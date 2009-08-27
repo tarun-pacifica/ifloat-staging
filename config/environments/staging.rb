@@ -12,5 +12,5 @@ Merb::Config.use { |c|
 
 Merb::BootLoader.after_app_loads do
   # Merb::Mailer.config = {:host => 'mail.freedom255.com', :port => 25}
-  AssetStore.config(:mosso, :user => "pristine", :key => "b7db73b0bd047f7292574d7c9f0d16de", :url_stem => "http://c0210071.cdn.cloudfiles.rackspacecloud.com")
+  AssetStore.config(:mosso, :user => "pristine", :key => "b7db73b0bd047f7292574d7c9f0d16de", :container => "ifloat-staging", :url_stem => "http://c0210071.cdn.cloudfiles.rackspacecloud.com")
 end

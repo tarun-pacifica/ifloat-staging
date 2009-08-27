@@ -44,8 +44,7 @@ class Asset
     "bottom-right-front", "bottom-right-back"
   ]
   
-  BUCKETS = %w(articles blogs products property_icons user_interface)
-  BUCKETS_ANONYMIZE = %w(articles products)
+  BUCKETS = %w(articles blogs products property_icons)
   NAME_FORMAT = /^([\w\-\.]+?)(___(\d+))?\.([a-z]{3,})$/
   
   property :id, Serial
@@ -114,7 +113,7 @@ class Asset
   # TODO: spec
   def store_name
     raise "unable to generate store_name without bucket, checksum (via file_path=) and name" if [bucket, checksum, name].any? { |v| v.nil?}
-    BUCKETS_ANONYMIZE.include?(bucket) ? "#{checksum}#{File.extname(name)}" : name
+    "#{checksum}#{File.extname(name)}"
   end
   
   # TODO: spec

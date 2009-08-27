@@ -8,7 +8,7 @@
 # succeeded:: true
 # report:: 'Asset repo version: ...'
 #
-class ImportEvent
+class ImportEvent # TODO: spec
   include DataMapper::Resource
   
   property :id, Serial

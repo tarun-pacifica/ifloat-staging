@@ -4,7 +4,7 @@
 #
 # CachedFinds may optionally belong to a User. Those that do not are considered 'anonymous' and in turn are treated as 'archived' upon obsolescence. To assist users in organising their CachedFinds, a description may be added.
 #
-# The act of executing the CachedFind takes a snapshot of all the pertinent values as well as every DefinitiveProduct included by an initial search of the database. Thus CachedFinds (for performance and user-consistency reasons) get progressively out-of-date with respect to the live DefinitiveProduct / PropertyValue information. For this reason, calls to CachedFind#products or CachedFind#total_product_count will trigger (re-)execution automatically if the CachedFind has either never been run or was run more than OBSOLESCENCE_TIME ago.
+# The act of executing the CachedFind takes a snapshot of all the pertinent values as well as every DefinitiveProduct included by an initial search of the database. Thus CachedFinds (for performance and user-consistency reasons) get progressively out-of-date with respect to the live DefinitiveProduct / PropertyValue information. For this reason, calls to CachedFind#products or CachedFind#total_product_count will trigger (re-)execution automatically if the CachedFind has either never been run or was run more than OBSOLESCENCE_TIME ago. TODO: revise
 #
 # In deference to both the existence of untranslatable values (such as brand names) and the fact that translation takes time, the lookup mechanism searches in both the requested language and English (ENG). When a value set is returned for a particular PropertyDefinition, if *no* value exists in the chosen (non-English) language, then the English values will be used instead. If one or more non-English values do exist, the English values will be discarded.
 #
@@ -20,7 +20,6 @@ class CachedFind
   include DataMapper::Resource
   
   ANONIMIZATION_TIME = 1.month
-  OBSOLESCENCE_TIME = 1.week
   
   property :id, Serial
   property :language_code, String, :nullable => false, :format => /^[A-Z]{3}$/
@@ -73,8 +72,12 @@ class CachedFind
   end
   
   def ensure_executed
-    prod_count = all_product_count
-    execute! if executed_at.nil? or executed_at < DateTime.now - OBSOLESCENCE_TIME or (prod_count > 0 and prod_count >  Product.count(:id => all_product_ids))
+    should_execute = executed_at.nil?
+    unless should_execute
+      last_import_run = ImportEvent.first(:succeeded => true, :order => [:ran_at.desc]).ran_at
+      should_execute = (last_import_run >= executed_at) unless last_import_run.nil?
+    end
+    execute! if should_execute
   end
 
   def execute!

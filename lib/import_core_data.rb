@@ -135,11 +135,16 @@ class ImportSet
     
     existing_by_pk = {}
     resource_pk = PRIMARY_KEYS[klass]
-    klass.all.each do |resource|
-      pk = resource_pk.map do |attribute|
-        attribute == :product ? DefinitiveProduct.get(resource.send(product_key)) : resource.send(attribute)
+    loop do
+      batch = klass.all(:limit => 1000, :offset => existing_by_pk.size)
+      break if batch.empty?
+      
+      batch.each do |resource|
+        pk = resource_pk.map do |attribute|
+          attribute == :product ? DefinitiveProduct.get(resource.send(product_key)) : resource.send(attribute)
+        end
+        existing_by_pk[pk] = resource
       end
-      existing_by_pk[pk] = resource
     end
     
     to_save = []

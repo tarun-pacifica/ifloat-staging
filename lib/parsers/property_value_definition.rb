@@ -6,7 +6,7 @@ class PropertyValueDefinitionParser < AbstractParser
   
   def generate_objects(parsed_fields)
     type, value, definition = parsed_fields.values_at("type", "value", "definition")
-    [ImportObject.new(PropertyValueDefinition, :property_type => type, :value => value, :definition => definition[0, 255])]
+    [ImportObject.new(PropertyValueDefinition, :property_type => type, :language_code => "ENG", :value => value, :definition => definition[0, 255])]
     # TODO: remove auto-truncation when data better
   end
   

@@ -85,20 +85,18 @@ module AssetStore
   
   class Mosso < Abstract
     def initialize(config)
-      @user = config.delete(:user) || (raise "specify a user")
-      @key = config.delete(:key) || (raise "specify a key")
+      @required_keys = [:user, :key, :container]
       super
     end
     
-    def container(bucket, auto_create = false)
-      @connection = @connection.nil? ? (CloudFiles::Connection.new(@user, @key) rescue nil) : @connection
+    def container
+      @connection ||= (CloudFiles::Connection.new(@user, @key) rescue nil)
       return nil if @connection.nil?
       
       cont = nil
       begin
-        cont = @connection.container(bucket)
-      rescue CloudFiles::NoSuchContainerException
-        cont = (create_container(bucket) rescue nil) if auto_create
+        cont = @connection.container(@container)
+      rescue
       end      
       return nil if cont.nil?
       
@@ -106,16 +104,24 @@ module AssetStore
     end
     
     def delete(bucket, name)
-      container(bucket) do |c|
-        c.delete_object(name)
-      end
+      container { |c| c.delete_object("#{bucket}/#{name}") }
     end
-          
-    def write(bucket, name, data)
-      container(bucket, true) do |c|
-        storage_object = c.create_object(name)
-        storage_object.write(data)
-        storage_object.public_url
+    
+    def list_by_bucket
+      names_by_bucket = {}
+      container do |c|
+        c.objects.each do |path|
+          dir, name = path.split("/")
+          names_by_bucket[dir] = name
+        end
+      end
+      names_by_bucket
+    end
+    
+    def write(asset)
+      container do |c|
+        object = c.create_object("#{asset.bucket}/#{asset.store_name}")
+        object.load_from_filename(asset.file_path) if object.bytes.to_i != File.size(asset.file_path)
       end
     end    
   end

@@ -1,0 +1,18 @@
+<%
+	dom_id = "purchase_#{purchase.id}"
+	titles = (@auto_titles_by_product_id || Hash.new({}))[purchase.definitive_product_id]
+	title_parts = titles[:title_4] || []
+	
+	klass, url = nil, nil
+	
+	if @partner_product_urls.nil?
+		url = "/products/#{purchase.definitive_product_id}"
+		klass = (purchase.deferred? ? "future" : "now")
+	else
+		url = @partner_product_urls[purchase.definitive_product_id]
+		klass = (url.nil? ? "unavailable" : "available")
+	end
+%>
+
+<a id=<%= dom_id.inspect %> class=<%= klass.inspect %> href=<%= (url || '#').inspect %>> </a>
+<%= title_js(dom_id, title_parts) %>

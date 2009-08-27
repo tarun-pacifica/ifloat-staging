@@ -1,0 +1,117 @@
+<%
+	property_id = filter.property_definition_id
+	domain, title = @friendly_name_sections[property_id]
+	domain_hash = domain.hash.abs.to_s
+	filter_id = "filter_#{filter.id}"
+	
+	suppress = (filter.text? ? nil : [:min, :max].select { |set| filter.suppress?(set) })
+	definitions = (filter.text? ? @text_value_definitions[property_id] || {} : nil)
+%>
+
+<% unless suppress == [:min, :max] %>
+
+<% unless domain == @domain %>
+<tr id=<%= domain_hash.inspect %> class="filter_section"> <th colspan="3"><%= domain %></th> </tr>
+<% @domain = domain; end %>
+
+<tr id=<%= (filter_id + "_summary").inspect %> class="filter_summary domain_<%= domain_hash %>">
+	<td>
+		<img class="icon" src=<%= @icon_urls_by_property_id[property_id].inspect %> onclick="$('#<%= filter_id %>').toggle()" onmouseover="bubble_tooltip_show(event, '<%= title %>')" onmouseout="bubble_tooltip_hide()" />
+	</td>
+	
+	<td> <div class="summary" onclick="$('#<%= filter_id %>').toggle()"> </div> </td>
+</tr>
+
+<tr id=<%= filter_id.inspect %> class="filter">
+	<td colspan="2">
+		<% if filter.text? %>
+		<% @text_filter_values[filter.id].sort.each do |value, chosen| %>
+		<div class="list_item">
+			<img class="select_one" src="/images/buttons/select_one.png" onclick="text_filter_select_one(this)"/>
+			<% checked = (chosen ? 'checked="checked"' : '') %>
+			<input type="checkbox" value=<%= value.inspect %> <%= checked %> onclick="text_filter_handle_check(this)" />
+			<%= defined_value(value, definitions[value]) %>
+		</div>
+		<% end %>
+	
+		<% else %>
+		<table>
+			<% unless suppress.include?(:min) %>
+			<tr>
+				<td class="label">min</td>
+				<td>
+					<img class="fraction_helper" src="/images/buttons/fraction_helper.png" onclick="fraction_helper_open(this)" />
+					<input class="min" type="text" onkeyup="num_filter_handle_input(this)" /> 
+					(&ge; <span class="min_all"> </span>)
+				</td>
+			</tr>
+			<% end %>
+			
+			<% unless suppress.include?(:max) %>
+			<tr>
+				<td class="label">max</td>
+				<td>
+					<img class="fraction_helper" src="/images/buttons/fraction_helper.png" onclick="fraction_helper_open(this)" />
+					<input class="max" type="text" onkeyup="num_filter_handle_input(this)" />
+					(&le; <span class="max_all"> </span>)
+				</td>
+			</tr>
+			<% end %>
+			
+			<% unless filter.units.include?(nil) %>
+			<tr>
+				<td class="label">unit</td>
+				<td>
+					<select class="unit" onchange="num_filter_handle_select(this)">
+						<% chosen_unit = filter.chosen[2] %>
+						<% filter.units.each do |unit| %>
+						<% selected = (unit == chosen_unit ? 'selected="selected"' : '') %>
+						<option <%= selected %>><%= unit %></option>
+						<% end %>
+					</select>
+				</td>
+			</tr>
+			<% end %>
+		</table>
+
+		<% end %>
+	</td>
+</tr>
+
+<script type="text/javascript">
+	var filter = $("#<%= filter_id %>");
+	var f = filter[0];
+	f.find_id = <%= filter.cached_find_id %>;
+	f.filter_id = <%= filter.id %>;
+	
+	f.text_filter = <%= filter.text? %>;
+	
+	<% unless filter.text? %>
+	f.date_filter = <%= filter.date? %>;
+	
+	<% min, max, unit = filter.chosen %>
+	f.unit = <%= unit.to_s.inspect %>;
+	
+	f.limits = {};
+	f.values = {};
+	<% filter.limits.each do |unit, limits| %>
+	<% unit = unit.to_s.inspect %>
+	<% limits = [suppress.include?(:min) ? undefined : limits.first.to_f,
+	             suppress.include?(:max) ? undefined : limits.last.to_f].inspect %>
+	f.limits[<%= unit %>] = <%= limits %>;
+	f.values[<%= unit %>] = <%= limits %>;
+	<% end %>	
+	
+	num_filter_update_context_and_summary(filter);
+	num_filter_update_min_max(filter);
+	
+	<% unless unit.nil? %>
+	filter.find("select.unit").val(f.unit);
+	<% end %>
+	
+	<% end %>
+	
+	filter.toggle();
+</script>
+
+<% end %>

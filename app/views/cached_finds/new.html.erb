@@ -1,0 +1,26 @@
+<%= partial "cached_finds/login" %>
+
+<div id="marquee">
+	<%= partial :finder %>
+	<div class="panel">
+		<div class="left"></div>
+		<div class="centre">
+			<% if @future_purchases.empty? %>
+			<div id="purchases"></div>
+			<% else %>
+			<a href="/future_purchases/buy_options" id="purchases"></a>
+			<% end %>
+			<a href="/blogs/tom_cunliffe" id="blog"></a>
+			<% if session.authenticated? %>
+			<a id="logout" href="#" onclick="logout()"></a>
+			<% else %>
+			<a id="login" href="#" onclick="login_open()"></a>
+			<% end %>
+		</div>
+		<div class="right"></div>
+	</div>
+</div>
+
+<script type="text/javascript" charset="utf-8">
+	$("body").css("background", "url(/images/backgrounds/sky.png) repeat-x");
+</script>

@@ -1,0 +1,67 @@
+<div id="main_header">
+	<span id="global_links">
+		<a href="/blogs/tom_cunliffe">Tom's Blog</a> |
+		<a href="mailto:support@ifloat.com">Contact Us</a> |
+		<% if session.authenticated? %>
+		<a href="#" onclick="logout()">Log Out (<%= session.user.nickname || session.user.name %>)</a>
+		<% else %>
+		<a href="#" onclick="login_open()">Log In</a>
+		<% end %>
+	</span>
+	<img src="/images/logo_sky.png" />
+	<div id="find_bar">
+		<%= partial "cached_finds/finder" %>
+		
+		<div id="future_purchases" class="purchase_list" onmouseover="purchase_list_hover(this)" onmouseout="purchase_list_unhover(this)">
+			<span class="name">Future Buys</span>
+			<span class="total"></span>
+			
+		</div>
+		
+		<div id="shopping_list" class="purchase_list" onmouseover="purchase_list_hover(this)" onmouseout="purchase_list_unhover(this)">
+			<span class="name">Shopping List</span>
+			<span class="total"></span>
+			
+		</div>
+		
+		<div id="future_purchases_tmp"> </div>
+	</div>
+</div>
+
+<%= partial "cached_finds/login" %>
+
+<div id="bubble_tooltip">
+	<table>
+		<tr class="top">
+			<td class="left">&nbsp;</td>
+			<td class="center">&nbsp;</td>
+			<td class="right">&nbsp;</td>
+		</tr>
+		<tr class="middle">
+			<td class="left">&nbsp;</td>
+			<td class="center"><p></p></td>
+			<td class="right">&nbsp;</td>
+		</tr>
+		<tr class="bottom">
+			<td class="left">&nbsp;</td>
+			<td class="center">&nbsp;</td>
+			<td class="right">&nbsp;</td>
+		</tr>
+	</table>
+</div>
+
+<img id="list_image_zoom" src="" />
+
+<script type="text/javascript" charset="utf-8">
+	var vert = ["top", "middle", "bottom"];
+	var horiz = ["left", "center", "right"];
+	for(v in vert) {
+		for(h in horiz) {
+			image_preload("/images/backgrounds/bubble/" + vert[v] + "_" + horiz[h] + ".png");
+		}
+	}
+		
+	$("body").css("background", "url(/images/backgrounds/sky_find_bar.png) repeat-x");
+	purchase_list_update();
+</script>
+	

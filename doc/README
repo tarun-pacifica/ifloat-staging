@@ -1,0 +1,65 @@
+= Pristine
+The pristine application manages a database of products/services in order to allow a user to quickly filter through potentially millions of items using an exclusions-based filtering system. Having found the product(s) they want, the customer can then proceed out to any vending retailer to complete a purchase, which is tracked by the application.
+
+The database schema is designed to allow arbitrary data (particularly PropertyValue and Asset objects) to be associated with each product and for products to be inter-related / filtered via that data. Thus the product-related sections of the schema could be said to simulate and OO database on top of a relational one.
+
+=== Feature Backlog
+
+The following items have been agreed for implementation in future phases (but are not necessarily listed in priority order).
+
+<b>Reviews System:</b>
+An e-mail / direct invitation approach that allows users to rate any products the application has a concrete record of them purchasing. The question set / style will be highly structured.
+
+<b>Structured User Inventories:</b>
+Building on the recorded purchases and ProductRelationship information in the database, tools will be provided to allow users to build complete pictures of their assets (i.e. a boat called the Saucy Sue containing rigging and an engine in which is fitted a spark plug ... and so on).
+
+<b>Synonym Support:</b>
+In order to make the system usable to those more accustomed to domain-specific synonyms, an intercepts mechanism for swapping out synonyms and acronyms in-place will be created. The current thinking centres on a per-language intercept table that can turn a single search word into a set of property value constraints (i.e. VHF maps to reference:class = 'transceiver' and radio:frequency_range = 'VHF'). Such a system could be phased in over the top of the more basic mechanisms for finding products. Any such system will need to carefully account for disambiguation (i.e. 'pumps' - devices for moving fluids about vs. athletic shoes).
+
+<b>Acronym Recognition:</b>
+Since entities like standards will be noted in acronym form ('IOA2150') the database potentially needs to be able to take a specification like 'Intentionally Odd Acronym 2150' and have some idea that the user is referring to the short, canonical form. No suggested approach yet exists.
+
+<b>PropertyValueAssociation System:</b>
+In what may be an approach to achieving acronym and synonym support, the system could introduce the generalized concept of a ProductValueAssociation (which is a superclass of both the existing PropertyValueDefinition and a new PropertyValueSimplification). This would allow the system to associate text values together to suggest broader searches (i.e. 'Goretex' has both a detailed definition and a simplification to 'breathable', 'Carribean Sunset' has both a precise colour value and a simplification to 'red').
+
+<b>Unit Translation:</b>
+Units are currently recorded using their English, SI names ('mm', 'kg' etc...). There will be a need to support unit localization by allowing the PropertyType objects to be transalatable. Some small variation on the current Translation class should do the trick.
+
+<b>Product UUIDs:</b>
+Assign a UUID to each product to facilitate direct external linking. <em>Undecided</em>
+
+<b>Region Aware Values:</b>
+Support the notion that NumericPropertyValues (or possible all PropertyValues) apply in the context of a particular ISO-3166 country / region. This is primarily to support the idea of pricing with different taxation / rates for shipping to different parts of the world. Note that this one piece of functionality could be simulated (albeit in a somewhat hacky manner) by creating one inventory for every supply region - which would create vastly more products and duplicated data.
+
+<b>Asset Views:</b>
+Support exists (as documented in Asset) for explicit viewing angle data on an image. This feature is currently unused.
+
+<b>Publishing Workflow:</b>
+Although not currently required, a policy/process will need to be thought out for either having the system infer or an administrator explicit mark a product as ready for publication (to cope with products in an unfinished state).
+
+<b>Filtering Usage Analyzer:</b>
+Add the ability to track filtering usage to build a profile that will optimize the order in which filters are presented. <em>Undecided</em>
+
+<b>Multi-dimensional Relationsip Support:</b>
+Support the notion that a relationship can be in terms of more than one property. The current workaround is to use properties like 'association:rope_type = nylon' whereas ideally it should be possible to construct a primary relationship of the form '<role>:[material:composition = nylon, reference:class = rope]'.
+
+<b>Support NIL Tolerances In Importer:</b>
+Although not yet used, it may become important to be able to tag tolerances corresponding to concrete / AUTO numerical values as 'to-come'. <em>Undecided</em>
+
+<b>Smart Differential Summaries In List View:</b>
+Derive a set of algorithms to alter the summaries / other displayed values per product in the list view such that the information shown is always maximally useful in discriminating between similar products in the listing. <em>Undecided</em>
+
+<b>Previously Viewed Product Summary:</b>
+Maintain (and display) a per-session list of the N most recently viewed products as a substitute for full 'breadcrumb' support in the UI.
+
+<b>Auditing Support:</b>
+Provide an audit log detailed enough to establish who made a change to the system, when and from where for a nominated list of changes. For absolute safety, establish a logging pattern for each affected class that gathers enough data about the final state to make the log useful in understanding the changes.
+
+<b>Image Map Product Selection / Navigation:</b>
+The use case is a conjoined set of navigational charts that can be 'stitched' together or used as macroscopic regions to find enclosed sub-region charts / resources. <em>Undecided</em>
+
+<b>Company Relationships:</b>
+Model the fact that company A consumes goods / services from company B (and perhaps the nature of that consumption / those products). <em>Undecided</em>
+
+<b>Coverflow-style Gallery</b>
+Provide an image gallery inspired by Apple's coverflow view to give a more 'boutique' perspective on product / image sets.

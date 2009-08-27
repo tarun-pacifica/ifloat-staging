@@ -1,0 +1,3 @@
+<% unless @errors.empty? %>
+<div class="errors"> <%= @errors.map { |error| "<p>#{error}</p>"} %> </div>
+<% end%>

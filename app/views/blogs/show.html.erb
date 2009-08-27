@@ -1,0 +1,65 @@
+<%= partial "cached_finds/find_header" %>
+
+<div id="blog">
+	<div id="blog_info">
+		<div class="title">Weblog</div>
+		<% unless @blog_image_src.nil? %> <img src=<%= @blog_image_src.inspect %> /> <% end %>
+		<h1><%= @blog.user.name %></h1>
+		<hr />
+		<p><%= @blog.description %></p>
+		<% unless @blog.email.nil? %>
+		<p class="link"> <a href="mailto:<%= @blog.email %>"><%= @blog.email %></a> </p>
+		<% end %>
+		<% unless @blog.primary_url.nil? %>
+		<p class="link"> <a href="http://<%= @blog.primary_url %>"><%= @blog.primary_url %></a> </p>
+		<% end %>
+	</div>
+	
+	<div id="blog_articles">
+		<% if @admin %>
+		<%= form :action => resource(:articles) do %>
+			<%= hidden_field :blog_id, :value => @blog.id %>
+			<h3>Create Article</h3>
+			<p><%= text_field :title, :value => "Title", :size => 50, :maxlength => 50 %></p>
+			<p><%= text_area :name => "body" %></p>
+			<p>Image to attach: <%= file_field :name => "image"%></p>
+			<p><%= submit "Create" %></p>
+		<% end =%>
+		<% end %>
+		
+		<% @articles.each do |article| %>
+		<% image = @images[article.asset_id] %>
+		<div class="article">
+			<% if @admin %>
+			<p class="update" onclick="article_edit(this)">Click here to update <%= article.title.inspect %>...</p>
+			<%= form :action => resource(article), :class => "update" do %>
+				<%= hidden_field :_method, :value => "PUT" %>
+				<h3>Update Article</h3>
+				<p><%= text_field :title, :value => article.title, :size => 50, :maxlength => 50 %></p>
+				<p><%= text_area article.body, :name => "body" %></p>
+				<% if image.nil? %>
+				<p>Image to attach: <%= file_field :name => "image"%></p>
+				<% else %>
+				<img src=<%= image.url.inspect %> />
+				<p>Replace image with: <%= file_field :name => "image"%></p>
+				<% end %>
+				<p><%= submit "Update" %></p>
+				<hr />
+			<% end =%>
+			<% end %>
+			
+			<h1><%= article.title %></h1>
+			<h2>Written on <%= article.created_at.strftime("%B %d, %Y") %> by <%= article.user.name %></h2>
+		
+			
+			<% unless image.nil? %> <img src=<%= image.url.inspect %> /> <% end %>
+		
+			<% article.body.split("\n").each_with_index do |paragraph, i| %>
+			<p><%= paragraph %></p>
+			<% end %>
+		
+			<hr />
+		</div>
+		<% end %>
+	</div>	
+</div>

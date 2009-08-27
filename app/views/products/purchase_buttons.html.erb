@@ -1,0 +1,13 @@
+<% if @purchase.nil? %>
+<div class="add" onclick="purchase_list_add(false, <%= @product_id %>)">Add to Shopping List</div>
+<div class="add" onclick="purchase_list_add(true, <%= @product_id %>)">Add to Future Buys</div>
+
+<% elsif @purchase.deferred? %>
+<div class="add" onclick="purchase_list_move(<%= @purchase.id %>)">Move to Shopping List</div>
+<div class="add" onclick="purchase_list_remove(true, <%= @purchase.id %>)">Remove from Future Buys</div>
+
+<% else %>
+<div class="add" onclick="purchase_list_remove(false, <%= @purchase.id %>)">Remove from Shopping List</div>
+<div class="add" onclick="purchase_list_move(<%= @purchase.id %>)">Move to Future Buys</div>
+
+<% end %>

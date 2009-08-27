@@ -1,0 +1,107 @@
+<%= partial "cached_finds/find_header" %>
+
+<div id="product_detail">
+
+<div id="product_detail_data">
+	<div class="title">Product Data</div>
+	<table> <%= partial :property, :with => @data_properties %> </table>
+</div>
+
+<div id="product_detail_main">
+	<% unless @recent_find.nil? %>
+	<a href=<%= resource(@recent_find).inspect %>>
+		<div id="cached_find_report">		
+			Go back to the products found for <span class="spec"><%= @recent_find.specification %></span>...
+		</div>
+	</a>
+	<% end %>
+	
+	<div id="product_detail_assets">
+		<img class="main" src=<%= @image_urls.first.inspect %> />
+		
+		<div class="thumbs">
+			<% @image_urls.each do |url|%>
+			<img src=<%= url.inspect %> onmouseover="prod_detail_select_image(event)" />
+			<% end %>
+		</div>
+		
+		<div class="asset_links">
+			<% @asset_urls_with_names.each do |url, name| %>
+			<a href=<%= url.inspect %>><%= name %></a>
+			<% end %>
+			<% unless @asset_urls_with_names.empty? %> <hr /> <% end %>
+			
+			<table class="prices">
+				<% @prices.each do |url, amount| %>
+					<tr>
+						<td> <img src="/images/estore_logos/<%= url %>.png" alt=<%= url.inspect %> /> </td>
+						<td class="price"> <%= money(amount) %> </td>
+					</tr>
+				<% end %>
+				
+				<% if @prices.empty? %>
+					<tr> <td>None of our partners currently have this item in stock</td> </tr>
+				<% end %>
+			</table>
+		</div>
+		
+		<hr />
+	</div>
+	
+	<div id="product_detail_words">
+		<%= product_titles(@product.id, @non_data_values) %>
+		<hr />
+		
+		<% summary, features, description = @non_data_values.values_at("marketing:summary", "marketing:feature_list", "marketing:description") %>
+		
+		<% unless summary.nil? %>
+		<h3>Summary</h3>
+		<p><%= summary %></p>
+		<% end %>
+		
+		<% unless features.nil? %>
+		<h3>Features</h3>
+		<ul>
+			<% features.split("\n").each do |feature| %>
+			<li><%= feature %></li>
+			<% end %>
+		</ul>
+		<% end %>
+	
+		<% unless description.nil? %>
+		<h3>Description</h3>
+		<% description.split("\n").each do |paragraph| %>
+		<p><%= paragraph %></p>
+		<% end %>
+		<% end %>
+	</div>
+	
+	<% unless @related_products_by_rel_name.empty? %>
+	<div id="product_detail_relations">
+		<h1>This product...</h1>
+	</div>
+	
+	<div id="product_detail_relations_tmp"> </div>
+	<% end %>
+</div>
+
+</div>
+
+
+<script type="text/javascript" charset="utf-8">
+<% unless @related_products_by_rel_name.empty? %>
+	var relations = $("#product_detail_relations");
+	var r = relations[0];
+	var pibs = r.product_ids_by_section = {};
+	r.initially_shown_per_section = 3;
+
+	<% @related_products_by_rel_name.each do |name, products| %>
+	pibs[<%= name.tr("_", " ").inspect %>] = <%= products.map { |prod| prod.id }.inspect %>;
+	<% end %>
+	
+	relationship_list_build(pibs);
+<% end %>
+	
+	$("#product_detail")[0].product_id = <%= @product.id %>;
+	prod_detail_update_purchase_buttons(<%= @product.id %>);
+</script>

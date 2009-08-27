@@ -1,0 +1,34 @@
+<div id="property_icons">
+	<table>
+		<tr> <th colspan="2"><h1>Properties</h1></th> </tr>
+		
+		<% domain = nil %>		
+		<% @properties.each do |property| %>
+		
+		<% d = property.name.split(":").first %>
+		<% unless d == domain %>
+		<% domain = d %>
+		<tr> <th colspan="2"><%= domain %></th> </tr>
+		<% end %>
+		
+		<% url = @icon_urls_by_property_id[property.id] %>
+		
+		<tr>
+			<td><img src=<%= url.inspect %> /></td>
+			<% shown = (property.filterable? or property.display_as_data?) %>
+			<td class="<%= shown ? (url =~ /blank.png$/ ? "blank" : "") : "not_needed" %>"><%= property.name %></td>
+		</tr>
+		
+		<% end %>
+	</table>
+	
+	<table>
+		<tr> <th colspan="2"><h1>Unassociated</h1></th> </tr>
+		<% @unused_property_icons.each do |asset| %>
+		<tr>
+			<td><img src=<%= asset.url.inspect %> /></td>
+			<td><%= asset.name %></td>
+		</tr>
+		<% end %>
+	</table>
+</div>

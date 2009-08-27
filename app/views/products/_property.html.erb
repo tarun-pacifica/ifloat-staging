@@ -1,0 +1,41 @@
+<%
+	domain, title = @friendly_name_sections[property.id]
+	property_id = "property_#{property.id}"
+	
+	values_by_unit = nil
+	values_by_unit = @values_by_property[property].group_by { |value| value.unit } unless property.text?
+	
+	definitions = (property.text? ? @text_value_definitions[property.id] || {} : nil)
+%>
+
+<% unless domain == @domain %>
+<tr> <th colspan="3"><%= domain %></th> </tr>
+<% @domain = domain; end %>
+
+<tr id=<%= property_id.inspect %> class="property">
+	<td>
+		<img src=<%= @icon_urls_by_property_id[property.id].inspect %> onmouseover="bubble_tooltip_show(event, '<%= title %>')" onmouseout="bubble_tooltip_hide()" />
+	</td>
+	
+	<td>
+		<div class="summary">
+			<% if property.text? %>
+			<%= @values_by_property[property].map { |v| defined_value(v, definitions[v]) }.join("<br />") %>
+			
+			<% else %>
+			<script type="text/javascript" charset="utf-8">
+				var summaries = [];
+				
+				<% values_by_unit.keys.sort_by { |unit| unit.to_s }.each do |unit| %>
+				  <% values_by_unit[unit].each do |value| %>
+					summaries.push(<%= number_format_js(value) %>);
+				  <% end %>
+				<% end %>
+			
+				$("#<%= property_id %>").find(".summary").html(summaries.join(" <br /> "));
+			</script>
+			
+			<% end %>
+		</div>
+	</td>
+</tr>

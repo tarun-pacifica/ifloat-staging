@@ -1,0 +1,8 @@
+<% @product_values.each do |product_id, values_by_name| %>
+<a class="product" id="prod_<%= product_id %>" href="/products/<%= product_id %>">
+	<img src=<%= @image_urls[product_id].inspect %> onmouseover="prod_list_image_zoom(event)" onmouseout="prod_list_image_unzoom(this)"/>
+	<%= product_titles(product_id, values_by_name) %>
+	<p><%= values_by_name["marketing:summary"] %></p>
+	<hr />
+</a>
+<% end %>

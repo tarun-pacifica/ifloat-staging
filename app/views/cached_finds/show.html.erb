@@ -1,0 +1,96 @@
+<%= partial :find_header %>
+
+<div id="cached_find">
+
+<% if @cached_find.all_product_count.zero? %>
+
+<img class="found_none" src="/images/backgrounds/found_none.png" />
+
+
+<% else %>
+
+<div id="cached_find_filters">	
+	<div id="fraction_helper" title="Fraction Helper">
+		<p>
+			<input class="integer" type="text" size="9" maxlength="9" onkeyup="fraction_helper_handle_input(this)" />
+			and
+			<select class="numerator" onchange="fraction_helper_handle_select(this)">
+				<option>0</option>
+				<option>1</option>
+			</select>
+			/
+			<select class="denominator" onchange="fraction_helper_handle_select(this)">
+				<%= [2, 4, 8, 16, 32, 64].map { |n| "<option>#{n}</option>" } %>
+			</select>
+		</p>
+		<p class="preview"> </p>
+	</div>
+	
+	<div class="title">Filters</div>
+	<% if @recalled %>
+	<p class="recall">Filters adjusted to their most recent settings for <span class="spec"><%= @cached_find.specification %></span>.</p>
+	<% end %>
+	<a href=<%= (resource(@cached_find) + "/reset").inspect %>>reset all filters</a>
+	<h1>Click to filter by...</h1>
+	<table> <%= partial :filter, :with => @filters %> </table>
+</div>
+
+<div id="cached_find_output">
+	<div id="cached_find_report">
+		Showing
+		<span class="displayed_count">?</span>
+		/ 
+		<span class="filtered_count"><%= @cached_find.all_product_count %></span>
+		products for
+		<span class="spec"><%= @cached_find.specification %></span>
+	</div>
+	
+	<div id="cached_find_switcher">
+		<div class="list" onclick="prod_list_switch_list()"> </div>
+		<div class="grid" onclick="prod_list_switch_grid()"> </div>
+	</div>
+	
+	<div id="cached_find_results">
+		
+		<hr class="result_terminator"/>
+		<div class="more">
+			<div id="cached_find_more" onclick="prod_list_more(this)">
+				<span class="count">36</span> More Results
+			</div>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript" charset="utf-8">
+	var results = $("#cached_find_results");
+	var r = results[0];
+	r.filter_queue = [];
+	r.filter_queue_active = -1;
+	r.find_id = <%= @cached_find.id %>;
+	r.list_request_max = 36;
+	r.list_size = 0;
+	r.view = "grid";
+	r.visible_size = 0;
+	
+	prod_list_more($("#cached_find_more"));
+	
+	var options = {autoOpen: false, modal: true};
+	options.buttons = {
+		"Paste Value": fraction_helper_paste_value,
+		"Cancel": function() { $(this).dialog("close"); }
+	};
+	options.close = function() { this.input.css("background", "white"); }
+	$("#fraction_helper").dialog(options);
+	
+	filter_show_only(<%= @text_values_by_relevant_filter_id.keys.inspect %>);
+	text_filter_mark_relevant(<%= @text_values_by_relevant_filter_id.to_json %>);
+	
+	$(".filter").each(function (i) {
+		if(this.text_filter == false) return true;
+		text_filter_update_summary($(this));
+	});
+</script>
+
+<% end %>
+
+</div>

@@ -1,0 +1,8 @@
+.*
+!.gitignore
+*~
+doc/*
+!doc/README
+!doc/rdoc/
+log/
+public/assets

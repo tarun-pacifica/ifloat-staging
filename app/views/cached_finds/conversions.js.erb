@@ -1,0 +1,16 @@
+var conversions = <%= @conversions.to_json %>;
+
+function num_filter_convert(value, from_unit, to_unit) {
+	var conversion_key = [from_unit, to_unit].sort().join(">>");
+	var ab_values = conversions[conversion_key];
+
+	if(ab_values == undefined) {
+		alert("no conversion available for" + from_unit + " -> " + to_unit);
+		return value;
+	}
+
+ 	var a = ab_values[0];
+	var b = ab_values[1];
+	
+	return (from_unit < to_unit) ? (value * a + b) : ((value - b) / a);
+}

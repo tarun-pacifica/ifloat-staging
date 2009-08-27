@@ -23,7 +23,8 @@ class CachedFinds < Application
   def found_product_ids(id, limit)
     provides :js
     
-    cached_find = session.ensure_cached_find(id.to_i)    
+    cached_find = session.ensure_cached_find(id.to_i)
+    cached_find.ensure_executed
     limit = [limit.to_i, 1].max
     product_ids = cached_find.filtered_product_ids
     ([product_ids.size] + product_ids[0, limit]).to_json

@@ -27,6 +27,7 @@ class Filters < Application
   private
   
   def filter_update
+    return "reset".to_json if @find.ensure_executed
     @find.text_values_by_relevant_filter_id.to_json
   end
   

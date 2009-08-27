@@ -54,6 +54,11 @@ function filter_queue_execute(results) {
 }
 
 function filter_queue_execute_handle(text_values_by_relevant_filter_ids) {
+	if(text_values_by_relevant_filter_ids == "reset") {
+		window.location.reload();
+		return;
+	}
+	
 	var results = $("#cached_find_results");
 	var r = results[0];
 	r.filter_queue_active -= 1;

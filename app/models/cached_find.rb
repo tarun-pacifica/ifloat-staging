@@ -78,6 +78,7 @@ class CachedFind
       should_execute = (last_import_run >= executed_at) unless last_import_run.nil?
     end
     execute! if should_execute
+    should_execute
   end
 
   def execute!

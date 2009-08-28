@@ -34,7 +34,7 @@ class NumericPropertyValue < PropertyValue
     max_sig_figs = [min_value, max_value].compact.map { |v| Conversion.determine_sig_figs(v) }.max
     converted_min = min_value.nil? ? -INFINITY : Conversion.convert(min_value.to_f, unit, to_unit, max_sig_figs)
     converted_max = max_value.nil? ? INFINITY : Conversion.convert(max_value.to_f, unit, to_unit, max_sig_figs)
-    attributes = {:unit => to_unit, :value => converted_min..converted_max}
+    attributes = {:unit => to_unit, :value => [converted_min, converted_max]}
     
     attributes[:tolerance] = Conversion.convert(tolerance, unit, to_unit) unless tolerance.nil?
     attributes

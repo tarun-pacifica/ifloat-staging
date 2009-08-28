@@ -76,13 +76,11 @@ class Asset
   
   # TODO: spec
   before :valid? do
-    if name =~ NAME_FORMAT
-      prefix, chain_seq_num, extension = $1, $3.to_i, $4
-      if chain_seq_num > 1
-        root_asset = Asset.first(:bucket => bucket, :name => "#{prefix}___1.#{extension}")
-        self.chain_id = root_asset.id unless root_asset.nil?
-        self.chain_sequence_number = chain_seq_num
-      end
+    root_name, chain_seq_num = self.class.parse_chain(name)
+    unless chain_seq_num.nil? or chain_seq_num == 1
+      root_asset = Asset.first(:bucket => bucket, :name => root_name)
+      self.chain_id = root_asset.id unless root_asset.nil?
+      self.chain_sequence_number = chain_seq_num
     end
   end
   
@@ -102,7 +100,12 @@ class Asset
     asset_chains_by_id
   end
   
- # TODO: spec
+  # TODO: spec
+  def self.parse_chain(name)
+    name =~ NAME_FORMAT ? ["#{$1}___1.#{$4}", $3.to_i] : nil
+  end
+  
+  # TODO: spec
   attr_reader :file_path
   def file_path=(value)
     self.checksum = Digest::MD5.file(value).hexdigest unless attribute_dirty?(:checksum)

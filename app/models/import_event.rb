@@ -14,5 +14,5 @@ class ImportEvent # TODO: spec
   property :id, Serial
   property :completed_at, DateTime, :nullable => false, :default => proc { DateTime.now }
   property :succeeded, Boolean, :nullable => false
-  property :report, String, :nullable => false
+  property :report, Text, :nullable => false
 end

@@ -6,7 +6,7 @@ class TitleStrategyParser < AbstractParser
   
   def generate_objects(parsed_fields)
     attributes = {:name => parsed_fields["Name"], :class_names => parsed_fields["Classes"]}
-    1.upto(4) { |i| attributes["title_#{i}"] = parsed_fields["Title_#{i}"] }
+    1.upto(4) { |i| attributes["title_#{i}".to_sym] = parsed_fields["Title_#{i}"] }
     [ImportObject.new(TitleStrategy, attributes)]
   end
   

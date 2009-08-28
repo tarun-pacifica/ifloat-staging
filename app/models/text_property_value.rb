@@ -77,7 +77,7 @@ class TextPropertyValue < PropertyValue
   # TODO: spec
   def self.parse_or_error(value)
     raise "invalid characters in #{value.inspect}" unless value =~ /\A[\n\w\.\/\- !@%()'";:,?®™]+\z/
-    value
+    {:text_value => value}
   end
   
   # TODO: document and test
@@ -120,10 +120,6 @@ class TextPropertyValue < PropertyValue
   
   def value
     text_value
-  end
-  
-  def value=(v)
-    self.text_value = self.class.parse_or_error(v)
   end
   
   

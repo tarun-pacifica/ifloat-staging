@@ -9,8 +9,8 @@ class NumericPropertyValue < PropertyValue
   VALUE_RANGE = BigDecimal.new("-999999999.999999")..BigDecimal.new("999999999.999999")
   
   property :unit, String
-  property :min_value, BigDecimal, :precision => PRECISION, :scale => MAX_DP, :accessor => :protected
-  property :max_value, BigDecimal, :precision => PRECISION, :scale => MAX_DP, :accessor => :protected
+  property :min_value, BigDecimal, :precision => PRECISION, :scale => MAX_DP
+  property :max_value, BigDecimal, :precision => PRECISION, :scale => MAX_DP
   property :tolerance, Float
   
   # TODO: ensure no specs address this / stub for it
@@ -20,23 +20,19 @@ class NumericPropertyValue < PropertyValue
   #   end
   # end
   
-  validates_with_method :validate_value_was_set
-  def validate_value_was_set
-    (min_value or max_value) || [false, "value must be set with 'value='"]
-  end
-  
   # TODO: update spec
   def self.convert(from_attributes, to_unit)
-    min_value, max_value = parse_or_error(from_attributes[:value])
+    min, max = from_attributes.values_at(:min_value, :max_value)
     tolerance = from_attributes[:tolerance]
     unit = from_attributes[:unit]
     
-    max_sig_figs = [min_value, max_value].compact.map { |v| Conversion.determine_sig_figs(v) }.max
-    converted_min = min_value.nil? ? -INFINITY : Conversion.convert(min_value.to_f, unit, to_unit, max_sig_figs)
-    converted_max = max_value.nil? ? INFINITY : Conversion.convert(max_value.to_f, unit, to_unit, max_sig_figs)
-    attributes = {:unit => to_unit, :value => [converted_min, converted_max]}
-    
+    attributes = {:unit => to_unit}
     attributes[:tolerance] = Conversion.convert(tolerance, unit, to_unit) unless tolerance.nil?
+    
+    max_sig_figs = [min, max].compact.map { |v| Conversion.determine_sig_figs(v) }.max
+    attributes[:min_value] = min.nil? ? -INFINITY : Conversion.convert(min.to_f, unit, to_unit, max_sig_figs)
+    attributes[:max_value] = max.nil? ?  INFINITY : Conversion.convert(max.to_f, unit, to_unit, max_sig_figs)
+    
     attributes
   end
   
@@ -91,7 +87,7 @@ class NumericPropertyValue < PropertyValue
     raise "cannot have infinity for both the lower and upper bounds" if min.nil? and max.nil?
     raise "the lower bound must not be greater than the upper bound" unless min.nil? or max.nil? or min <= max
     
-    [min, max]
+    {:min_value => min, :max_value => max}
   end
   
   def range?
@@ -109,10 +105,6 @@ class NumericPropertyValue < PropertyValue
     min = (min_value.nil? ? -INFINITY : coerce_db_value_to_native(min_value))
     max = (max_value.nil? ? INFINITY : coerce_db_value_to_native(max_value))
     min..max
-  end
-  
-  def value=(data)
-    self.min_value, self.min_value = self.class.parse_or_error(data)
   end
   
   

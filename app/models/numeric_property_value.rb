@@ -27,7 +27,7 @@ class NumericPropertyValue < PropertyValue
   
   # TODO: update spec
   def self.convert(from_attributes, to_unit)
-    min_value, max_value = parse(from_attributes[:value])
+    min_value, max_value = parse_or_error(from_attributes[:value])
     tolerance = from_attributes[:tolerance]
     unit = from_attributes[:unit]
     
@@ -67,39 +67,13 @@ class NumericPropertyValue < PropertyValue
   end
     
   # TODO: spec
-  def self.validate_or_error(data)
-    parse(data)
-  end
-  
-  def range?
-    min_value != max_value
-  end
-  
-  def to_s # TODO: spec for Num and Date
-    v = value
-    values = (range? ? [v.first, v.last] : [v])
-    values.map { |v| v.abs == INFINITY ? "?" : coerce_native_to_string(v) }.join("...")
-  end
-  
-  def value
-    return coerce_db_value_to_native(min_value) unless range?
-    min = (min_value.nil? ? -INFINITY : coerce_db_value_to_native(min_value))
-    max = (max_value.nil? ? INFINITY : coerce_db_value_to_native(max_value))
-    min..max
-  end
-  
-  def value=(data)
-    self.min_value, self.min_value = self.class.parse(data)
-  end
-  
-  
-  protected
-  
-  def self.parse(data)
+  def self.parse_or_error(data)
     min, max = 
       case data
       when nil
         raise "number is nil"
+      when Array
+        data
       when Range
         [data.first, data.last]
       when String
@@ -120,13 +94,40 @@ class NumericPropertyValue < PropertyValue
     [min, max]
   end
   
+  def range?
+    min_value != max_value
+  end
+  
+  def to_s # TODO: spec for Num and Date
+    v = value
+    values = (range? ? [v.first, v.last] : [v])
+    values.map { |v| v.abs == INFINITY ? "?" : coerce_native_to_string(v) }.join("...")
+  end
+  
+  def value
+    return coerce_db_value_to_native(min_value) unless range?
+    min = (min_value.nil? ? -INFINITY : coerce_db_value_to_native(min_value))
+    max = (max_value.nil? ? INFINITY : coerce_db_value_to_native(max_value))
+    min..max
+  end
+  
+  def value=(data)
+    self.min_value, self.min_value = self.class.parse_or_error(data)
+  end
+  
+  
+  protected
+  
   def self.parse_atom(atom)
     return nil if atom == "?" or (atom.is_a?(Numeric) and atom.abs == INFINITY)
     
-    atom = atom.to_s
-    raise "number is blank" if atom == ""
-    raise "non-numeric characters in #{atom.inspect}" if atom =~ /[^0-9\-\+ \.e]/
-    value = BigDecimal.new(atom).round(MAX_DP)
+    value = atom
+    unless value.is_a?(BigDecimal)
+      atom = atom.to_s
+      raise "number is blank" if atom == ""
+      raise "non-numeric characters in #{atom.inspect}" if atom =~ /[^0-9\-\+ \.e]/
+      value = BigDecimal.new(atom).round(MAX_DP)
+    end
     raise "number #{value} is outside the range #{VALUE_RANGE}" unless VALUE_RANGE.include?(value)    
     value
   end

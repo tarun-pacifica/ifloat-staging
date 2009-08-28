@@ -75,8 +75,9 @@ class TextPropertyValue < PropertyValue
   end
   
   # TODO: spec
-  def self.validate_or_error(v)
-    raise "invalid characters in #{v.inspect}" unless v =~ /\A[\n\w\.\/\- !@%()'";:,?®™]+\z/
+  def self.parse_or_error(value)
+    raise "invalid characters in #{value.inspect}" unless value =~ /\A[\n\w\.\/\- !@%()'";:,?®™]+\z/
+    value
   end
   
   # TODO: document and test
@@ -122,8 +123,7 @@ class TextPropertyValue < PropertyValue
   end
   
   def value=(v)
-    self.class.validate_or_error(v)
-    self.text_value = v
+    self.text_value = self.class.parse_or_error(v)
   end
   
   

@@ -56,7 +56,7 @@ class Asset
   property :todo_notes, String, :size => 255
   property :chain_id, Integer
   property :chain_sequence_number, Integer
-  property :checksum, String, :writer => :protected
+  property :checksum, String
   
   belongs_to :company
   has n, :attachments
@@ -105,7 +105,7 @@ class Asset
  # TODO: spec
   attr_reader :file_path
   def file_path=(value)
-    self.checksum = Digest::MD5.file(value).hexdigest
+    self.checksum = Digest::MD5.file(value).hexdigest unless attribute_dirty?(:checksum)
     @file_path = value
     @file_write = true
   end

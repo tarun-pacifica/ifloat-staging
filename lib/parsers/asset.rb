@@ -1,12 +1,12 @@
 class AssetParser < AbstractParser
-  ESSENTIAL_HEADERS = ["bucket", "company.reference", "name", "todo_notes", "file_path"]
+  ESSENTIAL_HEADERS = ["bucket", "company.reference", "name", "todo_notes", "file_path", "checksum"]
   
   
   private
   
   def generate_objects(parsed_fields)
     bucket, company, name, notes, path = parsed_fields.values_at(*ESSENTIAL_HEADERS)
-    attributes = {:bucket => bucket, :company => company, :name => name, :todo_notes => notes, :file_path => path}
+    attributes = {:bucket => bucket, :company => company, :name => name, :todo_notes => notes, :file_path => path, :checksum}
     [ImportObject.new(Asset, attributes)]
   end
   

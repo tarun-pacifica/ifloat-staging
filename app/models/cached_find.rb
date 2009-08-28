@@ -74,8 +74,8 @@ class CachedFind
   def ensure_executed
     should_execute = executed_at.nil?
     unless should_execute
-      last_import_run = ImportEvent.first(:succeeded => true, :order => [:ran_at.desc]).ran_at
-      should_execute = (last_import_run >= executed_at) unless last_import_run.nil?
+      last_import_run = ImportEvent.first(:succeeded => true, :order => [:completed_at.desc])
+      should_execute = (last_import_run.completed_at >= executed_at) unless last_import_run.nil?
     end
     execute! if should_execute
     should_execute

@@ -4,7 +4,7 @@
 #
 # === Sample Data
 #
-# ran_at:: 1981/09/05 12:34:56
+# completed_at:: 1981/09/05 12:34:56
 # succeeded:: true
 # report:: 'Asset repo version: ...'
 #

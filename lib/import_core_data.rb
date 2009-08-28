@@ -16,6 +16,10 @@ class ImportObject
     @attributes = attributes
   end
   
+  def resource_id
+    @resource.nil? ? attributes[:id] : @resource.id
+  end
+  
   def set_source(path, row)
     @path = path
     @row = row
@@ -91,18 +95,20 @@ class ImportSet
     end
     
     DataMapper.repository(:default) do
-      default_adapter = DataMapper.repository(:default).adapter
-      transaction = DataMapper::Transaction.new(default_adapter)
+      @adapter = DataMapper.repository(:default).adapter
+      transaction = DataMapper::Transaction.new(@adapter)
       transaction.begin
-      default_adapter.push_transaction(transaction)
+      @adapter.push_transaction(transaction)
       
       classes.each do |klass|
         start = Time.now
-        import_class(klass, objects_by_class[klass])
+        import_class(klass, objects_by_class.delete(klass))
         puts "#{'%6.2f' % (Time.now - start)}s : #{klass}"
       end
+      
+      # TODO: create ImportSet record
 
-      default_adapter.pop_transaction
+      @adapter.pop_transaction
       if @errors.empty? then transaction.commit
       else transaction.rollback
       end
@@ -130,50 +136,99 @@ class ImportSet
   end
   
   def import_class(klass, objects)
-    product_relationship = klass.relationships[:product]
-    product_key = product_relationship.nil? ? nil : product_relationship.child_key.first.name
-    
-    existing_by_pk = {}
-    resource_pk = PRIMARY_KEYS[klass]
-    loop do
-      batch = klass.all(:limit => 1000, :offset => existing_by_pk.size)
-      break if batch.empty?
-      
-      batch.each do |resource|
-        pk = resource_pk.map do |attribute|
-          attribute == :product ? DefinitiveProduct.get(resource.send(product_key)) : resource.send(attribute)
-        end
-        existing_by_pk[pk] = resource
-      end
+    relationships = {}
+    klass.relationships.each do |attribute, relationship|
+      relationships[attribute] = relationship.child_key.first.name
     end
     
-    to_save = []
-    to_skip = []
+    pk_fields, value_fields = pk_and_value_fields(klass)
+    existing_catalogue = value_md5s_and_ids_by_pk_md5(klass, pk_fields, value_fields)
+    
+    to_save_by_pk_md5 = {}
+    to_skip_pk_md5s = []
     
     objects.each do |object|
-      pk = object.primary_key
-      pk.map! { |v| v.is_a?(ImportObject) ? v.resource : v }
-      existing = existing_by_pk[pk]
-      
       attributes = {}
       object.attributes.each do |key, value|
-        attributes[key] = (value.is_a?(ImportObject) ? value.resource : value)
+        key = relationships[key] if relationships.has_key?(key)
+        attributes[key] = (value.is_a?(ImportObject) ? value.resource_id : value)
       end
       
-      object.resource = (existing || klass.new)
+      pk = attributes.values_at(*pk_fields) # TODO: stop tracking primary key in import object
+      pk_md5 = Digest::MD5.hexdigest(pk.join("::"))
+      existing_value_md5, existing_id = existing_catalogue[pk_md5]
+      if existing_id.nil?
+        object.resource = klass.new(attributes)
+        to_save_by_pk_md5[pk_md5] = object
+        next
+      end
+      
+      values = value_fields.map do |attribute|
+        value =
+          case attribute
+          when :min_value then "%.6f" % attributes[:min_value]
+          when :max_value then "%.6f" % attributes[:max_value]
+          else attributes[attribute]
+          end
+        
+        case value
+        when Array then value.to_yaml
+        when FalseClass, TrueClass then value ? 1 : 0
+        else value
+        end
+      end
+      value_md5 = (values.empty? ? nil : Digest::MD5.hexdigest(values.join("::")))
+      
+      if value_md5 == existing_value_md5
+        object.attributes[:id] = existing_id
+        to_skip_pk_md5s << pk_md5
+        next
+      end
+      
+      object.resource = klass.get(existing_id)
       object.resource.attributes = attributes
-      (object.resource.dirty? ? to_save : to_skip) << object
+      to_save_by_pk_md5[pk_md5] = object
     end
     
-    to_destroy = existing_by_pk.values.map { |r| r.id } - (to_save + to_skip).map { |o| o.resource.id }
+    to_destroy_pk_md5s = (existing_catalogue.keys - to_save_by_pk_md5.keys) - to_skip_pk_md5s
+    to_destroy_ids = existing_catalogue.values_at(to_destroy_pk_md5s).map { |value_md5, id| id }
+    to_destroy_ids.each_slice(1000) { |ids| klass.all(:id => ids) }
     
-    # TODO: review whether we need chained destruction behavior anywhere
-    klass.all(:id => to_destroy).destroy! unless to_destroy.empty?
-    
-    to_save.each do |object|
+    to_save_by_pk_md5.each do |pk_md5, object|
       next if object.resource.save
       object.resource.errors.full_messages.each { |message| error(klass, object.path, object.row, nil, message) }
     end
+  end
+  
+  def pk_and_value_fields(klass)
+    properties = klass.properties
+    relationships = klass.relationships
+    
+    pk_fields = PRIMARY_KEYS[klass].map do |attribute|
+      properties.has_property?(attribute) ? attribute : relationships[attribute].child_key.first.name
+    end
+    
+    value_fields = (properties.map { |property| property.name } - pk_fields - [:id, :type]).sort_by { |sym| sym.to_s }
+    value_fields -= [:chain_id, :chain_sequence_number] if klass == Asset
+    
+    [pk_fields, value_fields]
+  end
+  
+  def value_md5s_and_ids_by_pk_md5(klass, pk_fields, value_fields)
+    pk_fields, value_fields = [pk_fields, value_fields].map do |fields|
+      fields.map { |f| "IFNULL(#{f}, '')" }.join(",'::',")
+    end
+    
+    query = "SELECT id, MD5(CONCAT(#{pk_fields})) AS pk_md5"
+    query += (value_fields.empty? ? ", NULL AS value_md5" : ", MD5(CONCAT(#{value_fields})) AS value_md5")
+    query += " FROM #{klass.storage_name}"
+    query += " WHERE type = '#{klass}'" if klass.properties.has_property?(:type)
+  
+    results = {}
+    @adapter.query(query).each do |record|
+      results[record.pk_md5] = [record.value_md5, record.id]
+    end
+    results
   end
 end
 
@@ -205,12 +260,12 @@ def build_asset_csv
     name = path_parts.pop
     errors << [relative_path, "invalid asset name format"] unless name =~ Asset::NAME_FORMAT
     
-    assets << [bucket, company_ref, name, path_parts.first, path]
+    assets << [bucket, company_ref, name, path_parts.first, path, Digest::MD5.file(path).hexdigest]
   end
   
   if errors.empty?
     FasterCSV.open("/tmp/assets.csv", "w") do |csv|
-      csv << ["bucket", "company.reference", "name", "todo_notes", "file_path"]
+      csv << ["bucket", "company.reference", "name", "todo_notes", "file_path", "checksum"]
       assets.each { |asset| csv << asset }
     end
     return nil
@@ -229,7 +284,7 @@ def mail(success, message, attachment_path = nil)
   puts message
   puts "attachment: #{attachment_path}" unless attachment_path.nil?
   # TODO: do not send mail if Merb.environment == "development"
-  system "open #{attachment_path}" if Merb.environment == "development"
+  # system "open #{attachment_path}" if Merb.environment == "development"
 end
 
 def mail_fail(message, attachment_path = nil, exception = nil)
@@ -258,14 +313,14 @@ puts "=== Building Asset CSV ==="
 start = Time.now
 error_message = "Failed to build asset CSV from asset repository #{ASSET_REPO.inspect}."
 begin
-  error_report_path = build_asset_csv
-  mail_fail(error_message, error_report_path) unless error_report_path.nil?
+  # error_report_path = build_asset_csv
+  # mail_fail(error_message, error_report_path) unless error_report_path.nil?
 rescue SystemExit
   exit 1
 rescue Exception => e
   mail_fail(error_message, nil, e)
 end
-puts "#{'%6.2f' % (Time.now - start)}s : /tmp/assets.csv"
+puts "#{'%6.2f' % (Time.now - start)}s : assets.csv"
 
 
 # Ensure each class has at least one associated CSV to be imported
@@ -306,16 +361,11 @@ CLASSES.each do |klass|
   end
 end
 
-if import_set.write_errors("/tmp/errors.csv")
-  mail_fail("Some errors occurred whilst parsing CSVs from #{CSV_REPO.inspect} (and the auto-generated /tmp/assets.csv).", "/tmp/errors.csv")
-end
-
+mail_fail("Some errors occurred whilst parsing CSVs from #{CSV_REPO.inspect} (and the auto-generated /tmp/assets.csv).", "/tmp/errors.csv") if import_set.write_errors("/tmp/errors.csv")
 
 # Import the entire set
 
 puts "=== Importing Objects ==="
 import_set.import
 
-if import_set.write_errors("/tmp/errors.csv")
-  mail_fail("Some errors occurred whilst importing objects defined in CSVs from #{CSV_REPO.inspect} (and the auto-generated /tmp/assets.csv).", "/tmp/errors.csv")
-end
+mail_fail("Some errors occurred whilst importing objects defined in CSVs from #{CSV_REPO.inspect} (and the auto-generated /tmp/assets.csv).", "/tmp/errors.csv") if import_set.write_errors("/tmp/errors.csv")

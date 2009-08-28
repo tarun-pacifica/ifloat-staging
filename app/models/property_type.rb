@@ -21,7 +21,7 @@ class PropertyType
   property :id, Serial
   property :core_type, String, :nullable => false
   property :name, String, :nullable => false, :format => /^[a-z_]{3,}$/, :unique => true
-  property :units, Yaml
+  property :units, Yaml, :size => 255
   
   has n, :definitions, :class_name => "PropertyDefinition"
   has n, :value_definitions, :class_name => "PropertyValueDefinition"
@@ -41,7 +41,8 @@ class PropertyType
     when "currency"
       unit =~ /^[A-Z]{3}$/ || [false, "should always be an ISO-4217 code for a #{name}[#{core_type}] property"]
     when "numeric"
-      (valid_units || [nil]).include?(unit) || [false, "invalid for a #{name}[#{core_type}] property"]
+      valid_units = [nil] if valid_units.blank?
+      valid_units.include?(unit) || [false, "invalid for a #{name}[#{core_type}] property"]
     else
       unit.nil? || [false, "should always be nil for a #{name}[#{core_type}] property"]
     end
@@ -63,12 +64,11 @@ class PropertyType
   end
   
   def validate_numeric_units
-    return true if units.nil?
+    return true if units.blank?
     
-    error = [false, "should be an array of unique, valid units (or nil)"]
+    error = [false, "should be an array of unique, valid units (or nil / [])"]
     
     return error unless units.is_a?(Array)
-    return error if units.empty?
     return error unless units.repeated.empty?
     return error unless units.all? { |unit| unit.to_s =~ /^[\w\/%]+$/ }
     

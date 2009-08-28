@@ -12,7 +12,7 @@ class ImportEvent # TODO: spec
   include DataMapper::Resource
   
   property :id, Serial
-  property :ran_at, DateTime, :nullable => false
+  property :completed_at, DateTime, :nullable => false, :default => proc { DateTime.now }
   property :succeeded, Boolean, :nullable => false
   property :report, String, :nullable => false
 end

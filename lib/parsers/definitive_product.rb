@@ -134,7 +134,7 @@ class DefinitiveProductParser < AbstractParser
     when :value
       klass = PropertyType.value_class(property.attributes[:property_type].attributes[:core_type])
       klass.validate_or_error(value)
-      attributes = {:definition => property, :sequence_number => seq_num, :value => value}
+      attributes = {:definition => property, :auto_generated => false, :sequence_number => seq_num, :value => value}
       attributes[:unit] = unit unless unit.nil?
       attributes[:language_code] = "ENG" if klass.text?
       ImportObject.new(klass, attributes)

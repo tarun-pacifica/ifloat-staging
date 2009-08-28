@@ -42,7 +42,7 @@ class PropertyValue
   
   property :id, Serial
   property :type, Discriminator
-  property :auto_generated, Boolean, :default => false
+  property :auto_generated, Boolean, :nullable => false
   property :sequence_number, Integer, :nullable => false
   
   belongs_to :product

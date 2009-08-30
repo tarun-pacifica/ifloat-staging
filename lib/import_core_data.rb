@@ -94,6 +94,8 @@ class ImportSet
       (objects_by_class[klass] ||= []) << object
     end
     
+    class_stats = []
+    
     DataMapper.repository(:default) do
       @adapter = DataMapper.repository(:default).adapter
       transaction = DataMapper::Transaction.new(@adapter)
@@ -102,17 +104,17 @@ class ImportSet
       
       classes.each do |klass|
         start = Time.now
-        import_class(klass, objects_by_class.delete(klass))
+        class_stats << [klass, import_class(klass, objects_by_class.delete(klass))]
         puts "#{'%6.2f' % (Time.now - start)}s : #{klass}"
       end
-      
-      # TODO: create ImportSet record
 
       @adapter.pop_transaction
       if @errors.empty? then transaction.commit
       else transaction.rollback
       end
     end
+    
+    class_stats
   end
   
   def write_errors(path)
@@ -193,11 +195,15 @@ class ImportSet
     to_destroy_pk_md5s = (existing_catalogue.keys - to_save_by_pk_md5.keys) - to_skip_pk_md5s
     to_destroy_ids = existing_catalogue.values_at(to_destroy_pk_md5s).map { |value_md5, id| id }
     to_destroy_ids.each_slice(1000) { |ids| klass.all(:id => ids) }
+    stats = {:created => 0, :updated => 0, :destroyed => to_destroy_ids.size, :skipped => to_skip_pk_md5s.size}
     
     to_save_by_pk_md5.each do |pk_md5, object|
+      stats[object.resource.new_record? ? :created : :updated] += 1
       next if object.resource.save
       object.resource.errors.full_messages.each { |message| error(klass, object.path, object.row, nil, message) }
     end
+    
+    stats
   end
   
   def pk_and_value_fields(klass)
@@ -280,7 +286,7 @@ def build_asset_csv
 end
 
 def mail(success, message, attachment_path = nil)
-  puts "Import #{success} on #{`hostname`.chomp}"
+  puts "Import #{success} on #{`hostname`.chomp} (#{Merb.environment} environment)"
   puts message
   puts "attachment: #{attachment_path}" unless attachment_path.nil?
   # TODO: do not send mail if Merb.environment == "development"
@@ -293,6 +299,9 @@ def mail_fail(message, attachment_path = nil, exception = nil)
   exit 1
 end
 
+def repo_summary(path)
+  `git --git-dir='#{path}.git' log -n1 --pretty='%ai: %s'`.chomp
+end
 
 # Ensure each class has an associated parser
 
@@ -363,9 +372,19 @@ end
 
 mail_fail("Some errors occurred whilst parsing CSVs from #{CSV_REPO.inspect} (and the auto-generated /tmp/assets.csv).", "/tmp/errors.csv") if import_set.write_errors("/tmp/errors.csv")
 
+
 # Import the entire set
 
 puts "=== Importing Objects ==="
-import_set.import
+class_stats = import_set.import
 
 mail_fail("Some errors occurred whilst importing objects defined in CSVs from #{CSV_REPO.inspect} (and the auto-generated /tmp/assets.csv).", "/tmp/errors.csv") if import_set.write_errors("/tmp/errors.csv")
+
+report = ["Asset repository @ #{repo_summary(ASSET_REPO)}", "CSV repository @ #{repo_summary(CSV_REPO)}", ""]
+report += class_stats.map do |klass, stats|
+  "#{klass}: " + [:created, :updated, :destroyed, :skipped].map { |stat| "#{stat} #{stats[stat]}" }.join(", ")
+end
+
+report = report.join("\n")
+ImportSet.create(:succeed => @errors.empty?, :report => report)
+mail(:success, report)

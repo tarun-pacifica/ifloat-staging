@@ -322,8 +322,8 @@ puts "=== Building Asset CSV ==="
 start = Time.now
 error_message = "Failed to build asset CSV from asset repository #{ASSET_REPO.inspect}."
 begin
-  # error_report_path = build_asset_csv
-  # mail_fail(error_message, error_report_path) unless error_report_path.nil?
+  error_report_path = build_asset_csv
+  mail_fail(error_message, error_report_path) unless error_report_path.nil?
 rescue SystemExit
   exit 1
 rescue Exception => e

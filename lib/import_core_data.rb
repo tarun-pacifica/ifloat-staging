@@ -239,6 +239,9 @@ class ImportSet
 end
 
 def build_asset_csv
+  csv_path = "/tmp/assets.csv"
+  return nil if File.exist?(csv_path) and File.mtime(csv_path) > repo_mtime(ASSET_REPO)
+  
   assets = []
   errors = []
   
@@ -299,8 +302,13 @@ def mail_fail(message, attachment_path = nil, exception = nil)
   exit 1
 end
 
+def repo_mtime(path)
+  unix_stamp = `git --git-dir='#{path}/.git' log -n1 --pretty='%at'`
+  Time.at(unix_stamp.to_i)
+end
+
 def repo_summary(path)
-  `git --git-dir='#{path}.git' log -n1 --pretty='%ai: %s'`.chomp
+  `git --git-dir='#{path}/.git' log -n1 --pretty='%ai: %s'`.chomp
 end
 
 # Ensure each class has an associated parser
@@ -386,5 +394,5 @@ report += class_stats.map do |klass, stats|
 end
 
 report = report.join("\n")
-ImportSet.create(:succeed => @errors.empty?, :report => report)
+ImportEvent.create(:succeeded => true, :report => report)
 mail(:success, report)

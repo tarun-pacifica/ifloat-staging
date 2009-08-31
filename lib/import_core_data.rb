@@ -193,8 +193,8 @@ class ImportSet
     end
     
     to_destroy_pk_md5s = (existing_catalogue.keys - to_save_by_pk_md5.keys) - to_skip_pk_md5s
-    to_destroy_ids = existing_catalogue.values_at(to_destroy_pk_md5s).map { |value_md5, id| id }
-    to_destroy_ids.each_slice(1000) { |ids| klass.all(:id => ids) }
+    to_destroy_ids = existing_catalogue.values_at(*to_destroy_pk_md5s).map { |value_md5, id| id }
+    to_destroy_ids.each_slice(1000) { |ids| klass.all(:id => ids).destroy! }
     stats = {:created => 0, :updated => 0, :destroyed => to_destroy_ids.size, :skipped => to_skip_pk_md5s.size}
     
     to_save_by_pk_md5.each do |pk_md5, object|
@@ -390,7 +390,10 @@ mail_fail("Some errors occurred whilst importing objects defined in CSVs from #{
 
 report = ["Asset repository @ #{repo_summary(ASSET_REPO)}", "CSV repository @ #{repo_summary(CSV_REPO)}", ""]
 report += class_stats.map do |klass, stats|
-  "#{klass}: " + [:created, :updated, :destroyed, :skipped].map { |stat| "#{stat} #{stats[stat]}" }.join(", ")
+  "#{klass}: " + [:created, :updated, :destroyed, :skipped].map do |stat|
+    count = stats[stat]
+    count.zero? ? nil : "#{stat} #{count}"
+  end.compact.join(", ")
 end
 
 report = report.join("\n")

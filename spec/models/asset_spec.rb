@@ -9,8 +9,7 @@ describe Asset do
                          :name => "car.jpg",
                          :description => "2004 Red Volvo Estate",
                          :view => "top-left",
-                         :source_notes => "What Car? Magazine, January 2005, Page 22",
-                         :todo_notes => "Review quality")
+                         :source_notes => "What Car? Magazine, January 2005, Page 22")
     end
     
     it "should succeed with valid data" do
@@ -49,11 +48,6 @@ describe Asset do
     
     it "should succeeed without source notes" do
       @asset.source_notes = nil
-      @asset.should be_valid
-    end
-    
-    it "should succeeed without todo notes" do
-      @asset.todo_notes = nil
       @asset.should be_valid
     end
     

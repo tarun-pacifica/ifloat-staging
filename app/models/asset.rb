@@ -10,7 +10,7 @@
 #
 # Image assets may carry a view specifier that indicates the angle from which the image is taken. Values of 'top', 'bottom', 'left', 'right', 'front', 'back' cover the six faces of a projected cube. Values like 'top-left' then allow for the edges of that same cube. Finally, the vertices of the cube are described by values like 'top-left-front'. This up-to-three-face specification allows for 6 faces + 12 edges + 8 corners = 26 perspectives to be specified in a quick and intuitive manner. See CUBIC_VIEWS for a complete list of allowed values. <em>Note that this view support is intended for future use as the necessarry data entry is deemed too labour-intensive for phase 1.</em>
 #
-# An Asset's provenance can be recorded in a free-form source notes field which might contain (for example) the originating URL. Any notes about action to be taken can be recorded in the todo notes field.
+# An Asset's provenance can be recorded in a free-form source notes field which might contain (for example) the originating URL.
 #
 # === Sample Data
 #
@@ -19,13 +19,7 @@
 # description:: 'Side view of the Wilkers 31 speedboat.'
 # view:: 'top-left'
 # source_notes:: 'Scanned from Wilkers May 2008 catalogue (page 21).'
-# todo_notes:: 'Review quality'
 #
-# = Processes
-#
-# === 1. Batch Import
-#
-# Rough notes: dir structure to be COMPANY_REF/image.jpg for a normal image, COMPANY_REF/image___1.jpg for an image in a chain and COMPANY_REF/TODO_NOTE/image.jpg for an image with a todo note (the parent directory being named with the exact content of the note)
 class Asset
   include DataMapper::Resource
   
@@ -53,7 +47,6 @@ class Asset
   property :description, String, :size => 255
   property :view, String
   property :source_notes, String, :size => 255
-  property :todo_notes, String, :size => 255
   property :chain_id, Integer
   property :chain_sequence_number, Integer
   property :checksum, String

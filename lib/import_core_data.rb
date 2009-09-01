@@ -253,7 +253,7 @@ def build_asset_csv
     path_parts = relative_path.split("/")
     
     unless (3..4).include?(path_parts.size)
-      errors << [relative_path, "not in a bucket/company or bucket/company/todo_note directory"]
+      errors << [relative_path, "not in a bucket/company or bucket/company/class directory"]
       next
     end
     
@@ -269,12 +269,12 @@ def build_asset_csv
     name = path_parts.pop
     errors << [relative_path, "invalid asset name format"] unless name =~ Asset::NAME_FORMAT
     
-    assets << [bucket, company_ref, name, path_parts.first, path, Digest::MD5.file(path).hexdigest]
+    assets << [bucket, company_ref, name, path, Digest::MD5.file(path).hexdigest]
   end
   
   if errors.empty?
     FasterCSV.open("/tmp/assets.csv", "w") do |csv|
-      csv << ["bucket", "company.reference", "name", "todo_notes", "file_path", "checksum"]
+      csv << ["bucket", "company.reference", "name", "file_path", "checksum"]
       assets.each { |asset| csv << asset }
     end
     return nil

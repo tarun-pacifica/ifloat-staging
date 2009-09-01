@@ -245,6 +245,8 @@ def build_asset_csv
   assets = []
   errors = []
   
+  paths_by_names_by_company_refs = {}
+  
   Dir[ASSET_REPO / "**" / "*"].each do |path|
     next unless File.file?(path)
     
@@ -268,6 +270,12 @@ def build_asset_csv
 
     name = path_parts.pop
     errors << [relative_path, "invalid asset name format"] unless name =~ Asset::NAME_FORMAT
+    
+    paths_by_name = (paths_by_names_by_company_refs[company_ref] ||= {})
+    existing_path = paths_by_name[name]
+    if existing_path.nil? then paths_by_name[name] = relative_path
+    else errors << [relative_path, "duplicate of #{existing_path}"]
+    end
     
     assets << [bucket, company_ref, name, path, Digest::MD5.file(path).hexdigest]
   end

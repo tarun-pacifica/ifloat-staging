@@ -146,7 +146,8 @@ class ImportSet
     pk_fields, value_fields = pk_and_value_fields(klass)
     existing_catalogue = value_md5s_and_ids_by_pk_md5(klass, pk_fields, value_fields)
     
-    to_save_by_pk_md5 = {}
+    to_save = []
+    to_save_pk_md5s = []
     to_skip_pk_md5s = []
     
     objects.each do |object|
@@ -161,7 +162,8 @@ class ImportSet
       existing_value_md5, existing_id = existing_catalogue[pk_md5]
       if existing_id.nil?
         object.resource = klass.new(attributes)
-        to_save_by_pk_md5[pk_md5] = object
+        to_save << object
+        to_save_pk_md5s << pk_md5
         next
       end
       
@@ -189,15 +191,16 @@ class ImportSet
       
       object.resource = klass.get(existing_id)
       object.resource.attributes = attributes
-      to_save_by_pk_md5[pk_md5] = object
+      to_save << object
+      to_save_pk_md5s << pk_md5
     end
     
-    to_destroy_pk_md5s = (existing_catalogue.keys - to_save_by_pk_md5.keys) - to_skip_pk_md5s
+    to_destroy_pk_md5s = (existing_catalogue.keys - to_save_pk_md5s) - to_skip_pk_md5s
     to_destroy_ids = existing_catalogue.values_at(*to_destroy_pk_md5s).map { |value_md5, id| id }
     to_destroy_ids.each_slice(1000) { |ids| klass.all(:id => ids).destroy! }
     stats = {:created => 0, :updated => 0, :destroyed => to_destroy_ids.size, :skipped => to_skip_pk_md5s.size}
     
-    to_save_by_pk_md5.each do |pk_md5, object|
+    to_save.each do |object|
       stats[object.resource.new_record? ? :created : :updated] += 1
       next if object.resource.save
       object.resource.errors.full_messages.each { |message| error(klass, object.path, object.row, nil, message) }

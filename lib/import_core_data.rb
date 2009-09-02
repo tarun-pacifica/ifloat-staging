@@ -188,9 +188,6 @@ class ImportSet
         next
       end
       
-      p value_fields
-      p values
-      
       object.resource = klass.get(existing_id)
       object.resource.attributes = attributes
       to_save << object

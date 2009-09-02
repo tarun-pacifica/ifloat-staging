@@ -70,10 +70,12 @@ class Asset
   # TODO: spec
   before :valid? do
     root_name, chain_seq_num = self.class.parse_chain(name)
-    unless chain_seq_num.nil? or chain_seq_num == 1
+    unless chain_seq_num > 1
       root_asset = Asset.first(:bucket => bucket, :name => root_name)
-      self.chain_id = root_asset.id unless root_asset.nil?
-      self.chain_sequence_number = chain_seq_num
+      unless root_asset.nil?
+        self.chain_id = root_asset.id 
+        self.chain_sequence_number = chain_seq_num
+      end
     end
   end
   

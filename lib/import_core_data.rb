@@ -168,12 +168,11 @@ class ImportSet
       end
       
       values = value_fields.map do |attribute|
-        value =
-          case attribute
-          when :min_value then "%.6f" % attributes[:min_value]
-          when :max_value then "%.6f" % attributes[:max_value]
-          else attributes[attribute]
-          end
+        value = attributes[attribute]
+        
+        unless value.nil?
+          value = "%.6f" % value if attribute == :min_value or attribute == :max_value
+        end
         
         case value
         when Array then value.to_yaml
@@ -188,6 +187,9 @@ class ImportSet
         to_skip_pk_md5s << pk_md5
         next
       end
+      
+      p value_fields
+      p values
       
       object.resource = klass.get(existing_id)
       object.resource.attributes = attributes

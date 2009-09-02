@@ -93,14 +93,13 @@ module AssetStore
       @connection ||= (CloudFiles::Connection.new(@user, @key) rescue nil)
       return nil if @connection.nil?
       
-      cont = nil
       begin
-        cont = @connection.container(@container)
+        @cont ||= @connection.container(@container)
       rescue
       end      
-      return nil if cont.nil?
+      return nil if @cont.nil?
       
-      yield cont rescue nil
+      yield @cont rescue nil
     end
     
     def delete(bucket, name)

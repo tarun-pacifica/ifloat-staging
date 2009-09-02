@@ -311,12 +311,12 @@ def mail_fail(message, attachment_path = nil, exception = nil)
 end
 
 def repo_mtime(path)
-  unix_stamp = `git --git-dir='#{path}/.git' log -n1 --pretty='%at'`
+  unix_stamp = `git --git-dir='#{path}/.git' log -n1 --pretty='format:%at'`
   Time.at(unix_stamp.to_i)
 end
 
 def repo_summary(path)
-  `git --git-dir='#{path}/.git' log -n1 --pretty='%ai: %s'`.chomp
+  `git --git-dir='#{path}/.git' log -n1 --pretty='format:%ai: %s'`.chomp
 end
 
 # Ensure each class has an associated parser

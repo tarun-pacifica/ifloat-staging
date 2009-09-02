@@ -7,7 +7,7 @@ Merb::Config.use { |c|
   c[:log_auto_flush ] = false
   c[:log_level] = :error
   c[:log_stream] = nil
-  c[:log_file] = Merb.root / "log" / "production.log"
+  c[:log_file] = Merb.root / "log" / "staging.log"
 }
 
 Merb::BootLoader.after_app_loads do

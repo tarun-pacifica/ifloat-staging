@@ -126,17 +126,23 @@ class TextPropertyValue < PropertyValue
   private
   
   def self.product_ids_matching_word(word, language_codes)
+    # TODO: remove MS hack once we are vending all products rather than just MarineStore's
+    #       two final INNER JOINS and final WHERE
+    
     query =<<-EOS
       SELECT DISTINCT p.id
       FROM products p
         INNER JOIN property_values pv ON p.id = pv.product_id
         INNER JOIN property_definitions pd ON pv.property_definition_id = pd.id
+        INNER JOIN product_mappings pm ON p.id = pm.definitive_product_id
+        INNER JOIN companies c ON pm.company_id = c.id
       WHERE p.type = 'DefinitiveProduct'
         AND pd.findable = ?
         AND pv.language_code IN ?
         AND pv.text_value LIKE ?
+        AND c.reference = ?
     EOS
     
-    repository(:default).adapter.query(query, true, language_codes, "%#{word}%")
+    repository(:default).adapter.query(query, true, language_codes, "%#{word}%", "GBR-02934378")
   end
 end

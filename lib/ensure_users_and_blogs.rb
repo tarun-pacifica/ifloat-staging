@@ -26,7 +26,7 @@ end
 
 toms_blog = tom.blogs.first(:name => "tom_cunliffe")
 if toms_blog.nil?
-  toms_blog = tom.blogs.new(:company => companies_by_ref["GBR-04426357"],
+  toms_blog = tom.blogs.new(:company => Company.first(:reference => "GBR-04426357"),
                             :name => "tom_cunliffe",
                             :email => "info@tomcunliffe.com",
                             :primary_url => "www.tomcunliffe.com")

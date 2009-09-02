@@ -15,7 +15,7 @@ test:
 
 staging:
     <<: *defaults
-    database: ifloat_prod
+    database: ifloat_stag
 
 production:
     <<: *defaults

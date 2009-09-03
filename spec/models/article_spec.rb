@@ -16,9 +16,9 @@ describe Article do
       @article.should be_valid
     end
     
-    it "should succeed without a blog" do
+    it "should fail without a blog" do
       @article.blog = nil
-      @article.should be_valid
+      @article.should_not be_valid
     end
     
     it "should fail without a user" do
@@ -34,6 +34,66 @@ describe Article do
     it "should fail without a body" do
       @article.body = nil
       @article.should_not be_valid
+    end
+  end
+  
+  describe "destruction" do
+    it "should destroy any attached image" do
+      article = Article.create(:blog_id => 1, :user_id => 1, :title => "FlyFishing", :body => "Lorem ipsum dolor.")
+      article.asset = Asset.create(:company_id => 1, :bucket => "articles", :name => "fishy.jpg")
+      asset_id = article.asset.id
+      article.destroy
+      Asset.get(asset_id).should == nil
+    end
+  end
+  
+  describe "batch image retrieval" do
+    it "should have specs"
+  end
+  
+  describe "image saving" do
+    before(:all) do
+      @blog = Blog.create(:company_id => 1, :user_id => 1, :name => "fishing")
+      @article = @blog.articles.create(:user_id => 1, :title => "FlyFishing", :body => "Lorem ipsum dolor.")
+      
+      @jpg_path = "spec/assets/cube.jpg"
+      @png_path = "spec/assets/monkey.png"
+      @png_name = File.basename(@png_path)
+    end
+    
+    after(:all) do
+      @article.destroy
+      @blog.destroy
+    end
+    
+    it "should fail with an unsaved Article" do
+      article = Article.new(:user_id => 1, :title => "FlyFishing", :body => "Lorem ipsum dolor.")
+      proc { article.save_image(@png_path, @png_name) }.should raise_error
+    end
+    
+    it "should create an image belonging to the parent blog's company and the 'articles' bucket" do
+      @article.save_image(@png_path, @png_name).should == true
+      @article.asset.company_id.should == 1
+      @article.asset.bucket.should == "articles"
+    end
+    
+    it "should derive an image name of the form article_#.png for a source .png file name" do
+      @article.save_image(@png_path, @png_name).should == true
+      @article.asset.should_not == nil
+      @article.asset.name.should == "article_#{@article.id}.png"
+    end
+    
+    it "should derive an image name of the form article_#.jpg for an unparseable source file name" do
+      @article.save_image(@jpg_path, "sillyname").should == true
+      @article.asset.should_not == nil
+      @article.asset.name.should == "article_#{@article.id}.jpg"
+    end
+    
+    it "should destroy any existing image" do
+      @article.save_image(@png_path, @png_name).should == true
+      asset_id = @article.asset.id
+      @article.save_image(@png_path, @png_name).should == true
+      Asset.get(asset_id).should == nil
     end
   end
   

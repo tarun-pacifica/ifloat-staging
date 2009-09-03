@@ -122,11 +122,11 @@ class CachedFind
       
       property_ids.each do |property_id|
         filter = existing_filters[property_id]
-        unless filter.nil? or filter.language_code == language
+        unless filter.nil?
           filter.destroy
           filter = nil
         end
-        new_filters << TextFilter.new(:property_definition_id => property_id, :language_code => language) if filter.nil?
+        new_filters << TextFilter.new(:property_definition_id => property_id) if filter.nil?
       end
     end
     
@@ -207,7 +207,7 @@ class CachedFind
     query_chunks = []
     query_bind_values = []
     used_filters.each do |filter|
-      query, *bind_values = filter.excluded_product_query_chunk
+      query, *bind_values = filter.excluded_product_query_chunk(language_code)
       next if query.nil?
       query_chunks << query
       query_bind_values += bind_values

@@ -3,11 +3,7 @@
 # See the Filter superclass.
 #
 class TextFilter < Filter
-  property :language_code, String, :format => /^[A-Z]{3}$/
-  
 	has n, :exclusions, :class_name => "TextFilterExclusion", :child_key => [:text_filter_id]
-	
-	validates_present :language_code # TODO: see if refactoring can get rid of this entirely
 	
 	before :destroy do
 	  exclusions.destroy!
@@ -81,7 +77,7 @@ class TextFilter < Filter
     save! # TODO: remove (!) when DM bug is fixed that causes the fresh state to get reset to the DB value
   end
   
-  def excluded_product_query_chunk
+  def excluded_product_query_chunk(language_code)
     query =<<-EOS
       property_definition_id = ? AND
       language_code = ? AND
@@ -115,7 +111,7 @@ class TextFilter < Filter
         AND text_value NOT IN (SELECT value FROM text_filter_exclusions WHERE text_filter_id = ?)
     EOI
     
-    repository.adapter.execute(insert, id, product_ids, property_definition_id, language_code, id)
+    repository.adapter.execute(insert, id, product_ids, property_definition_id, cached_find.language_code, id)
     
     # TODO: switch to more convenient methods when DM bug is fixed that causes odd extra lookups
     TextFilterExclusion.all(:text_filter_id => id, :value => value).destroy!
@@ -142,6 +138,6 @@ class TextFilter < Filter
         AND text_value = ?
     EOS
     
-    repository.adapter.query(query, product_ids, property_definition_id, language_code, value).size > 0
+    repository.adapter.query(query, product_ids, property_definition_id, cached_find.language_code, value).size > 0
   end
 end

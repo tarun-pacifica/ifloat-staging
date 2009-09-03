@@ -82,7 +82,7 @@ class NumericFilter < Filter
     units.first
   end
   
-  def excluded_product_query_chunk
+  def excluded_product_query_chunk(language_code)
     return [] if limits.nil?
     
     query =<<-EOS

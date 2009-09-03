@@ -52,7 +52,6 @@ class TextFilter < Filter
     FROM filters f
       INNER JOIN property_values pv 
         ON f.property_definition_id = pv.property_definition_id
-        AND f.language_code = pv.language_code
       LEFT JOIN text_filter_exclusions tfe
         ON f.id = tfe.text_filter_id AND pv.text_value = tfe.value
     WHERE f.cached_find_id = ?

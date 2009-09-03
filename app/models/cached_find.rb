@@ -122,10 +122,6 @@ class CachedFind
       
       property_ids.each do |property_id|
         filter = existing_filters[property_id]
-        unless filter.nil?
-          filter.destroy
-          filter = nil
-        end
         new_filters << TextFilter.new(:property_definition_id => property_id) if filter.nil?
       end
     end

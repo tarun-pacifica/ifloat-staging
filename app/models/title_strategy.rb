@@ -78,8 +78,6 @@ class TitleStrategy
       
       titles[title] = rendered_parts
     end
-    # TODO: remove debug data
-    titles[:title_1] << "[#{klass} => #{strategy.name}]"
     titles
   end
   

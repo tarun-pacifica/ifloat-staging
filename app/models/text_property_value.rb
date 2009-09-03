@@ -70,10 +70,6 @@ class TextPropertyValue < PropertyValue
     matching_product_ids.inject { |union, product_ids| union & product_ids }
   end
   
-  def self.text? # TODO: spec (in this class and parent only)
-    true
-  end
-  
   # TODO: spec
   def self.parse_or_error(value)
     raise "invalid characters in #{value.inspect}" unless value =~ /\A[\n\w\.\/\- !@%()'";:,?®™]+\z/
@@ -112,6 +108,10 @@ class TextPropertyValue < PropertyValue
     end
     
     values_by_property_by_product_id
+  end
+  
+  def self.text? # TODO: spec (in this class and parent only)
+    true
   end
   
   def to_s # TODO: spec

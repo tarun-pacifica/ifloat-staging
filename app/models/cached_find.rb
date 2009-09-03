@@ -33,6 +33,16 @@ class CachedFind
   has n, :attachments
   has n, :filters
   
+  # TODO: spec
+  validates_with_block :language_code, :unless => :new_record? do
+    attribute_dirty?(:language_code) ? [false, "cannot be updated"] : true
+  end
+  
+  # TODO: spec
+  validates_with_block :specification, :unless => :new_record? do
+    attribute_dirty?(:specification) ? [false, "cannot be updated"] : true
+  end
+  
   validates_with_block :specification do
     words = specification.split
     if words.empty? or words.any? { |word| word.size < 3 }

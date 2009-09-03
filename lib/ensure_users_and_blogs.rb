@@ -21,12 +21,12 @@ if tom.nil?
   whiny_save(tom)
 end
 
-graeme = User.first(:login => "graemec13@yahoo.com")
+graeme = User.first(:login => "graeme.clark@att.biz")
 if graeme.nil?
   graeme = User.new(:name => "Graeme Clark",
                     :nickname => "Graeme",
-                    :login => "graemec13@yahoo.com",
-                    :password => Password.hash("pristine50"))
+                    :login => "graeme.clark@att.biz",
+                    :password => Password.hash("TND7%$58"))
   whiny_save(graeme)
 end
 

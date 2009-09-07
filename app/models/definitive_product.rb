@@ -8,7 +8,7 @@ class DefinitiveProduct < Product
   property :review_stage, Integer, :nullable => false, :default => 0
   
   belongs_to :company
-  has n, :mappings, :class_name => "ProductMapping", :child_key => [:product_id]
+  has n, :mappings, :class_name => "ProductMapping", :child_key => [:definitive_product_id]
   has n, :relationships, :child_key => [:definitive_product_id]
   has n, :user_products
   

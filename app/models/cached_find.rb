@@ -96,50 +96,37 @@ class CachedFind
     raise "cannot execute unsaved CachedFind" if new_record?
     
     product_ids = Indexer.product_ids_for_phrase(specification, language_code)
-    if product_ids.empty?
-      # filters.each { |filter| filter.destroy }
-      self.product_id_list = ""
-      # self.filters = []
-      self.executed_at = Time.now
-      return save
-    end
     self.product_id_list = product_ids.join(",")
     
     existing_filters = {}
-    filters.each do |filter|
-      existing_filters[filter.property_definition_id] = filter
-    end
+    NumericFilter.all(:cached_find_id => id).each { |f| existing_filters[f.property_definition_id] = f }
+    TextFilter.all(:cached_find_id => id).each { |f| existing_filters[f.property_definition_id] = f }
     
-    new_filters = []
+    to_save = []
     new_property_ids = []
-    filterable_property_ids = PropertyDefinition.all(:filterable => true).map { |property| property.id }
     
     Indexer.filterable_text_property_ids_for_product_ids(product_ids, false).each do |property_id|
       new_property_ids << property_id      
       filter = existing_filters[property_id]
-      new_filters << TextFilter.new(:property_definition_id => property_id) if filter.nil?
+      to_save << TextFilter.new(:cached_find_id => id, :property_definition_id => property_id) if filter.nil?
     end
     
     Indexer.numeric_limits_for_product_ids(product_ids, false).each do |property_id, limits_by_unit|
-      next if limits_by_unit.any? { |unit, min_max| min_max.compact.empty? }
-      next unless filterable_property_ids.include?(property_id)
+      next if limits_by_unit.any? { |unit, min_max| min_max == [nil, nil] }
       new_property_ids << property_id
       
       filter = existing_filters[property_id]
-      
-      if filter.nil?
-        new_filters << NumericFilter.new(:property_definition_id => property_id, :limits => limits_by_unit)
-      else
-        filter.limits = limits_by_unit
-      end
+      filter = NumericFilter.new(:cached_find_id => id, :property_definition_id => property_id) if filter.nil?
+      filter.limits = limits_by_unit
+      to_save << filter if filter.dirty?
     end
     
     # TODO: spec this functionality
-    filters.all(:property_definition_id => existing_filters.keys - new_property_ids).each { |filter| filter.destroy }
-    filters.push(*new_filters)
+    existing_filters.each { |property_id, filter| filter.destroy unless new_property_ids.include?(property_id) }
+    to_save.each { |filter| filter.save }
     
     self.executed_at = Time.now
-    save and filters.reload
+    save
   end
   
   def filtered_product_ids    

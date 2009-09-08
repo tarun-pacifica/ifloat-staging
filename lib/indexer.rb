@@ -33,6 +33,8 @@ class Indexer
   end
   
   def self.numeric_limits_for_product_ids(product_ids, auto_compile = true)
+    return {} if product_ids.empty?
+    
     compile if auto_compile and compile_needed?
     limits_by_unit_by_property_id = {}
     

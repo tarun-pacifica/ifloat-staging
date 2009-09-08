@@ -17,8 +17,8 @@ class NumericFilter < Filter
     limits || [false, "limits must be set with 'limits='"]
   end
   
-  def choose!(min, max, unit)
-    return if limits.nil? or not limits.has_key?(unit)
+  def choose(min, max, unit)
+    return nil if limits.nil? or not limits.has_key?(unit)
     min_limit, max_limit = limits[unit]
     
     min =
@@ -40,8 +40,10 @@ class NumericFilter < Filter
     self.chosen_unit = unit
     
     self.fresh = (chosen == (limits[default_unit] + [default_unit]))
-    
-    save
+  end
+  
+  def choose!(min, max, unit)
+    save unless choose(min, max, unit).nil?
   end
   
   def chosen
@@ -86,7 +88,7 @@ class NumericFilter < Filter
     limits_by_unit.each do |unit, min_max|
       raise "expected a String / nil unit but got #{unit.inspect}" unless unit.nil? or unit.is_a?(String)
       raise "expected a limit Array but got #{min_max.inspect} for #{unit.inspect}" unless min_max.is_a?(Array) and min_max.size == 2
-      raise "expected no more than one nil limit but got two for #{unit.inspect}" if min_max.compact.empty?
+      raise "expected no more than one nil limit but got two for #{unit.inspect}" if min_max == [nil, nil]
       min_max.each { |m| raise "expected a Numeric / nil value but got #{m.inspect} for #{unit.inspect}" unless m.nil? or m.is_a?(Numeric) }
     end
     
@@ -98,8 +100,8 @@ class NumericFilter < Filter
     end
     
     raise "detected nils for minima and maxima across the entire set of limits" if suppress?(:min) and suppress?(:max)
-    if limits.has_key?(chosen_unit) then choose!(chosen_min, chosen_max, chosen_unit)
-    else choose!(nil, nil, default_unit)
+    if limits_by_unit.has_key?(chosen_unit) then choose(chosen_min, chosen_max, chosen_unit)
+    else choose(nil, nil, default_unit)
     end
   end
   

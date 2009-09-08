@@ -11,33 +11,7 @@ class NumericFilter < Filter
                                     :scale => NumericPropertyValue::MAX_DP,
                                     :accessor => :protected
   property :chosen_unit, String, :accessor => :protected
-  
-  # TODO: review as likely defunct
-  def self.limits_by_unit_by_property_id(product_ids, property_ids)
-    return {} if product_ids.empty? or property_ids.empty?
     
-    query =<<-EOS
-      SELECT property_definition_id, unit,
-        MIN(min_value) AS min_min, MAX(min_value) AS max_min,
-        MIN(max_value) AS min_max, MAX(max_value) AS max_max
-      FROM property_values
-      WHERE type IN ('NumericPropertyValue', 'DatePropertyValue')
-        AND product_id IN ?
-        AND property_definition_id IN ?
-      GROUP BY property_definition_id, unit
-    EOS
-    
-    units_by_property_id = {}
-    repository.adapter.query(query, product_ids, property_ids).each do |record|
-      min = [record.min_min, record.min_max].compact.min
-      max = [record.max_min, record.max_max].compact.max
-
-      limits_by_unit = (units_by_property_id[record.property_definition_id] ||= {})
-      limits_by_unit[record.unit] = [min, max]
-    end
-    units_by_property_id
-  end
-  
   validates_with_method :validate_limits_were_set
   def validate_limits_were_set
     limits || [false, "limits must be set with 'limits='"]

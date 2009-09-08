@@ -97,9 +97,9 @@ class CachedFind
     
     product_ids = Indexer.product_ids_for_phrase(specification, language_code)
     if product_ids.empty?
-      filters.each { |filter| filter.destroy }
+      # filters.each { |filter| filter.destroy }
       self.product_id_list = ""
-      self.filters = []
+      # self.filters = []
       self.executed_at = Time.now
       return save
     end
@@ -120,7 +120,7 @@ class CachedFind
       new_filters << TextFilter.new(:property_definition_id => property_id) if filter.nil?
     end
     
-    NumericPropertyValue.limits_by_unit_by_property_id(product_ids).each do |property_id, limits_by_unit|
+    Indexer.numeric_limits_for_product_ids(product_ids, false).each do |property_id, limits_by_unit|
       next if limits_by_unit.any? { |unit, min_max| min_max.compact.empty? }
       next unless filterable_property_ids.include?(property_id)
       new_property_ids << property_id

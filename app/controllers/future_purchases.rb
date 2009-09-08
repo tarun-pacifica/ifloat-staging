@@ -11,7 +11,7 @@ class FuturePurchases < Application
     facility_products = facility.map_products(current_product_ids)
     
     product_ids = current_product_ids + @future_purchases.map { |purchase| purchase.definitive_product_id }
-    unused_values, @auto_titles_by_product_id = Product.display_values(product_ids, session.languages)
+    unused_values, @auto_titles_by_product_id = Product.display_values(product_ids, session.language)
             
     @partner_product_urls = {}
     facility_products.each do |definitive_product_id, facility_product|
@@ -79,7 +79,7 @@ class FuturePurchases < Application
   def index
     @purchases = session.future_purchases    
     product_ids = @purchases.map { |purchase| purchase.definitive_product_id }
-    unused_values, @auto_titles_by_product_id = Product.display_values(product_ids, session.languages)
+    unused_values, @auto_titles_by_product_id = Product.display_values(product_ids, session.language)
     render :layout => false
   end
   

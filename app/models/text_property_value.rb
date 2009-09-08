@@ -15,36 +15,19 @@ class TextPropertyValue < PropertyValue
   end
   
   # TODO: document and test
-  def self.translated_values(product_ids, languages_in_preference_order)
+  def self.translated_values(product_ids, language_code)
     return {} if product_ids.empty?
     
-    properties_by_id = {}
-    PropertyDefinition.all("values.product_id" => product_ids).each do |property|
-      properties_by_id[property.id] = property
-    end
-    property_ids_by_language = preferred_languages(properties_by_id.keys, languages_in_preference_order)
+    tpvs = all(:product_id => product_ids, :language_code => language_code)
     
-    query = "SELECT product_id, property_definition_id, text_value FROM property_values WHERE product_id IN ? AND "
-    bind_values = [product_ids]
-    
-    query_chunks = property_ids_by_language.map do |language, property_ids|
-      bind_values << language << property_ids
-      "(language_code = ? AND property_definition_id IN ?)"
-    end
-    query += query_chunks.join(" OR ")
+    property_ids = tpvs.map { |tpv| tpv.property_definition_id }.uniq
+    PropertyDefinition.all(:id => property_ids).map
     
     values_by_property_by_product_id = {}
-    product_ids.each do |product_id|
-      values_by_property_by_product_id[product_id] = {}
+    tpvs.each do |tpv|
+      values_by_property = (values_by_property_by_product_id[tpv.product_id] ||= {})
+      (values_by_property[tpv.definition] ||= []) << tpv.text_value
     end
-    
-    repository.adapter.query(query, *bind_values).each do |record|
-      values_by_property = values_by_property_by_product_id[record.product_id]
-      property = properties_by_id[record.property_definition_id]
-      values = (values_by_property[property] ||= [])
-      values << record.text_value
-    end
-    
     values_by_property_by_product_id
   end
   

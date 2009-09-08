@@ -18,7 +18,7 @@ class TextFilter < Filter
     exclusions
   end
   
-  # TODO: consider moving to TextPropertyValue
+  # TODO: consider moving to TextPropertyValue - at least the first uniq the flattern
   def self.values_by_property_id(product_ids_by_property_id, language_code)
     product_ids = product_ids_by_property_id.values.flatten
     property_ids = product_ids_by_property_id.keys

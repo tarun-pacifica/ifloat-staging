@@ -95,7 +95,7 @@ class CachedFind
     raise "cannot execute invalid CachedFind" unless valid?
     raise "cannot execute unsaved CachedFind" if new_record?
     
-    product_ids = Indexer.product_ids_for_phrase(language_code, specification)
+    product_ids = Indexer.product_ids_for_phrase(specification, language_code)
     if product_ids.empty?
       filters.each { |filter| filter.destroy }
       self.product_id_list = ""

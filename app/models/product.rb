@@ -27,10 +27,10 @@ class Product
   end
   
   # TODO: spec
-  def self.display_values(product_ids, languages)
+  def self.display_values(product_ids, language_code)
     values_by_property_by_product_id = {}  
     
-    TextPropertyValue.translated_values(product_ids, languages).each do |product_id, text_values_by_property|
+    TextPropertyValue.translated_values(product_ids, language_code).each do |product_id, text_values_by_property|
       values_by_property = (values_by_property_by_product_id[product_id] ||= {})
       values_by_property.update(text_values_by_property)
     end
@@ -75,8 +75,8 @@ class Product
   end
   
   # TODO: spec
-  def display_values(languages)
-    values_by_property_by_product_id, auto_titles_by_product_id = Product.display_values([id], languages)
+  def display_values(language_code)
+    values_by_property_by_product_id, auto_titles_by_product_id = Product.display_values([id], language_code)
     [values_by_property_by_product_id[id], auto_titles_by_product_id[id]]
   end
   

@@ -1,7 +1,7 @@
 class Products < Application
   def batch(ids)
     product_ids = ids.split("_").map { |id| id.to_i }.uniq[0..99]
-    values_by_property_by_product_id, auto_titles_by_product_id = Product.display_values(product_ids, session.languages)
+    values_by_property_by_product_id, auto_titles_by_product_id = Product.display_values(product_ids, session.language)
     
     @product_values = auto_titles_by_product_id
     
@@ -80,7 +80,7 @@ class Products < Application
   end
   
   def gather_property_values(product)
-    @values_by_property, auto_titles = product.display_values(session.languages)
+    @values_by_property, auto_titles = product.display_values(session.language)
     
     @data_properties = []
     @non_data_values = auto_titles

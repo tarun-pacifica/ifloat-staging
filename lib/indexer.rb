@@ -55,7 +55,7 @@ class Indexer
     @@last_compile
   end
   
-  def self.product_ids_for_phrase(language_code, phrase, auto_compile = true)
+  def self.product_ids_for_phrase(phrase, language_code, auto_compile = true)
     compile if auto_compile and compile_needed?
     phrase.downcase.split(/\W+/).map do |word|
       (@@phrase_index[language_code] || {})[word] || []

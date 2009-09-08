@@ -84,8 +84,8 @@ class CachedFind
   def ensure_executed
     should_execute = executed_at.nil?
     unless should_execute
-      last_import_run = ImportEvent.first(:succeeded => true, :order => [:completed_at.desc])
-      should_execute = (last_import_run.completed_at >= executed_at) unless last_import_run.nil?
+      last_indexer_compile = Indexer.last_compile
+      should_execute = (last_indexer_compile >= executed_at) unless last_indexer_compile.nil?
     end
     execute! if should_execute
     should_execute
@@ -95,9 +95,7 @@ class CachedFind
     raise "cannot execute invalid CachedFind" unless valid?
     raise "cannot execute unsaved CachedFind" if new_record?
     
-    languages = [language_code, "ENG"]
-    
-    product_ids = TextPropertyValue.product_ids_matching_spec(specification, languages)
+    product_ids = Indexer.product_ids_for_phrase(language_code, specification)
     if product_ids.empty?
       filters.each { |filter| filter.destroy }
       self.product_id_list = ""
@@ -116,14 +114,10 @@ class CachedFind
     new_property_ids = []
     filterable_property_ids = PropertyDefinition.all(:filterable => true).map { |property| property.id }
     
-    preferred_languages = TextPropertyValue.preferred_languages(filterable_property_ids, languages)
-    TextPropertyValue.filter_preferred_languages(preferred_languages, product_ids).each do |language, property_ids|
-      new_property_ids += property_ids
-      
-      property_ids.each do |property_id|
-        filter = existing_filters[property_id]
-        new_filters << TextFilter.new(:property_definition_id => property_id) if filter.nil?
-      end
+    Indexer.filterable_text_property_ids_for_product_ids(product_ids, false).each do |property_id|
+      new_property_ids << property_id      
+      filter = existing_filters[property_id]
+      new_filters << TextFilter.new(:property_definition_id => property_id) if filter.nil?
     end
     
     NumericPropertyValue.limits_by_unit_by_property_id(product_ids).each do |property_id, limits_by_unit|

@@ -38,4 +38,5 @@ dependency "rackspace-cloudfiles", :require_as => "cloudfiles"
 # Internal libraries
 require "lib" / "asset_store"
 require "lib" / "conversion"
+require "lib" / "indexer"
 require "lib" / "password"

@@ -63,26 +63,13 @@ class CachedFinds < Application
         
     filters = @find.filters
     property_ids = filters.map { |filter| filter.property_definition_id }
-    properties = PropertyDefinition.all(:id => property_ids)
-    seq_nums_by_pid = {}
-    properties.each do |property|
-      seq_nums_by_pid[property.id] = property.sequence_number
-    end
-    @filters = filters.sort_by { |filter| seq_nums_by_pid[filter.property_definition_id] }
+    properties = PropertyDefinition.all(:id => property_ids).map
+    @filters = filters.sort_by { |filter| filter.property_definition.sequence_number }
     
-    @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)
-    
-    @text_filter_values = @find.text_values_by_filter_id(find_was_executed == false)
-    
-    # TODO: consider subsuming this functionality into @text_filter_values and coping with it in JS etc...
-        @text_values_by_relevant_filter_id = {}
-    @text_filter_values.each do |filter_id, sets|
-      relevant = sets[1]
-      next if relevant.empty?
-      @text_values_by_relevant_filter_id[filter_id] = relevant
-    end
+    @text_filter_values, @relevant_filters = @find.filter_values(find_was_executed == false)
     
     @friendly_name_sections = PropertyDefinition.friendly_name_sections(property_ids, @find.language_code)
+    @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)
     @text_value_definitions = PropertyValueDefinition.definitions_by_property_id(property_ids, @find.language_code)
         
     @previous_finds = session.cached_finds

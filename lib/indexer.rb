@@ -26,7 +26,7 @@ class Indexer
   end
   
   def self.filterable_text_property_ids_for_product_ids(product_ids, language_code, auto_compile = true)
-    return {} if product_ids.empty?
+    return [] if product_ids.empty?
     
     compile if auto_compile and compile_needed?
 

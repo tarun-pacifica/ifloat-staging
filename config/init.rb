@@ -26,8 +26,17 @@ Merb::BootLoader.before_app_loads do
     end
   end
   
-  # This method is handy to have available in general
+  # These methods are handy to have available in general
   class Array
+    def hash_by(method = nil) # TODO: check for opportunities to use this
+      hash = {}
+      each do |item|
+        key = (method.nil? ? (yield item) : item.send(method))
+        hash[key] = item
+      end
+      hash
+    end
+    
     def repeated
       counts = Hash.new(0)
       each { |item| counts[item] += 1 }

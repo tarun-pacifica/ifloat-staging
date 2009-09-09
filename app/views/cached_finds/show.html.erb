@@ -82,8 +82,8 @@
 	options.close = function() { this.input.css("background", "white"); }
 	$("#fraction_helper").dialog(options);
 	
-	filter_show_only(<%= @text_values_by_relevant_filter_id.keys.inspect %>);
-	text_filter_mark_relevant(<%= @text_values_by_relevant_filter_id.to_json %>);
+	filter_show_only(<%= @relevant_filters.keys.inspect %>);
+	text_filter_mark_relevant(<%= @relevant_filters.to_json %>);
 	
 	$(".filter").each(function (i) {
 		if(this.text_filter == false) return true;

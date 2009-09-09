@@ -98,9 +98,10 @@ class CachedFind
     product_ids = Indexer.product_ids_for_phrase(specification, language_code)
     self.product_id_list = product_ids.join(",")
     
-    existing_filters = {}
-    NumericFilter.all(:cached_find_id => id).each { |f| existing_filters[f.property_definition_id] = f }
-    TextFilter.all(:cached_find_id => id).each { |f| existing_filters[f.property_definition_id] = f }
+    existing_filters = NumericFilter.all(:cached_find_id => id).hash_by(:property_definition_id)
+    existing_filters.update(TextFilter.all(:cached_find_id => id).hash_by(:property_definition_id))
+    # NumericFilter.all(:cached_find_id => id).each { |f| existing_filters[f.property_definition_id] = f }
+    # TextFilter.all(:cached_find_id => id).each { |f| existing_filters[f.property_definition_id] = f }
     
     to_save = []
     new_property_ids = []
@@ -127,6 +128,41 @@ class CachedFind
     save
   end
   
+  # TODO: spec
+  def filter_values(auto_compile = true, lookup_exclusions = true)
+    filters_by_property_id = filters.hash_by(:property_definition_id)
+    
+    text_values_by_fid = {}
+    fpids = filtered_product_ids
+    Indexer.filterable_text_values_for_product_ids(all_product_ids, fpids, language_code, auto_compile).each do |property_id, all_relevant|
+      filter_id = filters_by_property_id[property_id].id
+      text_values_by_fid[filter_id] = (all_relevant << [])
+    end
+    
+    if lookup_exclusions
+      filter_ids = filters.map { |filter| filter.id }
+      TextFilterExclusion.all(:text_filter_id => filter_ids).each do |exclusion|
+        text_values_by_fid[exclusion.text_filter_id].last << exclusion.value
+      end
+    end
+    
+    numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(fpids) 
+    relevant_values_by_fid = {}
+    filters.each do |filter|
+      relevant_values = nil
+      if filter.text?
+        relevant_values = text_values_by_fid[filter.id][1]
+        next if filter.fresh? and relevant_values.empty?
+      else
+        next if filter.fresh? and not numeric_limits_by_property_id.has_key?(filter.property_definition_id)
+      end
+
+      relevant_values_by_fid[filter.id] = relevant_values
+    end
+    
+    [text_values_by_fid, relevant_values_by_fid]
+  end
+  
   def filtered_product_ids    
     return [] if all_product_count.zero?
     
@@ -145,37 +181,6 @@ class CachedFind
     return [] if relevant_product_ids.empty?
     
     relevant_product_ids - excluded_product_ids(relevant_product_ids, used_filters)
-  end
-  
-  def text_values_by_filter_id(auto_compile = true)
-    filters_by_property_id = {}
-    filters.each { |filter| filters_by_property_id[filter.property_definition_id] = filter if filter.text? }
-    
-    text_values_by_fid = {}
-    Indexer.filterable_text_values_for_product_ids(all_product_ids, filtered_product_ids, language_code, auto_compile).each do |property_id, all_relevant|
-      filter_id = filters_by_property_id[property_id].id
-      text_values_by_fid[filter_id] = (all_relevant << [])
-    end
-    
-    filter_ids = filters.map { |filter| filter.id }
-    TextFilterExclusion.all(:text_filter_id => filter_ids).each do |exclusion|
-      text_values_by_fid[exclusion.text_filter_id].last << exclusion.value
-    end
-    text_values_by_fid
-  end
-  
-  # TODO: spec
-  def text_values_by_relevant_filter_id
-    product_ids_by_pid = Filter.product_ids_by_property_id(filtered_product_ids)
-    text_values = TextFilter.values_by_property_id(product_ids_by_pid, language_code)
-        
-    values_by_fid = {}
-    filters.each do |filter|
-      property_id = filter.property_definition_id
-      next if filter.fresh? and (product_ids_by_pid[property_id] || []).empty?
-      values_by_fid[filter.id] = text_values[property_id]
-    end
-    values_by_fid
   end
   
   # TODO: spec

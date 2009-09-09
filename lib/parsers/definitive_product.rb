@@ -29,7 +29,6 @@ class DefinitiveProductParser < AbstractParser
       objects.push(*values)
     end
     
-    # product.checksum = Product.checksum(product, associations) # TODO: may not need and so could compress this method
     objects
   end
   

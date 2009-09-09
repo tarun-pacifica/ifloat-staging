@@ -59,14 +59,14 @@ class CachedFinds < Application
     @recalled = session[:recalled]
     session[:recalled] = false
     session[:most_recent_find_id] = @find.id
-    find_was_executed = @find.ensure_executed
+    @find.ensure_executed
         
     filters = @find.filters
     property_ids = filters.map { |filter| filter.property_definition_id }
     properties = PropertyDefinition.all(:id => property_ids).map
     @filters = filters.sort_by { |filter| filter.property_definition.sequence_number }
     
-    @text_filter_values, @relevant_filters = @find.filter_values(find_was_executed == false)
+    @text_filter_values, @relevant_filters = @find.filter_values
     
     @friendly_name_sections = PropertyDefinition.friendly_name_sections(property_ids, @find.language_code)
     @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)

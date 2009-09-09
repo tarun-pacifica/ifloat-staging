@@ -129,12 +129,12 @@ class CachedFind
   end
   
   # TODO: spec
-  def filter_values(auto_compile = true, lookup_exclusions = true)
+  def filter_values(lookup_exclusions = true)
     filters_by_property_id = filters.hash_by(:property_definition_id)
     
     text_values_by_fid = {}
     fpids = filtered_product_ids
-    Indexer.filterable_text_values_for_product_ids(all_product_ids, fpids, language_code, auto_compile).each do |property_id, all_relevant|
+    Indexer.filterable_text_values_for_product_ids(all_product_ids, fpids, language_code, false).each do |property_id, all_relevant|
       filter_id = filters_by_property_id[property_id].id
       text_values_by_fid[filter_id] = (all_relevant << [])
     end
@@ -146,7 +146,7 @@ class CachedFind
       end
     end
     
-    numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(fpids, auto_compile) 
+    numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(fpids, false) 
     relevant_values_by_fid = {}
     filters.each do |filter|
       relevant_values = nil

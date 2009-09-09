@@ -65,10 +65,8 @@ class Indexer
         next if relevant_product_ids.empty?
         
         minima, maxima = extrema.values_at(*relevant_product_ids).transpose
-        min = (minima.any? { |v| v.nil? } ? nil : minima.min)
-        max = (maxima.any? { |v| v.nil? } ? nil : maxima.max)
         limits_by_unit = (limits_by_unit_by_property_id[property_id] ||= {})
-        limits_by_unit[unit] = [min, max]
+        limits_by_unit[unit] = [minima.min, maxima.max]
       end
     end
     

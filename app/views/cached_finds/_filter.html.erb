@@ -4,11 +4,9 @@
 	domain_hash = domain.hash.abs.to_s
 	filter_id = "filter_#{filter.id}"
 	
-	suppress = (filter.text? ? nil : [:min, :max].select { |set| filter.suppress?(set) })
-	definitions = (filter.text? ? @text_value_definitions[property_id] || {} : nil)
+	all, relevant, excluded = @text_filter_values[filter.id]
+	definitions = (@text_value_definitions[property_id] || {})
 %>
-
-<% unless suppress == [:min, :max] %>
 
 <% unless domain == @domain %>
 <tr id=<%= domain_hash.inspect %> class="filter_section"> <th colspan="3"><%= domain %></th> </tr>
@@ -25,7 +23,6 @@
 <tr id=<%= filter_id.inspect %> class="filter">
 	<td colspan="2">
 		<% if filter.text? %>
-		<% all, relevant, excluded = @text_filter_values[filter.id] %>
 		<% all.each do |value| %>
 		<div class="list_item">
 			<img class="select_one" src="/images/buttons/select_one.png" onclick="text_filter_select_one(this)"/>
@@ -37,7 +34,6 @@
 	
 		<% else %>
 		<table>
-			<% unless suppress.include?(:min) %>
 			<tr>
 				<td class="label">min</td>
 				<td>
@@ -46,9 +42,7 @@
 					(&ge; <span class="min_all"> </span>)
 				</td>
 			</tr>
-			<% end %>
 			
-			<% unless suppress.include?(:max) %>
 			<tr>
 				<td class="label">max</td>
 				<td>
@@ -57,7 +51,6 @@
 					(&le; <span class="max_all"> </span>)
 				</td>
 			</tr>
-			<% end %>
 			
 			<% unless filter.units.include?(nil) %>
 			<tr>
@@ -97,8 +90,7 @@
 	f.values = {};
 	<% filter.limits.each do |unit, limits| %>
 	<% unit = unit.to_s.inspect %>
-	<% limits = [suppress.include?(:min) ? undefined : limits.first.to_f,
-	             suppress.include?(:max) ? undefined : limits.last.to_f].inspect %>
+	<% limits = [limits.first.to_f, limits.last.to_f].inspect %>
 	f.limits[<%= unit %>] = <%= limits %>;
 	f.values[<%= unit %>] = <%= limits %>;
 	<% end %>	
@@ -114,5 +106,3 @@
 	
 	filter.toggle();
 </script>
-
-<% end %>

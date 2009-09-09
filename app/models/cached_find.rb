@@ -112,9 +112,7 @@ class CachedFind
     end
     
     Indexer.numeric_limits_for_product_ids(product_ids, false).each do |property_id, limits_by_unit|
-      next if limits_by_unit.any? { |unit, min_max| min_max == [nil, nil] }
-      new_property_ids << property_id
-      
+      new_property_ids << property_id      
       filter = existing_filters[property_id]
       filter = NumericFilter.new(:cached_find_id => id, :property_definition_id => property_id) if filter.nil?
       filter.limits = limits_by_unit

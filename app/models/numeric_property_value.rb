@@ -3,7 +3,6 @@
 # See the PropertyValue superclass.
 #
 class NumericPropertyValue < PropertyValue
-  INFINITY = (1.0/0)
   MAX_DP = 6
   PRECISION = 15
   VALUE_RANGE = BigDecimal.new("-999999999.999999")..BigDecimal.new("999999999.999999")
@@ -12,6 +11,8 @@ class NumericPropertyValue < PropertyValue
   property :min_value, BigDecimal, :precision => PRECISION, :scale => MAX_DP
   property :max_value, BigDecimal, :precision => PRECISION, :scale => MAX_DP
   property :tolerance, Float
+  
+  validates_present :min_value, :max_value # TODO: spec
   
   # TODO: ensure no specs address this / stub for it
   # validates_with_block :unit do
@@ -29,9 +30,9 @@ class NumericPropertyValue < PropertyValue
     attributes = {:unit => to_unit}
     attributes[:tolerance] = Conversion.convert(tolerance, unit, to_unit) unless tolerance.nil?
     
-    max_sig_figs = [min, max].compact.map { |v| Conversion.determine_sig_figs(v) }.max
-    attributes[:min_value] = Conversion.convert(min.to_f, unit, to_unit, max_sig_figs) unless min.nil?
-    attributes[:max_value] = Conversion.convert(max.to_f, unit, to_unit, max_sig_figs) unless max.nil?
+    max_sig_figs = [min, max].map { |v| Conversion.determine_sig_figs(v) }.max
+    attributes[:min_value] = Conversion.convert(min.to_f, unit, to_unit, max_sig_figs)
+    attributes[:max_value] = Conversion.convert(max.to_f, unit, to_unit, max_sig_figs)
     
     attributes
   end
@@ -39,54 +40,19 @@ class NumericPropertyValue < PropertyValue
   def self.date?
     false
   end
-  
-  def self.limits_by_unit_by_property_id(product_ids)
-    query =<<-EOS
-      SELECT property_definition_id, unit,
-        MIN(min_value) AS min_min, MAX(min_value) AS max_min,
-        MIN(max_value) AS min_max, MAX(max_value) AS max_max
-      FROM property_values
-      WHERE type IN ('NumericPropertyValue', 'DatePropertyValue')
-        AND product_id IN ?
-      GROUP BY property_definition_id, unit
-    EOS
-    
-    units_by_property_id = {}
-    repository.adapter.query(query, product_ids).each do |record|
-      min = [record.min_min, record.min_max].compact.min
-      max = [record.max_min, record.max_max].compact.max
-
-      limits_by_unit = (units_by_property_id[record.property_definition_id] ||= {})
-      limits_by_unit[record.unit] = [min, max]
-    end
-    units_by_property_id
-  end
     
   # TODO: spec
-  def self.parse_or_error(data)
-    min, max = 
-      case data
-      when nil
-        raise "number is nil"
-      when Array
-        data
-      when Range
-        [data.first, data.last]
-      when String
-        if data =~ /^(.+?)(\.{2,})(.+?)$/
-          raise "badly formatted range in #{data.inspect}" unless $2 == "..."
-          [$1, $3]
-        else [data, data]
-        end
-      else
-        [data, data]
-      end
+  def self.parse_or_error(value)
+    raise "expected numeric value/range as string" unless value.is_a?(String)
     
-    min, max = [min, max].map { |m| parse_atom(m) }
+    min, max = value, value
+    if data =~ /^(.+?)(\.{2,})(.+?)$/
+      raise "badly formatted range in #{data.inspect}" unless $2 == "..."
+      min, max = $1, $3
+    end
     
-    raise "cannot have infinity for both the lower and upper bounds" if min.nil? and max.nil?
-    raise "the lower bound must not be greater than the upper bound" unless min.nil? or max.nil? or min <= max
-    
+    min, max = [min, max].map { |m| parse_atom(m) }    
+    raise "the lower bound must not be greater than the upper bound" if min > max
     {:min_value => min, :max_value => max}
   end
   
@@ -96,30 +62,21 @@ class NumericPropertyValue < PropertyValue
   
   def to_s # TODO: spec for Num and Date
     v = value
-    values = (range? ? [v.first, v.last] : [v])
-    values.map { |v| v.abs == INFINITY ? "?" : coerce_native_to_string(v) }.join("...")
+    (range? ? [v.first, v.last] : [v]).map { |v| coerce_native_to_string(v) }.join("...")
   end
   
   def value
     return coerce_db_value_to_native(min_value) unless range?
-    min = (min_value.nil? ? -INFINITY : coerce_db_value_to_native(min_value))
-    max = (max_value.nil? ? INFINITY : coerce_db_value_to_native(max_value))
-    min..max
+    coerce_db_value_to_native(min_value)..coerce_db_value_to_native(max_value)
   end
   
   
   protected
   
   def self.parse_atom(atom)
-    return nil if atom == "?" or (atom.is_a?(Numeric) and atom.abs == INFINITY)
-    
-    value = atom
-    unless value.is_a?(BigDecimal)
-      atom = atom.to_s
-      raise "number is blank" if atom == ""
-      raise "non-numeric characters in #{atom.inspect}" if atom =~ /[^0-9\-\+ \.e]/
-      value = BigDecimal.new(atom).round(MAX_DP)
-    end
+    raise "number is blank" if atom == ""
+    raise "non-numeric characters in #{atom.inspect}" if atom =~ /[^0-9\-\+ \.e]/
+    value = BigDecimal.new(atom).round(MAX_DP)
     raise "number #{value} is outside the range #{VALUE_RANGE}" unless VALUE_RANGE.include?(value)    
     value
   end

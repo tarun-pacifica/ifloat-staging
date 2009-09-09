@@ -21,19 +21,9 @@ class NumericFilter < Filter
     return nil if limits.nil? or not limits.has_key?(unit)
     min_limit, max_limit = limits[unit]
     
-    min =
-      if suppress?(:min) then nil
-      elsif min.nil? then min_limit
-      else [[min, min_limit].compact.max, max_limit].compact.min
-      end
-      
-    max =
-      if suppress?(:max) then nil
-      elsif max.nil? then max_limit
-      else [[max, min_limit].compact.max, max_limit].compact.min
-      end
-      
-    min, max = max, min if min.is_a?(Numeric) and max.is_a?(Numeric) and min > max
+    min = min_limit if min.nil?
+    max = max_limit if max.nil?    
+    min, max = [min, max].map { |m| [[m, min_limit].max, max_limit].min }.sort
       
     self.chosen_min = min
     self.chosen_max = max
@@ -64,7 +54,7 @@ class NumericFilter < Filter
     query =<<-EOS
       property_definition_id = ? AND
       unit #{chosen_unit.nil? ? "IS" : "="} ? AND
-      (IFNULL(? > max_value, FALSE) OR IFNULL(? < min_value, FALSE))
+      (? > max_value OR ? < min_value)
     EOS
     
     [query, property_definition_id, chosen_unit, chosen_min, chosen_max]
@@ -87,9 +77,7 @@ class NumericFilter < Filter
     
     limits_by_unit.each do |unit, min_max|
       raise "expected a String / nil unit but got #{unit.inspect}" unless unit.nil? or unit.is_a?(String)
-      raise "expected a limit Array but got #{min_max.inspect} for #{unit.inspect}" unless min_max.is_a?(Array) and min_max.size == 2
-      raise "expected no more than one nil limit but got two for #{unit.inspect}" if min_max == [nil, nil]
-      min_max.each { |m| raise "expected a Numeric / nil value but got #{m.inspect} for #{unit.inspect}" unless m.nil? or m.is_a?(Numeric) }
+      raise "expected a limit Array but got #{min_max.inspect} for #{unit.inspect}" unless min_max.is_a?(Array) and min_max.size == 2 and min_max.all? { |m| m.is_a?(Numeric) }
     end
     
     @numeric_limits = limits_by_unit
@@ -99,15 +87,9 @@ class NumericFilter < Filter
       self.unit_limits[unit] = min_max.map { |decimal_value| decimal_value.to_s }
     end
     
-    raise "detected nils for minima and maxima across the entire set of limits" if suppress?(:min) and suppress?(:max)
     if limits_by_unit.has_key?(chosen_unit) then choose(chosen_min, chosen_max, chosen_unit)
     else choose(nil, nil, default_unit)
     end
-  end
-  
-  def suppress?(set)
-    return true if limits.nil?
-    limits.any? { |unit, limits| (set == :min ? limits.first : limits.last).nil? }
   end
   
   def text?

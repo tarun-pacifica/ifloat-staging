@@ -194,8 +194,8 @@ function fraction_helper_open(i) {
 	f.input.css("background", "yellow");
 	
 	var filter = f.input.parents(".filter")[0];
-	var limits = filter.limits[filter.unit];
-	var value = limits[(f.input.hasClass("min") ? 0 : 1)]
+	var values = filter.values[filter.unit];
+	var value = values[(f.input.hasClass("min") ? 0 : 1)]
 	value = fraction_helper_detect_nearest_po2_fraction(value);
 	fraction_helper.find(".integer").val(value.integer);
 	
@@ -210,13 +210,8 @@ function fraction_helper_paste_value() {
 	fraction_helper.dialog("close");
 	
 	var input = fraction_helper[0].input;
-	var filter = input.parents(".filter");
-	if(input.hasClass("min")) filter[0].min = value;
-	else filter[0].max = value;
-	
-	num_filter_choose(filter);
-	num_filter_update_context_and_summary(filter);
-	num_filter_update_min_max(filter);
+	input.val(value);
+	num_filter_handle_input(input[0]);
 }
 
 function fraction_helper_update_preview() {
@@ -334,25 +329,14 @@ function date_format(value) {
 function number_format(values, unit, date) {
 	if(values.length == 0) return "";
 	
+	var formatted_values = [];
 	for(i in values) {
 		var v = values[i];
-		if(v) values[i] = (date ? date_format(v) : fraction_helper_format(v));
+		if(v) formatted_values.push(date ? date_format(v) : fraction_helper_format(v));
 	}
 	
-	var result;
-	if(values.length == 1) {
-		result = values[0];
-	} else {
-		var min = values[0];
-		var max = values[1]
-		
-		if(min != undefined && max != undefined) result = min + " &ndash; " + max;
-		else if(min != undefined) result = "&ge; " + min;
-		else if(max != undefined) result = "&le; " + max;
-	}
-	
-	if(unit) result += " " + unit;
-	
+	var result = formatted_values.join(" &ndash; ");
+	if(unit) result += " " + unit;	
 	return result;
 }
 
@@ -387,11 +371,11 @@ function num_filter_handle_input(i) {
 	if(updated) {
 		for(unit in f.values) {
 			if(unit == f.unit) continue;
-			var target_values = f.values[unit];
-			
+			var unit_values = f.values[unit];
+
 			for(i in values) {
 				var v = values[i];
-				target_values[i] = (v == undefined ? undefined : num_filter_convert(v, f.unit, unit));
+				unit_values[i] = num_filter_convert(v, f.unit, unit);
 			}
 		}
 		

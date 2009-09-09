@@ -40,7 +40,7 @@ class Relationship
   validates_is_unique :value, :scope => [:company_id, :definitive_product_id, :property_definition_id, :name]
   
   validates_with_block :property_definition, :if => :property_definition do
-    property_definition.property_type.value_class.text? || [false, "should be a text property"]
+    property_definition.text? || [false, "should be a text property"]
   end
   
   def self.related_products(product)

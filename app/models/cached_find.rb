@@ -146,7 +146,7 @@ class CachedFind
       end
     end
     
-    numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(fpids) 
+    numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(fpids, auto_compile) 
     relevant_values_by_fid = {}
     filters.each do |filter|
       relevant_values = nil
@@ -166,7 +166,7 @@ class CachedFind
   def filtered_product_ids    
     return [] if all_product_count.zero?
     
-    used_filters = filters(:fresh => false)
+    used_filters = filters.select { |filter| not filter.fresh? }
     return all_product_ids if used_filters.empty?
     
     # TODO: spec examples where this kicks in

@@ -80,7 +80,7 @@ class PropertyDefinition
     property_type.value_class.date?
   end
   
-  def text? # TODO: check where this is used and whether it could be a direct call
+  def text?
     property_type.value_class.text?
   end
 end

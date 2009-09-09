@@ -52,7 +52,7 @@
 		<%= product_titles(@product.id, @non_data_values) %>
 		<hr />
 		
-		<% summary, features, description = @non_data_values.values_at("marketing:summary", "marketing:feature_list", "marketing:description") %>
+		<% summary, features, description = @non_data_values.values_at("marketing:summary", "marketing:feature_list", "marketing:description").map { |v| v.to_s } %>
 		
 		<% unless summary.nil? %>
 		<h3>Summary</h3>

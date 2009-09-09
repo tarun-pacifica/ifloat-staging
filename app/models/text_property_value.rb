@@ -14,23 +14,6 @@ class TextPropertyValue < PropertyValue
     {:text_value => value}
   end
   
-  # TODO: document and test
-  def self.translated_values(product_ids, language_code)
-    return {} if product_ids.empty?
-    
-    tpvs = all(:product_id => product_ids, :language_code => language_code)
-    
-    property_ids = tpvs.map { |tpv| tpv.property_definition_id }.uniq
-    PropertyDefinition.all(:id => property_ids).map
-    
-    values_by_property_by_product_id = {}
-    tpvs.each do |tpv|
-      values_by_property = (values_by_property_by_product_id[tpv.product_id] ||= {})
-      (values_by_property[tpv.definition] ||= []) << tpv.text_value
-    end
-    values_by_property_by_product_id
-  end
-  
   def self.text? # TODO: spec (in this class and parent only)
     true
   end

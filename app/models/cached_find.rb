@@ -100,8 +100,6 @@ class CachedFind
     
     existing_filters = NumericFilter.all(:cached_find_id => id).hash_by(:property_definition_id)
     existing_filters.update(TextFilter.all(:cached_find_id => id).hash_by(:property_definition_id))
-    # NumericFilter.all(:cached_find_id => id).each { |f| existing_filters[f.property_definition_id] = f }
-    # TextFilter.all(:cached_find_id => id).each { |f| existing_filters[f.property_definition_id] = f }
     
     to_save = []
     new_property_ids = []
@@ -186,7 +184,6 @@ class CachedFind
   # TODO: spec
   def reset
     filters.all.each { |filter| filter.destroy }
-    filters.reload
     execute!
   end
   

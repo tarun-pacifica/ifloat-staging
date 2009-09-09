@@ -46,8 +46,8 @@ class NumericPropertyValue < PropertyValue
     raise "expected numeric value/range as string" unless value.is_a?(String)
     
     min, max = value, value
-    if data =~ /^(.+?)(\.{2,})(.+?)$/
-      raise "badly formatted range in #{data.inspect}" unless $2 == "..."
+    if value =~ /^(.+?)(\.{2,})(.+?)$/
+      raise "badly formatted range in #{value.inspect}" unless $2 == "..."
       min, max = $1, $3
     end
     

@@ -27,15 +27,15 @@ class Product
   end
   
   # TODO: spec
-  def self.display_values(product_ids, language_code)
-    values_by_property_by_product_id = {}  
+  def self.display_values(product_ids, language_code)  
+    db_values = NumericPropertyValue.all(:product_id => product_ids)
+    db_values += TextPropertyValue.all(:product_id => product_ids, :language_code => language_code)
     
-    TextPropertyValue.translated_values(product_ids, language_code).each do |product_id, text_values_by_property|
-      values_by_property = (values_by_property_by_product_id[product_id] ||= {})
-      values_by_property.update(text_values_by_property)
-    end
+    property_ids = db_values.map { |value| value.property_definition_id }
+    PropertyDefinition.all(:id => property_ids.uniq).map
     
-    NumericPropertyValue.all(:product_id => product_ids).each do |value|
+    values_by_property_by_product_id = {}
+    db_values.each do |value|
       values_by_property = (values_by_property_by_product_id[value.product_id] ||= {})
       values = (values_by_property[value.definition] ||= [])
       values << value

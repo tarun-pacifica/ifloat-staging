@@ -23,7 +23,6 @@ module Merb
     def number_format_js(value)
       v = value.value
       values = (value.range? ? [v.first, v.last] : [v])
-      values.map! { |v| v.abs == NumericPropertyValue::INFINITY ? "undefined" : v }
 			"number_format([#{values.join(', ')}], #{value.unit.nil? ? 'undefined' : value.unit.inspect}, #{value.class.date?})"
     end
     

@@ -90,7 +90,7 @@ class CachedFind
     execute! if should_execute
     should_execute
   end
-
+  
   def execute!
     raise "cannot execute invalid CachedFind" unless valid?
     raise "cannot execute unsaved CachedFind" if new_record?
@@ -105,7 +105,7 @@ class CachedFind
     to_save = []
     new_property_ids = []
     
-    Indexer.filterable_text_property_ids_for_product_ids(product_ids, false).each do |property_id|
+    Indexer.filterable_text_property_ids_for_product_ids(product_ids, language_code, false).each do |property_id|
       new_property_ids << property_id      
       filter = existing_filters[property_id]
       to_save << TextFilter.new(:cached_find_id => id, :property_definition_id => property_id) if filter.nil?

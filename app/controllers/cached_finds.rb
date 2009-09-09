@@ -46,22 +46,22 @@ class CachedFinds < Application
   def show(id)
     find_id = id.to_i
     begin
-      @cached_find = session.ensure_cached_find(find_id)
+      @find = session.ensure_cached_find(find_id)
     rescue NotFound
       if session.authenticated? and find_id == session[:most_recent_find_id]
         defunct_cf = CachedFind.get(find_id)
-        @cached_find = session.cached_finds.find { |cf| cf.specification == defunct_cf.specification }
-        session[:recalled] = (not @cached_find.nil?)
+        @find = session.cached_finds.find { |cf| cf.specification == defunct_cf.specification }
+        session[:recalled] = (not @find.nil?)
       end
-      return redirect(@cached_find.nil? ? "/" : resource(@cached_find))
+      return redirect(@find.nil? ? "/" : resource(@find))
     end
     
     @recalled = session[:recalled]
     session[:recalled] = false
-    session[:most_recent_find_id] = @cached_find.id
-    @cached_find.ensure_executed
+    session[:most_recent_find_id] = @find.id
+    find_was_executed = @find.ensure_executed
         
-    filters = @cached_find.filters
+    filters = @find.filters
     property_ids = filters.map { |filter| filter.property_definition_id }
     properties = PropertyDefinition.all(:id => property_ids)
     seq_nums_by_pid = {}
@@ -72,11 +72,27 @@ class CachedFinds < Application
     
     @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)
     
-    @text_values_by_relevant_filter_id = @cached_find.text_values_by_relevant_filter_id
+    # TODO: make this a convenience method in TextFilter
+    @text_filter_values = Indexer.filterable_text_values_for_product_ids(@find.all_product_ids, @find.filtered_product_ids, @find.language_code, (not find_was_executed))
+    TextFilterExclusion.all("text_filter.cached_find_id" => @find.id).each do |exclusion|
+      filter_values = @text_filter_values[exclusion.text_filter.property_definition_id] # TODO: cache lookup
+      (filter_values[2] ||= []) << exclusion.value
+    end
+    @text_filter_values.each { |property_id, sets| sets << [] unless sets.size == 3 }
     
-    @friendly_name_sections = PropertyDefinition.friendly_name_sections(property_ids, @cached_find.language_code)
-    @text_filter_values = TextFilter.values_by_filter_id(@cached_find)
-    @text_value_definitions = PropertyValueDefinition.definitions_by_property_id(property_ids, @cached_find.language_code)
+    # TODO: consider subsuming this functionality into @text_filter_values and coping with it in JS etc...
+    # @text_values_by_relevant_filter_id = @find.text_values_by_relevant_filter_id
+    @text_values_by_relevant_filter_id = {}
+    @text_filter_values.each do |property_id, sets|
+      relevant = sets[1]
+      next if relevant.empty?
+      filter = filters.find { |f| f.property_definition_id == property_id } # TODO: make more efficient
+      @text_values_by_relevant_filter_id[filter.id] = relevant
+    end
+    
+    @friendly_name_sections = PropertyDefinition.friendly_name_sections(property_ids, @find.language_code)
+    # @text_filter_values = TextFilter.values_by_filter_id(@find)
+    @text_value_definitions = PropertyValueDefinition.definitions_by_property_id(property_ids, @find.language_code)
         
     @previous_finds = session.cached_finds
     render

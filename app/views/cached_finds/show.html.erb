@@ -2,7 +2,7 @@
 
 <div id="cached_find">
 
-<% if @cached_find.all_product_count.zero? %>
+<% if @find.all_product_count.zero? %>
 
 <img class="found_none" src="/images/backgrounds/found_none.png" />
 
@@ -28,9 +28,9 @@
 	
 	<div class="title">Filters</div>
 	<% if @recalled %>
-	<p class="recall">Filters adjusted to their most recent settings for <span class="spec"><%= @cached_find.specification %></span>.</p>
+	<p class="recall">Filters adjusted to their most recent settings for <span class="spec"><%= @find.specification %></span>.</p>
 	<% end %>
-	<a href=<%= (resource(@cached_find) + "/reset").inspect %>>reset all filters</a>
+	<a href=<%= (resource(@find) + "/reset").inspect %>>reset all filters</a>
 	<h1>Click to filter by...</h1>
 	<table> <%= partial :filter, :with => @filters %> </table>
 </div>
@@ -40,9 +40,9 @@
 		Showing
 		<span class="displayed_count">?</span>
 		/ 
-		<span class="filtered_count"><%= @cached_find.all_product_count %></span>
+		<span class="filtered_count"><%= @find.all_product_count %></span>
 		products for
-		<span class="spec"><%= @cached_find.specification %></span>
+		<span class="spec"><%= @find.specification %></span>
 	</div>
 	
 	<div id="cached_find_switcher">
@@ -66,7 +66,7 @@
 	var r = results[0];
 	r.filter_queue = [];
 	r.filter_queue_active = -1;
-	r.find_id = <%= @cached_find.id %>;
+	r.find_id = <%= @find.id %>;
 	r.list_request_max = 36;
 	r.list_size = 0;
 	r.view = "grid";

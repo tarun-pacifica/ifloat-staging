@@ -25,10 +25,11 @@
 <tr id=<%= filter_id.inspect %> class="filter">
 	<td colspan="2">
 		<% if filter.text? %>
-		<% @text_filter_values[filter.id].sort.each do |value, chosen| %>
+		<% all, relevant, excluded = @text_filter_values[filter.property_definition_id] %>
+		<% all.each do |value| %>
 		<div class="list_item">
 			<img class="select_one" src="/images/buttons/select_one.png" onclick="text_filter_select_one(this)"/>
-			<% checked = (chosen ? 'checked="checked"' : '') %>
+			<% checked = (excluded.include?(value) ? '' : 'checked="checked"') %>
 			<input type="checkbox" value=<%= value.inspect %> <%= checked %> onclick="text_filter_handle_check(this)" />
 			<%= defined_value(value, definitions[value]) %>
 		</div>

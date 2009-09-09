@@ -168,17 +168,13 @@ class CachedFind
     return all_product_ids if used_filters.empty?
     
     # TODO: spec examples where this kicks in
-    query =<<-EOS
-      SELECT DISTINCT product_id
-      FROM property_values
-      WHERE product_id IN ?
-        AND property_definition_id IN ?
-    EOS
     used_filter_pdids = used_filters.map { |filter| filter.property_definition_id }
-    relevant_product_ids = repository.adapter.query(query, all_product_ids, used_filter_pdids)
-    return [] if relevant_product_ids.empty?
+    relevant_product_ids = (all_product_ids & Indexer.filterable_product_ids_for_property_ids(used_filter_pdids, language_code, false))
     
-    relevant_product_ids - excluded_product_ids(relevant_product_ids, used_filters)
+    text_filters, numeric_filters = used_filters.partition { |filter| filter.text? }
+    excluded_product_ids = Indexer.filterable_numeric_excluded_product_ids(numeric_filters, false)
+    excluded_product_ids += Indexer.filterable_text_excluded_product_ids(text_filters, language_code, false)
+    relevant_product_ids - excluded_product_ids
   end
   
   # TODO: spec
@@ -191,27 +187,5 @@ class CachedFind
     if executed_at.nil? then specification
     else "#{specification} (#{executed_at.strftime('%Y/%m/%d %H:%M:%S')})"
     end
-  end
-
-
-  private
-  
-  # TODO: revise in light of the core filtering changes
-  def excluded_product_ids(product_ids, used_filters)
-    query_chunks = []
-    query_bind_values = []
-    used_filters.each do |filter|
-      query, *bind_values = filter.excluded_product_query_chunk(language_code)
-      next if query.nil?
-      query_chunks << query
-      query_bind_values += bind_values
-    end
-    
-    return [] if query_chunks.empty?
-    
-    query = "SELECT DISTINCT product_id FROM property_values WHERE product_id IN ? AND ("
-    query += query_chunks.map { |chunk| "(#{chunk})"}.join(" OR ")
-    query += ")"
-    repository.adapter.query(query, product_ids, *query_bind_values)
   end
 end

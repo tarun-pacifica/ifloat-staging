@@ -47,18 +47,6 @@ class NumericFilter < Filter
   def default_unit
     units.first
   end
-  
-  def excluded_product_query_chunk(language_code)
-    return [] if limits.nil?
-    
-    query =<<-EOS
-      property_definition_id = ? AND
-      unit #{chosen_unit.nil? ? "IS" : "="} ? AND
-      (? > max_value OR ? < min_value)
-    EOS
-    
-    [query, property_definition_id, chosen_unit, chosen_min, chosen_max]
-  end
 
   def limits
     return nil if unit_limits.nil?

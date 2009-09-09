@@ -25,6 +25,62 @@ class Indexer
     return last_import_run.completed_at >= @@last_compile
   end
   
+  def self.filterable_numeric_excluded_product_ids(filters, auto_compile = true)
+    return [] if filters.empty?
+    
+    compile if auto_compile and compile_needed?
+    
+    filters_by_pid = filters.hash_by(:property_definition_id)
+    
+    product_ids = []
+    @@numeric_filtering_index.each do |property_id, products_by_unit|
+      filter = filters_by_pid[property_id]
+      next if filter.nil?
+      
+      min, max, unit = filter.chosen
+      (products_by_unit[unit] || {}).each do |product_id, min_max|
+        product_ids << product_id if min > min_max.last or max < min_max.first
+      end
+    end
+    product_ids.uniq
+  end
+  
+  def self.filterable_product_ids_for_property_ids(property_ids, language_code, auto_compile = true)
+    compile if auto_compile and compile_needed?
+    
+    property_ids = (@@text_filtering_index[language_code] || {}).values_at(*property_ids).map do |values_by_product_id|
+      (values_by_product_id || {}).keys
+    end.compact
+    
+    property_ids += @@numeric_filtering_index.values_at(*property_ids).map do |products_by_unit|
+      (products_by_unit || {}).values.map do |minmax_by_product_id|
+        minmax_by_product_id.keys
+      end
+    end
+    
+    property_ids.flatten.uniq
+  end
+  
+  def self.filterable_text_excluded_product_ids(filters, language_code, auto_compile = true)
+    return [] if filters.empty?
+    
+    compile if auto_compile and compile_needed?
+    
+    filter_ids = filters.map { |filter| filter.id }
+    exclusions_by_fid = TextFilterExclusion.all(:text_filter_id => filter_ids).group_by { |tfe| tfe.text_filter_id }
+    filters_by_pid = filters.hash_by(:property_definition_id)
+    
+    product_ids = []
+    (@@text_filtering_index[language_code] || {}).each do |property_id, products|
+      filter = filters_by_pid[property_id]
+      next if filter.nil?
+      
+      exclusions = exclusions_by_fid[filter.id].map { |tfe| tfe.value }
+      products.each { |product_id, values| product_ids << product_id unless (values & exclusions).empty? }
+    end
+    product_ids.uniq
+  end
+  
   def self.filterable_text_property_ids_for_product_ids(product_ids, language_code, auto_compile = true)
     return [] if product_ids.empty?
     
@@ -59,12 +115,12 @@ class Indexer
     compile if auto_compile and compile_needed?
     limits_by_unit_by_property_id = {}
     
-    @@numeric_filtering_index.each do |property_id, units|
-      units.each do |unit, extrema|
-        relevant_product_ids = (product_ids & extrema.keys)
+    @@numeric_filtering_index.each do |property_id, products_by_unit|
+      products_by_unit.each do |unit, min_max_by_product_id|
+        relevant_product_ids = (product_ids & min_max_by_product_id.keys)
         next if relevant_product_ids.empty?
         
-        minima, maxima = extrema.values_at(*relevant_product_ids).transpose
+        minima, maxima = min_max_by_product_id.values_at(*relevant_product_ids).transpose
         limits_by_unit = (limits_by_unit_by_property_id[property_id] ||= {})
         limits_by_unit[unit] = [minima.min, maxima.max]
       end
@@ -100,7 +156,9 @@ class Indexer
     nfi = {}
     repository.adapter.query(query, true, "GBR-02934378").each do |record|
       units = (nfi[record.property_definition_id] ||= {})
-      (units[record.unit] ||= {})[record.product_id] = [record.min_value, record.max_value]
+      products = (units[record.unit] ||= {})
+      min_max = (products[record.product_id] || [])
+      products[record.product_id] = ([record.min_value, record.max_value] + min_max).minmax
     end
     nfi
   end

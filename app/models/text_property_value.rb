@@ -4,7 +4,7 @@
 #
 class TextPropertyValue < PropertyValue
   property :language_code, String, :format => /^[A-Z]{3}$/
-  property :text_value, Text
+  property :text_value, Text, :lazy => false
   
   validates_present :language_code, :text_value
   

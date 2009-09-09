@@ -168,11 +168,8 @@ class ImportSet
       end
       
       values = value_fields.map do |attribute|
-        value = attributes[attribute]
-        
-        unless value.nil?
-          value = "%.6f" % value if attribute == :min_value or attribute == :max_value
-        end
+        value = attributes[attribute]        
+        value = "%.6f" % value if attribute == :min_value or attribute == :max_value
         
         case value
         when Array then value.to_yaml

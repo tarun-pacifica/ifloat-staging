@@ -35,21 +35,4 @@ class Filter
   def self.archived
     all(:cached_find_id => CachedFind.archived.map { |find| find.id })
   end
-  
-  # TODO: review whether this belongs in Product
-  def self.product_ids_by_property_id(product_ids)
-    return {} if product_ids.empty?
-    
-    query =<<-EOS
-      SELECT DISTINCT property_definition_id, product_id
-      FROM property_values
-      WHERE product_id IN ?
-    EOS
-    
-    product_ids_by_pid = {}
-    repository.adapter.query(query, product_ids).each do |record|
-      (product_ids_by_pid[record.property_definition_id] ||= []) << record.product_id
-    end
-    product_ids_by_pid
-  end
 end

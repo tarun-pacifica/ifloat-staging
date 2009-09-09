@@ -85,7 +85,7 @@ class CachedFind
     should_execute = executed_at.nil?
     unless should_execute
       last_indexer_compile = Indexer.last_compile
-      should_execute = (last_indexer_compile >= executed_at) unless last_indexer_compile.nil?
+      should_execute = (last_indexer_compile.nil? || (last_indexer_compile >= executed_at))
     end
     execute! if should_execute
     should_execute

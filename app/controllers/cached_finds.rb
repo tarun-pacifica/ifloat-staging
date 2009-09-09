@@ -72,26 +72,17 @@ class CachedFinds < Application
     
     @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)
     
-    # TODO: make this a convenience method in TextFilter
-    @text_filter_values = Indexer.filterable_text_values_for_product_ids(@find.all_product_ids, @find.filtered_product_ids, @find.language_code, (not find_was_executed))
-    TextFilterExclusion.all("text_filter.cached_find_id" => @find.id).each do |exclusion|
-      filter_values = @text_filter_values[exclusion.text_filter.property_definition_id] # TODO: cache lookup
-      (filter_values[2] ||= []) << exclusion.value
-    end
-    @text_filter_values.each { |property_id, sets| sets << [] unless sets.size == 3 }
+    @text_filter_values = @find.text_values_by_filter_id(find_was_executed == false)
     
     # TODO: consider subsuming this functionality into @text_filter_values and coping with it in JS etc...
-    # @text_values_by_relevant_filter_id = @find.text_values_by_relevant_filter_id
-    @text_values_by_relevant_filter_id = {}
-    @text_filter_values.each do |property_id, sets|
+        @text_values_by_relevant_filter_id = {}
+    @text_filter_values.each do |filter_id, sets|
       relevant = sets[1]
       next if relevant.empty?
-      filter = filters.find { |f| f.property_definition_id == property_id } # TODO: make more efficient
-      @text_values_by_relevant_filter_id[filter.id] = relevant
+      @text_values_by_relevant_filter_id[filter_id] = relevant
     end
     
     @friendly_name_sections = PropertyDefinition.friendly_name_sections(property_ids, @find.language_code)
-    # @text_filter_values = TextFilter.values_by_filter_id(@find)
     @text_value_definitions = PropertyValueDefinition.definitions_by_property_id(property_ids, @find.language_code)
         
     @previous_finds = session.cached_finds

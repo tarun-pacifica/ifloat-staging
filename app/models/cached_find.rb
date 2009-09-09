@@ -149,6 +149,23 @@ class CachedFind
     relevant_product_ids - excluded_product_ids(relevant_product_ids, used_filters)
   end
   
+  def text_values_by_filter_id(auto_compile = true)
+    filters_by_property_id = {}
+    filters.each { |filter| filters_by_property_id[filter.property_definition_id] = filter if filter.text? }
+    
+    text_values_by_fid = {}
+    Indexer.filterable_text_values_for_product_ids(all_product_ids, filtered_product_ids, language_code, auto_compile).each do |property_id, all_relevant|
+      filter_id = filters_by_property_id[property_id].id
+      text_values_by_fid[filter_id] = (all_relevant << [])
+    end
+    
+    filter_ids = filters.map { |filter| filter.id }
+    TextFilterExclusion.all(:text_filter_id => filter_ids).each do |exclusion|
+      text_values_by_fid[exclusion.text_filter_id].last << exclusion.value
+    end
+    text_values_by_fid
+  end
+  
   # TODO: spec
   def text_values_by_relevant_filter_id
     product_ids_by_pid = Filter.product_ids_by_property_id(filtered_product_ids)

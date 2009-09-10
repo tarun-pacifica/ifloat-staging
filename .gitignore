@@ -6,3 +6,4 @@ doc/*
 !doc/rdoc/
 log/
 public/assets
+*.dump

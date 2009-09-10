@@ -14,7 +14,7 @@ class CachedFinds < Application
     cf = session.add_cached_find(CachedFind.new(:language_code => language_code, :specification => specification))
     
     if cf.valid?
-      session[:recalled] = (not cf.executed_at.nil?)
+      session[:recalled] = (not cf.accessed_at.nil?)
       redirect(resource(cf))
     else redirect("/")
     end
@@ -24,7 +24,7 @@ class CachedFinds < Application
     provides :js
     
     cached_find = session.ensure_cached_find(id.to_i)
-    cached_find.ensure_executed
+    cached_find.ensure_valid
     limit = [limit.to_i, 1].max
     product_ids = cached_find.filtered_product_ids
     ([product_ids.size] + product_ids[0, limit]).to_json
@@ -59,7 +59,9 @@ class CachedFinds < Application
     @recalled = session[:recalled]
     session[:recalled] = false
     session[:most_recent_find_id] = @find.id
-    @find.ensure_executed
+    @find.accessed_at = DateTime.now
+    @find.ensure_valid
+    @find.save
         
     filters = @find.filters
     property_ids = filters.map { |filter| filter.property_definition_id }

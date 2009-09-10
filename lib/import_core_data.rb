@@ -406,3 +406,6 @@ end
 report = report.join("\n")
 ImportEvent.create(:succeeded => true, :report => report)
 mail(:success, report)
+
+Indexer.compile
+CachedFind.all.update!(:invalidated => true)

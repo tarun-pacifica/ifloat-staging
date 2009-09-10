@@ -45,7 +45,7 @@ class Filters < Application
   def retrieve_filter
     find_id, filter_id = params.values_at(:find_id, :filter_id).map { |i| i.to_i }
     @find = session.ensure_cached_find(find_id)
-    @reset = @find.ensure_executed
+    @reset = @find.ensure_valid
     @filter = Filter.first(:cached_find_id => find_id, :id => filter_id)
     raise NotFound if @filter.nil?
   end

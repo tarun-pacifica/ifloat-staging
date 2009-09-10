@@ -27,7 +27,8 @@ class CachedFind
   property :description, String, :size => 255
   # TODO: consider making this a proper DB table rather than a flattened list (this isn't scaling)
   property :product_id_list, Text, :lazy => false
-  property :executed_at, DateTime
+  property :accessed_at, DateTime
+  property :invalidated, Boolean, :default => true
   
   belongs_to :user
   has n, :attachments
@@ -62,7 +63,7 @@ class CachedFind
   end
   
   def self.anonimize_unused
-    all(:executed_at.lt => ANONIMIZATION_TIME.ago).update!(:user_id => nil)
+    all(:accessed_at.lt => ANONIMIZATION_TIME.ago).update!(:user_id => nil)
   end
   
   def self.archived
@@ -70,7 +71,7 @@ class CachedFind
   end
   
   def self.obsolete
-    all(:executed_at.lt => OBSOLESCENCE_TIME.ago)
+    all(:accessed_at.lt => OBSOLESCENCE_TIME.ago)
   end
   
   def all_product_count
@@ -81,14 +82,8 @@ class CachedFind
     product_id_list.to_s.split(",").map { |product_id| product_id.to_i }
   end
   
-  def ensure_executed
-    should_execute = executed_at.nil?
-    unless should_execute
-      last_indexer_compile = Indexer.last_compile
-      should_execute = (last_indexer_compile.nil? || (last_indexer_compile >= executed_at))
-    end
-    execute! if should_execute
-    should_execute
+  def ensure_valid
+    invalidated? ? execute! : nil
   end
   
   def execute!
@@ -104,13 +99,13 @@ class CachedFind
     to_save = []
     new_property_ids = []
     
-    Indexer.filterable_text_property_ids_for_product_ids(product_ids, language_code, false).each do |property_id|
+    Indexer.filterable_text_property_ids_for_product_ids(product_ids, language_code).each do |property_id|
       new_property_ids << property_id      
       filter = existing_filters[property_id]
       to_save << TextFilter.new(:cached_find_id => id, :property_definition_id => property_id) if filter.nil?
     end
     
-    Indexer.numeric_limits_for_product_ids(product_ids, false).each do |property_id, limits_by_unit|
+    Indexer.numeric_limits_for_product_ids(product_ids).each do |property_id, limits_by_unit|
       new_property_ids << property_id      
       filter = existing_filters[property_id]
       filter = NumericFilter.new(:cached_find_id => id, :property_definition_id => property_id) if filter.nil?
@@ -122,7 +117,7 @@ class CachedFind
     existing_filters.each { |property_id, filter| filter.destroy unless new_property_ids.include?(property_id) }
     to_save.each { |filter| filter.save }
     
-    self.executed_at = Time.now
+    self.invalidated = false
     save
   end
   
@@ -132,7 +127,7 @@ class CachedFind
     
     text_values_by_fid = {}
     fpids = filtered_product_ids
-    Indexer.filterable_text_values_for_product_ids(all_product_ids, fpids, language_code, false).each do |property_id, all_relevant|
+    Indexer.filterable_text_values_for_product_ids(all_product_ids, fpids, language_code).each do |property_id, all_relevant|
       filter_id = filters_by_property_id[property_id].id
       text_values_by_fid[filter_id] = (all_relevant << [])
     end
@@ -144,7 +139,7 @@ class CachedFind
       end
     end
     
-    numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(fpids, false) 
+    numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(fpids) 
     relevant_values_by_fid = {}
     filters.each do |filter|
       relevant_values = nil
@@ -161,7 +156,7 @@ class CachedFind
     [text_values_by_fid, relevant_values_by_fid]
   end
   
-  def filtered_product_ids    
+  def filtered_product_ids
     return [] if all_product_count.zero?
     
     used_filters = filters.select { |filter| not filter.fresh? }
@@ -169,11 +164,11 @@ class CachedFind
     
     # TODO: spec examples where this kicks in
     used_filter_pdids = used_filters.map { |filter| filter.property_definition_id }
-    relevant_product_ids = (all_product_ids & Indexer.filterable_product_ids_for_property_ids(used_filter_pdids, language_code, false))
+    relevant_product_ids = (all_product_ids & Indexer.product_ids_for_filterable_property_ids(used_filter_pdids, language_code))
     
     text_filters, numeric_filters = used_filters.partition { |filter| filter.text? }
-    excluded_product_ids = Indexer.filterable_numeric_excluded_product_ids(numeric_filters, false)
-    excluded_product_ids += Indexer.filterable_text_excluded_product_ids(text_filters, language_code, false)
+    excluded_product_ids = Indexer.excluded_product_ids_for_numeric_filters(numeric_filters)
+    excluded_product_ids += Indexer.excluded_product_ids_for_text_filters(text_filters, language_code)
     relevant_product_ids - excluded_product_ids
   end
   
@@ -184,8 +179,8 @@ class CachedFind
   end
   
   def spec_date
-    if executed_at.nil? then specification
-    else "#{specification} (#{executed_at.strftime('%Y/%m/%d %H:%M:%S')})"
+    if accessed_at.nil? then specification
+    else "#{specification} (#{accessed_at.strftime('%Y/%m/%d %H:%M:%S')})"
     end
   end
 end

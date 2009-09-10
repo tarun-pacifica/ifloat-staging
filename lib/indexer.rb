@@ -1,34 +1,37 @@
 class Indexer
+  COMPILED_PATH = "lib/indexer.dump"
+  
+  @@last_loaded_md5 = nil
   @@numeric_filtering_index = {}
-  @@text_finding_index = {}
   @@text_filtering_index = {}
-  @@last_compile = nil
+  @@text_finding_index = {}
   
   def self.compile
-    numeric_filtering_index = compile_numeric_filtering_index
-    
-    records = text_records
-    text_finding_index = compile_text_finding_index(records)
-    text_filtering_index = compile_text_filtering_index(records)
-    
-    @@numeric_filtering_index = numeric_filtering_index
-    @@text_finding_index = text_finding_index
-    @@text_filtering_index = text_filtering_index
-    
-    @@last_compile = DateTime.now
+    Tempfile.open(File.basename(COMPILED_PATH)) do |f|
+      records = text_records
+      indexes = {
+        :numeric_filtering => compile_numeric_filtering_index,
+        :text_filtering => compile_text_filtering_index(records),
+        :text_finding => compile_text_finding_index(records)
+      }
+      
+      f.write Marshal.dump(indexes)
+      File.delete(COMPILED_PATH) if File.exists?(COMPILED_PATH)
+      File.link(f.path, COMPILED_PATH)
+    end
   end
   
-  def self.compile_needed?
-    return true if @@last_compile.nil?
-    last_import_run = ImportEvent.first(:succeeded => true, :order => [:completed_at.desc])
-    return false if last_import_run.nil?
-    return last_import_run.completed_at >= @@last_compile
+  def self.ensure_loaded
+    begin
+      load
+      true
+    rescue
+      false
+    end
   end
-  
-  def self.filterable_numeric_excluded_product_ids(filters, auto_compile = true)
-    return [] if filters.empty?
     
-    compile if auto_compile and compile_needed?
+  def self.excluded_product_ids_for_numeric_filters(filters)
+    return [] if filters.empty? or not ensure_loaded
     
     filters_by_pid = filters.hash_by(:property_definition_id)
     
@@ -45,26 +48,8 @@ class Indexer
     product_ids.uniq
   end
   
-  def self.filterable_product_ids_for_property_ids(property_ids, language_code, auto_compile = true)
-    compile if auto_compile and compile_needed?
-    
-    property_ids = (@@text_filtering_index[language_code] || {}).values_at(*property_ids).map do |values_by_product_id|
-      (values_by_product_id || {}).keys
-    end.compact
-    
-    property_ids += @@numeric_filtering_index.values_at(*property_ids).map do |products_by_unit|
-      (products_by_unit || {}).values.map do |minmax_by_product_id|
-        minmax_by_product_id.keys
-      end
-    end
-    
-    property_ids.flatten.uniq
-  end
-  
-  def self.filterable_text_excluded_product_ids(filters, language_code, auto_compile = true)
-    return [] if filters.empty?
-    
-    compile if auto_compile and compile_needed?
+  def self.excluded_product_ids_for_text_filters(filters, language_code)
+    return [] if filters.empty? or not ensure_loaded
     
     filter_ids = filters.map { |filter| filter.id }
     exclusions_by_fid = TextFilterExclusion.all(:text_filter_id => filter_ids).group_by { |tfe| tfe.text_filter_id }
@@ -81,20 +66,16 @@ class Indexer
     product_ids.uniq
   end
   
-  def self.filterable_text_property_ids_for_product_ids(product_ids, language_code, auto_compile = true)
-    return [] if product_ids.empty?
+  def self.filterable_text_property_ids_for_product_ids(product_ids, language_code)
+    return [] if product_ids.empty? or not ensure_loaded
     
-    compile if auto_compile and compile_needed?
-
     (@@text_filtering_index[language_code] || {}).map do |property_id, products|
       (products.keys & product_ids).empty? ? nil : property_id
     end.compact
   end
   
-  def self.filterable_text_values_for_product_ids(all_product_ids, relevant_product_ids, language_code, auto_compile = true)
-    return {} if all_product_ids.empty?
-    
-    compile if auto_compile and compile_needed?
+  def self.filterable_text_values_for_product_ids(all_product_ids, relevant_product_ids, language_code)
+    return {} if all_product_ids.empty? or not ensure_loaded
     
     values_by_property_id = {}
     (@@text_filtering_index[language_code] || {}).each do |property_id, products|
@@ -105,14 +86,26 @@ class Indexer
     values_by_property_id
   end
   
-  def self.last_compile
-    @@last_compile
+  def self.load
+    raise "no such file: #{COMPILED_PATH}" unless File.exists?(COMPILED_PATH)
+    raise "file unreadable: #{COMPILED_PATH}" unless File.readable?(COMPILED_PATH)
+    
+    source_md5 = Digest::MD5.file(COMPILED_PATH).digest
+    return if source_md5 == @@last_loaded_md5
+    
+    File.open(COMPILED_PATH) do |f|
+      indexes = Marshal.load(f)
+      @@numeric_filtering_index = indexes[:numeric_filtering]
+      @@text_filtering_index = indexes[:text_filtering]
+      @@text_finding_index = indexes[:text_finding]
+    end
+    
+    @@last_loaded_md5 = source_md5
   end
   
-  def self.numeric_limits_for_product_ids(product_ids, auto_compile = true)
-    return {} if product_ids.empty?
+  def self.numeric_limits_for_product_ids(product_ids)
+    return {} if product_ids.empty? or not ensure_loaded
     
-    compile if auto_compile and compile_needed?
     limits_by_unit_by_property_id = {}
     
     @@numeric_filtering_index.each do |property_id, products_by_unit|
@@ -129,8 +122,25 @@ class Indexer
     limits_by_unit_by_property_id
   end
   
-  def self.product_ids_for_phrase(phrase, language_code, auto_compile = true)
-    compile if auto_compile and compile_needed?
+  def self.product_ids_for_filterable_property_ids(property_ids, language_code)
+    return [] if property_ids.empty? or not ensure_loaded
+    
+    product_ids = (@@text_filtering_index[language_code] || {}).values_at(*property_ids).map do |values_by_product_id|
+      (values_by_product_id || {}).keys
+    end.compact
+    
+    product_ids += @@numeric_filtering_index.values_at(*property_ids).map do |products_by_unit|
+      (products_by_unit || {}).values.map do |minmax_by_product_id|
+        minmax_by_product_id.keys
+      end
+    end
+    
+    product_ids.flatten.uniq
+  end
+  
+  def self.product_ids_for_phrase(phrase, language_code)
+    return [] if phrase.blank? or not ensure_loaded
+
     phrase.downcase.split(/\W+/).map do |word|
       (@@text_finding_index[language_code] || {})[word] || []
     end.inject { |union, product_ids| union & product_ids }
@@ -163,23 +173,6 @@ class Indexer
     nfi
   end
   
-  def self.compile_text_finding_index(records)
-    tfi = {}
-    records.each do |record|
-      next unless record.findable
-      
-      record.text_value.downcase.split(/\W+/).select { |word| word.size > 2 }.uniq.each do |word|
-        language = (tfi[record.language_code] ||= {})
-        (language[word] ||= []) << record.product_id        
-      end
-    end
-    
-    tfi.each do |language, words|
-      words.each { |word, product_ids| product_ids.uniq! }
-    end
-    tfi
-  end
-  
   def self.compile_text_filtering_index(records)
     tfi = {}
     records.each do |record|
@@ -194,6 +187,23 @@ class Indexer
       properties.each do |property_id, products|
         products.each { |product_id, values| values.uniq! }
       end
+    end
+    tfi
+  end
+  
+  def self.compile_text_finding_index(records)
+    tfi = {}
+    records.each do |record|
+      next unless record.findable
+      
+      record.text_value.downcase.split(/\W+/).select { |word| word.size > 2 }.uniq.each do |word|
+        language = (tfi[record.language_code] ||= {})
+        (language[word] ||= []) << record.product_id        
+      end
+    end
+    
+    tfi.each do |language, words|
+      words.each { |word, product_ids| product_ids.uniq! }
     end
     tfi
   end

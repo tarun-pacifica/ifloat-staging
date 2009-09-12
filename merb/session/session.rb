@@ -50,12 +50,12 @@ module Merb
     
     def ensure_cached_find(find_id, retrieve = true) # TODO: review all uses to prevent retrieval where unnecessary
       raise NotFound unless cached_find_ids.include?(find_id)
-      retrieve ? CachedFind.get(find_id) : nil
+      retrieve ? (CachedFind.get(find_id) or raise NotFound) : nil
     end
     
     def ensure_future_purchase(purchase_id) # TODO: review all uses to prevent retrieval where unnecessary
       raise NotFound unless future_purchase_ids.include?(purchase_id)
-      FuturePurchase.get(purchase_id)
+      FuturePurchase.get(purchase_id) or raise NotFound
     end
     
     def future_purchases

@@ -36,20 +36,41 @@ class PropertyDefinition
   property :sequence_number, Integer, :nullable => false
   
   belongs_to :property_type
-  has n, :filters
   has n, :values, :class_name => "PropertyValue"
   has n, :translations
   
   validates_present :property_type_id
   
-  def self.friendly_name_sections(property_ids, language_code)
+  # TODO: spec
+  def self.definitions_by_property_id(properties, language_code)
+    return {} if properties.empty?
+    
+    query =<<-EOS
+      SELECT pd.id, pvd.value, pvd.definition
+      FROM property_value_definitions pvd
+        INNER JOIN property_types pt ON pvd.property_type_id = pt.id
+        INNER JOIN property_definitions pd ON pt.id = pd.property_type_id
+      WHERE pvd.language_code = ?
+        AND pd.id IN ?
+    EOS
+    
+    dbpi = {}
+    repository.adapter.query(query, language_code, properties.map { |p| p.id }).each do |record|
+      (dbpi[record.id] ||= {})[record.value] = record.definition
+    end
+    dbpi
+  end
+  
+  def self.friendly_name_sections(properties, language_code)
+    property_ids = properties.map { |property| property.id }
+    
     translated_names = {}
-    Translation.all(:language_code => language_code, :property_definition_id => property_ids).each do |translation|
+    Translation.all(:property_definition_id => property_ids, :language_code => language_code).each do |translation|
       translated_names[translation.property_definition_id] = translation.value
     end
     
     friendly_names = {}
-    PropertyDefinition.all(:id => property_ids).each do |property|
+    properties.each do |property|
       translation = translated_names[property.id]
       friendly_names[property.id] = (translation || property.name).split(":")
     end
@@ -70,10 +91,6 @@ class PropertyDefinition
       end
     end
     urls
-  end
-    
-  def friendly_name_sections(language_code)
-    PropertyDefinition.friendly_name_sections([id], language_code)[id]
   end
   
   def date?

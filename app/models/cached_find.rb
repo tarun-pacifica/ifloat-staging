@@ -25,12 +25,12 @@ class CachedFind
   property :language_code, String, :nullable => false, :format => /^[A-Z]{3}$/
   property :specification, String, :size => 255
   property :description, String, :size => 255
+  property :filters, Object, :writer => :protected, :lazy => false
   property :accessed_at, DateTime
   property :invalidated, Boolean, :default => true
   
   belongs_to :user
   has n, :attachments
-  has n, :filters
   
   # TODO: spec
   validates_with_block :language_code, :unless => :new_record? do
@@ -52,7 +52,6 @@ class CachedFind
   
   before :destroy do
     attachments.destroy!
-    filters.each { |filter| filter.destroy }
   end
   
   before :valid? do
@@ -86,96 +85,136 @@ class CachedFind
   
   def execute!
     raise "cannot execute invalid CachedFind" unless valid?
-    raise "cannot execute unsaved CachedFind" if new_record?
     
-    existing_filters = NumericFilter.all(:cached_find_id => id).hash_by(:property_definition_id)
-    existing_filters.update(TextFilter.all(:cached_find_id => id).hash_by(:property_definition_id))
+    text_property_ids = Indexer.filterable_text_property_ids_for_product_ids(all_product_ids, language_code)
+    numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(all_product_ids)
     
-    to_save = []
-    new_property_ids = []
+    properties = PropertyDefinition.all(:id => text_property_ids + numeric_limits_by_property_id.keys)
+    PropertyType.all(:id => properties.map { |p| p.property_type_id }).map
+    friendly_names = PropertyDefinition.friendly_name_sections(properties, language_code)
     
-    Indexer.filterable_text_property_ids_for_product_ids(all_product_ids, language_code).each do |property_id|
-      new_property_ids << property_id      
-      filter = existing_filters[property_id]
-      to_save << TextFilter.new(:cached_find_id => id, :property_definition_id => property_id) if filter.nil?
+    filters = []
+    properties.each do |property|
+      seq_num = property.sequence_number
+      friendly_name = friendly_names[property.id]
+      type = property.property_type.core_type
+      
+      data = []
+      if ["currency", "date", "numeric"].include?(type)
+        limits = numeric_limits_by_property_id[property.id]
+        data += numeric_filter_choose(nil, nil, nil, limits)
+        data << limits
+      end
+      
+      filters << [property.id, seq_num, friendly_name, type, data]
     end
-    
-    Indexer.numeric_limits_for_product_ids(all_product_ids).each do |property_id, limits_by_unit|
-      new_property_ids << property_id      
-      filter = existing_filters[property_id]
-      filter = NumericFilter.new(:cached_find_id => id, :property_definition_id => property_id) if filter.nil?
-      filter.limits = limits_by_unit
-      to_save << filter if filter.dirty?
-    end
-    
-    # TODO: spec this functionality
-    existing_filters.each { |property_id, filter| filter.destroy unless new_property_ids.include?(property_id) }
-    to_save.each { |filter| filter.save }
+    self.filters = filters.sort_by { |filter| filter[1] }
     
     self.invalidated = false
     save
   end
   
   # TODO: spec
-  def filter_values(lookup_exclusions = true)
-    filters_by_property_id = filters.hash_by(:property_definition_id)
+  def filter!(property_id, operation, params)
+    property_id, seq_num, friendly_name, type, data = filters.assoc(property_id)
+    return if property_id.nil?
     
-    text_values_by_fid = {}
+    case type
+    when "currency", "date", "numeric"
+      min, max = params.values_at("min", "max").map { |v| v.to_f }
+      data[0..2] = numeric_filter_choose(min, max, params["unit"], data.last)
+    when "text"
+      value = params["value"]
+      case operation
+      when "exclude"
+        data << value unless data.include?(value) or not text_filter_words(property_id).include?(value)
+      when "include"
+        data.delete(value)
+      when "include_only"
+        data.replace(text_filter_words(property_id))
+        data.delete(value)
+      end
+    end
+    
+    self.filters = filters
+    save
+  end
+  
+  # TODO: spec
+  def filter_values
     fpids = filtered_product_ids
-    Indexer.filterable_text_values_for_product_ids(all_product_ids, fpids, language_code).each do |property_id, all_relevant|
-      filter_id = filters_by_property_id[property_id].id
-      text_values_by_fid[filter_id] = (all_relevant << [])
-    end
+    text_values_by_property_id = Indexer.filterable_text_values_for_product_ids(all_product_ids, fpids, language_code)
+    numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(fpids)
     
-    if lookup_exclusions
-      filter_ids = filters.map { |filter| filter.id }
-      TextFilterExclusion.all(:text_filter_id => filter_ids).each do |exclusion|
-        text_values_by_fid[exclusion.text_filter_id].last << exclusion.value
+    relevant_values_by_property_id = {}
+    filters.each do |property_id, seq_num, friendly_name, type, data|
+      relevant_values = (type == "text" ? text_values_by_property_id[property_id].last : nil)
+      
+      if filter_fresh?(property_id, seq_num, friendly_name, type, data)
+        case type
+        when "currency", "date", "numeric" then next unless numeric_limits_by_property_id.has_key?(property_id)
+        when "text" then next if relevant_values.empty?
+        end
       end
+      
+      relevant_values_by_property_id[property_id] = relevant_values
     end
     
-    numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(fpids) 
-    relevant_values_by_fid = {}
-    filters.each do |filter|
-      relevant_values = nil
-      if filter.text?
-        relevant_values = text_values_by_fid[filter.id][1]
-        next if filter.fresh? and relevant_values.empty?
-      else
-        next if filter.fresh? and not numeric_limits_by_property_id.has_key?(filter.property_definition_id)
-      end
-
-      relevant_values_by_fid[filter.id] = relevant_values
-    end
-    
-    [text_values_by_fid, relevant_values_by_fid]
+    [text_values_by_property_id, relevant_values_by_property_id]
   end
   
   def filtered_product_ids
     return [] if all_product_count.zero?
     
-    used_filters = filters.select { |filter| not filter.fresh? }
+    used_filters = filters.select { |filter| not filter_fresh?(*filter) }
     return all_product_ids if used_filters.empty?
     
     # TODO: spec examples where this kicks in
-    used_filter_pdids = used_filters.map { |filter| filter.property_definition_id }
-    relevant_product_ids = (all_product_ids & Indexer.product_ids_for_filterable_property_ids(used_filter_pdids, language_code))
+    property_ids = used_filters.transpose.first
+    relevant_product_ids = (all_product_ids & Indexer.product_ids_for_filterable_property_ids(property_ids, language_code))
     
-    text_filters, numeric_filters = used_filters.partition { |filter| filter.text? }
+    text_filters, numeric_filters = used_filters.partition { |filter| filter[3] == "text" }
     excluded_product_ids = Indexer.excluded_product_ids_for_numeric_filters(numeric_filters)
     excluded_product_ids += Indexer.excluded_product_ids_for_text_filters(text_filters, language_code)
     relevant_product_ids - excluded_product_ids
-  end
-  
-  # TODO: spec
-  def reset
-    filters.all.each { |filter| filter.destroy }
-    execute!
   end
   
   def spec_date
     if accessed_at.nil? then specification
     else "#{specification} (#{accessed_at.strftime('%Y/%m/%d %H:%M:%S')})"
     end
+  end
+  
+  
+  private
+  
+  def filter_fresh?(property_id, seq_num, friendly_name, type, data)
+    case type
+    when "currency", "date", "numeric"
+      min, max, unit, limits = data
+      [min, max, unit] == numeric_filter_choose(nil, nil, unit, limits)
+    when "text"
+      data.empty?
+    end
+  end
+  
+  def numeric_filter_choose(min, max, unit, limits)
+    unless limits.has_key?(unit)
+      unit = limits.keys.sort_by { |unit| unit.to_s }.first
+      min, max = nil, nil
+    end
+    
+    min_limit, max_limit = limits[unit]
+    
+    min = min_limit if min.nil?
+    max = max_limit if max.nil?    
+    min, max = [min, max].map { |m| [[m, min_limit].max, max_limit].min }.sort
+    
+    [min, max, unit]
+  end
+  
+  def text_filter_words(property_id)
+    words_by_property_id = Indexer.filterable_text_values_for_product_ids(all_product_ids, [], language_code, property_id)
+    words_by_property_id[property_id].first
   end
 end

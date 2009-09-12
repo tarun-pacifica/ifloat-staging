@@ -344,9 +344,9 @@ function number_format(values, unit, date) {
 
 function num_filter_choose(filter) {
 	var f = filter[0];
-	var url = "/cached_finds/" + f.find_id + "/filters/" + f.filter_id + "/choose";
+	var url = "/cached_finds/" + f.find_id + "/filter/" + f.property_id;
 	var values = f.values[f.unit];
-	filter_queue_add(url, {min: values[0], max: values[1], unit: f.unit});
+	filter_queue_add(url, {operation: "choose", min: values[0], max: values[1], unit: f.unit});
 }
 
 function num_filter_handle_input(i) {
@@ -721,11 +721,10 @@ function text_filter_handle_check(checkbox, select_one) {
 	var filter = $(checkbox).parents(".filter");
 	var f = filter[0];
 	
-	var url = "/cached_finds/" + f.find_id + "/filters/" + f.filter_id;
-	if(select_one) url += "/include_only"
-	else url += (checkbox.checked ? "/include" : "/exclude");
+	var url = "/cached_finds/" + f.find_id + "/filter/" + f.property_id;
+	var operation = (select_one ? "include_only" : (checkbox.checked ? "include" : "exclude"));
 	
-	filter_queue_add(url, {value: checkbox.value});
+	filter_queue_add(url, {operation: operation, value: checkbox.value});
 	text_filter_update_summary(filter);
 }
 

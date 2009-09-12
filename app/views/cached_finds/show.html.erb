@@ -32,7 +32,11 @@
 	<% end %>
 	<a href=<%= (resource(@find) + "/reset").inspect %>>reset all filters</a>
 	<h1>Click to filter by...</h1>
-	<table> <%= partial :filter, :with => @filters %> </table>
+	<table>
+		<% @filters.each do |filter| %>
+		<%= partial :filter, :filter => filter %>
+		<% end %>
+	</table>
 </div>
 
 <div id="cached_find_output">

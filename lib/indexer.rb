@@ -34,14 +34,14 @@ module Indexer
   def self.excluded_product_ids_for_numeric_filters(filters)
     return [] if filters.empty? or not ensure_loaded
     
-    filters_by_pid = filters.hash_by(:property_definition_id)
+    filters_by_pid = filters.hash_by(:first)
     
     product_ids = []
     @@numeric_filtering_index.each do |property_id, products_by_unit|
       filter = filters_by_pid[property_id]
       next if filter.nil?
       
-      min, max, unit = filter.chosen
+      min, max, unit, limits = filter.last
       (products_by_unit[unit] || {}).each do |product_id, min_max|
         product_ids << product_id if min > min_max.last or max < min_max.first
       end
@@ -52,16 +52,14 @@ module Indexer
   def self.excluded_product_ids_for_text_filters(filters, language_code)
     return [] if filters.empty? or not ensure_loaded
     
-    filter_ids = filters.map { |filter| filter.id }
-    exclusions_by_fid = TextFilterExclusion.all(:text_filter_id => filter_ids).group_by { |tfe| tfe.text_filter_id }
-    filters_by_pid = filters.hash_by(:property_definition_id)
+    filters_by_pid = filters.hash_by(:first)
     
     product_ids = []
     (@@text_filtering_index[language_code] || {}).each do |property_id, products|
       filter = filters_by_pid[property_id]
       next if filter.nil?
       
-      exclusions = exclusions_by_fid[filter.id].map { |tfe| tfe.value }
+      exclusions = filter.last
       products.each { |product_id, values| product_ids << product_id unless (values & exclusions).empty? }
     end
     product_ids.uniq
@@ -75,11 +73,12 @@ module Indexer
     end.compact
   end
   
-  def self.filterable_text_values_for_product_ids(all_product_ids, relevant_product_ids, language_code)
+  def self.filterable_text_values_for_product_ids(all_product_ids, relevant_product_ids, language_code, single_property_id = nil)
     return {} if all_product_ids.empty? or not ensure_loaded
     
     values_by_property_id = {}
     (@@text_filtering_index[language_code] || {}).each do |property_id, products|
+      next unless single_property_id.nil? or single_property_id == property_id
       all_values = products.values_at(*all_product_ids).flatten.compact.uniq.sort
       relevant_values = products.values_at(*relevant_product_ids).flatten.uniq.compact
       values_by_property_id[property_id] = [all_values, relevant_values] unless all_values.empty?
@@ -173,7 +172,7 @@ module Indexer
       units = (nfi[record.property_definition_id] ||= {})
       products = (units[record.unit] ||= {})
       min_max = (products[record.product_id] || [])
-      products[record.product_id] = ([record.min_value, record.max_value] + min_max).minmax
+      products[record.product_id] = ([record.min_value.to_f, record.max_value.to_f] + min_max).minmax
     end
     nfi
   end

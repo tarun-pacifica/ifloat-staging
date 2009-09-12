@@ -4,6 +4,9 @@ module HouseKeeping
       # TODO: exception if already running
       expire_old_sessions
       # TODO: cached_find anonimization (may not need to delete filters if they are subsumed into cached finds)
+      # TODO: tidy up obsolete assets
+      # TODO: tidy up obsolete controller errors
+      # TODO: Purchase.abandon_obsolete
     rescue Exception => e
       p e
       # TODO: send mail

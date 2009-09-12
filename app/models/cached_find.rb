@@ -25,8 +25,6 @@ class CachedFind
   property :language_code, String, :nullable => false, :format => /^[A-Z]{3}$/
   property :specification, String, :size => 255
   property :description, String, :size => 255
-  # TODO: consider making this a proper DB table rather than a flattened list (this isn't scaling)
-  property :product_id_list, Text, :lazy => false
   property :accessed_at, DateTime
   property :invalidated, Boolean, :default => true
   
@@ -79,7 +77,7 @@ class CachedFind
   end
   
   def all_product_ids
-    product_id_list.to_s.split(",").map { |product_id| product_id.to_i }
+    @all_product_ids ||= Indexer.product_ids_for_phrase(specification, language_code)
   end
   
   def ensure_valid
@@ -90,22 +88,19 @@ class CachedFind
     raise "cannot execute invalid CachedFind" unless valid?
     raise "cannot execute unsaved CachedFind" if new_record?
     
-    product_ids = Indexer.product_ids_for_phrase(specification, language_code)
-    self.product_id_list = product_ids.join(",")
-    
     existing_filters = NumericFilter.all(:cached_find_id => id).hash_by(:property_definition_id)
     existing_filters.update(TextFilter.all(:cached_find_id => id).hash_by(:property_definition_id))
     
     to_save = []
     new_property_ids = []
     
-    Indexer.filterable_text_property_ids_for_product_ids(product_ids, language_code).each do |property_id|
+    Indexer.filterable_text_property_ids_for_product_ids(all_product_ids, language_code).each do |property_id|
       new_property_ids << property_id      
       filter = existing_filters[property_id]
       to_save << TextFilter.new(:cached_find_id => id, :property_definition_id => property_id) if filter.nil?
     end
     
-    Indexer.numeric_limits_for_product_ids(product_ids).each do |property_id, limits_by_unit|
+    Indexer.numeric_limits_for_product_ids(all_product_ids).each do |property_id, limits_by_unit|
       new_property_ids << property_id      
       filter = existing_filters[property_id]
       filter = NumericFilter.new(:cached_find_id => id, :property_definition_id => property_id) if filter.nil?

@@ -86,11 +86,15 @@ class Indexer
     values_by_property_id
   end
   
+  def self.last_loaded_md5
+    @@last_loaded_md5
+  end
+  
   def self.load
     raise "no such file: #{COMPILED_PATH}" unless File.exists?(COMPILED_PATH)
     raise "file unreadable: #{COMPILED_PATH}" unless File.readable?(COMPILED_PATH)
     
-    source_md5 = Digest::MD5.file(COMPILED_PATH).digest
+    source_md5 = Digest::MD5.file(COMPILED_PATH).hexdigest
     return if source_md5 == @@last_loaded_md5
     
     File.open(COMPILED_PATH) do |f|

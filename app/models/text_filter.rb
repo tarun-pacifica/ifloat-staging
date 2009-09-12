@@ -44,13 +44,6 @@ class TextFilter < Filter
     true
   end
   
-  def valid_exclusion?(value)
-    product_ids, language = cached_find.all_product_ids, cached_find.language_code
-    values_by_property_id = Indexer.filterable_text_values_for_product_ids(product_ids, [], language)
-    all, relevant = values_by_property_id[property_definition_id]
-    all.include?(value)
-  end
-  
   
   private
   

@@ -139,7 +139,7 @@ module Indexer
       end
     end
     
-    product_ids.flatten.uniq
+    product_ids.inject { |union, product_ids| product_ids.empty? ? union : (union & product_ids) }
   end
   
   def self.product_ids_for_phrase(phrase, language_code)

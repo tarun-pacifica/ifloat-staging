@@ -10,7 +10,7 @@ module Merb
       <<-EOS
       <a class="product" id="prod_#{product_id}" href="/products/#{product_id}">
       	<img src=#{image_url.inspect} onmouseover="prod_list_image_zoom(event)" onmouseout="prod_list_image_unzoom(this)"/>
-      	<%= product_titles(product_id, values_by_name) %>
+      	#{product_titles(product_id, values_by_name)}
       	<p>#{values_by_name["marketing:summary"]}</p>
       	<hr />
       </a>

@@ -1,9 +1,9 @@
 .*
 !.gitignore
 *~
+caches/*
 doc/*
 !doc/README
 !doc/rdoc/
 log/
 public/assets
-*.dump

@@ -1,5 +1,5 @@
 class Indexer
-  COMPILED_PATH = "lib/indexer.dump"
+  COMPILED_PATH = "caches/indexer.marshal"
   
   @@last_loaded_md5 = nil
   @@numeric_filtering_index = {}
@@ -15,6 +15,7 @@ class Indexer
         :text_finding => compile_text_finding_index(records)
       }
       
+      FileUtils.mkpath(File.dirname(COMPILED_PATH))
       f.write Marshal.dump(indexes)
       File.delete(COMPILED_PATH) if File.exists?(COMPILED_PATH)
       File.link(f.path, COMPILED_PATH)

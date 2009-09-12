@@ -1,27 +1,46 @@
 class Products < Application
+  BATCH_CACHE_DIR = "caches/products_batch"
+  
   def batch(ids)
     product_ids = ids.split("_").map { |id| id.to_i }.uniq[0..99]
-    values_by_property_by_product_id, auto_titles_by_product_id = Product.display_values(product_ids, session.language)
     
-    @product_values = auto_titles_by_product_id
+    cache_dir = BATCH_CACHE_DIR / Indexer.last_loaded_md5
+    Dir[BATCH_CACHE_DIR / "*"].each { |dir| FileUtils.rm_r(dir) unless dir == cache_dir }
+    FileUtils.mkpath(cache_dir)
     
-    values_by_property_by_product_id.each do |product_id, values_by_property|
-      @product_values[product_id]["marketing:summary"] = "SUMMARY"
+    html_by_product_id = {}
+    product_ids.each do |product_id|
+      path = cache_dir / "#{session.language}_#{product_id}.html"
+      html_by_product_id[product_id] = File.read(path) if File.exists?(path)
+    end
+    
+    missing_ids = (product_ids - html_by_product_id.keys)
+    return html_by_product_id.values.join("\n") if missing_ids.empty?
+    
+    summary_property = PropertyDefinition.first(:name => "marketing:summary")
+    values_by_property_by_product_id, auto_titles_by_product_id = Product.display_values(missing_ids, session.language)
+    
+    image_urls = Hash.new("/images/no_image.png")
+    Attachment.product_role_assets(product_ids, false).each do |product_id, assets_by_role|
+      product_images = assets_by_role["image"]
+      image_urls[product_id] = product_images.first.url unless product_images.nil?
+    end
+    
+    missing_ids.each do |product_id|
+      values_by_name = (auto_titles_by_product_id[product_id] || {})
+      values_by_property = (values_by_property_by_product_id[product_id] || {})
+      values_by_name["marketing:summary"] = (values_by_property[summary_property] || []).first
+      html = html_by_product_id[product_id] = product_summary(product_id, values_by_name, image_urls[product_id])
       
-      values_by_property.each do |property, values|
-        next unless property.name == "marketing:summary"
-        @product_values[product_id][property.name] = values.first
-        break
+      path = cache_dir / "#{session.language}_#{product_id}.html"
+      Tempfile.open(File.basename(path)) do |f|
+        f.write html
+        File.delete(path) if File.exists?(path)
+        File.link(f.path, path)
       end
     end
     
-    @image_urls = Hash.new("/images/no_image.png")
-    Attachment.product_role_assets(product_ids, false).each do |product_id, assets_by_role|
-      product_images = assets_by_role["image"]
-      @image_urls[product_id] = product_images.first.url unless product_images.nil?
-    end
-    
-    render :layout => false
+    html_by_product_id.values.join("\n")
   end
   
   def purchase_buttons(id)

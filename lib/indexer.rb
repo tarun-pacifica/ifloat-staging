@@ -1,4 +1,4 @@
-class Indexer
+module Indexer
   COMPILED_PATH = "caches/indexer.marshal"
   
   @@last_loaded_md5 = nil

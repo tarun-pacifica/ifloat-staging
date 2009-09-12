@@ -1,4 +1,4 @@
-class Password
+module Password
   FORMAT = /^\{SSHA\}(.+?)$/
   
   def self.ensure(pass)

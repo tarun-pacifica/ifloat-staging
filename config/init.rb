@@ -6,13 +6,8 @@ use_template_engine :erb
  
 Merb::Config.use do |c|
   c[:use_mutex] = false
-  c[:session_store] = 'memory'  # can also be 'cookie', 'memcache', 'container', 'datamapper'
-  c[:memory_session_ttl] = Merb::Const::WEEK
-  # TODO: switch to a DB based session store
-  
-  # cookie session store configuration
-  # c[:session_secret_key]  = '73b8ddd39dfcb0589db9e62307f42a6955e22640'  # required for cookie session store
-  # c[:session_id_key] = '_pristine_session_id' # cookie session id key, defaults to "_session_id"
+  c[:session_store] = "datamapper"
+  c[:session_ttl] = Merb::Const::WEEK
 end
  
 Merb::BootLoader.before_app_loads do

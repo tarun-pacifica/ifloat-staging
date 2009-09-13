@@ -26,7 +26,8 @@ if graeme.nil?
   graeme = User.new(:name => "Graeme Clark",
                     :nickname => "Graeme",
                     :login => "graeme.clark@att.biz",
-                    :password => Password.hash("TND7%$58"))
+                    :password => Password.hash("TND7%$58"),
+                    :admin => true)
   whiny_save(graeme)
 end
 

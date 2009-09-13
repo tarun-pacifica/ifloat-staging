@@ -13,6 +13,13 @@
 		<% unless @blog.primary_url.nil? %>
 		<p class="link"> <a href="http://<%= @blog.primary_url %>"><%= @blog.primary_url %></a> </p>
 		<% end %>
+		<% unless @blog.call_to_action.nil? %>
+		<%= form :action => resource(:cached_finds) do %>
+			<%= hidden_field :language_code, :value => session.language %>
+			<%= hidden_field :specification, :value => @blog.user.name %>
+			<p class="link"> <%= submit @blog.call_to_action, :id => "submit" %> </p>
+		<% end =%>
+		<% end %>
 	</div>
 	
 	<div id="blog_articles">

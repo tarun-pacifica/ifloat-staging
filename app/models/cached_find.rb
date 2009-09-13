@@ -122,7 +122,9 @@ class CachedFind
     case type
     when "currency", "date", "numeric"
       min, max = params.values_at("min", "max").map { |v| v.to_f }
-      data[0..2] = numeric_filter_choose(min, max, params["unit"], data.last)
+      unit = params["unit"]
+      unit = nil if unit.blank?
+      data[0..2] = numeric_filter_choose(min, max, unit, data.last)
     when "text"
       value = params["value"]
       case operation

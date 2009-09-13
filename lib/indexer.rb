@@ -37,12 +37,14 @@ module Indexer
     filters_by_pid = filters.hash_by(:first)
     
     product_ids = []
-    @@numeric_filtering_index.each do |property_id, products_by_unit|
+    @@numeric_filtering_index.each do |property_id, units_by_product_id|
       filter = filters_by_pid[property_id]
       next if filter.nil?
       
       min, max, unit, limits = filter.last
-      (products_by_unit[unit] || {}).each do |product_id, min_max|
+      units_by_product_id.each do |product_id, min_max_by_unit|
+        min_max = min_max_by_unit[unit]
+        next if min_max.nil?
         product_ids << product_id if min > min_max.last or max < min_max.first
       end
     end
@@ -112,14 +114,15 @@ module Indexer
     
     limits_by_unit_by_property_id = {}
     
-    @@numeric_filtering_index.each do |property_id, products_by_unit|
-      products_by_unit.each do |unit, min_max_by_product_id|
-        relevant_product_ids = (product_ids & min_max_by_product_id.keys)
-        next if relevant_product_ids.empty?
-        
-        minima, maxima = min_max_by_product_id.values_at(*relevant_product_ids).transpose
-        limits_by_unit = (limits_by_unit_by_property_id[property_id] ||= {})
-        limits_by_unit[unit] = [minima.min, maxima.max]
+    @@numeric_filtering_index.each do |property_id, units_by_product_id|
+      relevant_product_ids = (product_ids & units_by_product_id.keys)
+      next if relevant_product_ids.empty?
+      
+      limits_by_unit = limits_by_unit_by_property_id[property_id] = {}
+      units_by_product_id.values_at(*relevant_product_ids).each do |min_max_by_unit|
+        limits_by_unit.update(min_max_by_unit) do |unit, old_min_max, new_min_max|
+          (old_min_max + new_min_max).minmax
+        end
       end
     end
     
@@ -129,17 +132,10 @@ module Indexer
   def self.product_ids_for_filterable_property_ids(property_ids, language_code)
     return [] if property_ids.empty? or not ensure_loaded
     
-    product_ids = (@@text_filtering_index[language_code] || {}).values_at(*property_ids).map do |values_by_product_id|
-      (values_by_product_id || {}).keys
-    end.compact
-    
-    product_ids += @@numeric_filtering_index.values_at(*property_ids).map do |products_by_unit|
-      (products_by_unit || {}).values.map do |minmax_by_product_id|
-        minmax_by_product_id.keys
-      end
-    end
-    
-    product_ids.inject { |union, product_ids| product_ids.empty? ? union : (union & product_ids) }
+    values_by_product_ids = (@@text_filtering_index[language_code] || {}).values_at(*property_ids)
+    values_by_product_ids += @@numeric_filtering_index.values_at(*property_ids)
+    product_id_sets = values_by_product_ids.compact.map { |values_by_product_id| values_by_product_id.keys }
+    product_id_sets.inject { |union, product_ids| product_ids.empty? ? union : (union & product_ids) }
   end
   
   def self.product_ids_for_phrase(phrase, language_code)
@@ -169,10 +165,10 @@ module Indexer
     
     nfi = {}
     repository.adapter.query(query, true, "GBR-02934378").each do |record|
-      units = (nfi[record.property_definition_id] ||= {})
-      products = (units[record.unit] ||= {})
-      min_max = (products[record.product_id] || [])
-      products[record.product_id] = ([record.min_value.to_f, record.max_value.to_f] + min_max).minmax
+      products = (nfi[record.property_definition_id] ||= {})
+      units = (products[record.product_id] ||= {})
+      min_max = (units[record.unit] || [])
+      units[record.unit] = ([record.min_value.to_f, record.max_value.to_f] + min_max).minmax
     end
     nfi
   end

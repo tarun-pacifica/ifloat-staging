@@ -1,5 +1,9 @@
 class Tools < Application
-  # TODO: protect as admin area
+  before :ensure_authenticated
+  
+  def ensure_authenticated
+    redirect "/" unless Merb.environment == "development" or session.admin?
+  end
   
   def icons
     @properties = PropertyDefinition.all.sort_by { |property| property.sequence_number }

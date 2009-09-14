@@ -4,6 +4,7 @@ Merb::Router.prepare do
   # TODO: remove for launch
   match('/prelaunch/:action').to(:controller => 'prelaunch')
   
+  match('/tools/caches/:basename.:ext').to(:controller => 'tools', :action => 'caches')
   match('/tools/:action').to(:controller => 'tools')
   
   resources :articles

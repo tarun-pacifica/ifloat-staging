@@ -1,4 +1,4 @@
-# merb -i -r "lib/import_core_data"
+# merb -i -r lib/import_core_data.rb
 
 require "lib/parsers/abstract"
 
@@ -407,5 +407,8 @@ report = report.join("\n")
 ImportEvent.create(:succeeded => true, :report => report)
 mail(:success, report)
 
+puts "=== Compiling Indexes ==="
+start = Time.now
 Indexer.compile
 CachedFind.all.update!(:invalidated => true)
+puts "#{'%6.2f' % (Time.now - start)}s : #{Indexer::COMPILED_PATH}"

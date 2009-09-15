@@ -80,7 +80,7 @@ class FuturePurchases < Application
     @purchases = session.future_purchases    
     product_ids = @purchases.map { |purchase| purchase.definitive_product_id }
     unused_values, @auto_titles_by_product_id = Product.display_values(product_ids, session.language)
-    render :layout => false
+    partial :purchase, :with => @purchases
   end
   
   def update(id)

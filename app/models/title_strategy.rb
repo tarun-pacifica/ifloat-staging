@@ -49,7 +49,7 @@ class TitleStrategy
     klass = nil
     values_by_property.each do |property, values|
       properties_by_name[property.name] = property
-      klass = values.first if property.name == "reference:class"
+      klass = values.first.to_s if property.name == "reference:class"
     end
     
     strategy = @@cache[klass]

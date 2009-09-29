@@ -401,7 +401,7 @@ function num_filter_update_context_and_summary(filter) {
 	var summaries = [];
 	
 	for(unit in f.values) {
-		var summary = number_format(f.values[unit], unit, f.date);
+		var summary = number_format(f.values[unit], unit, f.date_filter);
 		if (unit == f.unit) summary = "<strong>" + summary + "</strong>";		
 		summaries.push(summary);
 	}

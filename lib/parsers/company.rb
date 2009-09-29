@@ -10,6 +10,13 @@ class CompanyParser < AbstractParser
     [ImportObject.new(Company, attributes)]
   end
   
+  def parse_field(head, value, fields)
+    return super unless head == "reference"
+    raise "invalid format: #{value.inspect}" unless value =~ Company::REFERENCE_FORMAT
+    raise "longer than 50 characters: #{value.inspect}" unless value.size <= 50
+    value
+  end
+  
   def reject_blank_value?(head)
     ESSENTIAL_HEADERS[0..1].include?(head)
   end

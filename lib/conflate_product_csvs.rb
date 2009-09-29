@@ -4,6 +4,10 @@ COMPILED_CSV_PATH = "caches/all_products.csv"
 COMPILED_PATH = "caches/all_products.marshal"
 CSV_REPO = "../ifloat_csvs"
 
+[COMPILED_CSV_PATH, COMPILED_PATH].each do |path|
+  File.delete(path) if File.exist?(path)
+end
+
 properties_by_name = PropertyDefinition.all.hash_by { |property| property.name }
 
 universal_columns = {}

@@ -52,8 +52,6 @@ class ImportSet
   end
   
   def add(object)
-    raise "add cannot be called once import has been" if @objects_by_pk_by_class.nil?
-    
     @objects << object
     
     pk = object.primary_key = object.attributes.values_at(*PRIMARY_KEYS[object.klass])
@@ -84,6 +82,7 @@ class ImportSet
   
   def import
     @objects_by_pk_by_class = nil
+    def add; raise "add cannot be called once import has been"; end
     
     classes = []
     objects_by_class = {}

@@ -54,12 +54,12 @@
 		
 		<% summary, features, description = @non_data_values.values_at("marketing:summary", "marketing:feature_list", "marketing:description").map { |v| v.to_s } %>
 		
-		<% unless summary.nil? %>
+		<% unless summary.blank? %>
 		<h3>Summary</h3>
 		<p><%= summary %></p>
 		<% end %>
 		
-		<% unless features.nil? %>
+		<% unless features.blank? %>
 		<h3>Features</h3>
 		<ul>
 			<% features.split("\n").each do |feature| %>
@@ -68,7 +68,7 @@
 		</ul>
 		<% end %>
 	
-		<% unless description.nil? %>
+		<% unless description.blank? %>
 		<h3>Description</h3>
 		<% description.split("\n").each do |paragraph| %>
 		<p><%= paragraph %></p>

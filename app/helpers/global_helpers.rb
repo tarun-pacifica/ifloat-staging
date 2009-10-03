@@ -51,16 +51,28 @@ module Merb
     end
 
     def title_js(dom_id, parts)
-      js_parts = parts.map do |part|
+      js_parts = []
+      
+      last_part = nil
+      parts.each do |part|
         case part
-        when "SEP" then '"&mdash;"'
-        when NumericPropertyValue then number_format_js(part)
-        else part.to_s.inspect
+        when "SEP"
+          js_parts << '" &mdash; "'
+        when NumericPropertyValue
+          different_property = (last_part.nil? or
+            not last_part.is_a?(NumericPropertyValue) or
+            last_part.property_definition_id != part.property_definition_id)
+          different_sequence = (different_property or last_part.sequence_number != part.sequence_number)
+          js_parts << (different_property ? '" "' : (different_sequence ? '", "' : '"_"'))
+          js_parts << number_format_js(part)
+        else
+          js_parts << " #{part} ".inspect
         end
+        last_part = part
       end
       
       '<script type="text/javascript" charset="utf-8">' +
-      '$("#' + dom_id.to_s + '").html([' + js_parts.join(", ") + '].join(" "));' +
+      '$("#' + dom_id.to_s + '").html([' + js_parts.join(", ") + '].join(""));' +
       '</script>'
     end
   end

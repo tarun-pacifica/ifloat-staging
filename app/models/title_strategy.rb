@@ -97,8 +97,9 @@ class TitleStrategy
   
   private
   
+  # TODO: pre-generate all titles from incoming CSVs - may need to change how formatting propagates
   def self.ensure_cache
-    return if @@indexer_md5 == Indexer.last_loaded_md5
+    return unless @@indexer_md5.nil? or @@indexer_md5 != Indexer.last_loaded_md5
     
     @@cache.clear
     TitleStrategy.all.each do |strategy|

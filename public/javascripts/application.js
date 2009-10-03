@@ -335,7 +335,7 @@ function number_format(values, unit, date) {
 		if(v) formatted_values.push(date ? date_format(v) : fraction_helper_format(v));
 	}
 	
-	var result = formatted_values.join(" &ndash; ");
+	var result = formatted_values.join("&ndash;");
 	if(unit) result += " " + unit;	
 	return result;
 }

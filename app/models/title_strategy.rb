@@ -2,7 +2,7 @@
 #
 # Title auto-construction in the system is handled by means of TitleStrategy objects. These strategies take the forms of very simple build instructions per auto-constructed title (of which there are four per product). The strategy employed for a given product is entirely dependent on it's class. One TitleStrategy may apply to many classes but each class has either no or one TitleStrategy.
 #
-# For performance reasons, the entire suite of strategies is cached inside the class and only updated every EXPIRY_TIME seconds.
+# For performance reasons, the entire suite of strategies is cached inside the class and only updated every time the Indexer cache changes.
 #
 # === Sample Data
 #
@@ -16,10 +16,8 @@
 class TitleStrategy
   include DataMapper::Resource
   
-  EXPIRY_TIME = 5.minutes
-  
   @@cache = {}
-  @@cache_time = nil
+  @@indexer_md5 = nil
   
   property :id, Serial
   property :name, String, :nullable => false, :unique => true
@@ -100,15 +98,15 @@ class TitleStrategy
   private
   
   def self.ensure_cache
-    return unless @@cache_time.nil? or @@cache_time < EXPIRY_TIME.ago
+    return if @@indexer_md5 == Indexer.last_loaded_md5
     
     @@cache.clear
-    @@cache_time = Time.now
-    
     TitleStrategy.all.each do |strategy|
       strategy.class_names.each do |class_name|
         @@cache[class_name] = strategy
       end
     end
+    
+    @@indexer_md5 = Indexer.last_loaded_md5
   end
 end

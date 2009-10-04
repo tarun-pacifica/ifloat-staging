@@ -1,10 +1,15 @@
 module Indexer
   COMPILED_PATH = "caches/indexer.marshal"
   
+  @@class_property_id = nil
   @@last_loaded_md5 = nil
   @@numeric_filtering_index = {}
   @@text_filtering_index = {}
   @@text_finding_index = {}
+  
+  def self.class_property_id
+    @@class_property_id
+  end
   
   def self.compile
     Tempfile.open(File.basename(COMPILED_PATH)) do |f|
@@ -105,6 +110,8 @@ module Indexer
       @@text_filtering_index = indexes[:text_filtering]
       @@text_finding_index = indexes[:text_finding]
     end
+    
+    @@class_property_id = PropertyDefinition.first(:name => "reference:class").id
     
     @@last_loaded_md5 = source_md5
   end

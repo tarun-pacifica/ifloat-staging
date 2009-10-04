@@ -144,7 +144,7 @@ class CachedFind
   
   # TODO: spec
   def filter_values
-    fpids = filtered_product_ids
+    fpids = filtered_product_ids(true)
     text_values_by_property_id = Indexer.filterable_text_values_for_product_ids(all_product_ids, fpids, language_code)
     numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(fpids)
     
@@ -165,10 +165,11 @@ class CachedFind
     [text_values_by_property_id, relevant_values_by_property_id]
   end
   
-  def filtered_product_ids
+  def filtered_product_ids(class_only = false)
     return [] if all_product_count.zero?
     
     used_filters = filters.select { |filter| not filter_fresh?(*filter) }
+    used_filters = used_filters.select { |filter| filter.first == Indexer.class_property_id } if class_only
     return all_product_ids if used_filters.empty?
     
     # TODO: spec examples where this kicks in

@@ -48,7 +48,10 @@ class NumericPropertyValue < PropertyValue
   
   # TODO: spec
   def self.format_value(value)
-    value.is_a?(BigDecimal) ? value.to_s("F") : value.to_s
+    return value.to_s if value.is_a?(Integer)
+    f = value.to_f
+    i = value.to_i
+    f == i ? i.to_s : f.to_s
   end
     
   # TODO: spec

@@ -14,6 +14,5 @@ Merb::Config.use { |c|
 
 Merb::BootLoader.after_app_loads do
   Merb::Mailer.delivery_method = :test_send
-  AssetStore.config(:local, :local_root => "/tmp/ifloat_assets", :url_stem => "/assets")
-  # ln -s /tmp/ifloat_assets public/assets
+  AssetStore.config(:local, :local_root => Merb.root / "public" / "assets", :url_stem => "/assets")
 end

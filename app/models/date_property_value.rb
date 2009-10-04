@@ -9,6 +9,12 @@ class DatePropertyValue < NumericPropertyValue
     true
   end
   
+  # TODO: spec
+  def self.format_value(value)
+    v = value.to_i
+    [v / 10000, (v / 100) % 100, v % 100].delete_if { |v| v.zero? }.join("-")
+  end
+  
     
   protected
   
@@ -20,10 +26,5 @@ class DatePropertyValue < NumericPropertyValue
   
   def coerce_db_value_to_native(db_value)
     db_value.to_i
-  end
-  
-  def coerce_native_to_string(native_value) # TODO: remove - all formatters should be in javascript
-    v = native_value.to_i
-    [v / 10000, (v / 100) % 100, v % 100].delete_if { |v| v.zero? }.join("/")
   end
 end

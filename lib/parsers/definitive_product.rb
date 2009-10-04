@@ -9,8 +9,72 @@ class DefinitiveProductParser < AbstractParser
     "NIL"  => [:attachments, :mappings, :relationships, :values]
   }
   
+  def initialize(*args)
+    super
+    
+    @auto_title_property = @import_set.get(PropertyDefinition, "auto:title")
+    
+    @title_strategies_by_class = {}
+    @import_set.get(TitleStrategy).each do |name, strategy|
+      attributes = strategy.attributes
+      attributes[:class_names].each do |klass|
+        @title_strategies_by_class[klass] = attributes
+      end
+    end
+    @title_strategies_by_class.default = @title_strategies_by_class["ANY_CLASS"]
+  end
+  
   
   private
+  
+  def generate_auto_titles(value_objects_by_property_name, product)
+    klass = (value_objects_by_property_name["reference:class"].first.attributes[:text_value] rescue nil)
+    strategy = @title_strategies_by_class[klass]
+    return [] if strategy.nil?
+    
+    title_objects = []
+    
+    TitleStrategy::TITLE_PROPERTIES.each_with_index do |title, i|
+      rendered_parts = []
+      
+      strategy[title].each do |part|
+        if part == "-"
+          rendered_parts << "&mdash;" unless rendered_parts.empty? or rendered_parts.last == "&mdash;"
+        else
+          value_objects = (value_objects_by_property_name[part] || [])
+          next if value_objects.empty?
+          
+          klass = value_objects.first.klass
+          value_attributes = value_objects.map { |o| o.attributes }.sort_by { |attribs| attribs[:sequence_number] }
+          
+          if klass == TextPropertyValue
+            rendered_parts << value_attributes.map { |attribs| attribs[:text_value] }.join(", ")
+          else
+            min_seq_num = value_attributes.first[:sequence_number]
+            value_attributes = value_attributes.select { |attribs| attribs[:sequence_number] == min_seq_num }
+            value_attributes = value_attributes.sort_by { |attribs| attribs[:unit].to_s }            
+            formatted_values = value_attributes.map do |attribs|
+              [klass.format(attribs[:min_value], attribs[:max_value], "&ndash;"), attribs[:unit]].compact.join(" ")
+            end
+            rendered_parts << formatted_values.join("_")
+          end
+        end
+      end
+      
+      rendered_parts.pop while rendered_parts.last == "&mdash;"
+      attributes = {
+        :definition => @auto_title_property,
+        :product => product,
+        :auto_generated => false,
+        :sequence_number => i + 1,
+        :language_code => "ENG",
+        :text_value => rendered_parts.join(" "),
+      }
+      title_objects << ImportObject.new(TextPropertyValue, attributes) unless rendered_parts.empty?
+    end
+    
+    title_objects
+  end
   
   def generate_objects(parsed_fields)
     attributes = {}
@@ -19,17 +83,25 @@ class DefinitiveProductParser < AbstractParser
     end
     objects = [ImportObject.new(DefinitiveProduct, attributes)]
     
-    parsed_fields.each do |head, value|
-      next if value.nil?
+    value_objects_by_property_name = {}
+    
+    parsed_fields.each do |head, object|
+      next if object.nil?
       domain = head.first
-      next unless [:attachments, :mappings, :relationships, :values].include?(domain)
       
-      values = (value.is_a?(Array) ? value : [value])
-      values.each { |o| o.attributes[:product] = objects[0] }
-      objects.push(*values)
+      if domain == :values
+        property_name = object.attributes[:definition].attributes[:name]
+        (value_objects_by_property_name[property_name] ||= []) << object
+      end
+        
+      if [:attachments, :mappings, :relationships, :values].include?(domain)
+        values = (object.is_a?(Array) ? object : [object])
+        values.each { |o| o.attributes[:product] = objects[0] }
+        objects.push(*values)  
+      end
     end
     
-    objects
+    objects + generate_auto_titles(value_objects_by_property_name, objects[0])
   end
   
   def parse_field(head, value, fields)
@@ -160,6 +232,12 @@ class DefinitiveProductParser < AbstractParser
     end
     
     :deferred
+  end
+  
+  def preflight_check
+    errors = []
+    errors << 'missing PropertyDefinition "auto:title"' if @auto_title_property.nil?
+    errors
   end
   
   def validate_headers(headers)

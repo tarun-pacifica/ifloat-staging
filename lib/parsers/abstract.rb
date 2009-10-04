@@ -7,12 +7,18 @@ class AbstractParser
   end
   
   def parse(csv_path)
-    old_kcode = $KCODE
-    $KCODE = self.class.const_get("KCODE")
-    
     klass = Kernel.const_get(self.class.to_s.sub(/Parser$/, ""))
     nice_path = File.basename(csv_path)
     nice_path = File.basename(File.dirname(csv_path)) / nice_path unless nice_path == "#{klass.storage_name}.csv"
+    
+    errors = preflight_check
+    unless errors.empty?
+      errors.each { |message| @import_set.error(klass, nice_path, nil, nil, message) }
+      return
+    end
+    
+    old_kcode = $KCODE
+    $KCODE = self.class.const_get("KCODE")
     
     @headers = {}
     row_number = 0
@@ -115,6 +121,10 @@ class AbstractParser
   
   def parse_row(row)
     parse_fields(row, nil)
+  end
+  
+  def preflight_check
+    []
   end
   
   def reject_blank_value?(head)

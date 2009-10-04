@@ -71,7 +71,8 @@ class ImportSet
   end
   
   def get(klass, *pk_value)
-    (@objects_by_pk_by_class[klass] || {})[pk_value]
+    objects = (@objects_by_pk_by_class[klass] || {})
+    pk_value.empty? ? objects : objects[pk_value]
   end
   
   def get!(klass, *pk_value)

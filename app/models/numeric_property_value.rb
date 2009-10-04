@@ -40,6 +40,16 @@ class NumericPropertyValue < PropertyValue
   def self.date?
     false
   end
+  
+  # TODO: spec
+  def self.format(min_value, max_value, range_separator = "...")
+    [min_value, max_value].uniq.map { |v| format_value(v) }.join(range_separator)
+  end
+  
+  # TODO: spec
+  def self.format_value(value)
+    value.is_a?(BigDecimal) ? value.to_s("F") : value.to_s
+  end
     
   # TODO: spec
   def self.parse_or_error(value)
@@ -60,11 +70,6 @@ class NumericPropertyValue < PropertyValue
     min_value != max_value
   end
   
-  def to_s # TODO: spec for Num and Date
-    v = value
-    (range? ? [v.first, v.last] : [v]).map { |v| coerce_native_to_string(v) }.join("...")
-  end
-  
   def value
     return coerce_db_value_to_native(min_value) unless range?
     coerce_db_value_to_native(min_value)..coerce_db_value_to_native(max_value)
@@ -79,10 +84,6 @@ class NumericPropertyValue < PropertyValue
     value = BigDecimal.new(atom).round(MAX_DP)
     raise "number #{value} is outside the range #{VALUE_RANGE}" unless VALUE_RANGE.include?(value)    
     value
-  end
-  
-  def coerce_native_to_string(native_value)
-    native_value.to_s
   end
   
   def coerce_db_value_to_native(db_value)

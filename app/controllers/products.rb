@@ -17,8 +17,7 @@ class Products < Application
     missing_ids = (product_ids - html_by_product_id.keys)
     return html_by_product_id.values.join("\n") if missing_ids.empty?
     
-    summary_property = PropertyDefinition.first(:name => "marketing:summary")
-    values_by_property_by_product_id, auto_titles_by_product_id = Product.display_values(missing_ids, session.language)
+    values_by_property_by_product_id = Product.display_values(missing_ids, session.language, ["auto:title", "marketing:summary"])
     
     image_urls = Hash.new("/images/no_image.png")
     Attachment.product_role_assets(product_ids, false).each do |product_id, assets_by_role|
@@ -27,9 +26,11 @@ class Products < Application
     end
     
     missing_ids.each do |product_id|
-      values_by_name = (auto_titles_by_product_id[product_id] || {})
-      values_by_property = (values_by_property_by_product_id[product_id] || {})
-      values_by_name["marketing:summary"] = (values_by_property[summary_property] || []).first
+      values_by_name = {}
+      (values_by_property_by_product_id[product_id] || {}).each do |property, values|
+        values_by_name[property.name] = values
+      end
+      
       html = html_by_product_id[product_id] = product_summary(product_id, values_by_name, image_urls[product_id])
       
       path = cache_dir / "#{session.language}_#{product_id}.html"
@@ -94,20 +95,20 @@ class Products < Application
       end
     end
         
-    wikipedia_stub = @non_data_values["reference:wikipedia"]
+    wikipedia_stub = (@non_data_values["reference:wikipedia"].first rescue nil)
     @asset_urls_with_names << ["http://en.wikipedia.org/wiki/#{wikipedia_stub}", "Wikipedia Article"] unless wikipedia_stub.nil?
   end
   
   def gather_property_values(product)
-    @values_by_property, auto_titles = product.display_values(session.language)
+    @values_by_property = product.display_values(session.language)
     
     @data_properties = []
-    @non_data_values = auto_titles
-    non_data_property_names = ["marketing:description", "marketing:feature_list", "marketing:summary", "reference:wikipedia"]
+    @non_data_values = {}
+    non_data_property_names = ["auto:title", "marketing:description", "marketing:feature_list", "marketing:summary", "reference:wikipedia"]
     
     @values_by_property.each do |property, values|
       if non_data_property_names.include?(property.name)
-        @non_data_values[property.name] = (values.first || "")
+        @non_data_values[property.name] = values
       elsif property.display_as_data?
         @data_properties << property
       end

@@ -10,8 +10,8 @@ module Merb
       <<-EOS
       <a class="product" id="prod_#{product_id}" href="/products/#{product_id}">
       	<img src=#{image_url.inspect} onmouseover="prod_list_image_zoom(event)" onmouseout="prod_list_image_unzoom(this)"/>
-      	#{product_titles(product_id, values_by_name)}
-      	<p>#{values_by_name["marketing:summary"]}</p>
+      	#{product_titles(values_by_name["auto:title"])}
+      	<p>#{(values_by_name["marketing:summary"] || []).first}</p>
       	<hr />
       </a>
       EOS
@@ -37,16 +37,12 @@ module Merb
 			"number_format([#{values.join(', ')}], #{value.unit.nil? ? 'undefined' : value.unit.inspect}, #{value.class.date?})"
     end
     
-    def product_titles(product_id, titles)
+    def product_titles(titles)
       lines = []
-      
-      TitleStrategy::TITLE_PROPERTIES.each do |title|
-        tag = (title == :title_4 ? "h2" : "h1")
-        tag_id = "prod_#{product_id}_#{title}"
-        lines << "<#{tag} id=#{tag_id.inspect}></#{tag}>"
-        lines << title_js(tag_id, titles[title])
+      (titles || []).each_with_index do |title, i|
+        tag = (i == 4 ? "h2" : "h1")
+        lines << "<#{tag}>#{title}</#{tag}>"
       end
-      
       lines.join("\n")
     end
 
@@ -56,7 +52,7 @@ module Merb
       last_part = nil
       parts.each do |part|
         case part
-        when "SEP"
+        when "-"
           js_parts << '" &mdash; "'
         when NumericPropertyValue
           different_property = (last_part.nil? or

@@ -27,26 +27,25 @@ class Product
   end
   
   # TODO: spec
-  def self.display_values(product_ids, language_code)  
-    db_values = NumericPropertyValue.all(:product_id => product_ids)
-    db_values += TextPropertyValue.all(:product_id => product_ids, :language_code => language_code)
+  def self.display_values(product_ids, language_code, property_names = nil)
+    attributes = {:product_id => product_ids}
+    attributes[:property_definition_id] = PropertyDefinition.all(:name => property_names).map { |pd| pd.id } unless property_names.nil?
     
-    property_ids = db_values.map { |value| value.property_definition_id }
-    PropertyDefinition.all(:id => property_ids.uniq).map
+    db_values = NumericPropertyValue.all(attributes)
+    db_values += TextPropertyValue.all(attributes.merge(:language_code => language_code))
+    
+    if property_names.nil?
+      property_ids = db_values.map { |value| value.property_definition_id }
+      PropertyDefinition.all(:id => property_ids.uniq).map
+    end
     
     values_by_property_by_product_id = {}
-    db_values.each do |value|
+    db_values.sort_by { |value| value.sequence_number }.each do |value|
       values_by_property = (values_by_property_by_product_id[value.product_id] ||= {})
       values = (values_by_property[value.definition] ||= [])
       values << value
     end
-    
-    auto_titles_by_product_id = {}
-    values_by_property_by_product_id.each do |product_id, values_by_property|
-      auto_titles_by_product_id[product_id] = TitleStrategy.generate_titles(values_by_property)
-    end
-    
-    [values_by_property_by_product_id, auto_titles_by_product_id]
+    values_by_property_by_product_id
   end
   
   # TODO: spec, implement supply country filtering support when required (retail:country)
@@ -75,9 +74,8 @@ class Product
   end
   
   # TODO: spec
-  def display_values(language_code)
-    values_by_property_by_product_id, auto_titles_by_product_id = Product.display_values([id], language_code)
-    [values_by_property_by_product_id[id], auto_titles_by_product_id[id]]
+  def display_values(language_code, property_names = nil)
+    Product.display_values([id], language_code, property_names)[id]
   end
   
   # TODO: spec

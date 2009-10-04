@@ -18,7 +18,7 @@ class TitleStrategyParser < AbstractParser
       value.to_s.split(",").map do |part|
         part.strip!
         @import_set.get!(PropertyDefinition, part) unless part == "-"
-        part == "-" ? "SEP" : part
+        part
       end
     else
       super

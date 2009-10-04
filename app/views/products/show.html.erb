@@ -49,10 +49,10 @@
 	</div>
 	
 	<div id="product_detail_words">
-		<%= product_titles(@product.id, @non_data_values) %>
+		<%= product_titles(@non_data_values["auto:title"]) %>
 		<hr />
 		
-		<% summary, features, description = @non_data_values.values_at("marketing:summary", "marketing:feature_list", "marketing:description").map { |v| v.to_s } %>
+		<% summary, features, description = @non_data_values.values_at("marketing:summary", "marketing:feature_list", "marketing:description").map { |values| (values || []).first.to_s } %>
 		
 		<% unless summary.blank? %>
 		<h3>Summary</h3>

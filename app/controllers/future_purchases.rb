@@ -11,7 +11,7 @@ class FuturePurchases < Application
     facility_products = facility.map_products(current_product_ids)
     
     product_ids = current_product_ids + @future_purchases.map { |purchase| purchase.definitive_product_id }
-    unused_values, @auto_titles_by_product_id = Product.display_values(product_ids, session.language)
+    @purchase_titles_by_product_id = purchase_titles(product_ids)
             
     @partner_product_urls = {}
     facility_products.each do |definitive_product_id, facility_product|
@@ -79,7 +79,7 @@ class FuturePurchases < Application
   def index
     @purchases = session.future_purchases    
     product_ids = @purchases.map { |purchase| purchase.definitive_product_id }
-    unused_values, @auto_titles_by_product_id = Product.display_values(product_ids, session.language)
+    @purchase_titles_by_product_id = purchase_titles(product_ids)
     partial :purchase, :with => @purchases
   end
   
@@ -118,5 +118,14 @@ class FuturePurchases < Application
       url
     else nil
     end
+  end
+  
+  def purchase_titles(product_ids)
+    purchase_titles_by_product_id = Hash.new("")
+    Product.display_values(product_ids, session.language, ["auto:title"]).each do |product_id, values_by_property|
+      title_property, titles = values_by_property.first
+      purchase_titles_by_product_id[product_id] = titles[3]
+    end
+    purchase_titles_by_product_id
   end
 end

@@ -314,6 +314,7 @@ function logout_success(data) {
 
 // Number formatters
 
+// TODO: review as possibly redundant (if the filtering controls for dates end up not using input boxes)
 function date_format(value) {
 	var yyyy_mm_dd = String(value).match(/^(\d{4})(\d\d)(\d\d)$/);
 	if(yyyy_mm_dd == null) return value;

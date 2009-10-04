@@ -1,7 +1,6 @@
 <%
 	dom_id = "purchase_#{purchase.id}"
-	titles = (@auto_titles_by_product_id || Hash.new({}))[purchase.definitive_product_id]
-	title_parts = titles[:title_4] || []
+	title = @purchase_titles_by_product_id[purchase.definitive_product_id]
 	
 	klass, url = nil, nil
 	
@@ -14,5 +13,4 @@
 	end
 %>
 
-<a id=<%= dom_id.inspect %> class=<%= klass.inspect %> href=<%= (url || '#').inspect %>> </a>
-<%= title_js(dom_id, title_parts) %>
+<a id=<%= dom_id.inspect %> class=<%= klass.inspect %> href=<%= (url || '#').inspect %>><%= title %></a>

@@ -2,7 +2,7 @@
 #
 # Title auto-construction in the system is handled by means of TitleStrategy objects. These strategies take the forms of very simple build instructions per auto-constructed title (of which there are four per product). The strategy employed for a given product is entirely dependent on it's class. One TitleStrategy may apply to many classes but each class has either no or one TitleStrategy.
 #
-# For performance reasons, the entire suite of strategies is cached inside the class and only updated every time the Indexer cache changes.
+# For performance reasons, the entire suite of strategies is applied to every product at import time so that these objects are never referenced directly during the normal operation of the application.
 #
 # === Sample Data
 #
@@ -15,9 +15,6 @@
 #
 class TitleStrategy
   include DataMapper::Resource
-  
-  @@cache = {}
-  @@indexer_md5 = nil
   
   property :id, Serial
   property :name, String, :nullable => false, :unique => true
@@ -40,74 +37,8 @@ class TitleStrategy
   end
   
   # TODO: spec
-  def self.generate_titles(values_by_property)
-    ensure_cache
-    
-    properties_by_name = {}
-    klass = nil
-    values_by_property.each do |property, values|
-      properties_by_name[property.name] = property
-      klass = values.first.to_s if property.name == "reference:class"
-    end
-    
-    strategy = @@cache[klass]
-    strategy ||= @@cache["ANY_CLASS"]
-    return {} if strategy.nil?
-    
-    titles = {}
-    TITLE_PROPERTIES.each do |title|
-      rendered_parts = []
-      
-      strategy.attribute_get(title).each do |part|
-        if part == "SEP"
-          rendered_parts << "SEP" unless rendered_parts.empty? or rendered_parts.last == "SEP"
-        else
-          property = properties_by_name[part]
-          values = (values_by_property[property] || [])
-          next if values.empty?
-          
-          if property.text? then rendered_parts << values.join(", ")
-          else rendered_parts += values
-          end
-        end
-      end
-      
-      rendered_parts.pop while rendered_parts.last == "SEP"
-      
-      titles[title] = rendered_parts
-    end
-    titles
-  end
-  
-  # TODO: spec
-  def add_class(class_name)
-    ensure_cache
-    
-    return false if @@cache.has_key?(class_name)
-    self.class_names = class_names << class_name
-    true
-  end
-  
-  # TODO: spec
   def validate_title(title)
     title.is_a?(Array) and title.all? { |part| name.is_a?(Integer) or name = "-" } ||
       [false, "should be an array containing PropertyDefinition IDs and (optionally) '-'s"]
-  end
-  
-  
-  private
-  
-  # TODO: pre-generate all titles from incoming CSVs - may need to change how formatting propagates
-  def self.ensure_cache
-    return unless @@indexer_md5.nil? or @@indexer_md5 != Indexer.last_loaded_md5
-    
-    @@cache.clear
-    TitleStrategy.all.each do |strategy|
-      strategy.class_names.each do |class_name|
-        @@cache[class_name] = strategy
-      end
-    end
-    
-    @@indexer_md5 = Indexer.last_loaded_md5
   end
 end

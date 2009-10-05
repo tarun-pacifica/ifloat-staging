@@ -40,6 +40,8 @@ class DefinitiveProductParser < AbstractParser
       strategy[title].each do |part|
         if part == "-"
           rendered_parts << "&mdash;" unless rendered_parts.empty? or rendered_parts.last == "&mdash;"
+        elsif part == "product.reference"
+          rendered_parts << product.attributes[:reference]
         else
           value_objects = (value_objects_by_property_name[part] || [])
           next if value_objects.empty?

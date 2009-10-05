@@ -17,7 +17,7 @@ class TitleStrategyParser < AbstractParser
     when /^Title/
       value.to_s.split(",").map do |part|
         part.strip!
-        @import_set.get!(PropertyDefinition, part) unless part == "-"
+        @import_set.get!(PropertyDefinition, part) unless part == "-" or part == "product.reference"
         part
       end
     else

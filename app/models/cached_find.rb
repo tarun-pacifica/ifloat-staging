@@ -208,6 +208,7 @@ class CachedFind
   private
   
   def filter_fresh?(filter)
+    filter[:include_unknown] and
     case filter[:prop_type]
     when "currency", "date", "numeric"
       min, max, unit, limits = filter[:data]

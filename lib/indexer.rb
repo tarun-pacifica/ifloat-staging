@@ -69,7 +69,7 @@ module Indexer
       next if filter.nil?
       
       exclusions = filter[:data]
-      products.each { |product_id, values| product_ids << product_id unless (values & exclusions).empty? }
+      products.each { |product_id, values| product_ids << product_id if (values - exclusions).empty? }
     end
     product_ids.uniq
   end

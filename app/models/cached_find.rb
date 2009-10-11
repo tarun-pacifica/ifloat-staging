@@ -93,6 +93,7 @@ class CachedFind
     PropertyType.all(:id => properties.map { |p| p.property_type_id }).map
     friendly_names = PropertyDefinition.friendly_name_sections(properties, language_code)
     
+    # TODO: copy old values where possible
     filters = []
     properties.each do |property|
       filter = {
@@ -100,6 +101,7 @@ class CachedFind
         :prop_seq_num       => property.sequence_number,
         :prop_friendly_name => friendly_names[property.id],
         :prop_type          => property.property_type.core_type,
+        :include_unknown    => true,
         :data               => []
       }
       
@@ -121,6 +123,13 @@ class CachedFind
   def filter!(property_id, operation, params)
     filter = filters.find { |filter| filter[:prop_id] == property_id }
     return if filter.nil?
+    
+    if operation == "include_unknown"
+      filter[:include_unknown] = (params["value"] == "true")
+      self.filters = filters
+      save
+      return
+    end
     
     data = filter[:data]
     

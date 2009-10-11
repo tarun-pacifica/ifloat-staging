@@ -1,5 +1,5 @@
 <%
-	property_id, type, data = filter.values_at(:prop_id, :prop_type, :data)
+	property_id, type = filter.values_at(:prop_id, :prop_type)
 	domain, title = filter[:prop_friendly_name]
 	domain_hash = domain.hash.abs.to_s
 	filter_id = "filter_#{property_id}"
@@ -7,9 +7,9 @@
 	if type == "text"
 		@all, @relevant = @text_filter_values[property_id]
 		@definitions = (@text_value_definitions[property_id] || {})
-		@excluded = data
+		@excluded = filter[:data]
 	else
-		@min, @max, @unit, @limits = data
+		@min, @max, @unit, @limits = filter[:data]
 	end
 %>
 
@@ -28,7 +28,7 @@
 <tr id=<%= filter_id.inspect %> class="filter">
 	<td colspan="2">
 		<div class="unknown_item">
-			<% checked = (@include_unknown ? '' : 'checked="checked"') %>
+			<% checked = (filter[:include_unknown] ? 'checked="checked"' : '') %>
 			<input type="checkbox" <%= checked %> onclick="filter_handle_check(this)" />
 			Show products with no value
 		</div>

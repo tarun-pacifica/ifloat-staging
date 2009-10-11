@@ -738,7 +738,7 @@ function text_filter_mark_relevant(text_values_by_relevant_filter_ids) {
 		for(i in values) value_lookup[values[i]] = true;
 		
 		var filter = $("#filter_" + filter_id);
-		filter.find("input:checkbox").each(function (i) {
+		filter.find(".list_item input:checkbox").each(function (i) {
 			var list_item = $(this).parent();
 			if(value_lookup[this.value]) list_item.css("text-decoration", "none").css("color", "black");
 			else list_item.css("text-decoration", "line-through").css("color", "gray");
@@ -750,13 +750,13 @@ function text_filter_mark_relevant(text_values_by_relevant_filter_ids) {
 
 function text_filter_select_one(image) {	
 	var checkbox = $(image).next("input:checkbox");
-	checkbox.parents(".filter").find("input:checkbox:checked").not(checkbox).attr("checked", false);
+	checkbox.parents(".filter").find(".list_item input:checkbox:checked").not(checkbox).attr("checked", false);
 	checkbox.not(":checked").attr("checked", true);
 	text_filter_handle_check(checkbox[0], true);
 }
 
 function text_filter_update_summary(filter) {
-	var list = filter.find("input:checkbox").map(function() {
+	var list = filter.find(".list_item input:checkbox").map(function() {
 		var relevant = ($(this).parent().css("text-decoration") == "none");
 		if(this.checked && relevant) return this.value;
 		else return undefined;

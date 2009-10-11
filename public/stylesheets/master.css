@@ -346,6 +346,19 @@ body {
 	text-align: right;
 }
 
+#cached_find_filters .filter .unknown_item {
+	font-style: italic;
+	margin-top: 2px;
+	padding-left: 10px;
+}
+
+#cached_find_filters .filter .unknown_item input {
+	font-size: 12px;
+	margin-top: 0;
+	vertical-align: middle;
+	width: auto;
+}
+
 #cached_find_filters .summary {
 	cursor: pointer;
 	padding-left: 5px;

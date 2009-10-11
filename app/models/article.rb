@@ -27,11 +27,7 @@ class Article
   end
   
   def self.images(articles)
-    images_by_asset_id = {}
-    Asset.all(:id => articles.map { |a| a.asset_id }).each do |asset|
-      images_by_asset_id[asset.id] = asset
-    end
-    images_by_asset_id
+    Asset.all(:id => articles.map { |a| a.asset_id }).hash_by(:id)
   end
   
   def save_image(file_path, original_name)

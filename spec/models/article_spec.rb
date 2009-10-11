@@ -48,7 +48,23 @@ describe Article do
   end
   
   describe "batch image retrieval" do
-    it "should have specs"
+    before(:all) do
+      @blog = Blog.create(:company_id => 1, :user_id => 1, :name => "fishing")
+      @articles = %w(FlyFishing NightFishing ComplimentFishing).map do |title|
+        article = @blog.articles.create(:user_id => 1, :title => title, :body => "Lorem ipsum dolor.")
+        article.save_image("spec/assets/cube.jpg", "cube.jpg") unless title == "FlyFishing"
+        article
+      end
+    end
+    
+    after(:all) do
+      @articles.each { |a| a.destroy }
+      @blog.destroy
+    end
+    
+    it "should retrieve assets only for the specified articles" do
+      Article.images(@articles[0..1]).size.should == 1
+    end
   end
   
   describe "image saving" do

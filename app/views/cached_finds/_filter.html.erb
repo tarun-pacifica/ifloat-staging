@@ -29,7 +29,7 @@
 	<td colspan="2">
 		<div class="unknown_item">
 			<% checked = (@include_unknown ? '' : 'checked="checked"') %>
-			<input type="checkbox" value="include_unknown" <%= checked %> onclick="filter_handle_check(this)" />
+			<input type="checkbox" <%= checked %> onclick="filter_handle_check(this)" />
 			Show products with no value
 		</div>
 		

@@ -31,6 +31,12 @@ function bubble_tooltip_hide() {
 
 // Filter Queue
 
+function filter_handle_check(checkbox) {
+	var f = $(checkbox).parents(".filter")[0];
+	var url = "/cached_finds/" + f.find_id + "/filter/" + f.property_id;
+	filter_queue_add(url, {operation: "include_unknown", value: checkbox.checked});
+}
+
 function filter_queue_add(url, data) {
 	var results = $("#cached_find_results");
 	var r = results[0];

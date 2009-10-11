@@ -7,6 +7,7 @@ module HouseKeeping
       # TODO: tidy up obsolete assets
       # TODO: tidy up obsolete controller errors
       # TODO: Purchase.abandon_obsolete
+      # TODO: check for /tmp/update_caches; if present, delete it and update indexer cache and conflate product values
     rescue Exception => e
       p e
       # TODO: send mail

@@ -165,6 +165,7 @@ class CachedFind
     [text_values_by_property_id, relevant_values_by_property_id]
   end
   
+  # TODO: spec for class_only filtering
   def filtered_product_ids(class_only = false)
     return [] if all_product_count.zero?
     

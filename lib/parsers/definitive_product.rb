@@ -6,7 +6,8 @@ class DefinitiveProductParser < AbstractParser
   SPECIAL_VALUE_VALIDITIES = {
     "AUTO" => [:values],
     "N/A"  => [:attachments, :mappings, :relationships, :values],
-    "NIL"  => [:attachments, :mappings, :relationships, :values]
+    "NIL"  => [:attachments, :mappings, :relationships, :values],
+    "Unknown" => [] # TODO: extend to multiple languages when necessary
   }
   
   def initialize(*args)

@@ -189,8 +189,9 @@ class CachedFind
     return all_product_ids if used_filters.empty?
     
     # TODO: spec examples where this kicks in
-    property_ids = used_filters.map { |filter| filter[:prop_id] }
-    relevant_product_ids = (all_product_ids & Indexer.product_ids_for_filterable_property_ids(property_ids, language_code))
+    relevant_product_ids = all_product_ids
+    focussed_property_ids = used_filters.reject { |filter| filter[:include_unknown] }.map { |filter| filter[:prop_id] }
+    relevant_product_ids &= Indexer.product_ids_for_filterable_property_ids(focussed_property_ids, language_code) unless focussed_property_ids.empty?
     
     text_filters, numeric_filters = used_filters.partition { |filter| filter[:prop_type] == "text" }
     excluded_product_ids = Indexer.excluded_product_ids_for_numeric_filters(numeric_filters)

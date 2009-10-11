@@ -1,6 +1,6 @@
 <%
-	property_id, seq_num, friendly_name, type, data = filter
-	domain, title = friendly_name
+	property_id, type, data = filter.values_at(:prop_id, :prop_type, :data)
+	domain, title = filter[:prop_friendly_name]
 	domain_hash = domain.hash.abs.to_s
 	filter_id = "filter_#{property_id}"
 	

@@ -95,20 +95,23 @@ class CachedFind
     
     filters = []
     properties.each do |property|
-      seq_num = property.sequence_number
-      friendly_name = friendly_names[property.id]
-      type = property.property_type.core_type
+      filter = {
+        :prop_id            => property.id,
+        :prop_seq_num       => property.sequence_number,
+        :prop_friendly_name => friendly_names[property.id],
+        :prop_type          => property.property_type.core_type,
+        :data               => []
+      }
       
-      data = []
-      if ["currency", "date", "numeric"].include?(type)
+      if ["currency", "date", "numeric"].include?(filter[:prop_type])
         limits = numeric_limits_by_property_id[property.id]
-        data += numeric_filter_choose(nil, nil, nil, limits)
-        data << limits
+        filter[:data] += numeric_filter_choose(nil, nil, nil, limits)
+        filter[:data] << limits
       end
       
-      filters << [property.id, seq_num, friendly_name, type, data]
+      filters << filter
     end
-    self.filters = filters.sort_by { |filter| filter[1] }
+    self.filters = filters.sort_by { |filter| filter[:prop_seq_num] }
     
     self.invalidated = false
     save
@@ -116,15 +119,17 @@ class CachedFind
   
   # TODO: spec
   def filter!(property_id, operation, params)
-    property_id, seq_num, friendly_name, type, data = filters.assoc(property_id)
-    return if property_id.nil?
+    filter = filters.find { |filter| filter[:prop_id] == property_id }
+    return if filter.nil?
     
-    case type
+    data = filter[:data]
+    
+    case filter[:prop_type]
     when "currency", "date", "numeric"
       min, max = params.values_at("min", "max").map { |v| v.to_f }
       unit = params["unit"]
       unit = nil if unit.blank?
-      data[0..2] = numeric_filter_choose(min, max, unit, data.last)
+      filter[:data][0..2] = numeric_filter_choose(min, max, unit, data.last)
     when "text"
       value = params["value"]
       case operation
@@ -149,10 +154,11 @@ class CachedFind
     numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(fpids)
     
     relevant_values_by_property_id = {}
-    filters.each do |property_id, seq_num, friendly_name, type, data|
+    filters.each do |filter|
+      property_id, type = filter.values_at(:prop_id, :prop_type)
       relevant_values = (type == "text" ? text_values_by_property_id[property_id].last : nil)
       
-      if filter_fresh?(property_id, seq_num, friendly_name, type, data)
+      if filter_fresh?(filter)
         case type
         when "currency", "date", "numeric" then next unless numeric_limits_by_property_id.has_key?(property_id)
         when "text" then next if relevant_values.empty?
@@ -169,15 +175,15 @@ class CachedFind
   def filtered_product_ids(class_only = false)
     return [] if all_product_count.zero?
     
-    used_filters = filters.select { |filter| not filter_fresh?(*filter) }
-    used_filters = used_filters.select { |filter| filter.first == Indexer.class_property_id } if class_only
+    used_filters = filters.select { |filter| not filter_fresh?(filter) }
+    used_filters = used_filters.select { |filter| filter[:prop_id] == Indexer.class_property_id } if class_only
     return all_product_ids if used_filters.empty?
     
     # TODO: spec examples where this kicks in
-    property_ids = used_filters.transpose.first
+    property_ids = used_filters.map { |filter| filter[:prop_id] }
     relevant_product_ids = (all_product_ids & Indexer.product_ids_for_filterable_property_ids(property_ids, language_code))
     
-    text_filters, numeric_filters = used_filters.partition { |filter| filter[3] == "text" }
+    text_filters, numeric_filters = used_filters.partition { |filter| filter[:prop_type] == "text" }
     excluded_product_ids = Indexer.excluded_product_ids_for_numeric_filters(numeric_filters)
     excluded_product_ids += Indexer.excluded_product_ids_for_text_filters(text_filters, language_code)
     relevant_product_ids - excluded_product_ids
@@ -192,13 +198,13 @@ class CachedFind
   
   private
   
-  def filter_fresh?(property_id, seq_num, friendly_name, type, data)
-    case type
+  def filter_fresh?(filter)
+    case filter[:prop_type]
     when "currency", "date", "numeric"
-      min, max, unit, limits = data
+      min, max, unit, limits = filter[:data]
       [min, max, unit] == numeric_filter_choose(nil, nil, unit, limits)
     when "text"
-      data.empty?
+      filter[:data].empty?
     end
   end
   

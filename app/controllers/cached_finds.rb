@@ -75,7 +75,7 @@ class CachedFinds < Application
     @find.save
     
     @filters = @find.filters
-    properties = PropertyDefinition.all(:id => @filters.map { |filter| filter.first })
+    properties = PropertyDefinition.all(:id => @filters.map { |filter| filter[:prop_id] })
     @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)
     @text_value_definitions = PropertyDefinition.definitions_by_property_id(properties, @find.language_code)
     @text_filter_values, @relevant_filters = @find.filter_values

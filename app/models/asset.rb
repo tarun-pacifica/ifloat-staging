@@ -70,7 +70,7 @@ class Asset
   # TODO: spec
   before :valid? do
     root_name, chain_seq_num = self.class.parse_chain(name)
-    unless chain_seq_num > 1
+    unless chain_seq_num.nil? or chain_seq_num > 1
       root_asset = Asset.first(:bucket => bucket, :name => root_name)
       unless root_asset.nil?
         self.chain_id = root_asset.id 
@@ -95,7 +95,6 @@ class Asset
     asset_chains_by_id
   end
   
-  # TODO: spec
   def self.parse_chain(name)
     name =~ NAME_FORMAT ? ["#{$1}___1.#{$4}", $3.to_i] : nil
   end
@@ -108,13 +107,11 @@ class Asset
     @file_write = true
   end
   
-  # TODO: spec
   def store_name
     raise "unable to generate store_name without bucket, checksum (via file_path=) and name" if [bucket, checksum, name].any? { |v| v.nil?}
     "#{checksum}#{File.extname(name)}"
   end
   
-  # TODO: spec
   def url
     AssetStore.url(self)
   end

@@ -14,6 +14,8 @@ describe Asset do
     
     it "should succeed with valid data" do
       @asset.should be_valid
+      @asset.checksum = "abc"
+      proc { @asset.url }.should_not raise_error
     end
     
     it "should fail without a company" do
@@ -110,6 +112,18 @@ describe Asset do
       @asset2.destroy
     end
     
+    it "(basic parsing) should return the root name and chain sequence number given a valid, chained name" do
+      Asset.parse_chain("abc___5.jpg").should == ["abc___1.jpg", 5]
+    end
+    
+    it "(basic parsing) should return the root name and 0 given a valid, non-chained name" do
+      Asset.parse_chain("abc.jpg").should == ["abc___1.jpg", 0]
+    end
+    
+    it "(basic parsing) should return nil given an invalid name" do
+      Asset.parse_chain("$$$").should == nil
+    end
+    
     it "should succeed with the same chain ID but a different sequence number" do
       Asset.new(:company_id => 1, :bucket => "products", :name => "car3.jpg",
                 :chain_id => @asset1.id, :chain_sequence_number => 2).should be_valid
@@ -121,9 +135,27 @@ describe Asset do
     end
   end
   
-  describe "path" do
-    it "should succeed" do
-      proc { Asset.new(:bucket => "products", :name => "car.jpg") }.should_not raise_error
+  describe "store name" do
+    before(:each) { @asset = Asset.new(:bucket => "products", :name => "car.jpg", :checksum => "abc") }
+    
+    it "should succeed with valid data" do
+      proc { @asset.store_name }.should_not raise_error
+    end
+    
+    it "should fail without a bucket" do
+      @asset.bucket = nil
+      proc { @asset.store_name }.should raise_error
+    end
+    
+    it "should fail without a name" do
+      @asset.name = nil
+      proc { @asset.store_name }.should raise_error
+    end
+    
+    it "should fail without a checksum" do
+      @asset.checksum = nil
+      proc { @asset.store_name }.should raise_error
     end
   end
+
 end

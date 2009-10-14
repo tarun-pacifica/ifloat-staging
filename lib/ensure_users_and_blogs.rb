@@ -12,29 +12,28 @@ end
 
 # Users
 
-tom = User.first(:login => "snugberth@aol.com")
-if tom.nil?
-  tom = User.new(:name => "Tom Cunliffe",
-                 :nickname => "Tom",
-                 :login => "snugberth@aol.com",
-                 :password => Password.hash("tom"))
-  whiny_save(tom)
+users = [
+  {:name => "Andre Ben Hamou", :nickname => "Andre", :login => "andre@bluetheta.com", :password => "fl04t3r", :admin => true},
+  {:name => "Tom Cunliffe", :nickname => "Tom", :login => "snugberth@aol.com", :password => "ab5fd34"},
+  {:name => "Graeme Clark", :nickname => "Graeme", :login => "graeme.clark@att.biz", :password => "TND7%$58", :admin => true},
+  {:name => "William Mackay", :nickname => "William", :login => "w.mackay@clear.net.nz", :password => "ff51641ea"}
+]
+
+users.each do |info|
+  pass = info.delete(:password)
+  user = User.first(:login => info[:login])
+  if user.nil?
+    user = User.new(info.update(:password => Password.hash(pass)))
+  else
+    info[:password] = Password.hash(pass) unless Password.match?(user.password, pass)
+    user.attributes = info
+  end
+  whiny_save(user)
 end
-
-graeme = User.first(:login => "graeme.clark@att.biz")
-if graeme.nil?
-  graeme = User.new(:name => "Graeme Clark",
-                    :nickname => "Graeme",
-                    :login => "graeme.clark@att.biz",
-                    :password => Password.hash("TND7%$58"),
-                    :admin => true)
-  whiny_save(graeme)
-end
-
-
 
 # Blogs (and Articles)
 
+tom = User.first(:login => "snugberth@aol.com")
 toms_blog = tom.blogs.first(:name => "tom_cunliffe")
 if toms_blog.nil?
   toms_blog = tom.blogs.new(:company => Company.first(:reference => "GBR-04426357"),

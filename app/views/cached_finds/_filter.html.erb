@@ -42,6 +42,25 @@
 			<%= defined_value(value, @definitions[value]) %>
 		</div>
 		<% end %>
+		
+		<% elsif type == "date" %>
+		<table>
+			<tr>
+				<td class="label">from</td>
+				<td>
+					<input class="min" type="text" onkeyup="num_filter_handle_input(this)" />
+					(&ge; <span class="min_all"> </span>)
+				</td>
+			</tr>
+			
+			<tr>
+				<td class="label">to</td>
+				<td>
+					<input class="max" type="text" onkeyup="num_filter_handle_input(this)" />
+					(&le; <span class="max_all"> </span>)
+				</td>
+			</tr>
+		</table>
 	
 		<% else %>
 		<table>
@@ -103,7 +122,8 @@
 	<% unit = unit.to_s.inspect %>
 	f.limits[<%= unit %>] = <%= [min_max.first.to_f, min_max.last.to_f].inspect %>;
 	f.values[<%= unit %>] = <%= [cmin, cmax].inspect %>;
-	<% end %>	
+	<% end %>
+	f.unit_count = <%= @limits.size %>;	
 	
 	num_filter_update_context_and_summary(filter);
 	num_filter_update_min_max(filter);

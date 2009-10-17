@@ -343,7 +343,7 @@ function number_format(values, unit, date) {
 	}
 	
 	var result = formatted_values.join("&ndash;");
-	if(unit) result += " " + unit;	
+	if(unit) result += " " + unit;
 	return result;
 }
 
@@ -364,15 +364,28 @@ function num_filter_handle_input(i) {
 	var value = input.val();
 	var values = f.values[f.unit];
 	var i = (input.hasClass("min") ? 0 : 1);
-	var updated = values[i] != value;
+	var updated = false;
 	
-	if(value == "" || value == ".") {
-		values[i] = 0;
-	} else if(value.match(/^\d*(\.\d*)?$/)) {
-		values[i] = parseFloat(value);
+	if(f.date_filter) {
+		if(value.length >= 4) {
+			value = value.substr(0, 4);
+			input.val(value);
+		}		
+		var year = parseInt(value);
+		if(!isNaN(year) && year >= 1000 && year <= 2500 && values[i] != year * 10000) {
+			values[i] = year * 10000;
+			updated = true;
+		}
 	} else {
-		input.val(values[i]);
-		updated = false
+		if(value == "" || value == ".") {
+			values[i] = 0;
+			updated = true;
+		} else if(value.match(/^\d*(\.\d*)?$/)) {
+			values[i] = parseFloat(value);
+			updated = true;
+		} else {
+			input.val(values[i]);
+		}
 	}
 	
 	if(updated) {
@@ -409,20 +422,21 @@ function num_filter_update_context_and_summary(filter) {
 	
 	for(unit in f.values) {
 		var summary = number_format(f.values[unit], unit, f.date_filter);
-		if (unit == f.unit) summary = "<strong>" + summary + "</strong>";		
+		if (f.unit_count > 1 && unit == f.unit) summary = "<strong>" + summary + "</strong>";		
 		summaries.push(summary);
 	}
 	
 	filter.prev().find(".summary").html(summaries.join(" <br /> "));
 	
 	var limits = f.limits[f.unit];
-	filter.find(".min_all").text(fraction_helper_format(limits[0])); 
-	filter.find(".max_all").text(fraction_helper_format(limits[1]));
+	filter.find(".min_all").text(number_format([limits[0]], "", f.date_filter)); 
+	filter.find(".max_all").text(number_format([limits[1]], "", f.date_filter));
 }
 
 function num_filter_update_min_max(filter) {
 	var f = filter[0];
 	var values = f.values[f.unit];
+	if(f.date_filter) values = [values[0] / 10000, values[1] / 10000];
 	filter.find("input.min").val(values[0]);
 	filter.find("input.max").val(values[1]);
 }

@@ -11,16 +11,7 @@ Merb::Config.use do |c|
 end
  
 Merb::BootLoader.before_app_loads do
-  # Override storage for YAML type (which is normally set to String)
-  # TODO: Remove once the dm-types maintainers come to their senses
-  module DataMapper
-    module Types
-      class Yaml < DataMapper::Type
-        primitive Text
-      end
-    end
-  end
-  
+    
   # These methods are handy to have available in general
   class Array
     def hash_by(method = nil) # TODO: check for opportunities to use this
@@ -38,4 +29,5 @@ Merb::BootLoader.before_app_loads do
       counts.reject { |item, count| count < 2 }.keys
     end
   end
+  
 end

@@ -47,8 +47,8 @@ class Asset
   property :description, String, :size => 255
   property :view, String
   property :source_notes, String, :size => 255
-  property :chain_id, Integer
-  property :chain_sequence_number, Integer
+  property :chain_id, Integer, :writer => :protected
+  property :chain_sequence_number, Integer, :writer => :protected
   property :checksum, String
   
   belongs_to :company
@@ -56,7 +56,7 @@ class Asset
   
   validates_present :company_id
   validates_within :bucket, :set => BUCKETS
-  validates_is_unique :name, :scope => [:company_id, :bucket] # TODO: spec ??
+  validates_is_unique :name, :scope => [:company_id, :bucket]
   validates_within :view, :set => CUBIC_VIEWS
   
   validates_with_block :chain_id do
@@ -67,25 +67,20 @@ class Asset
   validates_present :chain_sequence_number, :if => proc { |asset| not asset.chain_id.nil? }
   validates_is_unique :chain_sequence_number, :scope => [:chain_id], :allow_nil => true
   
-  # TODO: spec
   before :valid? do
     root_name, chain_seq_num = self.class.parse_chain(name)
-    unless chain_seq_num.nil? or chain_seq_num > 1
+    unless chain_seq_num.to_i <= 1
+      self.chain_sequence_number = chain_seq_num
       root_asset = Asset.first(:bucket => bucket, :name => root_name)
-      unless root_asset.nil?
-        self.chain_id = root_asset.id 
-        self.chain_sequence_number = chain_seq_num
-      end
+      self.chain_id = root_asset.id unless root_asset.nil?
     end
   end
   
-  # TODO: spec
   before :save do
     AssetStore.write(self) if @file_write
     @file_write = false
   end
   
-  # TODO: spec
   def self.chains_by_id(asset_ids)
     asset_chains_by_id = {}
     Asset.all(:chain_id => asset_ids, :order => [:chain_sequence_number]).each do |asset|
@@ -108,7 +103,7 @@ class Asset
   end
   
   def store_name
-    raise "unable to generate store_name without bucket, checksum (via file_path=) and name" if [bucket, checksum, name].any? { |v| v.nil?}
+    raise "unable to generate store_name without bucket, checksum (via file_path=) and name" if [bucket, checksum, name].any? { |v| v.nil? }
     "#{checksum}#{File.extname(name)}"
   end
   

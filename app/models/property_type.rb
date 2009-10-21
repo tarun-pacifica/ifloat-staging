@@ -21,7 +21,7 @@ class PropertyType
   property :id, Serial
   property :core_type, String, :nullable => false
   property :name, String, :nullable => false, :format => /^[a-z_]{3,}$/, :unique => true
-  property :units, Yaml, :size => 255
+  property :units, Object, :size => 255
   
   has n, :definitions, :class_name => "PropertyDefinition"
   has n, :value_definitions, :class_name => "PropertyValueDefinition"

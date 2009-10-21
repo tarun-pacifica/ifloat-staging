@@ -18,14 +18,14 @@ class ControllerError
   
   property :controller, String
   property :action, String
-  property :params, Yaml
+  property :params, Object
   
   property :exception_class, String
   property :exception_message, String, :size => 255
   property :exception_context, String, :size => 255
   
   property :ip_address, IPAddress
-  property :session, Yaml
+  property :session, Object
   
   def self.log!(request)
     exception = (request.exceptions.first rescue Exception.new("request.exceptions.first"))

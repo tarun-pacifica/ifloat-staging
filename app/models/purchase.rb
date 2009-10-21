@@ -29,8 +29,8 @@ class Purchase
   
   property :id, Serial
   property :created_at, DateTime, :nullable => false, :default => proc { DateTime.now }
-  property :product_refs, Yaml, :nullable => false
-  property :response, Yaml
+  property :product_refs, Object, :nullable => false
+  property :response, Object
   property :completed_at, DateTime
   property :abandoned, Boolean, :default => false
   

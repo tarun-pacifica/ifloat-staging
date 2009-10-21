@@ -21,10 +21,8 @@ dependency "do_mysql", do_gems_version
 dependency "dm-core", dm_gems_version         
 dependency "dm-aggregates", dm_gems_version   
 dependency "dm-migrations", dm_gems_version   
-dependency "dm-timestamps", dm_gems_version   
 dependency "dm-types", dm_gems_version        
 dependency "dm-validations", dm_gems_version  
-dependency "dm-serializer", dm_gems_version   
 
 dependency "merb_datamapper", merb_gems_version
 
@@ -33,7 +31,7 @@ require "fileutils"
 
 # Non-merb gems
 dependency "fastercsv"
-dependency "rackspace-cloudfiles", :require_as => "cloudfiles"
+dependency "rackspace-cloudfiles", :require_as => "cloudfiles" # --source http://gems.github.com
 
 # Internal libraries
 require "lib" / "asset_store"

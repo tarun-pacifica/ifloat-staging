@@ -18,11 +18,11 @@ class TitleStrategy
   
   property :id, Serial
   property :name, String, :nullable => false, :unique => true
-  property :class_names, Yaml, :lazy => false, :nullable => false, :default => []
+  property :class_names, Object, :lazy => false, :nullable => false, :default => []
   
   TITLE_PROPERTIES = (1..4).to_a.map { |i| "title_#{i}".to_sym }
   TITLE_PROPERTIES.each do |title|
-    property title, Yaml, :lazy => false, :default => []
+    property title, Object, :lazy => false, :default => []
   end
   
   validates_with_block :class_names, :if => :class_names do

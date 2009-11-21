@@ -282,7 +282,7 @@ def build_asset_csv
   if errors.empty?
     FasterCSV.open("/tmp/assets.csv", "w") do |csv|
       csv << ["bucket", "company.reference", "name", "file_path", "checksum"]
-      assets.each { |asset| csv << asset }
+      assets.sort.each { |asset| csv << asset }
     end
     return nil
   end

@@ -83,6 +83,7 @@ class ImportSet
   
   def import
     @objects_by_pk_by_class = nil
+    GC.start
     def add; raise "add cannot be called once import has been"; end
     
     classes = []
@@ -106,6 +107,8 @@ class ImportSet
         start = Time.now
         class_stats << [klass, import_class(klass, objects_by_class.delete(klass))]
         puts "#{'%6.2f' % (Time.now - start)}s : #{klass}"
+        GC.start
+        break unless @errors.empty?
       end
 
       @adapter.pop_transaction
@@ -382,6 +385,7 @@ CLASSES.each do |klass|
     nice_path = File.basename(path)
     nice_path = File.basename(File.dirname(path)) / nice_path unless nice_path == "#{klass.storage_name}.csv"
     puts "#{'%6.2f' % (Time.now - start)}s : #{nice_path}"
+    GC.start
   end
 end
 

@@ -22,6 +22,9 @@ class DefinitiveProductParser < AbstractParser
       end
     end
     @title_strategies_by_class.default = @title_strategies_by_class["ANY_CLASS"]
+    
+    # TODO: Remove this temporary hack when ready
+    @marine_store = @import_set.get!(Company, "GBR-02934378")
   end
   
   
@@ -103,6 +106,8 @@ class DefinitiveProductParser < AbstractParser
       end
     end
     
+    # TODO: Remove this temporary hack when ready
+    return [] unless objects.any? { |o| o.attributes[:company] == @marine_store }
     objects + generate_auto_titles(value_objects_by_property_name, objects[0])
   end
   
@@ -144,6 +149,7 @@ class DefinitiveProductParser < AbstractParser
       name, company, property = domain_info
       attributes = {:company => company, :property_definition => property, :name => name}
       value.split(",").map do |field|
+        raise "empty relationship (possible double comma): #{value.inspect}" if field.blank?
         ImportObject.new(Relationship, attributes.merge(:value => field.strip))
       end
           

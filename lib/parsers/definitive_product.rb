@@ -186,7 +186,7 @@ class DefinitiveProductParser < AbstractParser
     when /^relationship\.([a-z_]+)\.(.+?)(\.(.+?))?$/
       relationship_name, company_ref, property_name = $1, $2, $4
       raise "unknown relationship: #{relationship_name}" unless Relationship::NAMES.has_key?(relationship_name)
-      company = @import_set.get!(Company, company_ref)
+      company = ((company_ref == "*") ? nil : @import_set.get!(Company, company_ref))
       property = (property_name.blank? ? nil : @import_set.get!(PropertyDefinition, property_name))
       [:relationships, relationship_name, company, property]
 

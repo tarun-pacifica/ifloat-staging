@@ -98,7 +98,7 @@ module Indexer
   end
   
   def self.image_checksums_for_product_ids(product_ids)
-    product_ids.group_by { |id| @image_checksums_for_product_ids[id] }
+    product_ids.group_by { |id| @@image_checksum_index[id] }
   end
   
   def self.last_loaded_md5

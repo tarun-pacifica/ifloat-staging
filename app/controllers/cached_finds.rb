@@ -31,6 +31,22 @@ class CachedFinds < Application
     relevant_filters.to_json
   end
   
+  def found_product_checksums(id, limit)
+    provides :js
+    
+    find = session.ensure_cached_find(id.to_i)
+    find.ensure_valid
+    
+    total = 0
+    totals_by_checksum = {}
+    find.filtered_product_checksums.each do |checksum, product_ids|
+      total += (totals_by_checksum[checksum] = product_ids.size)
+    end
+    
+    limit = [limit.to_i, 1].max
+    totals_by_checksum.to_a[0, limit].unshift(["ALL", total]).to_json
+  end
+  
   def found_product_ids(id, limit)
     provides :js
     

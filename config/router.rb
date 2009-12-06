@@ -4,7 +4,7 @@ Merb::Router.prepare do
   # TODO: remove for launch
   match('/prelaunch/:action').to(:controller => 'prelaunch')
   
-  match('/tools/caches/:basename.:ext').to(:controller => 'tools', :action => 'caches')
+  match('/tools/caches/:basename.:ext').to(:controller => 'tools', :action => 'caches]')
   match('/tools/:action').to(:controller => 'tools')
   
   resources :articles
@@ -13,6 +13,7 @@ Merb::Router.prepare do
   
   match('/cached_finds/conversions.js').to(:controller => 'cached_finds', :action => 'conversions', :format => 'js')
   match('/cached_finds/:id/filter/:property_id').to(:controller => 'cached_finds', :action => 'filter')
+  match('/cached_finds/:id/found_product_checksums/:limit').to(:controller => 'cached_finds', :action => 'found_product_checksums', :format => 'js')
   match('/cached_finds/:id/found_product_ids/:limit').to(:controller => 'cached_finds', :action => 'found_product_ids', :format => 'js')
   match('/cached_finds/:id/reset').to(:controller => 'cached_finds', :action => 'reset')
   resources :cached_finds

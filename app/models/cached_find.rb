@@ -180,11 +180,6 @@ class CachedFind
     [text_values_by_property_id, relevant_values_by_property_id]
   end
   
-  # TODO: spec
-  def filtered_product_checksums
-    Indexer.image_checksums_for_product_ids(filtered_product_ids)
-  end
-  
   # TODO: spec for class_only filtering
   def filtered_product_ids(class_only = false)
     return [] if all_product_count.zero?
@@ -202,6 +197,11 @@ class CachedFind
     excluded_product_ids = Indexer.excluded_product_ids_for_numeric_filters(numeric_filters)
     excluded_product_ids += Indexer.excluded_product_ids_for_text_filters(text_filters, language_code)
     relevant_product_ids - excluded_product_ids
+  end
+  
+  # TODO: spec
+  def filtered_product_ids_by_image_url
+    Indexer.image_urls_for_product_ids(filtered_product_ids)
   end
   
   def spec_date

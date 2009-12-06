@@ -10,7 +10,7 @@ module AssetStore
   
   def self.method_missing(method, *args)
     raise "asset store engine not configured" if @@engine.nil?
-    super unless [:delete_obsolete, :url, :write].include?(method)
+    super unless [:delete_obsolete, :url, :url_direct, :write].include?(method)
     @@engine.send(method, *args)
   end
   

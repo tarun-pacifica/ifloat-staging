@@ -11,9 +11,9 @@ Merb::Router.prepare do
   
   match('/blogs/:name').to(:controller => 'blogs', :action => 'show').name(:blogs)
   
-  match('/cached_finds/conversions.js').to(:controller => 'cached_finds', :action => 'conversions', :format => 'js')
+  match('/cached_finds/conversions.js').to(:controller => 'cached_finds', :action => 'constants', :format => 'js')
   match('/cached_finds/:id/filter/:property_id').to(:controller => 'cached_finds', :action => 'filter')
-  match('/cached_finds/:id/found_product_checksums/:limit').to(:controller => 'cached_finds', :action => 'found_product_checksums', :format => 'js')
+  match('/cached_finds/:id/found_image_urls/:limit').to(:controller => 'cached_finds', :action => 'found_image_urls', :format => 'js')
   match('/cached_finds/:id/found_product_ids/:limit').to(:controller => 'cached_finds', :action => 'found_product_ids', :format => 'js')
   match('/cached_finds/:id/reset').to(:controller => 'cached_finds', :action => 'reset')
   resources :cached_finds

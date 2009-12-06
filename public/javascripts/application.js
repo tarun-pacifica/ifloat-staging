@@ -68,7 +68,7 @@ function filter_queue_execute_handle(text_values_by_relevant_filter_ids) {
 	var results = $("#cached_find_results");
 	var r = results[0];
 	r.filter_queue_active -= 1;
-	if(r.filter_queue_active == 0) prod_list_update(results);
+	if(r.filter_queue_active == 0) prod_grid_update(results);
 	
 	var relevant_filter_ids = [];
 	for(filter_id in text_values_by_relevant_filter_ids) relevant_filter_ids.push(filter_id);
@@ -457,9 +457,9 @@ function prod_detail_update_purchase_buttons_handle(data) {
 	assets.append(data);
 }
 
-// Product Listings (Gallery & List Views)
+// Product Grid
 
-function prod_list_image_zoom(event) {
+function prod_grid_image_zoom(event) {
 	var zoom = $("#list_image_zoom");
 	zoom[0].src = event.target.src;
 	
@@ -471,122 +471,57 @@ function prod_list_image_zoom(event) {
 	zoom.css("display", "block");
 }
 
-function prod_list_image_unzoom(i) {
+function prod_grid_image_unzoom(i) {
 	$(i).css("border-color", "gray");
 	$("#list_image_zoom").css("display", "none");
 }
 
-function prod_list_more(m) {
+function prod_grid_more(m) {
 	var more = $(m);
 	more.hide();
 	
 	var results = more.parents("#cached_find_results");
 	results[0].list_size += parseInt(more.find(".count").text());
-	prod_list_update(results);
+	prod_grid_update(results);
 }
 
-function prod_list_switch_grid() {
-	var results = $("#cached_find_results");
-	if(results[0].view == "grid") return;
-	results[0].view = "grid";
-	
-	results.find(".more").css("margin-top", "5px");
-	
-	var switcher = $("#cached_find_switcher");
-	switcher.find(".grid").css("background-position", "0 0");
-	switcher.find(".list").css("background-position", "0 -24px");
-	
-	var products = results.find(".product");
-	products.css("border-bottom", "none");
-	products.css("padding", "0");
-	
-	products.find("img").css("margin", "5px 0 0 5px");
-	
-	products.find("h1,h2,p,hr").hide();
-}
-
-function prod_list_switch_list() {
-	var results = $("#cached_find_results");
-	if(results[0].view == "list") return;	
-	results[0].view = "list";
-	
-	results.find(".more").css("margin-top", "0");
-	
-	var switcher = $("#cached_find_switcher");
-	switcher.find(".grid").css("background-position", "0 -24px");
-	switcher.find(".list").css("background-position", "0 0");
-	
-	var products = results.find(".product");
-	products.css("border-bottom", "1px solid silver");
-	products.css("padding", "5px");
-	
-	products.find("img").css("margin", "0 10px 0 0");
-	
-	products.find("h1,h2,p,hr").show();
-}
-
-function prod_list_update(results) {
+function prod_grid_update(results) {
 	var r = results[0];
-	var url = "/cached_finds/" + r.find_id + "/found_product_ids/" + r.list_size;
-	$.getJSON(url, prod_list_update_handle);
+	var url = "/cached_finds/" + r.find_id + "/found_image_urls/" + r.list_size
+	$.getJSON(url, prod_grid_update_handle);
 }
 
-function prod_list_update_handle(found_count_and_prod_ids) {
-	var found_count = found_count_and_prod_ids.shift();
-	var prod_ids = found_count_and_prod_ids;
-	var prod_count = prod_ids.length;
-	
-	$("#cached_find_report .filtered_count").text(found_count);
-	$("#cached_find_report .displayed_count").text(prod_count);
+function prod_grid_update_handle(url_counts) {
+	var image_prod_count = 0; // TODO add up as we iterate
+	var total_prod_count = url_counts.shift();
+	var image_count = url_counts.length;
 	
 	var results = $("#cached_find_results");
 	var r = results[0];
-	r.visible_size = prod_count;
+	r.visible_size = image_count;
 	
-	var products = results.find(".product");
-	products.addClass("to_hide");
-	
-	var prod_ids_to_load = [];
+	results.find(".product").remove();
+	var insertion_point = results.find("hr.result_terminator");
 		
-	for(i in prod_ids) {
-		var id = prod_ids[i];
-		var product = products.filter("#prod_" + id);
+	for(i in url_counts) {
+		var uc = url_counts[i];
+		var image_url = uc[0];
+		image_prod_count += uc[1];
 		
-		if(product.hasClass("to_hide")) {
-			product.removeClass("to_hide");
-			product.show();
-		} else {
-			prod_ids_to_load.push(id);
-		}
+		var checksum = image_url.match("([a-z0-9]+)\.([a-z]+)$")[1];
+		var link_url = "/cached_finds/" + r.find_id + '/found_products/' + checksum;
+		
+		var prod_html = '<div class="product"> <a href="' + link_url + '"> <img src="' + image_url + '" /> </a> </div>';
+		insertion_point.before(prod_html);
 	}
 		
-	if(prod_ids_to_load.length > 0) {
-		var url = "/products/batch/" + prod_ids_to_load.join("_");
-		$.get(url, prod_list_update_handle_batch, "html");
-	} else {
-		r.filter_queue_active = -1;
-		filter_queue_execute(results);
-	}
-		
-	products.filter(".to_hide").hide();
-	prod_list_update_more_button(results.find("#cached_find_more"), found_count, prod_count, r.list_request_max);
+	// prod_grid_update_more_button(results.find("#cached_find_more"), total_prod_count, r.visible_size, r.list_request_max); // TODO - revise completely
+	
+	$("#cached_find_report .filtered_count").text(total_prod_count);
+	$("#cached_find_report .displayed_count").text(image_prod_count);
 }
 
-function prod_list_update_handle_batch(data) {
-	var results = $("#cached_find_results");
-	var r = results[0];
-	results.find("hr.result_terminator").before(data);
-	
-	if (r.view == "grid") {
-		prod_list_switch_list();
-		prod_list_switch_grid();
-	}
-	
-	r.filter_queue_active = -1;
-	filter_queue_execute(results);
-}
-
-function prod_list_update_more_button(more, found_count, displayed_count, max_request_size) {
+function prod_grid_update_more_button(more, found_count, displayed_count, max_request_size) {
 	more.parent().find("p").remove();
 	
 	if(displayed_count == 0) {

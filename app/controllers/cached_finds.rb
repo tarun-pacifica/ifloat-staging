@@ -40,6 +40,7 @@ class CachedFinds < Application
     total = 0
     totals_by_url = {}
     find.filtered_product_ids_by_image_url.each do |url, product_ids|
+      next if url.nil? # TODO: decide whether we should allow for this
       total += (totals_by_url[url] = product_ids.size)
     end
     
@@ -47,14 +48,19 @@ class CachedFinds < Application
     totals_by_url.to_a[0, limit].unshift(total).to_json
   end
   
-  def found_product_ids(id, limit)
-    provides :js
-    
+  def found_products(id, image_checksum)
     find = session.ensure_cached_find(id.to_i)
     find.ensure_valid
-    limit = [limit.to_i, 1].max
-    product_ids = find.filtered_product_ids
-    ([product_ids.size] + product_ids[0, limit]).to_json
+    
+    image = Asset.first(:checksum => image_checksum)
+    return redirect(resource(find)) if image.nil?
+    
+    product_ids = find.filtered_product_ids_by_image_url[image.url]
+    return redirect(resource(find)) if product_ids.nil? or product_ids.empty?
+    
+    return redirect(url(:product, :id => product_ids.first)) if product_ids.size == 1
+    
+    product_ids.to_json # TODO: gather products and render them into selection list
   end
   
   def new

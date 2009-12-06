@@ -47,11 +47,6 @@
 		<span class="spec"><%= @find.specification %></span>
 	</div>
 	
-	<div id="cached_find_switcher">
-		<div class="list" onclick="prod_list_switch_list()"> </div>
-		<div class="grid" onclick="prod_list_switch_grid()"> </div>
-	</div>
-	
 	<div id="cached_find_results">
 		
 		<hr class="result_terminator"/>
@@ -71,10 +66,9 @@
 	r.find_id = <%= @find.id %>;
 	r.list_request_max = 36;
 	r.list_size = 0;
-	r.view = "grid";
-	r.visible_size = 0;
+	r.visible_size = 0; // TODO: this vs list_size and list_req_max???
 	
-	prod_list_more($("#cached_find_more"));
+	prod_grid_more($("#cached_find_more"));
 	
 	var options = {autoOpen: false, modal: true};
 	options.buttons = {

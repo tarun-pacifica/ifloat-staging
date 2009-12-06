@@ -459,23 +459,6 @@ function prod_detail_update_purchase_buttons_handle(data) {
 
 // Product Grid
 
-function prod_grid_image_zoom(event) {
-	var zoom = $("#list_image_zoom");
-	zoom[0].src = event.target.src;
-	
-	var image = $(event.target)
-	var position = image.position();
-	image.css("border-color", "black");
-	zoom.css("left", position.left - 10 - zoom.width() + "px");
-	zoom.css("top", position.top + (image.height() - zoom.height()) / 2 + "px");
-	zoom.css("display", "block");
-}
-
-function prod_grid_image_unzoom(i) {
-	$(i).css("border-color", "gray");
-	$("#list_image_zoom").css("display", "none");
-}
-
 function prod_grid_more(m) {
 	var more = $(m);
 	more.hide();
@@ -492,7 +475,7 @@ function prod_grid_update(results) {
 }
 
 function prod_grid_update_handle(url_counts) {
-	var image_prod_count = 0; // TODO add up as we iterate
+	var image_prod_count = 0;
 	var total_prod_count = url_counts.shift();
 	var image_count = url_counts.length;
 	
@@ -511,10 +494,10 @@ function prod_grid_update_handle(url_counts) {
 		var checksum = image_url.match("([a-z0-9]+)\.([a-z]+)$")[1];
 		var link_url = "/cached_finds/" + r.find_id + '/found_products/' + checksum;
 		
-		var prod_html = '<div class="product"> <a href="' + link_url + '"> <img src="' + image_url + '" /> </a> </div>';
+		var prod_html = '<div class="product"> <a href="' + link_url + '"> <img src="' + image_url + '" onmouseover="prod_image_zoom(event)" onmouseout="prod_image_unzoom(this)" /> </a> </div>';
 		insertion_point.before(prod_html);
 	}
-		
+	
 	// prod_grid_update_more_button(results.find("#cached_find_more"), total_prod_count, r.visible_size, r.list_request_max); // TODO - revise completely
 	
 	$("#cached_find_report .filtered_count").text(total_prod_count);
@@ -536,6 +519,25 @@ function prod_grid_update_more_button(more, found_count, displayed_count, max_re
 		more.find(".count").text(request_size);
 		more.show();
 	}
+}
+
+// Product Images
+
+function prod_image_zoom(event) {
+	var zoom = $("#image_zoom");
+	zoom[0].src = event.target.src;
+	
+	var image = $(event.target)
+	var position = image.position();
+	image.css("border-color", "black");
+	zoom.css("left", position.left - 10 - zoom.width() + "px");
+	zoom.css("top", position.top + (image.height() - zoom.height()) / 2 + "px");
+	zoom.css("display", "block");
+}
+
+function prod_image_unzoom(i) {
+	$(i).css("border-color", "gray");
+	$("#image_zoom").css("display", "none");
 }
 
 // Purchase Lists

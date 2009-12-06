@@ -2,6 +2,7 @@ module Indexer
   COMPILED_PATH = "caches/indexer.marshal"
   
   @@class_property_id = nil
+  @@image_checksum_index = {}
   @@last_loaded_md5 = nil
   @@numeric_filtering_index = {}
   @@text_filtering_index = {}
@@ -15,6 +16,7 @@ module Indexer
     Tempfile.open(File.basename(COMPILED_PATH)) do |f|
       records = text_records
       indexes = {
+        :image_checksums => compile_image_checksum_index,
         :numeric_filtering => compile_numeric_filtering_index,
         :text_filtering => compile_text_filtering_index(records),
         :text_finding => compile_text_finding_index(records)
@@ -95,6 +97,10 @@ module Indexer
     values_by_property_id
   end
   
+  def self.image_checksums_for_product_ids(product_ids)
+    product_ids.group_by { |id| @image_checksums_for_product_ids[id] }
+  end
+  
   def self.last_loaded_md5
     @@last_loaded_md5
   end
@@ -108,6 +114,7 @@ module Indexer
     
     File.open(COMPILED_PATH) do |f|
       indexes = Marshal.load(f)
+      @@image_checksum_index = indexes[:image_checksums]
       @@numeric_filtering_index = indexes[:numeric_filtering]
       @@text_filtering_index = indexes[:text_filtering]
       @@text_finding_index = indexes[:text_finding]
@@ -157,6 +164,29 @@ module Indexer
   
   
   private
+  
+  def self.compile_image_checksum_index
+    # TODO: remove MS hack once we are vending all products rather than just MarineStore's
+    #       first two INNER JOINS and second WHERE condition
+    query =<<-SQL
+      SELECT p.id, a.checksum
+      FROM products p
+        INNER JOIN product_mappings pm ON p.id = pm.definitive_product_id
+        INNER JOIN companies c ON pm.company_id = c.id
+        INNER JOIN attachments at ON p.id = at.product_id
+        INNER JOIN assets a ON at.asset_id = a.id
+      WHERE p.type = 'DefinitiveProduct'
+        AND c.reference = ?
+        AND at.role = 'image'
+      ORDER BY at.sequence_number
+    SQL
+    
+    ici = {}
+    repository.adapter.query(query, "GBR-02934378").each do |record|
+      ici[record.id] ||= record.checksum
+    end
+    ici
+  end
   
   def self.compile_numeric_filtering_index
     # TODO: remove MS hack once we are vending all products rather than just MarineStore's

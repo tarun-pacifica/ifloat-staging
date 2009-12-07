@@ -489,12 +489,14 @@ function prod_grid_update_handle(url_counts) {
 	for(i in url_counts) {
 		var uc = url_counts[i];
 		var image_url = uc[0];
-		image_prod_count += uc[1];
+		var count = uc[1];
+		image_prod_count += count;
 		
 		var checksum = image_url.match("([a-z0-9]+)\.([a-z]+)$")[1];
 		var link_url = "/cached_finds/" + r.find_id + '/found_products/' + checksum;
+		var count_overlay = (count == 1 ? "" : ('<div class="count">' + count + ' items</div>'))
 		
-		var prod_html = '<div class="product"> <a href="' + link_url + '"> <img src="' + image_url + '" onmouseover="prod_image_zoom(event)" onmouseout="prod_image_unzoom(this)" /> </a> </div>';
+		var prod_html = '<a class="product" href="' + link_url + '"> ' + count_overlay + '<img src="' + image_url + '" onmouseover="prod_image_zoom(event)" onmouseout="prod_image_unzoom(this)" /> </a>';
 		insertion_point.before(prod_html);
 	}
 	

@@ -395,9 +395,24 @@ body {
 	clear: both;
 }
 
-#cached_find_results .product img {
-	border: 1px solid gray;
+#cached_find_results a.product {
+	color: red;
 	float: left;
+	position: relative;
+	text-decoration: none;
+}
+
+#cached_find_results a.product .count {
+	background: white;
+	border: 1px solid gray;
+	margin-top: 5px;
+	padding: 2px;
+	position: absolute;
+	right: 5px;
+}
+
+#cached_find_results a.product img {
+	border: 1px solid gray;
 	height: 100px;
 	margin: 5px 0 0 5px;
 	width: 100px;

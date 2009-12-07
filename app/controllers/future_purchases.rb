@@ -124,7 +124,7 @@ class FuturePurchases < Application
     purchase_titles_by_product_id = Hash.new("")
     Product.display_values(product_ids, session.language, ["auto:title"]).each do |product_id, values_by_property|
       title_property, titles = values_by_property.first
-      purchase_titles_by_product_id[product_id] = titles[3]
+      purchase_titles_by_product_id[product_id] = titles.last
     end
     purchase_titles_by_product_id
   end

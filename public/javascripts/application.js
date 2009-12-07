@@ -504,6 +504,9 @@ function prod_grid_update_handle(url_counts) {
 	
 	$("#cached_find_report .filtered_count").text(total_prod_count);
 	$("#cached_find_report .displayed_count").text(image_prod_count);
+	
+	r.filter_queue_active = -1;
+	filter_queue_execute(results);
 }
 
 function prod_grid_update_more_button(more, found_count, displayed_count, max_request_size) {

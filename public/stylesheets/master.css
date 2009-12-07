@@ -722,7 +722,9 @@ body {
 	float: right;
 	height: 23px;
 	margin-left: 5px;
+	position: relative;
 	width: 150px;
+	z-index: 10;
 }
 
 #main_header #find_bar .purchase_list a {

@@ -398,6 +398,7 @@ body {
 #cached_find_results a.product {
 	color: red;
 	float: left;
+	margin: 5px 0 0 5px;
 	position: relative;
 	text-decoration: none;
 }
@@ -405,7 +406,6 @@ body {
 #cached_find_results a.product .count {
 	background: white;
 	border: 1px solid gray;
-	margin-top: 5px;
 	padding: 2px;
 	position: absolute;
 	right: 5px;
@@ -414,7 +414,6 @@ body {
 #cached_find_results a.product img {
 	border: 1px solid gray;
 	height: 100px;
-	margin: 5px 0 0 5px;
 	width: 100px;
 }
 
@@ -625,6 +624,7 @@ body {
 	height: 200px;
 	position: absolute;
 	width: 200px;
+	z-index: 10;
 }
 
 /* Login / Register */

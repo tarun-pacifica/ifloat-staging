@@ -530,7 +530,7 @@ function prod_image_zoom(event) {
 	zoom[0].src = event.target.src;
 	
 	var image = $(event.target)
-	var position = image.position();
+	var position = image.offset();
 	image.css("border-color", "black");
 	zoom.css("left", position.left - 10 - zoom.width() + "px");
 	zoom.css("top", position.top + (image.height() - zoom.height()) / 2 + "px");

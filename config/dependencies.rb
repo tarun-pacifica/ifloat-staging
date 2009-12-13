@@ -31,6 +31,7 @@ require "fileutils"
 
 # Non-merb gems
 dependency "fastercsv"
+dependency "image_science", ">= 1.2.0"
 dependency "rackspace-cloudfiles", :require_as => "cloudfiles" # --source http://gems.github.com
 
 # Internal libraries

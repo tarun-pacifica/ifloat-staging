@@ -25,13 +25,13 @@ module AssetStore
     
     def delete_obsolete
       list_by_bucket.each do |bucket, names|
-        current_names = Asset.all(:bucket => bucket).map { |asset| asset.store_name }
-        (names - current_names).each { |name| delete(bucket, name) }
+        db_names = Asset.all(:bucket => bucket).map { |asset| asset.store_names }.flatten
+        (names - db_names).each { |name| delete(bucket, name) }
       end
     end
     
-    def url(asset)
-      url_direct(asset.bucket, asset.store_name)
+    def url(asset, variant = nil)
+      url_direct(asset.bucket, asset.store_name(variant))
     end
     
     def url_direct(bucket, name)
@@ -67,18 +67,22 @@ module AssetStore
       @local_root / bucket
     end
     
-    def local_path(asset)
+    def local_path(asset, variant = nil)
       begin
         dir = local_dir(asset.bucket)
         FileUtils.mkpath(dir)
-        yield dir, asset.store_name
+        yield dir, asset.store_name(variant)
       rescue
         nil
       end
     end
     
-    def write(asset)
-      local_path(asset) { |dir, name| File.link(asset.file_path, dir / name) }
+    def write(asset, variant = nil)
+      source_path = asset.file_path(variant)
+      local_path(asset, variant) do |dir, name|
+        target_path = dir / name
+        File.link(source_path, target_path) unless File.exist?(target_path)
+      end unless source_path.nil?
     end
   end
   
@@ -117,11 +121,12 @@ module AssetStore
       names_by_bucket
     end
     
-    def write(asset)
+    def write(asset, variant = nil)
+      source_path = asset.file_path(variant)
       container do |c|
-        object = c.create_object("#{asset.bucket}/#{asset.store_name}")
-        object.load_from_filename(asset.file_path) if object.bytes.to_i != File.size(asset.file_path)
-      end
-    end    
+        object = c.create_object("#{asset.bucket}/#{asset.store_name(variant)}")
+        object.load_from_filename(source_path) if object.bytes.to_i != File.size(source_path)
+      end unless source_path.nil?
+    end
   end
 end

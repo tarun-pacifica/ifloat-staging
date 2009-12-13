@@ -2,7 +2,12 @@
 
 require "lib/parsers/abstract"
 
+ASSET_CSV_PATH = "/tmp/assets.csv"
+ASSET_ERRORS_PATH = "/tmp/basic_asset_errors.csv"
 ASSET_REPO = "../ifloat_assets"
+ASSET_VARIANT_DIR = "/tmp/ifloat_asset_variants"
+FileUtils.mkpath(ASSET_VARIANT_DIR)
+
 CSV_REPO = "../ifloat_csvs"
 
 CLASSES = [PropertyType, PropertyDefinition, PropertyValueDefinition, TitleStrategy, Company, Facility, Asset, DefinitiveProduct]
@@ -241,8 +246,7 @@ class ImportSet
 end
 
 def build_asset_csv
-  csv_path = "/tmp/assets.csv"
-  return nil if File.exist?(csv_path) and File.mtime(csv_path) > repo_mtime(ASSET_REPO)
+  return nil if File.exist?(ASSET_CSV_PATH) and File.mtime(ASSET_CSV_PATH) > repo_mtime(ASSET_REPO)
   
   assets = []
   errors = []
@@ -279,23 +283,56 @@ def build_asset_csv
     else errors << [relative_path, "duplicate of #{existing_path}"]
     end
     
-    assets << [bucket, company_ref, name, path, Digest::MD5.file(path).hexdigest]
+    checksum = Digest::MD5.file(path).hexdigest
+    
+    variants = [nil, nil]
+    variants = %w(small tiny).map do |variant|
+      variant_path, error = create_asset_variant(path, checksum, variant)
+      errors << [relative_path, error] unless error.nil?
+      variant_path
+    end if File.extname(path) =~ Asset::IMAGE_FORMAT
+    
+    assets << ([bucket, company_ref, name, path, checksum] + variants)
   end
   
   if errors.empty?
-    FasterCSV.open("/tmp/assets.csv", "w") do |csv|
-      csv << ["bucket", "company.reference", "name", "file_path", "checksum"]
+    FasterCSV.open(ASSET_CSV_PATH, "w") do |csv|
+      csv << ["bucket", "company.reference", "name", "file_path", "checksum", "file_path_small", "file_path_tiny"]
       assets.sort.each { |asset| csv << asset }
     end
     return nil
   end
   
-  error_report_path = "/tmp/basic_asset_errors.csv"
-  FasterCSV.open("/tmp/basic_asset_errors.csv", "w") do |error_report|
+  FasterCSV.open(ASSET_ERRORS_PATH, "w") do |error_report|
     error_report << ["path", "error"]
     errors.each { |error| error_report << error }
   end
-  error_report_path
+  ASSET_ERRORS_PATH
+end
+
+def create_asset_variant(source_path, checksum, variant)
+  path = ASSET_VARIANT_DIR / "#{checksum}-#{variant}#{File.extname(source_path)}"
+  return path if File.exist?(path)
+  
+  width, height =
+    case variant
+    when "small" then [200, 200]
+    when "tiny"  then [100, 100]
+    else raise "unknown variant #{variant.inspect}"
+    end
+  
+  begin
+    ImageScience.with_image(source_path) do |img|
+      unless img.width == 400 and img.height == 400
+        FileUtils.touch(path)
+        return [nil, nil]
+      end
+      img.resize(width, height) { |resized| resized.save(path) }    
+    end
+    [path, nil]
+  rescue Exception => e
+    [nil, "unable to create #{variant} variant of #{@file_path.inspect}: #{e}"]
+  end
 end
 
 def mail(success, message, attachment_path = nil)

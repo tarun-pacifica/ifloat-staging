@@ -39,6 +39,7 @@ class Asset
   ]
   
   BUCKETS = %w(articles blogs products property_icons)
+  IMAGE_FORMAT = /\.(gif|jpeg|jpg|png|tif|tiff)$/
   NAME_FORMAT = /^([\w\-\.]+?)(___(\d+))?\.([a-z]{3,})$/
   
   property :id, Serial
@@ -74,11 +75,14 @@ class Asset
       root_asset = Asset.first(:bucket => bucket, :name => root_name)
       self.chain_id = root_asset.id unless root_asset.nil?
     end
+    
+    self.checksum ||= Digest::MD5.file(@file_path).hexdigest unless @file_path.nil?
   end
   
   before :save do
-    AssetStore.write(self) if @file_write
-    @file_write = false
+    AssetStore.write(self) unless @file_path.nil?
+    AssetStore.write(self, "small") unless @file_path_small.nil?
+    AssetStore.write(self, "tiny") unless @file_path_tiny.nil?
   end
   
   def self.chains_by_id(asset_ids)
@@ -94,20 +98,32 @@ class Asset
     name =~ NAME_FORMAT ? ["#{$1}___1.#{$4}", $3.to_i] : nil
   end
   
-  # TODO: spec
-  attr_reader :file_path
-  def file_path=(value)
-    self.checksum = Digest::MD5.file(value).hexdigest unless attribute_dirty?(:checksum)
-    @file_path = value
-    @file_write = true
+  attr_writer :file_path
+  attr_writer :file_path_small
+  attr_writer :file_path_tiny
+  
+  # TODO: spec (variant)
+  def file_path(variant = nil)
+    variant = "_#{variant}" unless variant.nil?
+    instance_variable_get("@file_path#{variant}")
   end
   
-  def store_name
+  # TODO: spec (variant)
+  def store_name(variant = nil)
     raise "unable to generate store_name without bucket, checksum (via file_path=) and name" if [bucket, checksum, name].any? { |v| v.nil? }
-    "#{checksum}#{File.extname(name)}"
+    variant = "-#{variant}" unless variant.nil?
+    "#{checksum}#{variant}#{File.extname(name)}"
   end
   
-  def url
-    AssetStore.url(self)
+  # TODO: spec
+  def store_names
+    variants = [nil]
+    variants += ["small", "tiny"] if name =~ IMAGE_FORMAT
+    variants.map { |variant| store_name(variant) }
+  end
+  
+  # TODO: spec (variant)
+  def url(variant = nil)
+    AssetStore.url(self, variant)
   end
 end

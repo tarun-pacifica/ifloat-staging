@@ -148,9 +148,13 @@ class DefinitiveProductParser < AbstractParser
     when :relationships
       name, company, property = domain_info
       attributes = {:company => company, :property_definition => property, :name => name}
+      fields = []
       value.split(",").map do |field|
         raise "empty relationship (possible double comma): #{value.inspect}" if field.blank?
-        ImportObject.new(Relationship, attributes.merge(:value => field.strip))
+        f = field.strip
+        raise "repeated relationship (#{f.inspect}): #{value.inspect}" if fields.include?(f)
+        fields << f
+        ImportObject.new(Relationship, attributes.merge(:value => f))
       end
           
     when :values

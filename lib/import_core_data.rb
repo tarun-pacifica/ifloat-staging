@@ -312,7 +312,7 @@ end
 
 def create_asset_variant(source_path, checksum, variant)
   path = ASSET_VARIANT_DIR / "#{checksum}-#{variant}#{File.extname(source_path)}"
-  return path if File.exist?(path)
+  return [File.size(path).zero? ? nil : path, nil] if File.exist?(path)
   
   width, height =
     case variant

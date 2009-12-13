@@ -14,4 +14,8 @@ class AssetParser < AbstractParser
     return super unless head == "company.reference"
     @import_set.get!(Company, value)
   end
+  
+  def reject_blank_value?(head)
+    head != "file_path_small" and head != "file_path_tiny"
+  end
 end

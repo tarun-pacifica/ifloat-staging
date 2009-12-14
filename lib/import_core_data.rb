@@ -87,6 +87,7 @@ class ImportSet
   end
   
   def import
+    start = Time.now
     primary_image_assets.each do |asset|
       path = asset.attributes[:file_path]
       ImageScience.with_image(path) do |img|
@@ -94,6 +95,7 @@ class ImportSet
         error(Asset, asset.path, asset.row, nil, "not 400x400 (#{w}x#{h}): #{path}") unless w == 400 and h == 400
       end
     end
+    puts "#{'%6.2f' % (Time.now - start)}s : ensured all primary images are 400x400 in size"
     return [] unless @errors.empty?
     
     @objects_by_pk_by_class = nil

@@ -87,6 +87,15 @@ class ImportSet
   end
   
   def import
+    primary_image_assets.each do |asset|
+      path = asset.attributes[:file_path]
+      ImageScience.with_image(path) do |img|
+        w, h = img.width, img.height
+        error(Asset, asset.path, asset.row, nil, "not 400x400 (#{w}x#{h}): #{path}") unless w == 400 and h == 400
+      end
+    end
+    return [] unless @errors.empty?
+    
     @objects_by_pk_by_class = nil
     GC.start
     def add; raise "add cannot be called once import has been"; end
@@ -225,6 +234,17 @@ class ImportSet
     value_fields -= [:chain_id, :chain_sequence_number] if klass == Asset
     
     [pk_fields, value_fields]
+  end
+  
+  def primary_image_assets
+    attachments_by_product = {}
+    @objects_by_pk_by_class[Attachment].each do |pk, attachment|
+      product, role, sequence_number = pk
+      next unless role == "image"
+      a = attachments_by_product[product]
+      attachments_by_product[product] = attachment if a.nil? or a.attributes[:sequence_number] > sequence_number
+    end
+    attachments_by_product.values.map { |a| a.attributes[:asset] }
   end
   
   def value_md5s_and_ids_by_pk_md5(klass, pk_fields, value_fields)

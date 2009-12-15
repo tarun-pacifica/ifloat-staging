@@ -405,10 +405,10 @@ body {
 
 #cached_find_results a.product .count {
 	background: white;
-	border: 1px solid gray;
+	bottom: 4px;
 	padding: 2px;
 	position: absolute;
-	right: 5px;
+	right: 1px;
 }
 
 #cached_find_results a.product img {

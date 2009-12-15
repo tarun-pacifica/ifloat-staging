@@ -13,7 +13,7 @@ Merb::Router.prepare do
   
   match('/cached_finds/conversions.js').to(:controller => 'cached_finds', :action => 'conversions', :format => 'js')
   match('/cached_finds/:id/filter/:property_id').to(:controller => 'cached_finds', :action => 'filter')
-  match('/cached_finds/:id/found_image_urls/:limit').to(:controller => 'cached_finds', :action => 'found_image_urls', :format => 'js')
+  match('/cached_finds/:id/found_images/:limit').to(:controller => 'cached_finds', :action => 'found_images', :format => 'js')
   match('/cached_finds/:id/found_products/:image_checksum').to(:controller => 'cached_finds', :action => 'found_products')
   match('/cached_finds/:id/reset').to(:controller => 'cached_finds', :action => 'reset')
   resources :cached_finds

@@ -200,8 +200,8 @@ class CachedFind
   end
   
   # TODO: spec
-  def filtered_product_ids_by_image_url
-    Indexer.image_urls_for_product_ids(filtered_product_ids)
+  def filtered_product_ids_by_image_checksum
+    Indexer.image_checksums_for_product_ids(filtered_product_ids)
   end
   
   def spec_date

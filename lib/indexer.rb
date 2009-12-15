@@ -2,7 +2,7 @@ module Indexer
   COMPILED_PATH = "caches/indexer.marshal"
   
   @@class_property_id = nil
-  @@image_url_index = {}
+  @@image_checksum_index = {}
   @@last_loaded_md5 = nil
   @@numeric_filtering_index = {}
   @@text_filtering_index = {}
@@ -16,7 +16,7 @@ module Indexer
     Tempfile.open(File.basename(COMPILED_PATH)) do |f|
       records = text_records
       indexes = {
-        :image_urls => compile_image_url_index,
+        :image_checksums => compile_image_checksum_index,
         :numeric_filtering => compile_numeric_filtering_index,
         :text_filtering => compile_text_filtering_index(records),
         :text_finding => compile_text_finding_index(records)
@@ -97,8 +97,11 @@ module Indexer
     values_by_property_id
   end
   
-  def self.image_urls_for_product_ids(product_ids)
-    product_ids.group_by { |id| @@image_url_index[id] }
+  # TODO: get rid of extended logic here and revert to simple group_by once all ingested products are guaranteed to have a primary image - also should be able to get rid of 'no image' image in this case
+  def self.image_checksums_for_product_ids(product_ids)
+    prod_ids_by_checksum = product_ids.group_by { |id| @@image_checksum_index[id] }
+    prod_ids_by_checksum.delete(nil)
+    prod_ids_by_checksum
   end
   
   def self.last_loaded_md5
@@ -114,7 +117,7 @@ module Indexer
     
     File.open(COMPILED_PATH) do |f|
       indexes = Marshal.load(f)
-      @@image_url_index = indexes[:image_urls]
+      @@image_checksum_index = indexes[:image_checksums]
       @@numeric_filtering_index = indexes[:numeric_filtering]
       @@text_filtering_index = indexes[:text_filtering]
       @@text_finding_index = indexes[:text_finding]
@@ -165,7 +168,7 @@ module Indexer
   
   private
   
-  def self.compile_image_url_index
+  def self.compile_image_checksum_index
     # TODO: remove MS hack once we are vending all products rather than just MarineStore's
     #       first two INNER JOINS and second WHERE condition
     query =<<-SQL
@@ -183,7 +186,7 @@ module Indexer
     
     iui = {}
     repository.adapter.query(query, "GBR-02934378").each do |record|
-      iui[record.id] ||= AssetStore.url_direct("products", "#{record.checksum}#{File.extname(record.name)}")
+      iui[record.id] ||= record.checksum
     end
     iui
   end

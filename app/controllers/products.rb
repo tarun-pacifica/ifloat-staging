@@ -115,7 +115,6 @@ class Products < Application
     end
     
     @data_properties = @data_properties.sort_by { |property| property.sequence_number }
-    data_property_ids = @data_properties.map { |property| property.id }
     @friendly_name_sections = PropertyDefinition.friendly_name_sections(@data_properties, session.language)
     @text_value_definitions = PropertyDefinition.definitions_by_property_id(@data_properties, session.language)
   end

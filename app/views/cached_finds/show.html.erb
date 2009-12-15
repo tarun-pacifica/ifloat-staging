@@ -50,11 +50,7 @@
 	<div id="cached_find_results">
 		
 		<hr class="result_terminator"/>
-		<div class="more">
-			<div id="cached_find_more" onclick="prod_list_more(this)">
-				<span class="count">36</span> More Results
-			</div>
-		</div>
+		<div class="footer"> </div>
 	</div>
 </div>
 
@@ -64,11 +60,7 @@
 	r.filter_queue = [];
 	r.filter_queue_active = -1;
 	r.find_id = <%= @find.id %>;
-	r.list_request_max = 36;
-	r.list_size = 0;
-	r.visible_size = 0; // TODO: this vs list_size and list_req_max???
-	
-	prod_grid_more($("#cached_find_more"));
+	prod_grid_update(results);
 	
 	var options = {autoOpen: false, modal: true};
 	options.buttons = {

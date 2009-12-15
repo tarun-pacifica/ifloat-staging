@@ -459,78 +459,55 @@ function prod_detail_update_purchase_buttons_handle(data) {
 
 // Product Grid
 
-function prod_grid_more(m) {
-	var more = $(m);
-	more.hide();
-	
-	var results = more.parents("#cached_find_results");
-	results[0].list_size += parseInt(more.find(".count").text());
-	prod_grid_update(results);
-}
-
 function prod_grid_update(results) {
-	var r = results[0];
-	var url = "/cached_finds/" + r.find_id + "/found_image_urls/" + r.list_size
+	var url = "/cached_finds/" + results[0].find_id + "/found_images/36"
 	$.getJSON(url, prod_grid_update_handle);
 }
 
-function prod_grid_update_handle(url_counts) {
+function prod_grid_update_handle(images) {
 	var image_prod_count = 0;
-	var total_prod_count = url_counts.shift();
-	var image_count = url_counts.length;
+	var total_prod_count = images.shift();
+	var image_count = images.length;
 	
 	var results = $("#cached_find_results");
 	var r = results[0];
-	r.visible_size = image_count;
 	
 	results.find(".product").remove();
 	var insertion_point = results.find("hr.result_terminator");
+	
+	var small_urls = [];
+	for(i in images) {
+		var image_data = images[i];
 		
-	for(i in url_counts) {
-		var uc = url_counts[i];
-		var image_url = uc[0];
-		var count = uc[1];
+		var checksum = image_data[0];
+		var count = image_data[1];
+		var small_url = image_data[2];
+		var tiny_url = image_data[3];
+		
 		image_prod_count += count;
+		small_urls.push(small_url);
 		
-		var checksum = image_url.match("([a-z0-9]+)\.([a-z]+)$")[1];
 		var link_url = "/cached_finds/" + r.find_id + '/found_products/' + checksum;
 		var count_overlay = (count == 1 ? "" : ('<div class="count">' + count + ' items</div>'))
 		
-		var prod_html = '<a class="product" href="' + link_url + '"> ' + count_overlay + '<img src="' + image_url + '" onmouseover="prod_image_zoom(event)" onmouseout="prod_image_unzoom(this)" /> </a>';
+		var prod_html = '<a class="product" href="' + link_url + '"> ' + count_overlay + '<img src="' + tiny_url + '" onmouseover="prod_image_zoom(event, \'' + small_url + '\')" onmouseout="prod_image_unzoom(this)" /> </a>';
 		insertion_point.before(prod_html);
 	}
 	
-	// prod_grid_update_more_button(results.find("#cached_find_more"), total_prod_count, r.visible_size, r.list_request_max); // TODO - revise completely
+	for(i in small_urls) image_preload(small_urls[i]);
 	
-	$("#cached_find_report .filtered_count").text(total_prod_count);
 	$("#cached_find_report .displayed_count").text(image_prod_count);
+	$("#cached_find_report .filtered_count").text(total_prod_count);
 	
 	r.filter_queue_active = -1;
 	filter_queue_execute(results);
 }
 
-function prod_grid_update_more_button(more, found_count, displayed_count, max_request_size) {
-	more.parent().find("p").remove();
-	
-	if(displayed_count == 0) {
-		more.parent().append("<p>All items have been filtered out. Please try relaxing some of your filters.</p>")
-	}
-	
-	if(displayed_count == found_count) {
-		more.hide();
-	} else {
-		var request_size = found_count - displayed_count;
-		if(request_size > max_request_size) request_size = max_request_size;
-		more.find(".count").text(request_size);
-		more.show();
-	}
-}
-
 // Product Images
 
-function prod_image_zoom(event) {
+function prod_image_zoom(event, image_url) {
 	var zoom = $("#image_zoom");
-	zoom[0].src = event.target.src;
+	zoom[0].src = image_url ? image_url : event.target.src;
 	
 	var image = $(event.target)
 	var position = image.offset();

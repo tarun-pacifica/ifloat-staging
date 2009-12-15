@@ -424,30 +424,11 @@ body {
 	margin: 0;
 }
 
-#cached_find_results .more {
+#cached_find_results .footer {
 	background: url(/images/backgrounds/list_footer.png) repeat-x;
 	height: 23px;
 	margin-top: 5px;
 	padding: 5px;
-}
-
-#cached_find_results .more #cached_find_more {
-	background: url(/images/buttons/enabled.png) repeat-x;
-	border-left: 1px solid #4263A0;
-	border-right: 1px solid #4263A0;
-	color: white;
-	cursor: pointer;
-	display: table-cell;
-	height: 15px;
-	padding: 4px 10px;
-}
-
-#cached_find_results .more p {
-	color: #FCBB1A;
-	font-style: bold;
-	margin: 4px 0 0 0;
-	text-align: center;
-	width: 100%;
 }
 
 /* Fraction Helper */

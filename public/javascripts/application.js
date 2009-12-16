@@ -488,7 +488,7 @@ function prod_grid_update_handle(images) {
 		small_urls.push(small_url);
 		
 		var link_url = "/cached_finds/" + r.find_id + '/found_products_for_checksum/' + checksum;
-		var count_overlay = (count == 1 ? "" : ('<div class="count">' + count + ' items</div>'))
+		var count_overlay = '<div class="count">' + count + ' item' + (count > 1 ? "s" : "") + '</div>';
 		
 		var prod_html = '<a class="product" href="' + link_url + '"> ' + count_overlay + '<img src="' + tiny_url + '" onmouseover="prod_image_zoom(event, \'' + small_url + '\')" onmouseout="prod_image_unzoom(this)" /> </a>';
 		insertion_point.before(prod_html);

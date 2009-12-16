@@ -396,8 +396,10 @@ body {
 }
 
 #cached_find_results a.product {
-	color: red;
+	color: #17A1FF;
 	float: left;
+	font-size: 10px;
+	font-weight: bold;
 	margin: 5px 0 0 5px;
 	position: relative;
 	text-decoration: none;
@@ -405,8 +407,10 @@ body {
 
 #cached_find_results a.product .count {
 	background: white;
-	bottom: 4px;
-	padding: 2px;
+	border-left: 1px solid gray;
+	border-top: 1px solid gray;
+	bottom: 3px;
+	padding: 1px 2px;
 	position: absolute;
 	right: 1px;
 }

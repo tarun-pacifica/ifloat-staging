@@ -57,7 +57,7 @@ class CachedFinds < Application
     end.unshift(total).to_json
   end
   
-  def found_products(id, image_checksum)
+  def found_products_for_checksum(id, image_checksum)
     find = session.ensure_cached_find(id.to_i)
     find.ensure_valid
     

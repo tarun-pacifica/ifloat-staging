@@ -1,0 +1,36 @@
+<%= partial "cached_finds/find_header" %>
+
+<div id="product_common">
+
+<div id="product_common_data">
+	<div class="title">Common Product Data</div>
+	<table> <%= partial "products/property", :with => @common_properties %> </table>
+</div>
+
+<div id="product_common_main">
+	<% unless @recent_find.nil? %>
+	<a href=<%= resource(@recent_find).inspect %>>
+		<div id="cached_find_report">		
+			Go back to all the products found for <span class="spec"><%= @recent_find.specification %></span>...
+		</div>
+	</a>
+	<% end %>
+	
+	<div id="product_common_summary">
+		<h1>IMAGE + DIFF SUMMARIES</h1>
+	</div>
+	
+	<div id="product_common_list">
+		<h1>PROD 1</h1>
+		<h1>PROD 2</h1>
+		<h1>PROD 3</h1>
+	</div>
+</div>
+
+</div>
+
+
+<script type="text/javascript" charset="utf-8">
+	$("#product_detail")[0].product_id = <%= @product.id %>;
+	prod_detail_update_purchase_buttons(<%= @product.id %>);
+</script>

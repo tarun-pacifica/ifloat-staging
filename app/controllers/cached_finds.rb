@@ -70,28 +70,36 @@ class CachedFinds < Application
     return redirect(resource(find)) if @image.nil?
     
     @values_by_property_by_product_id = Product.display_values(product_ids, session.language)
+    product_count = @values_by_property_by_product_id.size
     
-    product_ids_by_value_by_property = {}
+    values_by_reduced_value = {}
     @values_by_property_by_product_id.each do |product_id, values_by_property|
-      values_by_property.each do |property, value|
-        product_ids_by_value = (product_ids_by_value_by_property[property] ||= {})
-        (product_ids_by_value[value] ||= []).push(product_id)
+      values_by_property.each do |property, values|
+        values.each do |value|
+          reduced_value = [property, value.value]
+          (values_by_reduced_value[reduced_value] ||= []).push(value)
+        end
       end
     end
     
-    @properties = product_ids_by_value_by_property.keys.sort_by { |property| property.sequence_number }
-    @friendly_name_sections = PropertyDefinition.friendly_name_sections(@properties, session.language)
-    @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(@properties)
-    @text_value_definitions = PropertyDefinition.definitions_by_property_id(@properties, session.language)
-    
-    # TODO: split up values
-    @common_values = {}
-    @differential_values = {}
-    product_ids_by_value_by_property.each do |property, product_ids_by_value|
-      if product_ids_by_value.size == 1 then @common_values[property] = product_ids_by_value.first.first
-      else @differential_values[property] = product_ids_by_value.keys
+    @common_values_by_property, @diff_values_by_reduced_value = {}, {}
+    values_by_reduced_value.each do |reduced_value, values|
+      if values.size == product_count
+        (@common_values_by_property[reduced_value.first] ||= []).push(values.first)
+      else
+        @diff_values_by_reduced_value[reduced_value] = values
       end
     end
+    
+    @common_properties = @common_values_by_property.keys.sort_by { |p| p.sequence_number }
+    @diff_properties = @diff_values_by_reduced_value.keys.map { |p, raw_value| p }.sort_by { |p| p.sequence_number}
+    
+    properties = (@common_properties + @diff_properties).uniq
+    @friendly_name_sections = PropertyDefinition.friendly_name_sections(properties, session.language)
+    @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)
+    @text_value_definitions = PropertyDefinition.definitions_by_property_id(properties, session.language)
+        
+    @values_by_property = @common_values_by_property # TODO: refactor once all woking
     
     @previous_finds = session.cached_finds
     @recent_find = CachedFind.get(session[:most_recent_find_id])

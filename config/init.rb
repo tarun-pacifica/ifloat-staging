@@ -1,4 +1,9 @@
-require 'config/dependencies.rb'
+require "fileutils"
+
+require "lib" / "asset_store"
+require "lib" / "conversion"
+require "lib" / "indexer"
+require "lib" / "password"
  
 use_orm :datamapper
 use_test :rspec

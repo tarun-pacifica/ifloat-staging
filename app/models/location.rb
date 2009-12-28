@@ -13,8 +13,8 @@ class Location
   include DataMapper::Resource
   
   property :id, Serial
-  property :country_code, String, :nullable => false, :format => /^[A-Z]{3}$/
-  property :postal_address, String, :size => 255
+  property :country_code, String, :required => true, :format => /^[A-Z]{3}$/
+  property :postal_address, String, :length => 255
   property :gps_coordinates, String, :format => /^[\d\.]+x[\d\.]+$/ # TODO: verify format
   property :gln_13, Integer
   

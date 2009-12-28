@@ -1,7 +1,7 @@
 # merb -i -r lib/conflate_product_csvs.rb
 
 COMPILED_CSV_PATH = "caches/all_products.csv"
-COMPILED_PATH = "caches/all_products.marshal"
+# COMPILED_PATH = "caches/all_products.marshal"
 CSV_REPO = "../ifloat_csvs"
 
 [COMPILED_CSV_PATH, COMPILED_PATH].each do |path|
@@ -46,8 +46,8 @@ sorted_column_names = universal_columns.keys.sort_by do |col_name|
 end
 
 universal_rows = universal_columns.values_at(*sorted_column_names).transpose
-File.open(COMPILED_PATH, "w") { |f| Marshal.dump({:headers => sorted_column_names, :rows => universal_rows}, f) }
-puts "#{'%6.2f' % (Time.now - start)}s : #{COMPILED_PATH}"
+# File.open(COMPILED_PATH, "w") { |f| Marshal.dump({:headers => sorted_column_names, :rows => universal_rows}, f) }
+# puts "#{'%6.2f' % (Time.now - start)}s : #{COMPILED_PATH}"
 
 start = Time.now
 FasterCSV.open(COMPILED_CSV_PATH, "w") do |csv|

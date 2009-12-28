@@ -28,8 +28,8 @@ class Purchase
   OBSOLESCENCE_TIME = 24.hours
   
   property :id, Serial
-  property :created_at, DateTime, :nullable => false, :default => proc { DateTime.now }
-  property :product_refs, Object, :nullable => false
+  property :created_at, DateTime, :required => true, :default => proc { DateTime.now }
+  property :product_refs, Object, :required => true
   property :response, Object
   property :completed_at, DateTime
   property :abandoned, Boolean, :default => false

@@ -13,11 +13,11 @@ class Blog
   include DataMapper::Resource
   
   property :id, Serial
-  property :name, String, :nullable => false, :unique => true
+  property :name, String, :required => true, :unique => true
   property :description, Text, :lazy => false
-  property :email, String, :size => 255, :format => :email_address
-  property :primary_url, String, :size => 255
-  property :call_to_action, String, :size => 255
+  property :email, String, :length => 255, :format => :email_address
+  property :primary_url, String, :length => 255
+  property :call_to_action, String, :length => 255
   
   belongs_to :company
   belongs_to :user

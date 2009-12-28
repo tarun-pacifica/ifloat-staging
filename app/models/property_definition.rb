@@ -29,14 +29,14 @@ class PropertyDefinition
   NAME_FORMAT = /^[a-z]{3,}:[a-z_]{3,}$/
   
   property :id, Serial
-  property :name, String, :nullable => false, :format => NAME_FORMAT, :unique => true
+  property :name, String, :required => true, :format => NAME_FORMAT, :unique => true
   property :findable, Boolean, :default => false
   property :filterable, Boolean, :default => false
   property :display_as_data, Boolean, :default => false
-  property :sequence_number, Integer, :nullable => false
+  property :sequence_number, Integer, :required => true
   
   belongs_to :property_type
-  has n, :values, :class_name => "PropertyValue"
+  has n, :values, :model => "PropertyValue"
   has n, :translations
   
   validates_present :property_type_id
@@ -55,7 +55,7 @@ class PropertyDefinition
     EOS
     
     dbpi = {}
-    repository.adapter.query(query, language_code, properties.map { |p| p.id }).each do |record|
+    repository.adapter.select(query, language_code, properties.map { |p| p.id }).each do |record|
       (dbpi[record.id] ||= {})[record.value] = record.definition
     end
     dbpi

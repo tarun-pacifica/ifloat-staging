@@ -21,8 +21,8 @@ class ControllerError
   property :params, Object
   
   property :exception_class, String
-  property :exception_message, String, :size => 255
-  property :exception_context, String, :size => 255
+  property :exception_message, String, :length => 255
+  property :exception_context, String, :length => 255
   
   property :ip_address, IPAddress
   property :session, Object

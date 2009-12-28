@@ -11,8 +11,8 @@ class Article
   include DataMapper::Resource
   
   property :id, Serial
-  property :title, String, :nullable => false
-  property :body, Text, :nullable => false
+  property :title, String, :required => true
+  property :body, Text, :required => true
   property :created_at, DateTime, :default => proc { DateTime.now }
   
   belongs_to :asset

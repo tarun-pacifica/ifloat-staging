@@ -29,10 +29,10 @@ class Relationship
   
   property :id, Serial
   property :name, String
-  property :value, String, :nullable => false
+  property :value, String, :required => true
 
   belongs_to :company
-  belongs_to :product, :class_name => "DefinitiveProduct", :child_key =>[:definitive_product_id]
+  belongs_to :product, :model => "DefinitiveProduct", :child_key =>[:definitive_product_id]
   belongs_to :property_definition
   
   validates_present :definitive_product_id
@@ -58,7 +58,7 @@ class Relationship
         AND p.id != ?
         AND p.type = 'DefinitiveProduct'
     EOS
-    repository.adapter.query(query, product.id, product.id).each do |record|
+    repository.adapter.select(query, product.id, product.id).each do |record|
       product_ids = (product_ids_by_relationship[record.name] ||= [])
       product_ids << record.id
     end
@@ -79,7 +79,7 @@ class Relationship
         AND p.type = 'DefinitiveProduct'
         AND pv.text_value IS NOT NULL
     EOS
-    repository.adapter.query(query, product.id, product.id).each do |record|
+    repository.adapter.select(query, product.id, product.id).each do |record|
       product_ids = (product_ids_by_relationship[record.name] ||= [])
       product_ids << record.id
     end
@@ -93,7 +93,7 @@ class Relationship
         AND r.property_definition_id IS NULL
         AND r.value = ?
     EOS
-    repository.adapter.query(query, product.company_id, product.id, product.reference).each do |record|
+    repository.adapter.select(query, product.company_id, product.id, product.reference).each do |record|
       implied_name = (NAMES[record.name] || record.name)
       product_ids = (product_ids_by_relationship[implied_name] ||= [])
       product_ids << record.definitive_product_id
@@ -111,7 +111,7 @@ class Relationship
         AND r.property_definition_id IS NOT NULL
         AND pv.product_id = ?
     EOS
-    repository.adapter.query(query, product.company_id, product.id, product.id).each do |record|
+    repository.adapter.select(query, product.company_id, product.id, product.id).each do |record|
       implied_name = (NAMES[record.name] || record.name)
       product_ids = (product_ids_by_relationship[implied_name] ||= [])
       product_ids << record.definitive_product_id

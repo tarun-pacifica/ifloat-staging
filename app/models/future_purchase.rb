@@ -7,9 +7,9 @@ class FuturePurchase
   
   property :id, Serial
   property :created_at, DateTime, :default => proc { DateTime.now }
-  property :deferred, Boolean, :nullable => false
+  property :deferred, Boolean, :required => true
   
-  belongs_to :product, :class_name => "DefinitiveProduct", :child_key =>[:definitive_product_id]
+  belongs_to :product, :model => "DefinitiveProduct", :child_key =>[:definitive_product_id]
   belongs_to :user
   
   validates_present :definitive_product_id

@@ -42,11 +42,11 @@ class PropertyValue
   
   property :id, Serial
   property :type, Discriminator
-  property :auto_generated, Boolean, :nullable => false
-  property :sequence_number, Integer, :nullable => false
+  property :auto_generated, Boolean, :required => true
+  property :sequence_number, Integer, :required => true
   
   belongs_to :product
-  belongs_to :definition, :class_name => "PropertyDefinition", :child_key => [:property_definition_id]
+  belongs_to :definition, :model => "PropertyDefinition", :child_key => [:property_definition_id]
   has n, :attachments
   
   validates_with_block :type do

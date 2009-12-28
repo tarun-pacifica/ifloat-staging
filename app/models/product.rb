@@ -17,10 +17,10 @@ class Product
   
   property :id, Serial
   property :type, Discriminator
-  property :reference, String, :format => REFERENCE_FORMAT, :nullable => false
+  property :reference, String, :format => REFERENCE_FORMAT, :required => true
   
   has n, :attachments
-  has n, :values, :class_name => "PropertyValue"
+  has n, :values, :model => "PropertyValue"
   
   validates_with_block :type do
     (self.class != Product and self.kind_of?(Product)) || [false, "must be a sub-class of Product"]
@@ -66,7 +66,7 @@ class Product
     EOS
     
     prices_by_url_by_product_id = {}
-    repository(:default).adapter.query(query, currency, product_ids).each do |record|
+    repository(:default).adapter.select(query, currency, product_ids).each do |record|
       prices_by_url = (prices_by_url_by_product_id[record.definitive_product_id] ||= {})
       prices_by_url[record.primary_url] = record.min_value
     end

@@ -17,8 +17,8 @@ class TitleStrategy
   include DataMapper::Resource
   
   property :id, Serial
-  property :name, String, :nullable => false, :unique => true
-  property :class_names, Object, :lazy => false, :nullable => false, :default => []
+  property :name, String, :required => true, :unique => true
+  property :class_names, Object, :lazy => false, :required => true, :default => []
   
   TITLE_PROPERTIES = (1..4).to_a.map { |i| "title_#{i}".to_sym }
   TITLE_PROPERTIES.each do |title|

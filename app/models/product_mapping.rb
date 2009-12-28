@@ -12,10 +12,10 @@ class ProductMapping
   include DataMapper::Resource
   
   property :id, Serial
-  property :reference, String, :nullable => false, :format => /^[A-Z_\d\-\.\/]+$/
+  property :reference, String, :required => true, :format => /^[A-Z_\d\-\.\/]+$/
 
   belongs_to :company
-  belongs_to :product, :class_name => "DefinitiveProduct", :child_key =>[:definitive_product_id]
+  belongs_to :product, :model => "DefinitiveProduct", :child_key =>[:definitive_product_id]
   
   validates_is_unique :definitive_product_id, :scope => [:company_id, :reference]
   validates_present :company_id, :definitive_product_id

@@ -18,7 +18,7 @@ class Attachment
   
   property :id, Serial
   property :role, String
-  property :sequence_number, Integer, :nullable => false
+  property :sequence_number, Integer, :required => true
   
   belongs_to :asset
   belongs_to :cached_find

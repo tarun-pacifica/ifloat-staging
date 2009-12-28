@@ -19,12 +19,12 @@ class PropertyType
   }
   
   property :id, Serial
-  property :core_type, String, :nullable => false
-  property :name, String, :nullable => false, :format => /^[a-z_]{3,}$/, :unique => true
-  property :units, Object, :size => 255
+  property :core_type, String, :required => true
+  property :name, String, :required => true, :format => /^[a-z_]{3,}$/, :unique => true
+  property :units, Object, :length => 255
   
-  has n, :definitions, :class_name => "PropertyDefinition"
-  has n, :value_definitions, :class_name => "PropertyValueDefinition"
+  has n, :definitions, :model => "PropertyDefinition"
+  has n, :value_definitions, :model => "PropertyValueDefinition"
   
   validates_absent :units, :unless => :numeric?
   validates_with_method :units, :method => :validate_numeric_units, :if => :numeric?

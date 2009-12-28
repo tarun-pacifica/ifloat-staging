@@ -18,10 +18,10 @@ class User
   include DataMapper::Resource
   
   property :id, Serial
-  property :name, String, :nullable => false
+  property :name, String, :required => true
   property :nickname, String
-  property :login, String, :size => 255, :nullable => false, :format => :email_address, :unique => true
-  property :password, String, :size => 255, :nullable => false
+  property :login, String, :length => 255, :required => true, :format => :email_address, :unique => true
+  property :password, String, :length => 255, :required => true
   property :admin, Boolean, :default => false
   property :disabled_at, DateTime
   property :send_marketing, Boolean, :default => false
@@ -31,7 +31,7 @@ class User
   has n, :contacts
   has n, :future_purchases, :order => [:created_at]
   has n, :locations
-  has n, :products, :class_name => "UserProduct"
+  has n, :products, :model => "UserProduct"
   has n, :purchases
   # TODO has n, :root_products
   

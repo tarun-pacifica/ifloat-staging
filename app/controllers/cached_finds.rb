@@ -70,7 +70,7 @@ class CachedFinds < Application
     return redirect(resource(find)) if @image.nil?
     
     @values_by_property_by_product_id = Product.display_values(product_ids, session.language)
-    product_count = @values_by_property_by_product_id.size
+    @product_count = @values_by_property_by_product_id.size
     
     values_by_reduced_value = {}
     @values_by_property_by_product_id.each do |product_id, values_by_property|
@@ -82,9 +82,15 @@ class CachedFinds < Application
       end
     end
     
-    @common_values_by_property, @diff_values_by_reduced_value = {}, {}
+    # TODO: check that the values.size == @product_count copes with multi-value products
+    #       suspect this needs to be value.map { |v| v.product_id }.uniq.size == @product_count
+    @common_values_by_property = {}
+    @diff_values_by_reduced_value = {}
     values_by_reduced_value.each do |reduced_value, values|
-      if values.size == product_count
+      property = reduced_value.first
+      next unless property.display_as_data?
+      
+      if values.size == @product_count
         (@common_values_by_property[reduced_value.first] ||= []).push(values.first)
       else
         @diff_values_by_reduced_value[reduced_value] = values
@@ -92,7 +98,7 @@ class CachedFinds < Application
     end
     
     @common_properties = @common_values_by_property.keys.sort_by { |p| p.sequence_number }
-    @diff_properties = @diff_values_by_reduced_value.keys.map { |p, raw_value| p }.sort_by { |p| p.sequence_number}
+    @diff_properties = @diff_values_by_reduced_value.keys.map { |p, raw_value| p }.uniq.sort_by { |p| p.sequence_number}
     
     properties = (@common_properties + @diff_properties).uniq
     @friendly_name_sections = PropertyDefinition.friendly_name_sections(properties, session.language)

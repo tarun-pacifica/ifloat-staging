@@ -15,13 +15,13 @@ class Facility
   include DataMapper::Resource
   
   property :id, Serial
-  property :name, String, :nullable => false
-  property :primary_url, String, :size => 255
+  property :name, String, :required => true
+  property :primary_url, String, :length => 255
   
   belongs_to :company
   belongs_to :location
   has n, :employees
-  has n, :products, :class_name => "FacilityProduct"
+  has n, :products, :model => "FacilityProduct"
   has n, :purchases
   
   validates_present :company_id

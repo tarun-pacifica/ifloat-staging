@@ -16,7 +16,7 @@ class Contact
   property :id, Serial
   property :type, Discriminator
   property :variant, String
-  property :value, String, :nullable => false, :size => 255
+  property :value, String, :required => true, :length => 255
   
   belongs_to :user
   

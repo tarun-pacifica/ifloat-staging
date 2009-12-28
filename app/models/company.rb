@@ -21,10 +21,10 @@ class Company
   REFERENCE_FORMAT = /^[A-Z]{3}\-[\w-]+$/
   
   property :id, Serial
-  property :name, String, :nullable => false
-  property :description, String, :size => 255
-  property :reference, String, :nullable => false, :format => REFERENCE_FORMAT, :unique => true
-  property :primary_url, String, :size => 255
+  property :name, String, :required => true
+  property :description, String, :length => 255
+  property :reference, String, :required => true, :format => REFERENCE_FORMAT, :unique => true
+  property :primary_url, String, :length => 255
 
   has n, :assets
   has n, :product_mappings

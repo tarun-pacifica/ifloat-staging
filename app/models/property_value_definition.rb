@@ -12,9 +12,9 @@ class PropertyValueDefinition
   include DataMapper::Resource
   
   property :id, Serial
-  property :language_code, String, :nullable => false, :format => /^[A-Z]{3}$/
-  property :value, String, :nullable => false
-  property :definition, String, :nullable => false, :size => 255
+  property :language_code, String, :required => true, :format => /^[A-Z]{3}$/
+  property :value, String, :required => true
+  property :definition, String, :required => true, :length => 255
   
   belongs_to :property_type
   

@@ -185,7 +185,7 @@ module Indexer
     SQL
     
     iui = {}
-    repository.adapter.query(query, "GBR-02934378").each do |record|
+    repository.adapter.select(query, "GBR-02934378").each do |record|
       iui[record.id] ||= record.checksum
     end
     iui
@@ -206,7 +206,7 @@ module Indexer
     SQL
     
     nfi = {}
-    repository.adapter.query(query, true, "GBR-02934378").each do |record|
+    repository.adapter.select(query, true, "GBR-02934378").each do |record|
       products = (nfi[record.property_definition_id] ||= {})
       units = (products[record.product_id] ||= {})
       min_max = (units[record.unit] || [])
@@ -265,6 +265,6 @@ module Indexer
         AND c.reference = ?
     SQL
     
-    repository.adapter.query(query, "GBR-02934378")
+    repository.adapter.select(query, "GBR-02934378")
   end
 end

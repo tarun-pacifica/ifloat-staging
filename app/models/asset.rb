@@ -43,11 +43,11 @@ class Asset
   NAME_FORMAT = /^([\w\-\.]+?)(___(\d+))?\.([a-z]{3,})$/
   
   property :id, Serial
-  property :bucket, String, :nullable => false
-  property :name, String, :nullable => false, :size => 255, :format => NAME_FORMAT
-  property :description, String, :size => 255
+  property :bucket, String, :required => true
+  property :name, String, :required => true, :length => 255, :format => NAME_FORMAT
+  property :description, String, :length => 255
   property :view, String
-  property :source_notes, String, :size => 255
+  property :source_notes, String, :length => 255
   property :chain_id, Integer, :writer => :protected
   property :chain_sequence_number, Integer, :writer => :protected
   property :checksum, String

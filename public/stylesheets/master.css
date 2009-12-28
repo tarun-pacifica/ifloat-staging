@@ -1164,6 +1164,48 @@ body {
 	margin: 0;
 }
 
+#product_detail_diff_summary {
+	border: 5px solid #404040;
+	clear: both;
+	padding: 5px;
+}
+
+#product_detail_diff_summary h1 {
+	font-size: 16px;
+	font-weight: normal;
+	margin: 0;
+}
+
+#product_detail_diff_summary h1 span {
+	color: #17A1FF;
+	font-weight: bold;
+}
+
+#product_detail_diff_summary hr {
+	border: none;
+	clear: both;
+	height: 0;
+	margin: 0;
+}
+
+#product_detail_diff_summary img.main {
+	border: 1px solid #404040;
+	float: left;
+	height: 200px;
+	margin-right: 10px;
+	width: 200px;
+}
+
+#product_detail_diff_summary img.icon {
+	margin-top: 2px;
+	height: 36px;
+	width: 58px;
+}
+
+#product_detail_diff_summary p.help {
+	margin: 0;
+}
+
 #product_detail_words {
 	border: 1px solid silver;
 	padding: 10px;

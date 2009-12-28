@@ -11,8 +11,8 @@ class Translation
   include DataMapper::Resource
   
   property :id, Serial
-  property :language_code, String, :nullable => false, :format => /^[A-Z]{3}$/
-  property :value, Text, :nullable => false, :lazy => false
+  property :language_code, String, :required => true, :format => /^[A-Z]{3}$/
+  property :value, Text, :required => true, :lazy => false
   
   belongs_to :property_definition
   

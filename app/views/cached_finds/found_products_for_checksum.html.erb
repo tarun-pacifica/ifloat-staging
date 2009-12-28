@@ -1,13 +1,13 @@
 <%= partial "cached_finds/find_header" %>
 
-<div id="product_common">
+<div id="product_detail">
 
-<div id="product_common_data">
+<div id="product_detail_data">
 	<div class="title">Common Product Data</div>
 	<table> <%= partial "products/property", :with => @common_properties %> </table>
 </div>
 
-<div id="product_common_main">
+<div id="product_detail_main">
 	<% unless @recent_find.nil? %>
 	<a href=<%= resource(@recent_find).inspect %>>
 		<div id="cached_find_report">		
@@ -16,11 +16,26 @@
 	</a>
 	<% end %>
 	
-	<div id="product_common_summary">
-		<h1>IMAGE + DIFF SUMMARIES</h1>
+	<div id="product_detail_diff_summary">
+		<img class="main" src=<%= @image.url(:small).inspect %> />
+		<h1>There are <span><%= @product_count %></span> products with this image</h1>
+		<p class="help">Selecting one of the following values will highlight the relevant products</p>
+		
+		<% @diff_properties.each do |property| %>		
+		<% domain, title = @friendly_name_sections[property.id] %>
+		<div>
+			<img class="icon" src=<%= @icon_urls_by_property_id[property.id].inspect %> onmouseover="bubble_tooltip_show(event, '<%= title %>')" onmouseout="bubble_tooltip_hide()" />
+			<% @diff_values_by_reduced_value.each do |reduced_value, values| %>
+			<% next unless reduced_value.first == property %>
+			<p><%= reduced_value.last %></p>
+			<% end %>
+		</div>
+		<% end %>
+		
+		<hr />
 	</div>
 	
-	<div id="product_common_list">
+	<div id="product_detail_diff_products">
 		<h1>PROD 1</h1>
 		<h1>PROD 2</h1>
 		<h1>PROD 3</h1>

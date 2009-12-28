@@ -12,7 +12,7 @@ class ImportEvent # TODO: spec
   include DataMapper::Resource
   
   property :id, Serial
-  property :completed_at, DateTime, :nullable => false, :default => proc { DateTime.now }
-  property :succeeded, Boolean, :nullable => false
-  property :report, Text, :nullable => false
+  property :completed_at, DateTime, :required => true, :default => proc { DateTime.now }
+  property :succeeded, Boolean, :required => true
+  property :report, Text, :required => true
 end

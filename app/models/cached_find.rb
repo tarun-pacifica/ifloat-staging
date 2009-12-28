@@ -22,9 +22,9 @@ class CachedFind
   ANONIMIZATION_TIME = 1.month
   
   property :id, Serial
-  property :language_code, String, :nullable => false, :format => /^[A-Z]{3}$/
-  property :specification, String, :size => 255
-  property :description, String, :size => 255
+  property :language_code, String, :required => true, :format => /^[A-Z]{3}$/
+  property :specification, String, :length => 255
+  property :description, String, :length => 255
   property :filters, Object, :writer => :protected, :lazy => false
   property :accessed_at, DateTime
   property :invalidated, Boolean, :default => true

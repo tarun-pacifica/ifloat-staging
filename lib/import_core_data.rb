@@ -159,7 +159,7 @@ class ImportSet
   def import_class(klass, objects)
     relationships = {}
     klass.relationships.each do |attribute, relationship|
-      relationships[attribute] = relationship.child_key.first.name
+      relationships[attribute.to_sym] = relationship.child_key.first.name
     end
     
     pk_fields, value_fields = pk_and_value_fields(klass)
@@ -187,17 +187,18 @@ class ImportSet
       end
       
       values = value_fields.map do |attribute|
-        value = attributes[attribute]        
+        value = attributes[attribute]
         value = "%.6f" % value if attribute == :min_value or attribute == :max_value
         
         case value
-        when Array then value.to_yaml
+        when Array then Base64.encode64(Marshal.dump(value))
         when FalseClass, TrueClass then value ? 1 : 0
         else value
         end
       end
-      value_md5 = (values.empty? ? nil : Digest::MD5.hexdigest(values.join("::")))
       
+      value_md5 = (values.empty? ? nil : Digest::MD5.hexdigest(values.join("::")))
+            
       if value_md5 == existing_value_md5
         object.attributes[:id] = existing_id
         to_skip_pk_md5s << pk_md5
@@ -229,7 +230,7 @@ class ImportSet
     relationships = klass.relationships
     
     pk_fields = PRIMARY_KEYS[klass].map do |attribute|
-      properties.has_property?(attribute) ? attribute : relationships[attribute].child_key.first.name
+      properties.named?(attribute) ? attribute : relationships[attribute].child_key.first.name
     end
     
     value_fields = (properties.map { |property| property.name } - pk_fields - [:id, :type]).sort_by { |sym| sym.to_s }
@@ -257,10 +258,10 @@ class ImportSet
     query = "SELECT id, MD5(CONCAT(#{pk_fields})) AS pk_md5"
     query += (value_fields.empty? ? ", NULL AS value_md5" : ", MD5(CONCAT(#{value_fields})) AS value_md5")
     query += " FROM #{klass.storage_name}"
-    query += " WHERE type = '#{klass}'" if klass.properties.has_property?(:type)
+    query += " WHERE type = '#{klass}'" if klass.properties.named?(:type)
   
     results = {}
-    @adapter.query(query).each do |record|
+    @adapter.select(query).each do |record|
       results[record.pk_md5] = [record.value_md5, record.id]
     end
     results

@@ -41,7 +41,7 @@ class Product
     
     values_by_property_by_product_id = {}
     db_values.sort_by { |value| value.sequence_number }.each do |value|
-      values_by_property = (values_by_property_by_product_id[value.product_id] ||= {})´
+      values_by_property = (values_by_property_by_product_id[value.product_id] ||= {})
       # TODO: swap simpler code back in when SEL is working in DM again ()
       # http://datamapper.lighthouseapp.com/projects/20609-datamapper/tickets/965
       # values = (values_by_property[value.definition] ||= [])

@@ -1,9 +1,11 @@
 .*
 !.gitignore
 *~
+bin/*
 caches/*
 doc/*
 !doc/README
 !doc/rdoc/
+gems/*
 log/
 public/assets

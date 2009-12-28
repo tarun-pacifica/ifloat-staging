@@ -17,7 +17,7 @@ module Merb
     
     def add_future_purchase(purchase)
       return if future_purchases.any? { |fp| fp.definitive_product_id == purchase.definitive_product_id }
-            
+      
       purchase.user = user
       self[:future_purchase_ids] = (future_purchase_ids << purchase.id) if purchase.save
     end

@@ -10,7 +10,7 @@ class FuturePurchase
   property :deferred, Boolean, :required => true
   
   belongs_to :product, :model => "DefinitiveProduct", :child_key =>[:definitive_product_id]
-  belongs_to :user
+  belongs_to :user, :required => false
   
   validates_present :definitive_product_id
   validates_is_unique :definitive_product_id, :scope => [:user_id], :unless => proc { |purchase| purchase.user_id.nil? }

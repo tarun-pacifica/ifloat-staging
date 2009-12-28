@@ -29,7 +29,7 @@ class CachedFind
   property :accessed_at, DateTime
   property :invalidated, Boolean, :default => true
   
-  belongs_to :user
+  belongs_to :user, :required => false
   has n, :attachments
   
   # TODO: spec

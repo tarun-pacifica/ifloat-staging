@@ -31,7 +31,7 @@ class Product
     attributes = {:product_id => product_ids}
     attributes[:property_definition_id] = PropertyDefinition.all(:name => property_names).map { |pd| pd.id } unless property_names.nil?
     
-    db_values = NumericPropertyValue.all(attributes)
+    db_values = NumericPropertyValue.all(attributes).map
     db_values += TextPropertyValue.all(attributes.merge(:language_code => language_code))
     
     if property_names.nil?

@@ -47,9 +47,6 @@ class CachedFinds < Application
     checksums = totals_by_checksum.keys[0, limit]
     assets_by_checksum = {}
     Asset.all(:checksum => checksums).each { |a| assets_by_checksum[a.checksum] = a }
-    p assets_by_checksum.size
-    p checksums.size
-    p checksums - assets_by_checksum.keys
     
     checksums.map do |checksum|
       asset = assets_by_checksum[checksum]

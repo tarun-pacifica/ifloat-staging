@@ -13,3 +13,30 @@ Spec::Runner.configure do |config|
 end
 
 DataMapper.auto_migrate! if Merb.orm == :datamapper
+
+class BeValid
+  def initialize
+    
+  end
+  
+  def matches?(model)
+    @model = model
+    return @model.valid?
+  end
+  
+  def description
+    "be valid"
+  end
+  
+  def failure_message
+    (["expected to be valid, but was not..."] + @model.errors.full_messages.map { |m| " - #{m}" }).join("\n")
+  end
+  
+  def negative_failure_message
+    "expected to be invalid, but was not - missing validation?"
+  end
+end
+
+def be_valid
+  BeValid.new
+end

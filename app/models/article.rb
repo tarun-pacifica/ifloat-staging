@@ -15,19 +15,16 @@ class Article
   property :body, Text, :required => true
   property :created_at, DateTime, :default => proc { DateTime.now }
   
-  belongs_to :asset
+  belongs_to :asset, :required => false
   belongs_to :blog
   belongs_to :user
-  
-  validates_present :blog_id
-  validates_present :user_id
-  
+    
   before :destroy do
 	  asset.destroy unless asset.nil?
   end
   
   def self.images(articles)
-    Asset.all(:id => articles.map { |a| a.asset_id }).hash_by(:id)
+    Asset.all(:id => articles.map { |a| a.asset_id }.compact).hash_by(:id)
   end
   
   def save_image(file_path, original_name)

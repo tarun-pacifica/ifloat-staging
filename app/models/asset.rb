@@ -55,7 +55,6 @@ class Asset
   belongs_to :company
   has n, :attachments
   
-  validates_present :company_id
   validates_within :bucket, :set => BUCKETS
   validates_is_unique :name, :scope => [:company_id, :bucket]
   validates_within :view, :set => CUBIC_VIEWS

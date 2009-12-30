@@ -154,7 +154,7 @@ class DefinitiveProductParser < AbstractParser
         f = field.strip
         raise "repeated relationship (#{f.inspect}): #{value.inspect}" if fields.include?(f)
         fields << f
-        ImportObject.new(Relationship, attributes.merge(:value => f))
+        ImportObject.new(ProductRelationship, attributes.merge(:value => f))
       end
           
     when :values
@@ -189,7 +189,7 @@ class DefinitiveProductParser < AbstractParser
 
     when /^relationship\.([a-z_]+)\.(.+?)(\.(.+?))?$/
       relationship_name, company_ref, property_name = $1, $2, $4
-      raise "unknown relationship: #{relationship_name}" unless Relationship::NAMES.has_key?(relationship_name)
+      raise "unknown relationship: #{relationship_name}" unless ProductRelationship::NAMES.has_key?(relationship_name)
       company = ((company_ref == "*") ? nil : @import_set.get!(Company, company_ref))
       property = (property_name.blank? ? nil : @import_set.get!(PropertyDefinition, property_name))
       [:relationships, relationship_name, company, property]

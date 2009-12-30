@@ -19,12 +19,11 @@ class Facility
   property :primary_url, String, :length => 255
   
   belongs_to :company
-  belongs_to :location
+  belongs_to :location, :required => false
   has n, :employees
   has n, :products, :model => "FacilityProduct"
   has n, :purchases
   
-  validates_present :company_id
   validates_is_unique :name, :scope => :company_id
   validates_is_unique :primary_url, :unless => proc { |f| f.primary_url.nil? }
   

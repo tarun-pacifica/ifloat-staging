@@ -64,7 +64,7 @@ class Products < Application
     # TODO: remove test data
     @prices["marinestore.co.uk"] = 57.22
     
-    @related_products_by_rel_name = Relationship.related_products(@product)
+    @related_products_by_rel_name = ProductRelationship.related_products(@product)
     @related_products_by_rel_name.delete_if { |name, products| products.empty? }
     
     @previous_finds = session.cached_finds

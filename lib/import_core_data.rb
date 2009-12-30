@@ -44,7 +44,7 @@ class ImportSet
     DefinitiveProduct       => [:company, :reference],
     Attachment              => [:product, :role, :sequence_number],
     ProductMapping          => [:company, :product, :reference],
-    Relationship            => [:company, :product, :property_definition, :name, :value],
+    ProductRelationship     => [:company, :product, :property_definition, :name, :value],
     DatePropertyValue       => [:product, :definition, :sequence_number],
     NumericPropertyValue    => [:product, :definition, :sequence_number, :unit],
     TextPropertyValue       => [:product, :definition, :sequence_number, :language_code]

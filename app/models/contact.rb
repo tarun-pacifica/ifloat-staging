@@ -19,9 +19,7 @@ class Contact
   property :value, String, :required => true, :length => 255
   
   belongs_to :user
-  
-  validates_present :user_id
-  
+    
   validates_with_block :type do
     (self.class != Contact and self.kind_of?(Contact)) || [false, "must be a sub-class of Contact"]
   end

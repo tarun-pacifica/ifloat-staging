@@ -12,6 +12,4 @@ class Employee < User
   property :department, String
   
   belongs_to :facility
-  
-  validates_present :facility_id
 end

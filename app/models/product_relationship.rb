@@ -1,6 +1,6 @@
 # = Summary
 #
-# In order to support both auto-assemblies (hiearchies of products) and other less concrete groupings (like marketing categories), DefinitiveProducts may have many Relationships. Each Relationship links a DefinitiveProduct to any other that has a matching TextPropertyValue for a given PropertyDefinition.
+# In order to support both auto-assemblies (hiearchies of products) and other less concrete groupings (like marketing categories), DefinitiveProducts may have many ProductRelationships. Each ProductRelationship links a DefinitiveProduct to any other that has a matching TextPropertyValue for a given PropertyDefinition.
 #
 # The TextPropertyValue match may be limited to a specific Company. This copes with instances where, for example, one DefinitiveProduct is 'used_on' another whose reference:manufacturer is only meaningful in the context of a specific Company. Put another way, specifying a Company as part of the relationship will limit the returned, related DefinitiveProducts to only those from that Company.
 #
@@ -11,7 +11,7 @@
 # name:: 'used_on'
 # value:: 'PF223423G'
 #
-class Relationship
+class ProductRelationship
   include DataMapper::Resource
   
   # parent *includes* child:: child _is_included_in_ parent
@@ -31,11 +31,10 @@ class Relationship
   property :name, String
   property :value, String, :required => true
 
-  belongs_to :company
+  belongs_to :company, :required => false
   belongs_to :product, :model => "DefinitiveProduct", :child_key =>[:definitive_product_id]
   belongs_to :property_definition
   
-  validates_present :definitive_product_id
   validates_within :name, :set => NAMES.keys
   validates_is_unique :value, :scope => [:company_id, :definitive_product_id, :property_definition_id, :name]
   

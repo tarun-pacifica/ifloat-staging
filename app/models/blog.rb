@@ -22,6 +22,4 @@ class Blog
   belongs_to :company
   belongs_to :user
   has n, :articles, :order => [:created_at.desc]
-  
-  validates_present :company_id, :user_id
 end

@@ -39,8 +39,6 @@ class PropertyDefinition
   has n, :values, :model => "PropertyValue"
   has n, :translations
   
-  validates_present :property_type_id
-  
   # TODO: spec
   def self.definitions_by_property_id(properties, language_code)
     return {} if properties.empty?

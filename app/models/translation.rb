@@ -16,6 +16,5 @@ class Translation
   
   belongs_to :property_definition
   
-  validates_present :property_definition_id
   validates_is_unique :language_code, :scope => [:property_definition_id]
 end

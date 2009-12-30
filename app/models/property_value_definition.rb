@@ -18,6 +18,5 @@ class PropertyValueDefinition
   
   belongs_to :property_type
   
-  validates_present :property_type_id
   validates_is_unique :value, :scope => [:property_type_id, :language_code]
 end

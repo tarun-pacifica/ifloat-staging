@@ -35,10 +35,8 @@ class Purchase
   property :abandoned, Boolean, :default => false
   
   belongs_to :facility
-  belongs_to :user
+  belongs_to :user, :required => false
   has n, :user_products
-  
-  validates_present :facility_id
   
   validates_with_block :product_refs do
     product_refs.is_a?(Array) and product_refs.size > 0 and

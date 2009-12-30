@@ -1,6 +1,6 @@
 require File.join( File.dirname(__FILE__), '..', "spec_helper" )
 
-describe Relationship do
+describe ProductRelationship do
   
   before(:all) do
     @text_type = PropertyType.create(:core_type => "text", :name => "text")
@@ -18,11 +18,11 @@ describe Relationship do
 
   describe "creation" do   
     before(:each) do
-      @relationship = Relationship.new(:company_id => 1,
-                                       :definitive_product_id => 1,
-                                       :property_definition => @text_property,
-                                       :name => "used_on",
-                                       :value => "Astra")
+      @relationship = ProductRelationship.new(:company_id => 1,
+                                              :definitive_product_id => 1,
+                                              :property_definition => @text_property,
+                                              :name => "used_on",
+                                              :value => "Astra")
     end
     
     it "should succeed with valid data" do
@@ -68,11 +68,11 @@ describe Relationship do
   describe "creation with existing relationship for a company, product and property definition" do
     before(:all) do
       @text_property2 = @text_type.definitions.create(:name => "marketing:edition", :sequence_number => 1)
-      @relationship = Relationship.create(:company_id => 1,
-                                          :definitive_product_id => 1,
-                                          :property_definition => @text_property,
-                                          :name => "used_on",
-                                          :value => "Astra")
+      @relationship = ProductRelationship.create(:company_id => 1,
+                                                 :definitive_product_id => 1,
+                                                 :property_definition => @text_property,
+                                                 :name => "used_on",
+                                                 :value => "Astra")
     end
     
     after(:all) do
@@ -81,33 +81,33 @@ describe Relationship do
     end
     
     it "should succeed with a different company" do
-      Relationship.new(:company_id => 2, :definitive_product_id => 1, :property_definition => @text_property,
-                       :name => "used_on", :value => "Astra").should be_valid
+      ProductRelationship.new(:company_id => 2, :definitive_product_id => 1, :property_definition => @text_property,
+                              :name => "used_on", :value => "Astra").should be_valid
     end
     
     it "should succeed with a different product" do
-      Relationship.new(:company_id => 1, :definitive_product_id => 2, :property_definition => @text_property,
-                       :name => "used_on", :value => "Astra").should be_valid
+      ProductRelationship.new(:company_id => 1, :definitive_product_id => 2, :property_definition => @text_property,
+                              :name => "used_on", :value => "Astra").should be_valid
     end
     
     it "should succeed with a different property definition" do
-      Relationship.new(:company_id => 1, :definitive_product_id => 1, :property_definition => @text_property2,
-                       :name => "used_on", :value => "Astra").should be_valid
+      ProductRelationship.new(:company_id => 1, :definitive_product_id => 1, :property_definition => @text_property2,
+                              :name => "used_on", :value => "Astra").should be_valid
     end
     
     it "should succeed with a different name" do
-      Relationship.new(:company_id => 1, :definitive_product_id => 1, :property_definition => @text_property,
-                       :name => "works_with", :value => "Astra").should be_valid
+      ProductRelationship.new(:company_id => 1, :definitive_product_id => 1, :property_definition => @text_property,
+                              :name => "works_with", :value => "Astra").should be_valid
     end
     
     it "should succeed with a different value" do
-      Relationship.new(:company_id => 1, :definitive_product_id => 1, :property_definition => @text_property,
-                       :name => "used_on", :value => "Polo").should be_valid
+      ProductRelationship.new(:company_id => 1, :definitive_product_id => 1, :property_definition => @text_property,
+                              :name => "used_on", :value => "Polo").should be_valid
     end
     
     it "should fail with the same value" do
-      Relationship.new(:company_id => 1, :definitive_product_id => 1, :property_definition => @text_property,
-                       :name => "used_on", :value => "Astra").should_not be_valid
+      ProductRelationship.new(:company_id => 1, :definitive_product_id => 1, :property_definition => @text_property,
+                              :name => "used_on", :value => "Astra").should_not be_valid
     end
   end
   
@@ -138,20 +138,20 @@ describe Relationship do
     end
     
     it "should yield the clasp (used) and the earring (goes well) for the necklace" do
-      Relationship.related_products(@products[0]).should == {
+      ProductRelationship.related_products(@products[0]).should == {
         "uses" => [ @products[1] ],
         "goes_well_with" => [ @products[2] ]
       }
     end
     
     it "should yield the necklace (used) for the clasp" do
-      Relationship.related_products(@products[1]).should == {
+      ProductRelationship.related_products(@products[1]).should == {
         "used_on" => [ @products[0] ]
       }
     end
     
     it "should yield the necklace (goes well) for the earring" do
-      Relationship.related_products(@products[2]).should == {
+      ProductRelationship.related_products(@products[2]).should == {
         "goes_well_with" => [ @products[0] ]
       }
     end
@@ -195,26 +195,26 @@ describe Relationship do
     end
     
     it "should yield the the Sparklies clasp (used) and the Sparklies Earring for the Sparklies necklace" do
-      Relationship.related_products(@products[0]).should == {
+      ProductRelationship.related_products(@products[0]).should == {
         "uses" => [ @products[1] ],
         "goes_well_with" => [ @products[2] ]
       }
     end
     
     it "should yield the Sparklies necklace (used) for the Sparklies clasp" do
-      Relationship.related_products(@products[1]).should == { "used_on" => [ @products[0] ] }
+      ProductRelationship.related_products(@products[1]).should == { "used_on" => [ @products[0] ] }
     end
     
     it "should yield the Sparklies necklace (goes well) for the Sparklies Earring" do
-      Relationship.related_products(@products[2]).should == { "goes_well_with" => [ @products[0] ] }
+      ProductRelationship.related_products(@products[2]).should == { "goes_well_with" => [ @products[0] ] }
     end
 
     it "should yield no related products for the Tinselies clasp" do
-      Relationship.related_products(@products[3]).should == {}
+      ProductRelationship.related_products(@products[3]).should == {}
     end
     
     it "should yield no related products for the Tinselies earring" do
-      Relationship.related_products(@products[4]).should == {}
+      ProductRelationship.related_products(@products[4]).should == {}
     end
   end
   

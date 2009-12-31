@@ -48,7 +48,7 @@ class ProductRelationship
     # forward reference relationships
     query =<<-EOS
       SELECT r.name, p.id
-      FROM relationships r
+      FROM product_relationships r
         INNER JOIN products p
           ON r.value = p.reference
           AND IF(r.company_id IS NULL, TRUE, r.company_id = p.company_id)
@@ -65,7 +65,7 @@ class ProductRelationship
     # forward property relationships
     query =<<-EOS
       SELECT r.name, p.id
-      FROM relationships r
+      FROM product_relationships r
         INNER JOIN products p
           ON IF(r.company_id IS NULL, TRUE, r.company_id = p.company_id)
         INNER JOIN property_values pv
@@ -86,7 +86,7 @@ class ProductRelationship
     # backward reference relationships
     query =<<-EOS
       SELECT r.name, r.definitive_product_id
-      FROM relationships r
+      FROM product_relationships r
       WHERE (r.company_id IS NULL OR r.company_id = ?)
         AND r.definitive_product_id != ?
         AND r.property_definition_id IS NULL
@@ -101,7 +101,7 @@ class ProductRelationship
     # backward property relationships
     query =<<-EOS
       SELECT r.name, r.definitive_product_id
-      FROM relationships r
+      FROM product_relationships r
         INNER JOIN property_values pv
           ON r.property_definition_id = pv.property_definition_id
           AND r.value = pv.text_value

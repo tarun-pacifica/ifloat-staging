@@ -11,5 +11,7 @@ class Employee < User
   property :job_title, String
   property :department, String
   
-  belongs_to :facility
+  belongs_to :facility, :required => false
+  
+  validates_present :facility_id
 end

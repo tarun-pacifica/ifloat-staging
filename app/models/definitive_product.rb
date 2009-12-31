@@ -7,10 +7,11 @@
 class DefinitiveProduct < Product
   property :review_stage, Integer, :required => true, :default => 0
   
-  belongs_to :company
+  belongs_to :company, :required => false
   has n, :mappings, :model => "ProductMapping", :child_key => [:definitive_product_id]
   has n, :product_relationships, :child_key => [:definitive_product_id]
   has n, :user_products
   
+  validates_present :company_id
   validates_is_unique :reference, :scope => [:company_id]
 end

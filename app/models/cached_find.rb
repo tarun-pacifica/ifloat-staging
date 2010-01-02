@@ -121,6 +121,7 @@ class CachedFind
   
   # TODO: spec
   def filter!(property_id, operation, params)
+    filters = Marshal.load(Marshal.dump(self.filters))
     filter = filters.find { |filter| filter[:prop_id] == property_id }
     return if filter.nil?
     
@@ -141,8 +142,11 @@ class CachedFind
       filter[:data][0..2] = numeric_filter_choose(min, max, unit, data.last)
     when "text"
       value = params["value"]
+      p [operation, value, data]
       case operation
       when "exclude"
+        p data.include?(value)
+        p text_filter_words(property_id).include?(value)
         data << value unless data.include?(value) or not text_filter_words(property_id).include?(value)
       when "include"
         data.delete(value)

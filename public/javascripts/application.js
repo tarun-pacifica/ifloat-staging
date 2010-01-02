@@ -29,6 +29,81 @@ function bubble_tooltip_hide() {
 	$("#bubble_tooltip").css("display", "none");
 }
 
+// Filter
+
+function filter_create(id, type, icon_url, domain_class, name, include_unknown, data) {
+	var html = [];
+	var dom_id = "filter_" + id;
+	
+	filter_create_summary(dom_id, icon_url, domain_class, name, html);
+	
+	html.push('<tr id="' + dom_id + '" class="filter">');
+	
+	filter_create_unknown_checkbox(include_unknown, html);
+	
+	if (type == "text") text_filter_create(data, html);
+	else if(type == "numeric") numeric_filter_create(data, html);
+	else if(type == "date") date_filter_create(data, html);
+	else if(type == "currency") numeric_filter_create(data, html);
+	
+	html.push('</tr>');
+	
+	return html.join(" ");
+}
+
+function filter_create_summary(dom_id, icon_url, domain_class, name, html) {
+	html.push('<tr id="' + dom_id + '_summary" class="filter_summary ' + domain_class + '">');
+	
+	html.push('<td>');
+	html.push('<img class="icon" src="' + icon_url + '" onclick="$(\'#' + dom_id + '\').toggle()" onmouseover="bubble_tooltip_show(event, \'' + name + '\')" onmouseout="bubble_tooltip_hide()"/>');
+	html.push('</td>');
+	
+	html.push('<td>');
+	html.push('<div class="summary" onclick="$(\'#' + dom_id + '\').toggle()"> </div>');
+	html.push('</td>');
+	
+	html.push('</tr>');
+}
+
+function filter_create_unknown_checkbox(include_unknown, html) {
+	html.push('<td colspan="2">');
+	html.push('<div class="unknown_item">');
+	var checked = (include_unknown ? 'checked="checked"' : '');
+	html.push('<input type="checkbox" ' + checked + ' onclick="filter_handle_check(this)" />');
+	html.push('Show products with no value');
+	html.push('</div>');
+}
+
+function filter_update(filter_ids) {
+	// goes and gets the value data
+  // for all filters in one hit as a json call
+}
+
+function filter_update_handle(data) {
+	if(data == "reset") {
+		window.location.reload();
+		return;
+	}
+	
+	for(id in data) {
+		var filter = $("#filter_" + id);
+		var filter_data = data[id];
+		
+		// use filter_data.hidden
+		
+		if(filter[0].type == "text") {
+			var excluded = filter_data.excluded;
+			var irrelevant = filter_data.irrelevant;
+			// use data
+		} else {
+			var min = filter_data[0];
+			var max = filter_data[1];
+			var unit = filter_data[2];
+			// use data
+		}
+	}
+}
+
 // Filter Queue
 
 function filter_handle_check(checkbox) {
@@ -656,6 +731,20 @@ function relationship_list_more(d) {
 }
 
 // Text Filters
+
+function text_filter_create(data, html) {
+	for(value in data) {
+		html.push('<div class="list_item">');
+		html.push('<img class="select_one" src="/images/buttons/select_one.png" onclick="text_filter_select_one(this)"/>');
+		html.push('<input type="checkbox" value="' + value + '" onclick="text_filter_handle_check(this)" />');
+		
+		var definition = data[value];
+		if(definition == null) html.push(value);
+		else html.push('<span class="defined" onmouseover="bubble_tooltip_show(event, \'' + definition + '\')" onmouseout="bubble_tooltip_hide()">' + value + '</span>');
+		
+		html.push('</div>');
+	}
+}
 
 function text_filter_handle_check(checkbox, select_one) {
 	var filter = $(checkbox).parents(".filter");

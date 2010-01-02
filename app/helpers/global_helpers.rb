@@ -1,5 +1,6 @@
 module Merb
   module GlobalHelpers
+    # TODO: remove
     def defined_value(value, definition)
       return value if definition.nil?
       definition.gsub!(/(['"])/) { '\\' + $1 }

@@ -51,35 +51,37 @@ function filter_create(info) {
 	
 	filter_create_unknown_checkbox(info.include_unknown, html);
 	
-	if (info.prop_type == "text") text_filter_create(info.data, html);
-	else if(info.prop_type == "numeric") num_filter_create(info.data, html);
-	else if(info.prop_type == "date") date_filter_create(info.data, html);
-	else if(info.prop_type == "currency") num_filter_create(info.data, html);
+	var data = info.data;
+	if (info.prop_type == "text") text_filter_create(data, html);
+	else if(info.prop_type == "numeric") num_filter_create(data, html);
+	else if(info.prop_type == "date") date_filter_create(data, html);
+	else if(info.prop_type == "currency") num_filter_create(data, html);
 	
 	html.push('</tr>');
 	
-	// TODO: implement for all numeric/currency filters
-	// f.unit = <%= @unit.to_s.inspect %>;
-	// 
-	// f.limits = {};
-	// f.values = {};
-	// <% @limits.each do |unit, min_max| %>
-	// <% cmin, cmax = @min.to_f, @max.to_f %>
-	// <% cmin, cmax = [cmin, cmax].map { |v| Conversion.convert(v, @unit, unit) } unless unit == @unit %>
-	// <% unit = unit.to_s.inspect %>
-	// f.limits[<%= unit %>] = <%= [min_max.first.to_f, min_max.last.to_f].inspect %>;
-	// f.values[<%= unit %>] = <%= [cmin, cmax].inspect %>;
-	// <% end %>
-	// f.unit_count = <%= @limits.size %>;	
-	// 
-	// num_filter_update_context_and_summary(filter);
-	// num_filter_update_min_max(filter);
-	// 
-	// <% unless @unit.nil? %>
-	// filter.find("select.unit").val(f.unit);
-	// <% end %>
+	var attributes = {};
 	
-	return html.join(" ");
+	if (info.prop_type != "text") {
+		attributes.limit_count = 0;
+		attributes.limits = data.limits;
+		attributes.unit = data.chosen[2];
+		attributes.values = {};
+		
+		for(unit in data.limits) {
+			var min = data.chosen[0];
+			var max = data.chosen[1];
+			
+			if (unit != attributes.unit) {
+				min = num_filter_convert(min, unit, attributes.unit);
+				max = num_filter_convert(max, unit, attributes.unit);
+			}
+			
+			attributes.values[unit] = [min, max];
+			attributes.limit_count += 1;
+		}		
+	}
+	
+	return [html.join(" "), attributes];
 }
 
 function filter_create_summary(dom_id, icon_url, domain_class, name, html) {
@@ -119,25 +121,38 @@ function filter_load_all_handle(filters) {
 	var domains = [];
 	
 	for(i in filters) {
-		var filter = filters[i];
+		var info = filters[i];
 		
-		var domain = filter.prop_friendly_name[0];
+		var domain = info.prop_friendly_name[0];
 		if(domains[domains.length - 1] != domain) {
 			domains.push(domain);
 			filter_table.append('<tr id="' + domains.length + '" class="filter_section"> <th colspan="3">' + domain + '</th> </tr>');
 		}
-		filter.domain_class = "domain_" + domains.length;
-				
-		filter_table.append(filter_create(filter));
+		info.domain_class = "domain_" + domains.length;
+		
+		var html_attribs = filter_create(info);
+		filter_table.append(html_attribs[0]);
+		
+		var filter = $("#cached_find_filters .filter:last");
+		var f = filter[0];
+		
+		var attributes = html_attribs[1];
+		for(key in attributes) f[key] = attributes[key];
+		
+		if(info.prop_type == "text") text_filter_update_summary(filter);
+		else {
+			num_filter_update_context_and_summary(filter);
+			num_filter_update_min_max(filter);
+		}
 	}
 	
-	$("#cached_find_filters .text_filter").each(function(i) { text_filter_update_summary($(this)); });
-	$("#cached_find_filters .filter").not(".text_filter").each(function(i) {
-		// TODO: check whether this is the most efficient way to go about this
-		var filter = $(this);
-		num_filter_update_context_and_summary(filter);
-		num_filter_update_min_max(filter);
-	});
+	// $("#cached_find_filters .text_filter").each(function(i) { text_filter_update_summary($(this)); });
+	// $("#cached_find_filters .filter").not(".text_filter").each(function(i) {
+	// 	// TODO: check whether this is the most efficient way to go about this
+	// 	var filter = $(this);
+	// 	num_filter_update_context_and_summary(filter);
+	// 	num_filter_update_min_max(filter);
+	// });
 	
 	// TODO: re-activate / replace
 	// filter_show_only(<%= @relevant_filters.keys.inspect %>);
@@ -466,7 +481,8 @@ function number_format(values, unit, date) {
 
 function num_filter_choose(filter) {
 	var f = filter[0];
-	var url = "/cached_finds/" + f.find_id + "/filter/" + f.property_id;
+	var property_id = f.id.match(/^filter_(\d+)$/)[1];
+	var url = "/cached_finds/" + $("#cached_find_results")[0].find_id + "/filter/" + property_id;
 	var values = f.values[f.unit];
 	filter_queue_add(url, {operation: "choose", min: values[0], max: values[1], unit: f.unit});
 }
@@ -477,12 +493,17 @@ function num_filter_create(data, html) {
 	num_filter_create_min_max("min", "min", true, html);
 	num_filter_create_min_max("max", "max", true, html);
 	
-	if(data[null] == undefined) {
+	var chosen_unit = data.chosen[2];
+	var limits = data.limits;
+	if(limits[""] == undefined) {
 		html.push('<tr>');
 		html.push('<td class="label">unit</td>');
 		html.push('<td>');
 		html.push('<select class="unit" onchange="num_filter_handle_select(this)">');
-		for(unit in data) html.push('<option>' + unit + '</option>');
+		for(unit in limits) {
+			var selected = (unit == chosen_unit ? 'selected="selected"' : '');
+			html.push('<option ' + selected + '>' + unit + '</option>');
+		}
 		html.push('</select>');
 		html.push('</td>');
 		html.push('</tr>');
@@ -569,7 +590,7 @@ function num_filter_update_context_and_summary(filter) {
 	
 	for(unit in f.values) {
 		var summary = number_format(f.values[unit], unit, date_filter);
-		if (f.unit_count > 1 && unit == f.unit) summary = "<strong>" + summary + "</strong>";		
+		if (f.limit_count > 1 && unit == f.unit) summary = "<strong>" + summary + "</strong>";		
 		summaries.push(summary);
 	}
 	

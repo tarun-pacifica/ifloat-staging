@@ -58,7 +58,7 @@ class CachedFinds < Application
         }
       else
         filter[:data] = {
-          :chosen => filter[:data],
+          :chosen => filter[:data][0..2].map { |v| v.nil? ? "" : v },
           :limits => numeric_limits[prop_id]
         }
       end

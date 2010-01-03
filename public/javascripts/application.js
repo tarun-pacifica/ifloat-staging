@@ -119,9 +119,11 @@ function filter_load_all_handle(filters) {
 
 	var filter_table = $("#cached_find_filters table");
 	var domains = [];
+	var relevant_ids = [];
 	
 	for(i in filters) {
 		var info = filters[i];
+		if(info.relevant) relevant_ids.push(info.prop_id);
 		
 		var domain = info.prop_friendly_name[0];
 		if(domains[domains.length - 1] != domain) {
@@ -147,9 +149,7 @@ function filter_load_all_handle(filters) {
 		}
 	}
 	
-	// TODO: re-activate / replace
-	// filter_show_only(<%= @relevant_filters.keys.inspect %>);
-	// text_filter_mark_relevant(<%= @relevant_filters.to_json %>);
+	filter_show_only(relevant_ids);	
 }
 
 // Filter Queue
@@ -488,6 +488,7 @@ function num_filter_create(data, html) {
 	
 	var chosen_unit = data.chosen[2];
 	var limits = data.limits;
+	
 	if(limits[""] == undefined) {
 		html.push('<tr>');
 		html.push('<td class="label">unit</td>');

@@ -40,11 +40,13 @@ class CachedFinds < Application
     properties = PropertyDefinition.all(:id => filters.map { |filter| filter[:prop_id] })
     icon_urls = PropertyDefinition.icon_urls_by_property_id(properties)
     text_value_definitions = PropertyDefinition.definitions_by_property_id(properties, find.language_code)
-    text_values, numeric_limits = find.filter_values
+    text_values, relevant_numeric_limits = find.filter_values
+    relevant_prop_ids = find.filter_values_relevant(text_values, relevant_numeric_limits).keys
     
     filters.each do |filter|
       prop_id = filter[:prop_id]
       filter[:icon_url] = icon_urls[prop_id]
+      filter[:relevant] = relevant_prop_ids.include?(prop_id)
       
       if filter[:prop_type] == "text"
         all_values, relevant_values = text_values[prop_id]
@@ -59,7 +61,7 @@ class CachedFinds < Application
       else
         filter[:data] = {
           :chosen => filter[:data][0..2].map { |v| v.nil? ? "" : v },
-          :limits => numeric_limits[prop_id]
+          :limits => filter[:data][3]
         }
       end
     end

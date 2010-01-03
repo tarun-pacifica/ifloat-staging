@@ -132,6 +132,12 @@ function filter_load_all_handle(filters) {
 	}
 	
 	$("#cached_find_filters .text_filter").each(function(i) { text_filter_update_summary($(this)); });
+	$("#cached_find_filters .filter").not(".text_filter").each(function(i) {
+		// TODO: check whether this is the most efficient way to go about this
+		var filter = $(this);
+		num_filter_update_context_and_summary(filter);
+		num_filter_update_min_max(filter);
+	});
 	
 	// TODO: re-activate / replace
 	// filter_show_only(<%= @relevant_filters.keys.inspect %>);
@@ -802,7 +808,7 @@ function text_filter_create(data, html) {
 	var all = data.all;
 	var definitions = data.definitions;
 	var excluded = util_hash_from_array(data.excluded, true);
-	var relevant = util_hash_from_array(data.relevant, true);
+	var relevant = util_hash_from_array(data.relevant == "all" ? all : data.relevant, true);
 	
 	for(i in all) {
 		var value = all[i];

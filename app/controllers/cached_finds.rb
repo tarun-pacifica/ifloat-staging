@@ -48,11 +48,13 @@ class CachedFinds < Application
       
       if filter[:prop_type] == "text"
         all_values, relevant_values = text_values[prop_id]
+        definitions = text_value_definitions[prop_id]
+        (definitions.keys - all_values).each { |v| definitions.delete(v) }
         filter[:data] = {
           :all         => all_values,
-          :definitions => text_value_definitions[prop_id],
+          :definitions => definitions,
           :excluded    => filter[:data],
-          :relevant    => (relevant_values == all_values ? "all" : relevant_values)
+          :relevant    => (relevant_values.sort == all_values ? "all" : relevant_values)
         }
       else
         filter[:data] = {

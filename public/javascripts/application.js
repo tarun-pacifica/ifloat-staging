@@ -139,20 +139,13 @@ function filter_load_all_handle(filters) {
 		var attributes = html_attribs[1];
 		for(key in attributes) f[key] = attributes[key];
 		
-		if(info.prop_type == "text") text_filter_update_summary(filter);
-		else {
+		if(info.prop_type == "text") {
+			text_filter_update_summary(filter);
+		} else {
 			num_filter_update_context_and_summary(filter);
 			num_filter_update_min_max(filter);
 		}
 	}
-	
-	// $("#cached_find_filters .text_filter").each(function(i) { text_filter_update_summary($(this)); });
-	// $("#cached_find_filters .filter").not(".text_filter").each(function(i) {
-	// 	// TODO: check whether this is the most efficient way to go about this
-	// 	var filter = $(this);
-	// 	num_filter_update_context_and_summary(filter);
-	// 	num_filter_update_min_max(filter);
-	// });
 	
 	// TODO: re-activate / replace
 	// filter_show_only(<%= @relevant_filters.keys.inspect %>);

@@ -1,12 +1,5 @@
 module Merb
   module GlobalHelpers
-    # TODO: remove
-    def defined_value(value, definition)
-      return value if definition.nil?
-      definition.gsub!(/(['"])/) { '\\' + $1 }
-      "<span class=\"defined\" onmouseover=\"bubble_tooltip_show(event, '#{definition}')\" onmouseout=\"bubble_tooltip_hide()\">#{value}</span>"
-    end
-    
     def product_summary(product_id, values_by_name, image_url)
       <<-EOS
       <a class="product" id="prod_#{product_id}" href="/products/#{product_id}">

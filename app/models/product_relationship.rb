@@ -33,7 +33,7 @@ class ProductRelationship
 
   belongs_to :company, :required => false
   belongs_to :product, :model => "DefinitiveProduct", :child_key =>[:definitive_product_id]
-  belongs_to :property_definition
+  belongs_to :property_definition, :required => false
   
   validates_within :name, :set => NAMES.keys
   validates_is_unique :value, :scope => [:company_id, :definitive_product_id, :property_definition_id, :name]

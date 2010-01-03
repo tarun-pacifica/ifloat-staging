@@ -307,6 +307,10 @@ body {
 	padding: 4px 10px;
 }
 
+#cached_find_filters .filter {
+	display: none;
+}
+
 #cached_find_filters .filter .list_item {
 	margin-top: 2px;
 	padding-left: 31px;

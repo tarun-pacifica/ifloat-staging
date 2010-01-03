@@ -114,6 +114,7 @@ class CachedFind
       filters << filter
     end
     self.filters = filters.sort_by { |filter| filter[:prop_seq_num] }
+    filters.each { |filter| filter.delete(:prop_seq_num) }
     
     self.invalidated = false
     save
@@ -160,13 +161,17 @@ class CachedFind
     save
   end
   
-  # TODO: spec
   def filter_values
     fpids = filtered_product_ids(true)
-    text_values_by_property_id = Indexer.filterable_text_values_for_product_ids(all_product_ids, fpids, language_code)
-    numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(fpids)
-    
+    text_values = Indexer.filterable_text_values_for_product_ids(all_product_ids, fpids, language_code)
+    numeric_limits = Indexer.numeric_limits_for_product_ids(fpids)
+    [text_values, numeric_limits]
+  end
+  
+  # TODO: spec
+  def filter_values_relevant(text_values_by_property_id, numeric_limits_by_property_id)
     relevant_values_by_property_id = {}
+    
     filters.each do |filter|
       property_id, type = filter.values_at(:prop_id, :prop_type)
       relevant_values = (type == "text" ? text_values_by_property_id[property_id].last : nil)
@@ -181,7 +186,7 @@ class CachedFind
       relevant_values_by_property_id[property_id] = relevant_values
     end
     
-    [text_values_by_property_id, relevant_values_by_property_id]
+    relevant_values_by_property_id
   end
   
   # TODO: spec for class_only filtering

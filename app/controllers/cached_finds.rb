@@ -26,9 +26,43 @@ class CachedFinds < Application
     find = session.ensure_cached_find(id.to_i)
     return "reset".to_json if find.ensure_valid
     
-    find.filter!(property_id.to_i, operation, params)
-    text_filter_values, relevant_filters = find.filter_values
-    relevant_filters.to_json
+    find.filter!(property_id.to_i, operation, params)    
+    find.filter_values_relevant(*find.filter_values).to_json
+  end
+  
+  def filters(id)
+    provides :js
+    
+    find = session.ensure_cached_find(id.to_i)
+    return "reset".to_json if find.ensure_valid
+    
+    filters = find.filters
+    properties = PropertyDefinition.all(:id => filters.map { |filter| filter[:prop_id] })
+    icon_urls = PropertyDefinition.icon_urls_by_property_id(properties)
+    text_value_definitions = PropertyDefinition.definitions_by_property_id(properties, find.language_code)
+    text_values, numeric_limits = find.filter_values
+    
+    filters.each do |filter|
+      prop_id = filter[:prop_id]
+      filter[:icon_url] = icon_urls[prop_id]
+      
+      if filter[:prop_type] == "text"
+        all_values, relevant_values = text_values[prop_id]
+        filter[:data] = {
+          :all         => all_values,
+          :definitions => text_value_definitions[prop_id],
+          :excluded    => filter[:data],
+          :relevant    => (relevant_values == all_values ? "all" : relevant_values)
+        }
+      else
+        filter[:data] = {
+          :chosen => filter[:data],
+          :limits => numeric_limits[prop_id]
+        }
+      end
+    end
+    
+    filters.to_json
   end
   
   def found_images(id, limit)
@@ -142,11 +176,11 @@ class CachedFinds < Application
     @find.ensure_valid
     @find.save
     
-    @filters = @find.filters
-    properties = PropertyDefinition.all(:id => @filters.map { |filter| filter[:prop_id] })
-    @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)
-    @text_value_definitions = PropertyDefinition.definitions_by_property_id(properties, @find.language_code)
-    @text_filter_values, @relevant_filters = @find.filter_values
+    # @filters = @find.filters
+    # properties = PropertyDefinition.all(:id => @filters.map { |filter| filter[:prop_id] })
+    # @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)
+    # @text_value_definitions = PropertyDefinition.definitions_by_property_id(properties, @find.language_code)
+    # @text_filter_values, @relevant_filters = @find.filter_values
     
     @previous_finds = session.cached_finds
     render

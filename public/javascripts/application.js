@@ -29,24 +29,55 @@ function bubble_tooltip_hide() {
 	$("#bubble_tooltip").css("display", "none");
 }
 
-// Filter
+// Date Filter
 
-function filter_create(id, type, icon_url, domain_class, name, include_unknown, data) {
+function date_filter_create(data, html) {
+	html.push('<table>');
+	num_filter_create_min_max("min", "from", false, html);
+	num_filter_create_min_max("max", "to", false, html);
+	html.push('</table>');
+}
+
+// Filter (Common)
+
+function filter_create(info) {
 	var html = [];
-	var dom_id = "filter_" + id;
+	var dom_id = "filter_" + info.prop_id;
 	
-	filter_create_summary(dom_id, icon_url, domain_class, name, html);
+	filter_create_summary(dom_id, info.icon_url, info.domain_class, info.prop_friendly_name[1], html);
 	
-	html.push('<tr id="' + dom_id + '" class="filter">');
+	var subclass = info.prop_type + "_filter";
+	html.push('<tr id="' + dom_id + '" class="filter ' + info.prop_type + '_filter">');
 	
-	filter_create_unknown_checkbox(include_unknown, html);
+	filter_create_unknown_checkbox(info.include_unknown, html);
 	
-	if (type == "text") text_filter_create(data, html);
-	else if(type == "numeric") numeric_filter_create(data, html);
-	else if(type == "date") date_filter_create(data, html);
-	else if(type == "currency") numeric_filter_create(data, html);
+	if (info.prop_type == "text") text_filter_create(info.data, html);
+	else if(info.prop_type == "numeric") num_filter_create(info.data, html);
+	else if(info.prop_type == "date") date_filter_create(info.data, html);
+	else if(info.prop_type == "currency") num_filter_create(info.data, html);
 	
 	html.push('</tr>');
+	
+	// TODO: implement for all numeric/currency filters
+	// f.unit = <%= @unit.to_s.inspect %>;
+	// 
+	// f.limits = {};
+	// f.values = {};
+	// <% @limits.each do |unit, min_max| %>
+	// <% cmin, cmax = @min.to_f, @max.to_f %>
+	// <% cmin, cmax = [cmin, cmax].map { |v| Conversion.convert(v, @unit, unit) } unless unit == @unit %>
+	// <% unit = unit.to_s.inspect %>
+	// f.limits[<%= unit %>] = <%= [min_max.first.to_f, min_max.last.to_f].inspect %>;
+	// f.values[<%= unit %>] = <%= [cmin, cmax].inspect %>;
+	// <% end %>
+	// f.unit_count = <%= @limits.size %>;	
+	// 
+	// num_filter_update_context_and_summary(filter);
+	// num_filter_update_min_max(filter);
+	// 
+	// <% unless @unit.nil? %>
+	// filter.find("select.unit").val(f.unit);
+	// <% end %>
 	
 	return html.join(" ");
 }
@@ -74,41 +105,44 @@ function filter_create_unknown_checkbox(include_unknown, html) {
 	html.push('</div>');
 }
 
-function filter_update(filter_ids) {
-	// goes and gets the value data
-  // for all filters in one hit as a json call
+function filter_load_all(find_id) {
+	$.getJSON("/cached_finds/" + find_id + "/filters", filter_load_all_handle);
 }
 
-function filter_update_handle(data) {
-	if(data == "reset") {
+function filter_load_all_handle(filters) {
+	if(filters == "reset") {
 		window.location.reload();
 		return;
 	}
+
+	var filter_table = $("#cached_find_filters table");
+	var domains = [];
 	
-	for(id in data) {
-		var filter = $("#filter_" + id);
-		var filter_data = data[id];
+	for(i in filters) {
+		var filter = filters[i];
 		
-		// use filter_data.hidden
-		
-		if(filter[0].type == "text") {
-			var excluded = filter_data.excluded;
-			var irrelevant = filter_data.irrelevant;
-			// use data
-		} else {
-			var min = filter_data[0];
-			var max = filter_data[1];
-			var unit = filter_data[2];
-			// use data
+		var domain = filter.prop_friendly_name[0];
+		if(domains[domains.length - 1] != domain) {
+			domains.push(domain);
+			filter_table.append('<tr id="' + domains.length + '" class="filter_section"> <th colspan="3">' + domain + '</th> </tr>');
 		}
+		filter.domain_class = "domain_" + domains.length;
+				
+		filter_table.append(filter_create(filter));
 	}
+	
+	$("#cached_find_filters .text_filter").each(function(i) { text_filter_update_summary($(this)); });
+	
+	// TODO: re-activate / replace
+	// filter_show_only(<%= @relevant_filters.keys.inspect %>);
+	// text_filter_mark_relevant(<%= @relevant_filters.to_json %>);
 }
 
 // Filter Queue
 
 function filter_handle_check(checkbox) {
-	var f = $(checkbox).parents(".filter")[0];
-	var url = "/cached_finds/" + f.find_id + "/filter/" + f.property_id;
+	var property_id = $(checkbox).parents(".filter")[0].id.match(/^filter_(\d+)$/)[1];
+	var url = "/cached_finds/" + $("#cached_find_results")[0].find_id + "/filter/" + property_id;
 	filter_queue_add(url, {operation: "include_unknown", value: checkbox.checked});
 }
 
@@ -431,6 +465,37 @@ function num_filter_choose(filter) {
 	filter_queue_add(url, {operation: "choose", min: values[0], max: values[1], unit: f.unit});
 }
 
+function num_filter_create(data, html) {
+	html.push('<table>');
+	
+	num_filter_create_min_max("min", "min", true, html);
+	num_filter_create_min_max("max", "max", true, html);
+	
+	if(data[null] == undefined) {
+		html.push('<tr>');
+		html.push('<td class="label">unit</td>');
+		html.push('<td>');
+		html.push('<select class="unit" onchange="num_filter_handle_select(this)">');
+		for(unit in data) html.push('<option>' + unit + '</option>');
+		html.push('</select>');
+		html.push('</td>');
+		html.push('</tr>');
+	}
+
+	html.push('</table>');
+}
+
+function num_filter_create_min_max(min_max, label, fraction_helper, html) {
+	html.push('<tr>');
+	html.push('<td class="label">' + label + '</td>');
+	html.push('<td>');
+	if(fraction_helper) html.push('<img class="fraction_helper" src="/images/buttons/fraction_helper.png" onclick="fraction_helper_open(this)" />');
+	html.push('<input class="' + min_max + '" type="text" onkeyup="num_filter_handle_input(this)" />');
+	html.push('(' + (min_max == "min" ? "&ge;" : "&le;") + ' <span class="' + min_max + '_all"> </span>)');
+	html.push('</td>');
+	html.push('</tr>');
+}
+
 function num_filter_handle_input(i) {
 	var input = $(i);
 	var filter = input.parents(".filter");
@@ -441,7 +506,7 @@ function num_filter_handle_input(i) {
 	var i = (input.hasClass("min") ? 0 : 1);
 	var updated = false;
 	
-	if(f.date_filter) {
+	if(filter.hasClass("date_filter")) {
 		if(value.length >= 4) {
 			value = value.substr(0, 4);
 			input.val(value);
@@ -493,10 +558,11 @@ function num_filter_handle_select(s) {
 
 function num_filter_update_context_and_summary(filter) {
 	var f = filter[0];
+	var date_filter = filter.hasClass("date_filter");
 	var summaries = [];
 	
 	for(unit in f.values) {
-		var summary = number_format(f.values[unit], unit, f.date_filter);
+		var summary = number_format(f.values[unit], unit, date_filter);
 		if (f.unit_count > 1 && unit == f.unit) summary = "<strong>" + summary + "</strong>";		
 		summaries.push(summary);
 	}
@@ -504,14 +570,14 @@ function num_filter_update_context_and_summary(filter) {
 	filter.prev().find(".summary").html(summaries.join(" <br /> "));
 	
 	var limits = f.limits[f.unit];
-	filter.find(".min_all").text(number_format([limits[0]], "", f.date_filter)); 
-	filter.find(".max_all").text(number_format([limits[1]], "", f.date_filter));
+	filter.find(".min_all").text(number_format([limits[0]], "", date_filter));
+	filter.find(".max_all").text(number_format([limits[1]], "", date_filter));
 }
 
 function num_filter_update_min_max(filter) {
 	var f = filter[0];
 	var values = f.values[f.unit];
-	if(f.date_filter) values = [values[0] / 10000, values[1] / 10000];
+	if(filter.hasClass("date_filter")) values = [values[0] / 10000, values[1] / 10000];
 	filter.find("input.min").val(values[0]);
 	filter.find("input.max").val(values[1]);
 }
@@ -733,10 +799,21 @@ function relationship_list_more(d) {
 // Text Filters
 
 function text_filter_create(data, html) {
-	for(value in data) {
-		html.push('<div class="list_item">');
+	var all = data.all;
+	var definitions = data.definitions;
+	var excluded = util_hash_from_array(data.excluded, true);
+	var relevant = util_hash_from_array(data.relevant, true);
+	
+	for(i in all) {
+		var value = all[i];
+		
+		var style = (relevant[value] ? '' : 'style="text-decoration:line-through;color:gray"');
+		html.push('<div class="list_item" ' + style + '>');
+		
 		html.push('<img class="select_one" src="/images/buttons/select_one.png" onclick="text_filter_select_one(this)"/>');
-		html.push('<input type="checkbox" value="' + value + '" onclick="text_filter_handle_check(this)" />');
+		
+		var checked = (excluded[value] ? '' : 'checked="checked"');
+		html.push('<input type="checkbox" ' + checked + ' value="' + value + '" onclick="text_filter_handle_check(this)" />');
 		
 		var definition = data[value];
 		if(definition == null) html.push(value);
@@ -748,9 +825,9 @@ function text_filter_create(data, html) {
 
 function text_filter_handle_check(checkbox, select_one) {
 	var filter = $(checkbox).parents(".filter");
-	var f = filter[0];
+	var property_id = filter[0].id.match(/^filter_(\d+)$/)[1];
 	
-	var url = "/cached_finds/" + f.find_id + "/filter/" + f.property_id;
+	var url = "/cached_finds/" + $("#cached_find_results")[0].find_id + "/filter/" + property_id;
 	var operation = (select_one ? "include_only" : (checkbox.checked ? "include" : "exclude"));
 	
 	filter_queue_add(url, {operation: operation, value: checkbox.value});
@@ -762,15 +839,14 @@ function text_filter_mark_relevant(text_values_by_relevant_filter_ids) {
 		var values = text_values_by_relevant_filter_ids[filter_id];
 		if(values == null) continue;
 		
-		var value_lookup = {};
-		for(i in values) value_lookup[values[i]] = true;
+		var value_lookup = util_hash_from_array(values, true);
 		
 		var filter = $("#filter_" + filter_id);
 		filter.find(".list_item input:checkbox").each(function (i) {
 			var list_item = $(this).parent();
 			if(value_lookup[this.value]) list_item.css("text-decoration", "none").css("color", "black");
 			else list_item.css("text-decoration", "line-through").css("color", "gray");
-		})
+		});
 		
 		text_filter_update_summary(filter);
 	}
@@ -793,4 +869,12 @@ function text_filter_update_summary(filter) {
 	var summary = list.get().join(", ");
 	if(summary.length > 50) summary = summary.substr(0, 46) + "...";
 	filter.prev().find(".summary").text(summary);
+}
+
+// Util
+
+function util_hash_from_array(keys, value) {
+	var hash = {};
+	for(i in keys) hash[keys[i]] = value;
+	return hash;
 }

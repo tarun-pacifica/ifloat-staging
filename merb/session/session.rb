@@ -94,7 +94,8 @@ module Merb
         unless session_set.empty?
           user_discriminators = user_set.map { |item| item.send(discriminator) }
           session_set.all(discriminator => user_discriminators).destroy!
-          session_set.update!({:user_id => user.id}, true)
+          session_set.reload
+          session_set.update!(:user_id => user.id)
           user_set.reload
         end
         

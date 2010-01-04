@@ -10,7 +10,7 @@ module Merb
     def product_summary(product_id, values_by_name, image_url)
       <<-EOS
       <a class="product" id="prod_#{product_id}" href="/products/#{product_id}">
-      	<img src=#{image_url.inspect} onmouseover="prod_list_image_zoom(event)" onmouseout="prod_list_image_unzoom(this)"/>
+      	<img src=#{image_url.inspect} onmouseover="prod_image_zoom(event)" onmouseout="prod_image_unzoom(this)"/>
       	#{product_titles(values_by_name["auto:title"])}
       	<p>#{(values_by_name["marketing:summary"] || []).first}</p>
       	<hr />

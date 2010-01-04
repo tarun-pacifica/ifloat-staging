@@ -88,7 +88,18 @@ class ImportSet
   
   def import
     start = Time.now
-    primary_image_assets.each do |asset|
+    pias_by_product = primary_image_attachments
+    puts "#{'%6.2f' % (Time.now - start)}s : derived primary image list"
+    
+    start = Time.now
+    (@objects.select { |object| object.klass == DefinitiveProduct } - pias_by_product.keys).each do |product|
+      error(DefinitiveProduct, product.path, product.row, nil, "no image specified")
+    end
+    puts "#{'%6.2f' % (Time.now - start)}s : ensured all products have an image"
+    return [] unless @errors.empty?
+    
+    start = Time.now
+    pias_by_product.values.map { |attachment| attachment[:asset] }.uniq.each do |asset|
       path = asset.attributes[:file_path]
       ImageScience.with_image(path) do |img|
         w, h = img.width, img.height
@@ -239,7 +250,7 @@ class ImportSet
     [pk_fields, value_fields]
   end
   
-  def primary_image_assets
+  def primary_image_attachments
     attachments_by_product = {}
     @objects_by_pk_by_class[Attachment].each do |pk, attachment|
       product, role, sequence_number = pk
@@ -247,7 +258,7 @@ class ImportSet
       a = attachments_by_product[product]
       attachments_by_product[product] = attachment if a.nil? or a.attributes[:sequence_number] > sequence_number
     end
-    attachments_by_product.values.map { |a| a.attributes[:asset] }
+    attachments_by_product
   end
   
   def value_md5s_and_ids_by_pk_md5(klass, pk_fields, value_fields)

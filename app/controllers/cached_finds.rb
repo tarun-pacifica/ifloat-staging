@@ -41,12 +41,12 @@ class CachedFinds < Application
     icon_urls = PropertyDefinition.icon_urls_by_property_id(properties)
     text_value_definitions = PropertyDefinition.definitions_by_property_id(properties, find.language_code)
     text_values, relevant_numeric_limits = find.filter_values
-    relevant_prop_ids = find.filter_values_relevant(text_values, relevant_numeric_limits).keys
+    relevant_values_by_prop_id = find.filter_values_relevant(text_values, relevant_numeric_limits)
     
     filters.each do |filter|
       prop_id = filter[:prop_id]
       filter[:icon_url] = icon_urls[prop_id]
-      filter[:relevant] = relevant_prop_ids.include?(prop_id)
+      filter[:relevant] = relevant_values_by_prop_id.has_key?(prop_id)
       
       if filter[:prop_type] == "text"
         all_values, relevant_values = text_values[prop_id]

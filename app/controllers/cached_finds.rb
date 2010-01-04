@@ -15,6 +15,7 @@ class CachedFinds < Application
     
     if find.valid?
       session[:recalled] = (not find.accessed_at.nil?)
+      CachedFindEvent.log!(specification, session[:recalled], request.remote_ip)
       redirect(resource(find))
     else redirect("/")
     end

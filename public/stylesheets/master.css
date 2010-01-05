@@ -1072,6 +1072,13 @@ body {
 	border-bottom: 1px solid gray;
 }
 
+/* Product Detail Diff */
+
+#product_detail_diff_summary .property {
+	border: 1px solid red;
+	width: 100px;
+}
+
 /* Product Detail Main */
 
 #product_detail_main {

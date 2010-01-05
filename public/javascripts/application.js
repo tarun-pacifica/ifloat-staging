@@ -38,6 +38,14 @@ function date_filter_create(data, html) {
 	html.push('</table>');
 }
 
+// Diff Property
+
+function diff_property_handle_select(s) {
+	var select = $(s);
+	select.nextAll().hide();
+	select.nextAll("." + select.val() + "_values").show();
+}
+
 // Filter (Common)
 
 function filter_create(info) {

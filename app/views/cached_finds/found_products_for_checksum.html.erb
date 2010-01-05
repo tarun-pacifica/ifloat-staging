@@ -21,31 +21,16 @@
 		<h1>There are <span><%= @product_count %></span> products with this image</h1>
 		<p class="help">Selecting one of the following values will highlight the relevant products</p>
 		
-		<% @diff_properties.each do |property| %>		
-		<% domain, title = @friendly_name_sections[property.id] %>
-		<div>
-			<img class="icon" src=<%= @icon_urls_by_property_id[property.id].inspect %> onmouseover="bubble_tooltip_show(event, '<%= title %>')" onmouseout="bubble_tooltip_hide()" />
-			<% @diff_values_by_reduced_value.each do |reduced_value, values| %>
-			<% next unless reduced_value.first == property %>
-			<p><%= reduced_value.last %></p>
-			<% end %>
-		</div>
-		<% end %>
+		<%= partial :property, :with => @diff_properties %>
 		
 		<hr />
 	</div>
 	
 	<div id="product_detail_diff_products">
-		<h1>PROD 1</h1>
-		<h1>PROD 2</h1>
-		<h1>PROD 3</h1>
+		<% @values_by_property_by_product_url.each do |url, values_by_property| %>
+		<a href=<%= url.inspect %>><%= url %></a>
+		<% end %>
 	</div>
 </div>
 
 </div>
-
-
-<script type="text/javascript" charset="utf-8">
-	$("#product_detail")[0].product_id = <%= @product.id %>;
-	prod_detail_update_purchase_buttons(<%= @product.id %>);
-</script>

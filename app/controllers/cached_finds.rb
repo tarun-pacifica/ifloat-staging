@@ -98,6 +98,7 @@ class CachedFinds < Application
     find.ensure_valid
     
     product_ids = find.filtered_product_ids_by_image_checksum[image_checksum]
+    @product_count = product_ids.size
     return redirect(resource(find)) if product_ids.nil? or product_ids.empty?
     
     return redirect(url(:product, :id => product_ids.first)) if product_ids.size == 1
@@ -106,42 +107,55 @@ class CachedFinds < Application
     return redirect(resource(find)) if @image.nil?
     
     @values_by_property_by_product_id = Product.display_values(product_ids, session.language)
-    @product_count = @values_by_property_by_product_id.size
     
-    values_by_reduced_value = {}
+    value_identities_by_property = {}
     @values_by_property_by_product_id.each do |product_id, values_by_property|
       values_by_property.each do |property, values|
+        next unless property.display_as_data?
+        
+        value_identity = values.map do |value|
+          v = value.value
+          parts = (v.is_a?(Range) ? [v.first, v.last] : [v])
+          parts << value.unit unless value.class.text? or value.unit.nil?
+          parts
+        end.sort
+        (value_identities_by_property[property] ||= []).push(value_identity)
+      end
+    end
+    
+    properties = value_identities_by_property.keys
+    @common_properties, @diff_properties = properties.partition do |property|
+      value_identities_by_property[property].uniq.size == 1
+    end.map do |prop_segment|
+      prop_segment.sort_by { |p| p.sequence_number }
+    end
+    
+    @values_by_property = {}
+    @values_by_property_by_product_id.values.first.each do |property, values|
+      @values_by_property[property] = values if @common_properties.include?(property)
+    end
+    
+    @product_ids_by_value_by_unit_by_property = {}
+    @values_by_property_by_product_id.each do |product_id, values_by_property|
+      values_by_property.each do |property, values|
+        next unless @diff_properties.include?(property)
+        product_ids_by_value_by_unit = (@product_ids_by_value_by_unit_by_property[property] ||= {})
         values.each do |value|
-          reduced_value = [property, value.value]
-          (values_by_reduced_value[reduced_value] ||= []).push(value)
+          product_ids_by_value = (product_ids_by_value_by_unit[value.class.text? ? nil : value.unit] ||= {})
+          (product_ids_by_value[value.value] ||= []).push(product_id)
         end
       end
     end
     
-    # TODO: check that the values.size == @product_count copes with multi-value products
-    #       suspect this needs to be value.map { |v| v.product_id }.uniq.size == @product_count
-    @common_values_by_property = {}
-    @diff_values_by_reduced_value = {}
-    values_by_reduced_value.each do |reduced_value, values|
-      property = reduced_value.first
-      next unless property.display_as_data?
-      
-      if values.size == @product_count
-        (@common_values_by_property[reduced_value.first] ||= []).push(values.first)
-      else
-        @diff_values_by_reduced_value[reduced_value] = values
-      end
-    end
-    
-    @common_properties = @common_values_by_property.keys.sort_by { |p| p.sequence_number }
-    @diff_properties = @diff_values_by_reduced_value.keys.map { |p, raw_value| p }.uniq.sort_by { |p| p.sequence_number}
-    
-    properties = (@common_properties + @diff_properties).uniq
     @friendly_name_sections = PropertyDefinition.friendly_name_sections(properties, session.language)
     @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)
     @text_value_definitions = PropertyDefinition.definitions_by_property_id(properties, session.language)
-        
-    @values_by_property = @common_values_by_property # TODO: refactor once all woking
+    
+    @values_by_property_by_product_url = {}
+    product_ids.each do |product_id|
+      url = url(:product, :id => product_id)
+      @values_by_property_by_product_url[url] = nil
+    end
     
     @previous_finds = session.cached_finds
     @recent_find = CachedFind.get(session[:most_recent_find_id])

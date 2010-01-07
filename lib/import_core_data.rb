@@ -91,12 +91,12 @@ class ImportSet
     pias_by_product = primary_image_attachments
     puts "#{'%6.2f' % (Time.now - start)}s : derived primary image list"
     
-    start = Time.now
-    (@objects.select { |object| object.klass == DefinitiveProduct } - pias_by_product.keys).each do |product|
-      error(DefinitiveProduct, product.path, product.row, nil, "no image specified")
-    end
-    puts "#{'%6.2f' % (Time.now - start)}s : ensured all products have an image"
-    return [] unless @errors.empty?
+    # start = Time.now
+    # (@objects.select { |object| object.klass == DefinitiveProduct } - pias_by_product.keys).each do |product|
+    #   error(DefinitiveProduct, product.path, product.row, nil, "no image specified")
+    # end
+    # puts "#{'%6.2f' % (Time.now - start)}s : ensured all products have an image"
+    # return [] unless @errors.empty?
     
     start = Time.now
     pias_by_product.values.map { |attachment| attachment.attributes[:asset] }.uniq.each do |asset|

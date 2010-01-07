@@ -844,9 +844,13 @@ function text_filter_create(data, html) {
 		var checked = (excluded[value] ? '' : 'checked="checked"');
 		html.push('<input type="checkbox" ' + checked + ' value="' + value + '" onclick="text_filter_handle_check(this)" />');
 		
-		var definition = data[value];
-		if(definition == null) html.push(value);
-		else html.push('<span class="defined" onmouseover="bubble_tooltip_show(event, \'' + definition + '\')" onmouseout="bubble_tooltip_hide()">' + value + '</span>');
+		var definition = definitions[value];
+		if(definition == null) {
+			html.push(value);
+		} else {
+			definition = definition.replace("'", "\\'").replace('"', '\\"');
+			html.push('<span class="defined" onmouseover="bubble_tooltip_show(event, \'' + definition + '\')" onmouseout="bubble_tooltip_hide()">' + value + '</span>');
+		}
 		
 		html.push('</div>');
 	}

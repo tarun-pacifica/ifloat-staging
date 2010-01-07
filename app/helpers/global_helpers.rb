@@ -46,6 +46,23 @@ module Merb
       end
       lines.join("\n")
     end
+    
+    def property_summary(dom_id, text, values, definitions)
+      return values.map { |v| defined_value(v, definitions[v]) }.join("<br />") if text
+			
+		  script_lines = ['<script type="text/javascript" charset="utf-8">']
+		  script_lines << "var summaries = [];"
+		  
+		  values_by_unit = values.group_by { |value| value.unit }
+      values_by_unit.keys.sort_by { |unit| unit.to_s }.each do |unit|
+        script_lines += values_by_unit[unit].map { |value| "summaries.push(#{number_format_js(value)});" }
+      end
+		  
+		  script_lines << "$(\"##{dom_id}\").find(\".summary\").html(summaries.join(\" <br /> \"));"
+			script_lines << "</script>"
+			
+      script_lines.join("\n")
+    end
 
     def title_js(dom_id, parts)
       js_parts = []

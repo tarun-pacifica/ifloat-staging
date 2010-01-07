@@ -19,23 +19,7 @@
 	
 	<td>
 		<div class="summary">
-			<% if property.text? %>
-			<%= @values_by_property[property].map { |v| defined_value(v, definitions[v]) }.join("<br />") %>
-			
-			<% else %>
-			<script type="text/javascript" charset="utf-8">
-				var summaries = [];
-				
-				<% values_by_unit.keys.sort_by { |unit| unit.to_s }.each do |unit| %>
-				  <% values_by_unit[unit].each do |value| %>
-					summaries.push(<%= number_format_js(value) %>);
-				  <% end %>
-				<% end %>
-			
-				$("#<%= property_id %>").find(".summary").html(summaries.join(" <br /> "));
-			</script>
-			
-			<% end %>
+			<%= property_summary(property_id, property.text?, @values_by_property[property], definitions) %>
 		</div>
 	</td>
 </tr>

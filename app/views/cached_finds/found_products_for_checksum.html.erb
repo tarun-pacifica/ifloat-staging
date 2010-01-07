@@ -17,19 +17,36 @@
 	<% end %>
 	
 	<div id="product_detail_diff_summary">
-		<img class="main" src=<%= @image.url(:small).inspect %> />
+		<img class="main" src=<%= @image.url(:tiny).inspect %> />
 		<h1>There are <span><%= @product_count %></span> products with this image</h1>
-		<p class="help">Selecting one of the following values will highlight the relevant products</p>
-		
-		<%= partial :property, :with => @diff_properties %>
-		
+		<p class="help">Choose one below</p>
 		<hr />
 	</div>
 	
 	<div id="product_detail_diff_products">
-		<% @values_by_property_by_product_url.each do |url, values_by_property| %>
-		<a href=<%= url.inspect %>><%= url %></a>
-		<% end %>
+		<table>
+			<tr>
+				<td></td>
+				<% @diff_properties.each do |property| %>
+				<td><img class="icon" src=<%= @icon_urls_by_property_id[property.id].inspect %> onmouseover="bubble_tooltip_show(event, '<%= @friendly_name_sections[property.id].last %>')" onmouseout="bubble_tooltip_hide()" /></td>
+				<% end %>
+			</tr>
+			
+			<% parity = :even %>
+			<% @values_by_property_by_product_id.each do |product_id, values_by_property| %>
+			<tr class="<%= parity = (parity == :even ? :odd : :even) %>">
+				<td class="choose"><a href=<%= url(:product, :id => product_id).inspect %>>choose</a></td>
+				<% @diff_properties.each do |property| %>
+				<% dom_id = "product_#{product_id}_property_#{property.id}" %>
+				<td id=<%= dom_id.inspect %>>
+					<div class="summary">
+						<%= property_summary(dom_id, property.text?, values_by_property[property], @text_value_definitions[property.id]) %>
+					</div>
+				</td>
+				<% end %>
+			</tr>
+			<% end %>
+		</table>
 	</div>
 </div>
 

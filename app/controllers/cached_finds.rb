@@ -135,27 +135,9 @@ class CachedFinds < Application
       @values_by_property[property] = values if @common_properties.include?(property)
     end
     
-    @product_ids_by_value_by_unit_by_property = {}
-    @values_by_property_by_product_id.each do |product_id, values_by_property|
-      values_by_property.each do |property, values|
-        next unless @diff_properties.include?(property)
-        product_ids_by_value_by_unit = (@product_ids_by_value_by_unit_by_property[property] ||= {})
-        values.each do |value|
-          product_ids_by_value = (product_ids_by_value_by_unit[value.class.text? ? nil : value.unit] ||= {})
-          (product_ids_by_value[value.value] ||= []).push(product_id)
-        end
-      end
-    end
-    
     @friendly_name_sections = PropertyDefinition.friendly_name_sections(properties, session.language)
     @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)
     @text_value_definitions = PropertyDefinition.definitions_by_property_id(properties, session.language)
-    
-    @values_by_property_by_product_url = {}
-    product_ids.each do |product_id|
-      url = url(:product, :id => product_id)
-      @values_by_property_by_product_url[url] = nil
-    end
     
     @previous_finds = session.cached_finds
     @recent_find = CachedFind.get(session[:most_recent_find_id])

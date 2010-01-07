@@ -365,7 +365,7 @@ def create_asset_variant(source_path, checksum, variant)
     end
     [path, nil]
   rescue Exception => e
-    [nil, "unable to create #{variant} variant of #{@file_path.inspect}: #{e}"]
+    [nil, "unable to create #{variant} variant: #{e}"]
   end
 end
 

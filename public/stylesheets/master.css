@@ -1099,6 +1099,7 @@ body {
 
 #product_detail_diff_products td.choose {
 	background: url(/images/backgrounds/panel_heading.png) repeat-x;
+	width: 50px;
 	text-align: center;
 }
 

@@ -240,7 +240,7 @@ module Indexer
       
       record.text_value.downcase.split(/\W+/).select { |word| word.size > 2 }.uniq.each do |word|
         language = (tfi[record.language_code] ||= {})
-        (language[word] ||= []) << record.product_id        
+        (language[word.gsub(/[^a-zA-Z0-9]+/, "")] ||= []) << record.product_id        
       end
     end
     

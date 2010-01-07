@@ -48,6 +48,8 @@ module Merb
     end
     
     def property_summary(dom_id, text, values, definitions)
+      return nil if values.nil?
+      
       return values.map { |v| defined_value(v, definitions[v]) }.join("<br />") if text
 			
 		  script_lines = ['<script type="text/javascript" charset="utf-8">']

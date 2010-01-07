@@ -664,7 +664,7 @@ function prod_grid_update_handle(images) {
 		insertion_point.before(prod_html);
 	}
 	
-	for(i in small_urls) image_preload(small_urls[i]);
+	// for(i in small_urls) image_preload(small_urls[i]);
 	
 	$("#cached_find_report .displayed_count").text(image_prod_count);
 	$("#cached_find_report .filtered_count").text(total_prod_count);

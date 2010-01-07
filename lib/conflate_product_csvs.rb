@@ -1,7 +1,7 @@
 # merb -i -r lib/conflate_product_csvs.rb
 
 COMPILED_CSV_PATH = "caches/all_products.csv"
-# COMPILED_PATH = "caches/all_products.marshal"
+COMPILED_PATH = "caches/all_products.marshal"
 CSV_REPO = "../ifloat_csvs"
 
 [COMPILED_CSV_PATH, COMPILED_PATH].each do |path|

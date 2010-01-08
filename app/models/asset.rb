@@ -101,27 +101,23 @@ class Asset
   attr_writer :file_path_small
   attr_writer :file_path_tiny
   
-  # TODO: spec (variant)
   def file_path(variant = nil)
     variant = "_#{variant}" unless variant.nil?
     instance_variable_get("@file_path#{variant}")
   end
   
-  # TODO: spec (variant)
   def store_name(variant = nil)
     raise "unable to generate store_name without bucket, checksum (via file_path=) and name" if [bucket, checksum, name].any? { |v| v.nil? }
     variant = "-#{variant}" unless variant.nil?
     "#{checksum}#{variant}#{File.extname(name)}"
   end
   
-  # TODO: spec
   def store_names
     variants = [nil]
     variants += ["small", "tiny"] if name =~ IMAGE_FORMAT
     variants.map { |variant| store_name(variant) }
   end
   
-  # TODO: spec (variant)
   def url(variant = nil)
     AssetStore.url(self, variant)
   end

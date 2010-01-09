@@ -1,20 +1,22 @@
 # = Summary
 #
-# A CachedFind is created every time a 'find' is initiated by supplying a multi-word specification. Indeed a CachedFind may be thought of as the combination of a valid specification (in a given language) and a set of filterable PropertyValues broken out into CachedFindFilter objects.
+# A CachedFind is created every time a 'find' is initiated by supplying a multi-word specification. Indeed a CachedFind may be thought of as the combination of a valid specification (in a given language) and a marshalled set of filters differentiating the 'found' products.
 #
 # CachedFinds may optionally belong to a User. Those that do not are considered 'anonymous' and in turn are treated as 'archived' upon obsolescence. To assist users in organising their CachedFinds, a description may be added.
 #
-# The act of executing the CachedFind takes a snapshot of all the pertinent values as well as every DefinitiveProduct included by an initial search of the database. Thus CachedFinds (for performance and user-consistency reasons) get progressively out-of-date with respect to the live DefinitiveProduct / PropertyValue information. For this reason, calls to CachedFind#products or CachedFind#total_product_count will trigger (re-)execution automatically if the CachedFind has either never been run or was run more than OBSOLESCENCE_TIME ago. TODO: revise
-#
-# In deference to both the existence of untranslatable values (such as brand names) and the fact that translation takes time, the lookup mechanism searches in both the requested language and English (ENG). When a value set is returned for a particular PropertyDefinition, if *no* value exists in the chosen (non-English) language, then the English values will be used instead. If one or more non-English values do exist, the English values will be discarded.
+# CachedFind operations (and filter value caching) are based on the Indexer and thus every time the global catalogue is updated (at product import time), all CachedFinds are marked as 'invalidated' and reset when they are next accessed.
 #
 # For future-proofing, Assets may be attached to a CachedFind. It is envisaged that this will allow Users (or the application itself) to assign images etc... to searches. This feature is currently speculative.
 #
 # = Processes
 #
-# === 1. Archived Unused CachedFinds
+# === 1. Anonimize Unused CachedFinds
 #
-# Run CachedFind.anonimize_unused periodically. This will detach any unused CachedFinds from their parent users. Note that, although a process exists to destroy archived Filters, no such process exists for CachedFinds as a record of all specifications has been deemed to be essential data for the future.
+# Run CachedFind.unusued.update!(:user_id => nil) periodically. This will detach any unused CachedFinds from their parent users.
+#
+# === 2. Destroy Obsolete CachedFinds
+#
+# Run CachedFind.obsolete.destroy! peridically. This will destroy any anonymous CachedFinds whose IDs do not appear in any Session.
 #
 class CachedFind
   include DataMapper::Resource
@@ -59,16 +61,15 @@ class CachedFind
     self.description = specification if description.blank?
   end
   
-  def self.anonimize_unused
-    all(:accessed_at.lt => ANONIMIZATION_TIME.ago).update!(:user_id => nil)
-  end
-  
-  def self.archived
-    obsolete.all(:user_id => nil)
-  end
-  
+  # TODO: spec
   def self.obsolete
-    all(:accessed_at.lt => OBSOLESCENCE_TIME.ago)
+    ttl = Merb::Config[:session_ttl]
+    all(:user_id => nil, :created_at.lt => ttl.ago)
+  end
+  
+  # TODO: spec
+  def self.unused
+    all(:accessed_at.lt => ANONIMIZATION_TIME.ago)
   end
   
   def all_product_count

@@ -33,7 +33,6 @@ class Attachment
   validates_within :role, :set => ROLES
   validates_is_unique :sequence_number, :scope => [:cached_find_id, :product_id, :role]
   
-  # TODO: spec
   def self.product_role_assets(product_ids, include_chains = true)
     return [] if product_ids.empty?
         

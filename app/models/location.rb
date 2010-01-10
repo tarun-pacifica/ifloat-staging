@@ -18,7 +18,7 @@ class Location
   property :gps_coordinates, String, :format => /^[\d\.]+x[\d\.]+$/ # TODO: verify format
   property :gln_13, Integer
   
-  belongs_to :user
+  belongs_to :user, :required => false
   
   validates_with_block :gln_13 do
     if gln_13.nil? then true

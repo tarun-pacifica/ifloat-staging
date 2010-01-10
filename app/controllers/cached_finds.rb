@@ -125,7 +125,8 @@ class CachedFinds < Application
     
     properties = value_identities_by_property.keys
     @common_properties, @diff_properties = properties.partition do |property|
-      value_identities_by_property[property].uniq.size == 1
+      identities = value_identities_by_property[property]
+      identities.size == @product_count and identities.uniq.size == 1
     end.map do |prop_segment|
       prop_segment.sort_by { |p| p.sequence_number }
     end

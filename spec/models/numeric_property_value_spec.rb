@@ -191,7 +191,41 @@ describe NumericPropertyValue do
       proc { @value.convert("bananas") }.should raise_error
     end
   end
-
+  
+  describe "formatting" do
+    it "should succeed for an Integer" do
+      NumericPropertyValue.format_value(1).should == "1"
+    end
+    
+    it "should succeed for a Float with a remainder" do
+      NumericPropertyValue.format_value(1.1).should == "1.1"
+    end
+    
+    it "should succeed for a Float with no remainder" do
+      NumericPropertyValue.format_value(1.0).should == "1"
+    end
+    
+    it "should succeed for a String with a remainder" do
+      NumericPropertyValue.format_value("1.1 fish").should == "1.1"
+    end
+    
+    it "should succeed for a String with no remainder" do
+      NumericPropertyValue.format_value("1.0 fish").should == "1"
+    end
+    
+    it "should succeed for a scalar pair" do
+      NumericPropertyValue.format(5.2, 5.2).should == "5.2"
+    end
+    
+    it "should succeed for a ranged pair with a default separator" do
+      NumericPropertyValue.format(1, 5.2).should == "1...5.2"
+    end
+    
+    it "should succeed for a ranged pair with a custom separator" do
+      NumericPropertyValue.format(1.6, 5.0, "-").should == "1.6-5"
+    end
+  end
+  
   describe "retrieving limits by unit by property ID" do
     it "should have specs"
   end

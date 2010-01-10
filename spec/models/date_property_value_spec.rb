@@ -52,7 +52,7 @@ describe DatePropertyValue do
     end
   end
   
-  describe "value formatting" do
+  describe "formatting" do
     it "should succeed for YYYY0000" do
       DatePropertyValue.format_value(20090000).should == "2009"
     end

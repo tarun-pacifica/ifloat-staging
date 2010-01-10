@@ -41,12 +41,10 @@ class NumericPropertyValue < PropertyValue
     false
   end
   
-  # TODO: spec
   def self.format(min_value, max_value, range_separator = "...")
     [min_value, max_value].uniq.map { |v| format_value(v) }.join(range_separator)
   end
   
-  # TODO: spec
   def self.format_value(value)
     return value.to_s if value.is_a?(Integer)
     f = value.to_f

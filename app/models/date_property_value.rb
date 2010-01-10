@@ -9,10 +9,9 @@ class DatePropertyValue < NumericPropertyValue
     true
   end
   
-  # TODO: spec
   def self.format_value(value)
     v = value.to_i
-    [v / 10000, (v / 100) % 100, v % 100].delete_if { |v| v.zero? }.join("-")
+    [v / 10000, (v / 100) % 100, v % 100].delete_if { |v| v.zero? }.map { |i| "%.2i" % i }.join("-")
   end
   
     

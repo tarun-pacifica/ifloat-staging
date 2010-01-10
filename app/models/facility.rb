@@ -2,7 +2,7 @@
 #
 # Facility objects track the various outlets and places of business a Company may have. They model real premises as well as virtual outlets like e-stores. Note that an Employee who frequents multiple facilities on behalf of their Company would best be allocated to the 'HQ' facility (or similar).
 #
-# Primary URLs act as a unique identifier for tracking purchases (and jumpout behaviour) with e-stores. It must be set to the actual URL location of an e-store minus any session specific data.
+# Primary URLs act as a unique identifier for tracking purchases (and jumpout behaviour) with e-stores. They must be set to the actual URL location of an e-store minus any session specific data.
 #
 # Facilities act as co-ordinating objects for a Company's inventory of FacilityProducts, any tracked Purchase and the Employees of a Company. They may have a Location.
 #

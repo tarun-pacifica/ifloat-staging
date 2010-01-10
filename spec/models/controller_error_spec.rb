@@ -24,19 +24,18 @@ describe ControllerError do
     end
   end
 
-  describe "destruction through obsolescence" do
+  describe "should be classified as" do
     before(:all) do
       recent, old = 2.minutes.ago, (ControllerError::OBSOLESCENCE_TIME + 2.minutes).ago
-      [recent, old].each { |created_at| ControllerError.create(:created_at => created_at) }
+      @errors = [recent, old].map { |created_at| ControllerError.create(:created_at => created_at) }
     end
     
     after(:all) do
-      ControllerError.all.destroy!
+      @errors.each { |error| error.destroy }
     end
     
-    it "should remove only those filters belonging to an obsolete ControllerError" do
-      ControllerError.obsolete.destroy!
-      ControllerError.count.should == 1
+    it "obsolete if created longer ago than OBSOLESCENCE_TIME" do
+      ControllerError.obsolete.count.should == 1
     end
   end
 

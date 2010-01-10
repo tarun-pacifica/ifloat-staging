@@ -16,7 +16,7 @@
 #
 # === 2. Destroy Obsolete CachedFinds
 #
-# Run CachedFind.obsolete.destroy! peridically. This will destroy any anonymous CachedFinds whose IDs do not appear in any Session.
+# Run CachedFind.obsolete.destroy! peridically. This will destroy any anonymous CachedFinds no longer featured in any Session.
 #
 class CachedFind
   include DataMapper::Resource
@@ -34,12 +34,10 @@ class CachedFind
   belongs_to :user, :required => false
   has n, :attachments
   
-  # TODO: spec
   validates_with_block :language_code, :unless => :new_record? do
     attribute_dirty?(:language_code) ? [false, "cannot be updated"] : true
   end
   
-  # TODO: spec
   validates_with_block :specification, :unless => :new_record? do
     attribute_dirty?(:specification) ? [false, "cannot be updated"] : true
   end
@@ -61,15 +59,12 @@ class CachedFind
     self.description = specification if description.blank?
   end
   
-  # TODO: spec
   def self.obsolete
-    ttl = Merb::Config[:session_ttl]
-    all(:user_id => nil, :created_at.lt => ttl.ago)
+    all(:user_id => nil, :accessed_at.lt => Merb::Config[:session_ttl].ago)
   end
   
-  # TODO: spec
   def self.unused
-    all(:accessed_at.lt => ANONIMIZATION_TIME.ago)
+    all(:user_id.not => nil, :accessed_at.lt => ANONIMIZATION_TIME.ago)
   end
   
   def all_product_count

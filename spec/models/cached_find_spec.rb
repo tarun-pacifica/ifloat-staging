@@ -53,6 +53,32 @@ describe CachedFind do
     end
   end
   
+  describe "modification" do
+    before(:all) do
+      @find = CachedFind.create(:user_id => 1, :language_code => "ENG", :specification => "life jacket")
+    end
+    
+    after(:all) do
+      @find.destroy
+    end
+    
+    it "should fail with a different language" do
+      @find.language_code = "FRA"
+      @find.should_not be_valid
+    end
+    
+    it "should fail with a different specification" do
+      @find.specification = "rubber ducky"
+      @find.should_not be_valid
+    end
+  end
+  
+  it "needs updated specs for execution"
+  it "needs specs for filter_values & filter_values_relevant"
+  it "needs specs for the filter! command"
+  it "needs updated specs for filtered_product_ids (that take the class_only path into account)"
+  it "needs specs for language_code"
+  
   describe "execution with product data" do
     before(:all) do
       @text_type = PropertyType.create(:core_type => "text", :name => "text")
@@ -247,7 +273,7 @@ describe CachedFind do
         weight_wet_values.update!(:unit => "kg")
       end
     end
-  end
+  end if false
   
   describe "execution without product data" do
     it "should fail if the find is not valid" do
@@ -268,7 +294,7 @@ describe CachedFind do
         find.destroy
       end
     end
-  end
+  end if false
   
   describe "destruction" do
     it "should destroy any child filters (and thence exclusions)" do
@@ -284,24 +310,31 @@ describe CachedFind do
         TextFilterExclusion.all(:filter_id => filter.id).destroy!
       end
     end
-  end
+  end if false
   
-  describe "anonimization through disuse" do
+  describe "should be classified as" do
     before(:all) do
-      recent, old = 2.minutes.ago, (CachedFind::ANONIMIZATION_TIME + 2.minutes).ago
-
-      @finds = [recent, old].map do |executed_at|
-        CachedFind.create(:user_id => 1, :executed_at => executed_at, :language_code => "ENG", :specification => "test")
+      outside_anon = (CachedFind::ANONIMIZATION_TIME + 2.minutes).ago
+      outside_ttl = (Merb::Config[:session_ttl] + 2.minutes).ago
+      recently = 2.minutes.ago
+      
+      @finds = []
+      [outside_anon, outside_ttl, recently].each do |t|
+        @finds << CachedFind.create(:accessed_at => t, :language_code => "ENG", :specification => "test")
+        @finds << CachedFind.create(:user_id => 1, :accessed_at => t, :language_code => "ENG", :specification => "test")
       end
     end
 
     after(:all) do
       @finds.each { |find| find.destroy }
     end
+    
+    it "obsolete if both anonymous and accessed longer ago than the current session TTL" do
+      CachedFind.obsolete.count.should == (CachedFind::ANONIMIZATION_TIME > Merb::Config[:session_ttl] ? 2 : 1)
+    end
 
-    it "should remove only anonimize the find older than the ANONIMIZATION_TIME" do
-      CachedFind.anonimize_unused
-      @finds.map { |find| find.reload.user_id }.should == [1, nil]
+    it "unused if both owned and accessed longer ago than the ANONIMIZATION_TIME" do
+      CachedFind.unused.count.should == (CachedFind::ANONIMIZATION_TIME > Merb::Config[:session_ttl] ? 1 : 2)
     end
   end
   

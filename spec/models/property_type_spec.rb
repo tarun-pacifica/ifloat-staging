@@ -89,7 +89,7 @@ describe PropertyType do
     end
   end
   
-  describe "update" do
+  describe "modification" do
     before(:all) do
       @type = PropertyType.create(:core_type => "text", :name => "text")
     end

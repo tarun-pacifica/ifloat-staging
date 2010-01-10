@@ -59,17 +59,4 @@ describe DefinitiveProduct do
     end
   end
   
-  describe "import nils" do
-    it "should be 'nil' by default" do
-      DefinitiveProduct.new.import_nils.should == nil
-    end
-    
-    it "should be an array containing what's supplied" do
-      product = DefinitiveProduct.new
-      info = [:property, "name", "unit", "seq_num"]
-      product.add_import_nil(info)
-      product.import_nils.should == [info]
-    end
-  end
-  
 end

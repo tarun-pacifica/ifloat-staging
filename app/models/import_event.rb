@@ -1,6 +1,6 @@
 # = Summary
 #
-# ImportEvents track successful runs of lib/import_core_data (both as an audit record and to support CacheFind auto-re-execution). 
+# ImportEvents track runs of lib/import_core_data (to provide an audit record). They are currently only used to track successful runs.
 #
 # === Sample Data
 #
@@ -8,7 +8,7 @@
 # succeeded:: true
 # report:: 'Asset repo version: ...'
 #
-class ImportEvent # TODO: spec
+class ImportEvent
   include DataMapper::Resource
   
   property :id, Serial

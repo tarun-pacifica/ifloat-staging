@@ -35,16 +35,24 @@ describe DatePropertyValue do
   end
   
   describe "parsing" do
+    it "should succeed with a complete date" do
+      DatePropertyValue.parse_or_error("20100101").should == {:min_value => 20100101, :max_value => 20100101}
+    end
+    
     it "should succeed with an indeterminate number of days" do
-      proc { DatePropertyValue.parse_or_error("20090100") }.should_not raise_error
+      DatePropertyValue.parse_or_error("20090100").should == {:min_value => 20090100, :max_value => 20090100}
     end
     
     it "should succeed with an indeterminate number of months and days" do
-      proc { DatePropertyValue.parse_or_error("20090000") }.should_not raise_error
+      DatePropertyValue.parse_or_error("20090000").should == {:min_value => 20090000, :max_value => 20090000}
     end
     
     it "should fail with an indeterminate number of months but a determinate number of days" do
       proc { DatePropertyValue.parse_or_error("20090012") }.should raise_error
+    end
+    
+    it "should succeed with a range" do
+      DatePropertyValue.parse_or_error("20090000...20100101").should == {:min_value => 20090000, :max_value => 20100101}
     end
     
     it "should fail with an invalid value" do

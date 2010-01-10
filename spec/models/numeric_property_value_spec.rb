@@ -192,6 +192,42 @@ describe NumericPropertyValue do
     end
   end
   
+  describe "parsing" do
+    it "should succeed with a String" do
+      NumericPropertyValue.parse_or_error("90210").should == {:min_value => 90210, :max_value => 90210}
+    end
+    
+    it "should fail with a Number" do
+      proc { NumericPropertyValue.parse_or_error(90210) }.should raise_error
+    end
+    
+    it "should fail with a blank String" do
+      proc { NumericPropertyValue.parse_or_error("") }.should raise_error
+    end
+    
+    it "should fail with a String with non-numeric characters in it" do
+      proc { NumericPropertyValue.parse_or_error("52.4 gibbons") }.should raise_error
+    end
+    
+    it "should fail with a String specifying a number outside the VALUE_RANGE" do
+      proc { NumericPropertyValue.parse_or_error(NumericPropertyValue::VALUE_RANGE.first - 1) }.should raise_error
+      proc { NumericPropertyValue.parse_or_error(NumericPropertyValue::VALUE_RANGE.last + 1) }.should raise_error
+    end
+    
+    it "should succeed with a String range" do
+      NumericPropertyValue.parse_or_error("90210...90210.1").should == {:min_value => 90210, :max_value => 90210.1}
+    end
+    
+    it "should fail with an improperly specified String range" do
+      proc { NumericPropertyValue.parse_or_error("90210..90210.1") }.should raise_error
+      proc { NumericPropertyValue.parse_or_error("90210....90210.1") }.should raise_error
+    end
+    
+    it "should fail with a back-to-front String range" do
+      proc { NumericPropertyValue.parse_or_error("90210.1..90210") }.should raise_error
+    end
+  end
+  
   describe "formatting" do
     it "should succeed for an Integer" do
       NumericPropertyValue.format_value(1).should == "1"

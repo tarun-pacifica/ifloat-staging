@@ -52,7 +52,6 @@ class NumericPropertyValue < PropertyValue
     f == i ? i.to_s : f.to_s
   end
     
-  # TODO: spec
   def self.parse_or_error(value)
     raise "expected numeric value/range as string" unless value.is_a?(String)
     

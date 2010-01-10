@@ -12,7 +12,8 @@ Spec::Runner.configure do |config|
   # config.include(Merb::Test::ControllerHelper)
 end
 
-DataMapper.auto_migrate! if Merb.orm == :datamapper
+# TODO: reactivate once this isn't a 5 second bottleneck
+# DataMapper.auto_migrate! if Merb.orm == :datamapper
 
 class BeValid
   def initialize

@@ -88,27 +88,27 @@ describe Article do
     end
     
     it "should create an image belonging to the parent blog's company and the 'articles' bucket" do
-      @article.save_image(@png_path, @png_name).should == true
+      @article.save_image(@png_path, @png_name).should be_true
       @article.asset.company_id.should == 1
       @article.asset.bucket.should == "articles"
     end
     
     it "should derive an image name of the form article_#.png for a source .png file name" do
-      @article.save_image(@png_path, @png_name).should == true
+      @article.save_image(@png_path, @png_name).should be_true
       @article.asset.should_not == nil
       @article.asset.name.should == "article_#{@article.id}.png"
     end
     
     it "should derive an image name of the form article_#.jpg for an unparseable source file name" do
-      @article.save_image(@jpg_path, "sillyname").should == true
+      @article.save_image(@jpg_path, "sillyname").should be_true
       @article.asset.should_not == nil
       @article.asset.name.should == "article_#{@article.id}.jpg"
     end
     
     it "should destroy any existing image" do
-      @article.save_image(@png_path, @png_name).should == true
+      @article.save_image(@png_path, @png_name).should be_true
       asset_id = @article.asset.id
-      @article.save_image(@png_path, @png_name).should == true
+      @article.save_image(@png_path, @png_name).should be_true
       Asset.get(asset_id).should == nil
     end
   end

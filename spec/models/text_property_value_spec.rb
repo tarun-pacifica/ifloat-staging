@@ -12,7 +12,7 @@ describe TextPropertyValue do
   
   def mock_text_value(value)
     t = TextPropertyValue.new(:product_id => 1, :property_definition_id => 1, :value => value, :language_code => "ENG")
-    t.stub!(:property_type).and_return(@text)
+    t.stub!(:property_type).and_return(@text) # is this still needed?
     t
   end
   

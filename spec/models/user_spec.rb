@@ -106,8 +106,8 @@ describe User do
     it "should succeed, issuing a random password which can be accessed in memory" do
       user = User.new(:password => "sekrit")
       user.reset_password
-      user.plain_password.blank?.should == false
-      Password.match?(user.password, user.plain_password).should == true
+      user.plain_password.blank?.should be_false
+      Password.match?(user.password, user.plain_password).should be_true
     end
   end
 end

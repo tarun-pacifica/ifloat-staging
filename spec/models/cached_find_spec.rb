@@ -253,8 +253,8 @@ describe CachedFind do
         model_values.update!(:language_code => "FRA")
         
         @find.execute!
-        filter_for_property(:brand).exclusions.empty?.should == false
-        filter_for_property(:model).exclusions.empty?.should == true
+        filter_for_property(:brand).exclusions.empty?.should be_false
+        filter_for_property(:model).exclusions.empty?.should be_true
 
         model_values.update!(:language_code => "ENG")
       end

@@ -110,7 +110,7 @@ describe PropertyType do
         klass = PropertyType.new(:core_type => name).value_class
         klass.should_not == PropertyValue
         # TODO: find out why a simple 'kind_of?' check fails here
-        klass.ancestors.include?(PropertyValue).should == true 
+        klass.ancestors.include?(PropertyValue).should be_true 
       end
     end
   end
@@ -121,24 +121,24 @@ describe PropertyType do
     end
     
     it "validation should validate a known unit" do
-      @type.validate_unit("kg").should == true
+      @type.validate_unit("kg").should be_true
     end
     
     it "validation should not validate an unknown unit" do
-      @type.validate_unit("lb").should_not == true
+      @type.validate_unit("lb").should_not be_true
     end
     
     it "addition of a new unit should succeed, allowing that unit to validate" do
       @type.add_unit("lb")
       @type.should be_valid
-      @type.validate_unit("lb").should == true
+      @type.validate_unit("lb").should be_true
     end
     
     it "deletion of a known unit should succeed, preventing that unit from validating" do
       @type.add_unit("lb")
       @type.delete_unit("lb")
       @type.should be_valid
-      @type.validate_unit("lb").should_not == true
+      @type.validate_unit("lb").should_not be_true
     end
     
     it "deletion of an unknown unit should succeed" do

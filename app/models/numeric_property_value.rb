@@ -12,16 +12,8 @@ class NumericPropertyValue < PropertyValue
   property :max_value, BigDecimal, :precision => PRECISION, :scale => MAX_DP
   property :tolerance, Float
   
-  validates_present :min_value, :max_value # TODO: spec
+  validates_present :min_value, :max_value
   
-  # TODO: ensure no specs address this / stub for it
-  # validates_with_block :unit do
-  #   if property_type.nil? then [false, "unable to verify unit (no property type)"]
-  #   else property_type.validate_unit(unit)
-  #   end
-  # end
-  
-  # TODO: update spec
   def self.convert(from_attributes, to_unit)
     min, max = from_attributes.values_at(:min_value, :max_value)
     tolerance = from_attributes[:tolerance]

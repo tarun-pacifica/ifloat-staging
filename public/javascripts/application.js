@@ -14,14 +14,24 @@ function article_edit(a) {
 
 // Bubble Tooltip
 
-function bubble_tooltip_show(event, text) {
+function bubble_tooltip_show(event, text, relative_position) {
 	var bubble = $("#bubble_tooltip");
 	bubble.find("p").text(text);
 	
 	var target = $(event.target);
 	var position = target.position();
-	bubble.css("left", position.left + target.width() + 3 + "px");
-	bubble.css("top", position.top + ((target.height() - bubble.height()) / 2) + 2 + "px");
+	var left, top;
+	
+	if(relative_position == "above") {
+		left = position.left + ((target.width() - bubble.width()) / 2);
+		top = position.top - bubble.height() - 3;
+	} else {
+		left = position.left + target.width() + 3;
+		top = position.top + ((target.height() - bubble.height()) / 2) + 2;
+	}
+	
+	bubble.css("left", left + "px");
+	bubble.css("top", top + "px");
 	bubble.css("display", "block");
 }	
 

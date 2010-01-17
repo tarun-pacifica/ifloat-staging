@@ -28,7 +28,7 @@
 			<tr>
 				<td></td>
 				<% @diff_properties.each do |property| %>
-				<td><img class="icon" src=<%= @icon_urls_by_property_id[property.id].inspect %> onmouseover="bubble_tooltip_show(event, '<%= @friendly_name_sections[property.id].last %>')" onmouseout="bubble_tooltip_hide()" /></td>
+				<td><img class="icon" src=<%= @icon_urls_by_property_id[property.id].inspect %> onmouseover="bubble_tooltip_show(event, '<%= @friendly_name_sections[property.id].last %>', 'above')" onmouseout="bubble_tooltip_hide()" /></td>
 				<% end %>
 			</tr>
 			

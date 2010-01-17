@@ -34,11 +34,11 @@ class CachedFind
   belongs_to :user, :required => false
   has n, :attachments
   
-  validates_with_block :language_code, :unless => :new_record? do
+  validates_with_block :language_code, :unless => :new? do
     attribute_dirty?(:language_code) ? [false, "cannot be updated"] : true
   end
   
-  validates_with_block :specification, :unless => :new_record? do
+  validates_with_block :specification, :unless => :new? do
     attribute_dirty?(:specification) ? [false, "cannot be updated"] : true
   end
   

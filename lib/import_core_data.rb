@@ -228,7 +228,7 @@ class ImportSet
     stats = {:created => 0, :updated => 0, :destroyed => to_destroy_ids.size, :skipped => to_skip_pk_md5s.size}
     
     to_save.each do |object|
-      stats[object.resource.new_record? ? :created : :updated] += 1
+      stats[object.resource.new? ? :created : :updated] += 1
       next if object.resource.save
       object.resource.errors.full_messages.each { |message| error(klass, object.path, object.row, nil, message) }
     end

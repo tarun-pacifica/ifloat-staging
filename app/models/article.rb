@@ -28,7 +28,7 @@ class Article
   end
   
   def save_image(file_path, original_name)
-    raise "cannot set the image on an unsaved Article" if new_record?
+    raise "cannot set the image on an unsaved Article" if new?
     
     extension = (original_name =~ /\.([A-Za-z]{3,})$/ ? $1.downcase : "jpg")
     asset.destroy unless asset.nil?

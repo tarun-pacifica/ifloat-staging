@@ -112,13 +112,7 @@ class CachedFinds < Application
     @values_by_property_by_product_id.each do |product_id, values_by_property|
       values_by_property.each do |property, values|
         next unless property.display_as_data?
-        
-        value_identity = values.map do |value|
-          v = value.value
-          parts = (v.is_a?(Range) ? [v.first, v.last] : [v])
-          parts << value.unit unless value.class.text? or value.unit.nil?
-          parts
-        end.sort
+        value_identity = values.map { |v| value_identity(v) }.sort
         (value_identities_by_property[property] ||= []).push(value_identity)
       end
     end
@@ -129,6 +123,14 @@ class CachedFinds < Application
       identities.size == @product_count and identities.uniq.size == 1
     end.map do |prop_segment|
       prop_segment.sort_by { |p| p.sequence_number }
+    end
+    
+    @sorted_product_ids = product_ids.sort_by do |product_id|
+      values_by_property = @values_by_property_by_product_id[product_id]
+      @diff_properties.map do |property| # TODO: allow for selection of a primary property by the user
+        values = values_by_property[property]
+        values.nil? ? [] : values.map { |v| value_identity(v) }.min
+      end
     end
     
     @values_by_property = {}
@@ -180,5 +182,15 @@ class CachedFinds < Application
     
     @previous_finds = session.cached_finds
     render
+  end
+  
+  
+  private
+  
+  def value_identity(property_value)
+    v = property_value.value
+    parts = (v.is_a?(Range) ? [v.first, v.last] : [v])
+    parts << property_value.unit unless property_value.class.text? or property_value.unit.nil?
+    parts
   end
 end

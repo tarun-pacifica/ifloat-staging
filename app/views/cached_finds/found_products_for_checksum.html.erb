@@ -33,7 +33,8 @@
 			</tr>
 			
 			<% parity = :even %>
-			<% @values_by_property_by_product_id.each do |product_id, values_by_property| %>
+			<% @sorted_product_ids.each do |product_id| %>
+			<% values_by_property = @values_by_property_by_product_id[product_id] %>
 			<tr class="<%= parity = (parity == :even ? :odd : :even) %>">
 				<td class="choose"><a href=<%= url(:product, :id => product_id).inspect %>>choose</a></td>
 				<% @diff_properties.each do |property| %>

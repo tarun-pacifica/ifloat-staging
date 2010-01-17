@@ -24,7 +24,7 @@ class ProductRelationship
     "is_alternative_to" => "is_originator_of",
     "goes_well_with"    => "goes_well_with",
     "used_on"           => "uses",
-    "uses"              => "used_on"
+    "uses"              => "used_on",
     "works_with"        => "works_with"
   }
   

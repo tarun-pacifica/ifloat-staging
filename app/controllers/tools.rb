@@ -1,23 +1,5 @@
 class Tools < Application
-  CSV_REPO = "../ifloat_csvs"
-  
   before :ensure_authenticated
-  
-  def caches(basename, ext)
-    filename = "#{basename}.#{ext}"
-    path = "caches" / filename
-    return "no such file: #{path}" unless File.exists?(path)
-    return "file unreadable: #{path}" unless File.readable?(path)
-    
-    headers["Content-Disposition"] = "attachment; filename=#{filename}"
-    
-    headers["Content-Type"] =
-      case ext
-      when "csv" then "text/csv"
-      end
-    
-    File.open(path)
-  end
   
   def icons
     @properties = PropertyDefinition.all.sort_by { |property| property.sequence_number }

@@ -125,9 +125,15 @@ class CachedFinds < Application
       prop_segment.sort_by { |p| p.sequence_number }
     end
     
+    primary_property_id = params[:sort_by].to_i
+    properties_in_comparison_order = @diff_properties.sort_by do |p|
+      p.id == primary_property_id ? -1 : p.sequence_number
+    end
+    @primary_property = properties_in_comparison_order.first
+    
     @sorted_product_ids = product_ids.sort_by do |product_id|
       values_by_property = @values_by_property_by_product_id[product_id]
-      @diff_properties.map do |property| # TODO: allow for selection of a primary property by the user
+      properties_in_comparison_order.map do |property|
         values = values_by_property[property]
         values.nil? ? [] : values.map { |v| value_identity(v) }.min
       end

@@ -29,7 +29,7 @@ Units are currently recorded using their English, SI names ('mm', 'kg' etc...). 
 Assign a UUID to each product to facilitate direct external linking. <em>Undecided</em>
 
 <b>Region Aware Values:</b>
-Support the notion that NumericPropertyValues (or possible all PropertyValues) apply in the context of a particular ISO-3166 country / region. This is primarily to support the idea of pricing with different taxation / rates for shipping to different parts of the world. Note that this one piece of functionality could be simulated (albeit in a somewhat hacky manner) by creating one inventory for every supply region - which would create vastly more products and duplicated data.
+Support the notion that NumericPropertyValues (or possible all PropertyValues) apply in the context of a particular ISO-3166 country / region. This is primarily to support the idea of pricing with different taxation / rates for shipping to different parts of the world. Note that this one piece of functionality could be simulated (albeit in a somewhat hacky manner) by creating one inventory for every supply region - which would create vastly more products and duplicated data. ALTERNATIVELY: prices could be factored out into a prices table tracking per-facility, per-region, currency aware values at points in time - to power historical pricing trends and notification of customers of recent price changes.
 
 <b>Asset Views:</b>
 Support exists (as documented in Asset) for explicit viewing angle data on an image. This feature is currently unused.

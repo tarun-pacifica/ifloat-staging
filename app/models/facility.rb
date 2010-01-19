@@ -42,33 +42,33 @@ class Facility
     fps_by_dpid
   end
   
-  def retrieve_products()
+  def retrieve_products(data = nil)
     raise "logger block required" unless block_given?
     
     products = {}
     
     case primary_url
     when "marinestore.co.uk"
-      host, path = "marinestore.co.uk", "/marinestorechandlery-google.txt"
-      
-      yield "downloading manifest from #{host}#{path}"
-      data = nil
-      begin
-        response = Net::HTTP.get_response(host, path)
-        raise "expected an HTTPSuccess but recieved an #{response.class}" unless response.kind_of?(Net::HTTPSuccess)
-        data = response.body
-      rescue Exception => e
-        yield e.message
-        return nil
+      if data.nil?
+        host, path = "marinestore.co.uk", "/marinestorechandlers.txt"
+        yield [:info, "downloading manifest from #{host}#{path}"]
+        begin
+          response = Net::HTTP.get_response(host, path)
+          raise "expected an HTTPSuccess but recieved an #{response.class}" unless response.kind_of?(Net::HTTPSuccess)
+          data = response.body
+        rescue Exception => e
+          yield [:error, e.message]
+          return nil
+        end
       end
       
       lines = data.split("\n")
-      yield "parsing #{lines.size} lines (#{data.size} bytes)"
+      yield [:info, "parsing #{lines.size} lines (#{data.size} bytes)"]
       
       header = lines.shift
-      expected_header = "link\ttitle\tdescription\timage_link\tprice\tid\texpiration_date\tproduct_type\tcondition"
+      expected_header = "link\ttitle\tdescription\timage_link\tprice\tid\texpiration_date\tbrand\tcondition\tproduct_type"
       unless header == expected_header
-        yield "expected header to be #{expected_header.inspect} but received #{header.inspect}"
+        yield [:error, "expected header to be #{expected_header.inspect} but received #{header.inspect}"]
         return nil
       end
       
@@ -76,8 +76,8 @@ class Facility
       lines.each do |line|
         fields = line.split("\t", -1)
         unless expected_count == fields.size
-          yield "expected #{expected_count} fields but encountered #{fields.size} in #{line.inspect}"
-          return nil
+          yield [:error, "expected #{expected_count} fields but encountered #{fields.size} in #{line.inspect}"]
+          next
         end
         products[fields[5]] = {"sale:price:GBP" => [fields[4]]}
       end

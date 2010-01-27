@@ -5,7 +5,6 @@
 # The subclasses are...
 #
 # DefinitiveProduct:: The 'ideal' definition of a Product based as far as possible on the original manufacturer's specifications and belonging to a specific Company. It may be related to other DefinitiveProducts by means of ProductRelationship objects.
-# FacilityProduct:: A record of the data associated with a particular product at a partner's Facility. ProductMapping objects can map one FacilityProduct to many DefinitiveProducts to allow association for pricing and availability purposes. <em>Has exclusive use of propeties in the 'retail' first-level name-space.</em>
 # UserProduct:: An instance of a DefinitiveProduct that the user has 'purchased' (or otherwise acquired) that may be associated with a specific Purchase and can form a tree to group the User's products into name assemblies (such as a boat). <em>Has exclusive use of properties in the 'purchase' first-level name-space.</em>
 #
 # Each individual piece of information associated with a Product is recorded as a PropertyValue and Products may have arbtitrary Attachments for managing images, data sheets and so on.

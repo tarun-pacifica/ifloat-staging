@@ -79,7 +79,7 @@ class Facility
           yield [:error, "expected #{expected_count} fields but encountered #{fields.size} in #{line.inspect}"]
           next
         end
-        products[fields[5]] = {"sale:price:GBP" => [fields[4]]}
+        products[fields[5]] = {:price => {"GBP" => fields[4]}}
       end
       
     else raise "no import routine for #{primary_url} (#{name})"

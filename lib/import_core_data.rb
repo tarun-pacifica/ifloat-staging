@@ -109,6 +109,20 @@ class ImportSet
     puts "#{'%6.2f' % (Time.now - start)}s : ensured all primary images are 400x400 in size"
     return [] unless @errors.empty?
     
+    start = Time.now
+    FuturePurchase.all_definitive_product_primary_keys.each do |company_ref, product_ref|
+      company = get(Company, company_ref)
+      if company.nil?
+        error(Company, nil, nil, nil, "unable to delete company owning user-referenced products: #{company_ref}")
+        next
+      end
+      
+      next unless get(DefinitiveProduct, [company, product_ref]).nil?
+      error(DefinitiveProduct, nil, nil, nil, "unable to delete user-referenced product: #{company_ref} / #{product_ref}")
+    end
+    puts "#{'%6.2f' % (Time.now - start)}s : ensured no orphaned FuturePurchases"
+    return [] unless @errors.empty?
+    
     @objects_by_pk_by_class = nil
     GC.start
     def add; raise "add cannot be called once import has been"; end
@@ -310,6 +324,7 @@ def build_asset_csv
 
     name = path_parts.pop
     errors << [relative_path, "invalid asset name format"] unless name =~ Asset::NAME_FORMAT
+    errors << [relative_path, "extension not jpg or pdf"] unless name =~ /(jpg|pdf|png)$/
     
     paths_by_name = (paths_by_names_by_company_refs[company_ref] ||= {})
     existing_path = paths_by_name[name]

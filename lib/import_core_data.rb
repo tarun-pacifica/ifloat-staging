@@ -86,43 +86,7 @@ class ImportSet
     object
   end
   
-  def import
-    start = Time.now
-    pias_by_product = primary_image_attachments
-    puts "#{'%6.2f' % (Time.now - start)}s : derived primary image list"
-    
-    # start = Time.now
-    # (@objects.select { |object| object.klass == DefinitiveProduct } - pias_by_product.keys).each do |product|
-    #   error(DefinitiveProduct, product.path, product.row, nil, "no image specified")
-    # end
-    # puts "#{'%6.2f' % (Time.now - start)}s : ensured all products have an image"
-    # return [] unless @errors.empty?
-    
-    start = Time.now
-    pias_by_product.values.map { |attachment| attachment.attributes[:asset] }.uniq.each do |asset|
-      path = asset.attributes[:file_path]
-      ImageScience.with_image(path) do |img|
-        w, h = img.width, img.height
-        error(Asset, asset.path, asset.row, nil, "not 400x400 (#{w}x#{h}): #{path}") unless w == 400 and h == 400
-      end
-    end
-    puts "#{'%6.2f' % (Time.now - start)}s : ensured all primary images are 400x400 in size"
-    return [] unless @errors.empty?
-    
-    start = Time.now
-    FuturePurchase.all_definitive_product_primary_keys.each do |company_ref, product_ref|
-      company = get(Company, company_ref)
-      if company.nil?
-        error(Company, nil, nil, nil, "unable to delete company owning user-referenced products: #{company_ref}")
-        next
-      end
-      
-      next unless get(DefinitiveProduct, [company, product_ref]).nil?
-      error(DefinitiveProduct, nil, nil, nil, "unable to delete user-referenced product: #{company_ref} / #{product_ref}")
-    end
-    puts "#{'%6.2f' % (Time.now - start)}s : ensured no orphaned FuturePurchases"
-    return [] unless @errors.empty?
-    
+  def import    
     @objects_by_pk_by_class = nil
     GC.start
     def add; raise "add cannot be called once import has been"; end
@@ -145,9 +109,7 @@ class ImportSet
       @adapter.push_transaction(transaction)
       
       classes.each do |klass|
-        start = Time.now
-        class_stats << [klass, import_class(klass, objects_by_class.delete(klass))]
-        puts "#{'%6.2f' % (Time.now - start)}s : #{klass}"
+        stopwatch(klass) { class_stats << [klass, import_class(klass, objects_by_class.delete(klass))] }
         GC.start
         break unless @errors.empty?
       end
@@ -159,6 +121,37 @@ class ImportSet
     end
     
     class_stats
+  end
+  
+  def verify_integrity
+    pias_by_product = stopwatch("derived primary image list") { primary_image_attachments }
+    
+    # stopwatch("ensured all products have a primary image") do
+    #   (@objects.select { |object| object.klass == DefinitiveProduct } - pias_by_product.keys).each do |product|
+    #     error(DefinitiveProduct, product.path, product.row, nil, "no image specified")
+    #   end
+    # end
+    
+    stopwatch("ensured all primary images are 400x400 in size") do
+      pias_by_product.values.map { |attachment| attachment.attributes[:asset] }.uniq.each do |asset|
+        path = asset.attributes[:file_path]
+        ImageScience.with_image(path) do |img|
+          w, h = img.width, img.height
+          error(Asset, asset.path, asset.row, nil, "not 400x400 (#{w}x#{h}): #{path}") unless w == 400 and h == 400
+        end
+      end
+    end
+    
+    stopwatch("ensured no orphaned FuturePurchases") do
+      FuturePurchase.all_definitive_product_primary_keys.each do |company_ref, product_ref|
+        company = get(Company, company_ref)
+        if company.nil?
+          error(Company, nil, nil, nil, "unable to delete company with user-referenced product: #{company_ref} / #{product_ref}")
+        else
+          error(DefinitiveProduct, nil, nil, nil, "unable to delete user-referenced product: #{company_ref} / #{product_ref}") if get(DefinitiveProduct, company, product_ref).nil?
+        end
+      end
+    end
   end
   
   def write_errors(path)
@@ -407,6 +400,14 @@ def repo_summary(path)
   `git --git-dir='#{path}/.git' log -n1 --pretty='format:%ai: %s'`.chomp
 end
 
+def stopwatch(message)
+  start = Time.now
+  result = yield
+  puts "#{'%6.2f' % (Time.now - start)}s : #{message}"
+  result
+end
+
+
 # Ensure each class has an associated parser
 
 parsers_by_class = {}
@@ -423,17 +424,17 @@ end
 # Build an asset import CSV from the contents of the asset repo
 
 puts "=== Building Asset CSV ==="
-start = Time.now
-error_message = "Failed to build asset CSV from asset repository #{ASSET_REPO.inspect}."
-begin
-  error_report_path = build_asset_csv
-  mail_fail(error_message, error_report_path) unless error_report_path.nil?
-rescue SystemExit
-  exit 1
-rescue Exception => e
-  mail_fail(error_message, nil, e)
+stopwatch("assets.csv") do
+  error_message = "Failed to build asset CSV from asset repository #{ASSET_REPO.inspect}."
+  begin
+    error_report_path = build_asset_csv
+    mail_fail(error_message, error_report_path) unless error_report_path.nil?
+  rescue SystemExit
+    exit 1
+  rescue Exception => e
+    mail_fail(error_message, nil, e)
+  end
 end
-puts "#{'%6.2f' % (Time.now - start)}s : assets.csv"
 
 
 # Ensure each class has at least one associated CSV to be imported
@@ -466,14 +467,15 @@ import_set = ImportSet.new
 CLASSES.each do |klass|
   parser = parsers_by_class[klass].new(import_set)
   csv_paths_by_class[klass].each do |path|
-    start = Time.now
-    parser.parse(path)
     nice_path = File.basename(path)
     nice_path = File.basename(File.dirname(path)) / nice_path unless nice_path == "#{klass.storage_name}.csv"
-    puts "#{'%6.2f' % (Time.now - start)}s : #{nice_path}"
+    stopwatch(nice_path) { parser.parse(path) }
     GC.start
   end
 end
+
+puts "=== Verifying Global Integrity ==="
+import_set.verify_integrity
 
 mail_fail("Some errors occurred whilst parsing CSVs from #{CSV_REPO.inspect} (and the auto-generated /tmp/assets.csv).", "/tmp/errors.csv") if import_set.write_errors("/tmp/errors.csv")
 
@@ -498,7 +500,7 @@ ImportEvent.create(:succeeded => true, :report => report)
 mail(:success, report)
 
 puts "=== Compiling Indexes ==="
-start = Time.now
-Indexer.compile
-CachedFind.all.update!(:invalidated => true)
-puts "#{'%6.2f' % (Time.now - start)}s : #{Indexer::COMPILED_PATH}"
+stopwatch(Indexer::COMPILED_PATH) do
+  Indexer.compile
+  CachedFind.all.update!(:invalidated => true)
+end

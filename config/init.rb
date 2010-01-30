@@ -1,3 +1,8 @@
+if RUBY_VERSION =~ /^1\.9\./
+  require "csv"
+  FasterCSV = CSV
+end
+
 require "fileutils"
 
 require "lib" / "asset_store"

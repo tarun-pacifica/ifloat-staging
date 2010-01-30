@@ -17,13 +17,16 @@ class AbstractParser
       return
     end
     
-    old_kcode = $KCODE
-    $KCODE = self.class.const_get("KCODE")
+    old_kcode = nil
+    unless RUBY_VERSION =~ /^1\.9\./
+      old_kcode = $KCODE
+      $KCODE = self.class.const_get("KCODE")
+    end
     
     @headers = {}
     row_number = 0
     
-    FasterCSV.foreach(csv_path, :headers => :first_row, :return_headers => true) do |row|
+    FasterCSV.foreach(csv_path, :headers => :first_row, :return_headers => true, :encoding => "UTF-8") do |row|
       row_number += 1
       
       if row.header_row?
@@ -58,7 +61,7 @@ class AbstractParser
       end
     end
     
-    $KCODE = old_kcode
+    $KCODE = old_kcode unless RUBY_VERSION =~ /^1\.9\./
   end
   
   

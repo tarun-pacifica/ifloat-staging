@@ -11,7 +11,6 @@ Merb::Router.prepare do
   
   match('/blogs/:name').to(:controller => 'blogs', :action => 'show').name(:blogs)
   
-  match('/cached_finds/conversions.js').to(:controller => 'cached_finds', :action => 'conversions', :format => 'js')
   match('/cached_finds/:id/filter/:property_id').to(:controller => 'cached_finds', :action => 'filter')
   match('/cached_finds/:id/filters').to(:controller => 'cached_finds', :action => 'filters', :format => 'js')
   match('/cached_finds/:id/found_images/:limit').to(:controller => 'cached_finds', :action => 'found_images', :format => 'js')

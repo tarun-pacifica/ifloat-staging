@@ -9,3 +9,4 @@ doc/*
 gems/*
 log/
 public/assets
+public/javascripts/conversions.js

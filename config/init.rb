@@ -40,4 +40,9 @@ Merb::BootLoader.before_app_loads do
     end
   end
   
+  # Cache the latest version of conversions.js
+  path = "public/javascripts/conversions.js"
+  script = Conversion.javascript
+  File.open(path, "w") { |f| f.write script } unless File.exist?(path) and File.read(path) == script
+  
 end

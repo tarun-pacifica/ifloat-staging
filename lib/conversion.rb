@@ -55,6 +55,32 @@ module Conversion
     [$2.size, 2].max
   end
   
+  def self.javascript
+    conversions = {}
+    Conversion::MAPPINGS.each do |from_to, ab_values|
+      conversions[from_to.join(">>")] = ab_values
+    end
+    
+    <<-SCRIPT
+    var conversions = #{conversions.to_json};
+
+    function num_filter_convert(value, from_unit, to_unit) {
+    	var conversion_key = [from_unit, to_unit].sort().join(">>");
+    	var ab_values = conversions[conversion_key];
+
+    	if(ab_values == undefined) {
+    		alert("no conversion available for" + from_unit + " -> " + to_unit);
+    		return value;
+    	}
+
+     	var a = ab_values[0];
+    	var b = ab_values[1];
+
+    	return (from_unit < to_unit) ? (value * a + b) : ((value - b) / a);
+    }
+    SCRIPT
+  end
+  
   def self.required
     conversions = []
     

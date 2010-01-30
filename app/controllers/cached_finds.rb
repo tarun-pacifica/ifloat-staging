@@ -1,15 +1,4 @@
-class CachedFinds < Application
-  def conversions
-    provides :js
-    
-    @conversions = {}
-    Conversion::MAPPINGS.each do |from_to, ab_values|
-      @conversions[from_to.join(">>")] = ab_values
-    end
-    
-    render
-  end
-  
+class CachedFinds < Application  
   def create(language_code, specification)
     find = session.add_cached_find(CachedFind.new(:language_code => language_code, :specification => specification))
     

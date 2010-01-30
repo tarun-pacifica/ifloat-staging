@@ -141,7 +141,7 @@ class ImportSet
             error(Asset, asset.path, asset.row, nil, "not 400x400 (#{w}x#{h}): #{path}") unless w == 400 and h == 400
           end
         rescue Exception => e
-          error(Asset, asset.path, asset.row, nil, "ImageScience error #{e.message.inspect}: #{path}")
+          error(Asset, asset.path, asset.row, nil, "unable to read image (#{e}): #{path}")
         end
       end
     end

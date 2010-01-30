@@ -135,9 +135,13 @@ class ImportSet
     stopwatch("ensured all primary images are 400x400 in size") do
       pias_by_product.values.map { |attachment| attachment.attributes[:asset] }.uniq.each do |asset|
         path = asset.attributes[:file_path]
-        ImageScience.with_image(path) do |img|
-          w, h = img.width, img.height
-          error(Asset, asset.path, asset.row, nil, "not 400x400 (#{w}x#{h}): #{path}") unless w == 400 and h == 400
+        begin
+          ImageScience.with_image(path) do |img|
+            w, h = img.width, img.height
+            error(Asset, asset.path, asset.row, nil, "not 400x400 (#{w}x#{h}): #{path}") unless w == 400 and h == 400
+          end
+        rescue Exception => e
+          error(Asset, asset.path, asset.row, nil, "ImageScience error #{e.message.inspect}: #{path}")
         end
       end
     end

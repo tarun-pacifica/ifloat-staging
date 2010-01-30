@@ -8,7 +8,7 @@ def gems(names, version)
 end
 
 # DataObjects, DataMapper and Merb
-gems %w(data_objects do_mysql), "0.10.0"
+gems %w(data_objects do_mysql), "0.10.1"
 gems %w(dm-core dm-aggregates dm-migrations dm-types dm-validations), "0.10.2"
 gems %w(merb-core merb-action-args merb-helpers merb-mailer merb_datamapper), "1.1.0.pre"
 # merb-assets merb-exceptions ?

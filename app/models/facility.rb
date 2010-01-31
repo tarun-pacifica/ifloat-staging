@@ -43,26 +43,13 @@ class Facility
   end
   
   # TODO: spec
-  def retrieve_products(data = nil)
+  def parse_products(data)
     raise "logger block required" unless block_given?
     
     product_info_by_ref = {}
     
     case primary_url
     when "marinestore.co.uk"
-      if data.nil?
-        host, path = "marinestore.co.uk", "/marinestorechandlers.txt"
-        yield [:info, "downloading manifest from #{host}#{path}"]
-        begin
-          response = Net::HTTP.get_response(host, path)
-          raise "expected an HTTPSuccess but recieved an #{response.class}" unless response.kind_of?(Net::HTTPSuccess)
-          data = response.body
-        rescue Exception => e
-          yield [:error, e.message]
-          return nil
-        end
-      end
-      
       lines = data.split("\n")
       yield [:info, "parsing #{lines.size} lines (#{data.size} bytes)"]
       
@@ -74,19 +61,54 @@ class Facility
       end
       
       expected_count = expected_header.split("\t").size
-      lines.each do |line|
+      line_nums_by_ref = {}
+      lines.each_with_index do |line, i|
         fields = line.split("\t", -1)
         unless expected_count == fields.size
           yield [:error, "expected #{expected_count} fields but encountered #{fields.size} in #{line.inspect}"]
           next
         end
-        product_info_by_ref[fields[5]] = {:price => fields[4]}
+        
+        ref = fields[5].upcase
+        unless ref =~ FacilityProduct::REFERENCE_FORMAT
+          yield [:warn, "skipped line #{i} as reference #{ref.inspect} contains invalid characters"]
+          next
+        end
+        
+        line_num = line_nums_by_ref[ref]
+        if line_num.nil?
+          line_nums_by_ref[ref] = i
+          product_info_by_ref[ref] = {:price => fields[4]}
+        else
+          yield [:warn, "skipped line #{i} as reference #{ref.inspect} already encountered on line #{line_num}"]
+        end
       end
       
     else raise "no import routine for #{primary_url} (#{name})"
     end
   
     product_info_by_ref
+  end
+  
+  # TODO: spec
+  def retrieve_products(data)
+    raise "logger block required" unless block_given?
+    
+    case primary_url
+      
+    when "marinestore.co.uk"
+      host, path = "marinestore.co.uk", "/marinestorechandlers.txt"
+      yield [:info, "downloading manifest from #{host}#{path}"]
+      begin
+        response = Net::HTTP.get_response(host, path)
+        raise "expected an HTTPSuccess but recieved an #{response.class}" unless response.kind_of?(Net::HTTPSuccess)
+        response.body
+      rescue Exception => e
+        yield [:error, e.message]
+        nil
+      end
+      
+    end
   end
   
   # TODO: spec
@@ -97,13 +119,19 @@ class Facility
     adapter.push_transaction(transaction)
   
     products.all(:reference.not => product_info_by_ref.keys).destroy!
-    existing_products_by_ref = products.all.hash_by { |product| product.reference }
+    # TODO: switch to the simpler form when the call to save below stops triggering the facility's validations
+    # http://datamapper.lighthouseapp.com/projects/20609-datamapper/tickets/1154
+    # existing_products_by_ref = products.all.hash_by { |product| product.reference }
+    existing_products_by_ref = FacilityProduct.all(:facility_id => id).hash_by { |product| product.reference }
   
     product_info_by_ref.each do |ref, info|
-      product = existing_products_by_ref[ref] || products.new(:reference => ref)
+      # TODO: see above
+      # product = existing_products_by_ref[ref] || products.new(:reference => ref)
+      product = existing_products_by_ref[ref] || FacilityProduct.new(:facility_id => id, :reference => ref)
+      old_price = product.price
       product.price = info[:price]
       product.currency = "GBP"
-      product.save
+      product.save if product.new? or product.dirty? # TODO: remove when DM comes to its senses
     end
 
     adapter.pop_transaction

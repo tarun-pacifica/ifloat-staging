@@ -21,7 +21,7 @@ class FuturePurchases < Application
     @partner_url = partner_url(facility, fap)
     return redirect("/future_purchases/buy_options") if @partner_url.nil?
     
-    purchase_refs = fac_prods_by_def_prod_id.values_at(*current_prod_ids).map { |fp| fp.reference }
+    purchase_refs = fac_prods_by_def_prod_id.values_at(*current_prod_ids).compact.map { |fp| fp.reference }
     purchase = Purchase.new(:facility => facility, :product_refs => purchase_refs)
     session.add_purchase(purchase)
     

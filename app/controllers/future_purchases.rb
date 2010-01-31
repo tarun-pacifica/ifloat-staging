@@ -57,8 +57,7 @@ class FuturePurchases < Application
     @facility_urls.each do |url|
       prices = []
       shopping_list_product_ids.each do |product_id|
-        prices_by_url = @prices_by_url_by_product_id[product_id]
-        price = prices_by_url[url]
+        price = [@prices_by_url_by_product_id[product_id] || {}][url]
         prices << price unless price.nil?
       end
 

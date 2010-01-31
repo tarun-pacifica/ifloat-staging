@@ -8,21 +8,21 @@ class FuturePurchases < Application
     return redirect("/future_purchases/buy_options") if @current_purchases.empty?
     
     current_product_ids = @current_purchases.map { |purchase| purchase.definitive_product_id }
-    facility_products = facility.map_products(current_product_ids)
+    fac_prods_by_def_prod_id = facility.map_products(current_product_ids)
     
     product_ids = current_product_ids + @future_purchases.map { |purchase| purchase.definitive_product_id }
     @purchase_titles_by_product_id = purchase_titles(product_ids)
             
     @partner_product_urls = {}
-    facility_products.each do |definitive_product_id, facility_product|
+    fac_prods_by_def_prod_id.each do |definitive_product_id, facility_product|
       @partner_product_urls[definitive_product_id] = partner_product_url(facility, facility_product.reference)
     end
     
-    fap = first_available_product(@current_purchases, facility_products)
+    fap = first_available_product(@current_purchases, fac_prods_by_def_prod_id)
     @partner_url = partner_url(facility, fap)
     return redirect("/future_purchases/buy_options") if @partner_url.nil?
     
-    purchase = Purchase.new(:facility => facility, :product_refs => facility_products.map { |fp| fp.reference } )
+    purchase = Purchase.new(:facility => facility, :product_refs => fac_prods_by_def_prod_id.values.map { |fp| fp.reference } )
     session.add_purchase(purchase)
     
     @transitional = true
@@ -101,10 +101,10 @@ class FuturePurchases < Application
     nil
   end
   
-  def partner_product_url(facility, product)
+  def partner_product_url(facility, reference)
     case facility.primary_url
     when "marinestore.co.uk"
-      "http://marinestore.co.uk/Merchant2/merchant.mvc?Screen=PROD&Product_Code=#{product.reference}"
+      "http://marinestore.co.uk/Merchant2/merchant.mvc?Screen=PROD&Product_Code=#{reference}"
     else nil
     end
   end

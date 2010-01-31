@@ -16,7 +16,7 @@
 		<span class="total"><%= @current_purchases.size %></span>
 		
 	</div>
-	<%= partial :purchase, :with => @current_purchases %>
+	<%= partial :purchase, :with => @current_purchases, :target => "partner_store" %>
 	
 	<% unless @future_purchases.empty? %>
 	<div id="future_purchases" class="purchase_list">
@@ -62,7 +62,7 @@ $(document).ready(function() {
 });
 </script>
 
-<iframe id="partner_store"></iframe>
+<iframe id="partner_store" name="partner_store"></iframe>
 
 
 

@@ -2,15 +2,16 @@
 	dom_id = "purchase_#{purchase.id}"
 	title = @purchase_titles_by_product_id[purchase.definitive_product_id]
 	
-	klass, url = nil, nil
+	klass, target_attr, url = nil, nil, nil
 	
 	if @partner_product_urls.nil?
-		url = "/products/#{purchase.definitive_product_id}"
 		klass = (purchase.deferred? ? "future" : "now")
+		url = "/products/#{purchase.definitive_product_id}"
 	else
 		url = @partner_product_urls[purchase.definitive_product_id]
 		klass = (url.nil? ? "unavailable" : "available")
+		target_attr = "target=#{target.inspect}"
 	end
 %>
 
-<a id=<%= dom_id.inspect %> class=<%= klass.inspect %> href=<%= (url || '#').inspect %>><%= title %></a>
+<a id=<%= dom_id.inspect %> class=<%= klass.inspect %> <%= target_attr %> href=<%= (url || '#').inspect %>><%= title %></a>

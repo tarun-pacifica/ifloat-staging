@@ -24,7 +24,7 @@
 		<span class="total"><%= @future_purchases.empty? ? "" : @future_purchases.size %></span>
 		
 	</div>
-	<%= partial :purchase, :with => @future_purchases %>
+	<%= partial :purchase, :with => @future_purchases, :target => "partner_store" %>
 	<% end %>
 </div>
 

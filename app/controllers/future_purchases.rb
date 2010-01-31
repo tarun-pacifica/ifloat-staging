@@ -7,10 +7,9 @@ class FuturePurchases < Application
     @future_purchases, @current_purchases = session.future_purchases.partition { |purchase| purchase.deferred? }
     return redirect("/future_purchases/buy_options") if @current_purchases.empty?
     
-    current_product_ids = @current_purchases.map { |purchase| purchase.definitive_product_id }
-    fac_prods_by_def_prod_id = facility.map_products(current_product_ids)
-    
-    product_ids = current_product_ids + @future_purchases.map { |purchase| purchase.definitive_product_id }
+    current_prod_ids = @current_purchases.map { |purchase| purchase.definitive_product_id }
+    product_ids = current_prod_ids + @future_purchases.map { |purchase| purchase.definitive_product_id }
+    fac_prods_by_def_prod_id = facility.map_products(product_ids)
     @purchase_titles_by_product_id = purchase_titles(product_ids)
             
     @partner_product_urls = {}
@@ -22,7 +21,8 @@ class FuturePurchases < Application
     @partner_url = partner_url(facility, fap)
     return redirect("/future_purchases/buy_options") if @partner_url.nil?
     
-    purchase = Purchase.new(:facility => facility, :product_refs => fac_prods_by_def_prod_id.values.map { |fp| fp.reference } )
+    purchase_refs = fac_prods_by_def_prod_id.values_at(*current_prod_ids).map { |fp| fp.reference }
+    purchase = Purchase.new(:facility => facility, :product_refs => purchase_refs)
     session.add_purchase(purchase)
     
     @transitional = true
@@ -36,9 +36,11 @@ class FuturePurchases < Application
     @shopping_list = []
     @future_buys = []
     @product_ids = []
+    shopping_list_product_ids = []
     all_purchases.each do |purchase|
       (purchase.deferred? ? @future_buys : @shopping_list) << purchase
       @product_ids << purchase.definitive_product_id
+      shopping_list_product_ids << purchase.definitive_product_id unless purchase.deferred?
     end
     
     @prices_by_url_by_product_id = Product.prices(@product_ids, session.currency)
@@ -53,10 +55,16 @@ class FuturePurchases < Application
     
     @totals_info = {}
     @facility_urls.each do |url|
-      prices = @prices_by_url_by_product_id.values.map { |prices_by_facility_url| prices_by_facility_url[url] }.compact
+      prices = []
+      shopping_list_product_ids.each do |product_id|
+        prices_by_url = @prices_by_url_by_product_id[product_id]
+        price = prices_by_url[url]
+        prices << price unless price.nil?
+      end
+
       @totals_info[url] = [facility_ids[url], prices.size, prices.reduce(:+)]
     end
-    p @totals_info
+    
     @previous_finds = session.cached_finds
     render
   end

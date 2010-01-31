@@ -41,7 +41,7 @@ class FuturePurchases < Application
       @product_ids << purchase.definitive_product_id
     end
     
-    @prices = Product.prices(@product_ids, session.currency)
+    @prices_by_url_by_product_id = Product.prices(@product_ids, session.currency)
     @facility_urls = ["marinestore.co.uk"]
     # this is hard-coded in order to simplify the buy options page, this will need review as more facilities are added
     # note that the following lookup and logic would also probably be obviated by a change in this code
@@ -53,11 +53,10 @@ class FuturePurchases < Application
     
     @totals_info = {}
     @facility_urls.each do |url|
-      facility_id = facility_ids[url]
-      prices = @prices.values.map { |prices_by_facility_id| prices_by_facility_id[facility_id] }.compact
-      @totals_info[url] = [facility_id, prices.size, prices.reduce(:+)]
+      prices = @prices_by_url_by_product_id.values.map { |prices_by_facility_url| prices_by_facility_url[url] }.compact
+      @totals_info[url] = [facility_ids[url], prices.size, prices.reduce(:+)]
     end
-    
+    p @totals_info
     @previous_finds = session.cached_finds
     render
   end

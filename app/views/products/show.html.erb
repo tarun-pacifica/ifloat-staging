@@ -32,14 +32,14 @@
 			<% unless @asset_urls_with_names.empty? %> <hr /> <% end %>
 			
 			<table class="prices">
-				<% @prices.each do |url, amount| %>
+				<% @prices_by_url.each do |url, amount| %>
 					<tr>
 						<td> <img src="/images/estore_logos/<%= url %>.png" alt=<%= url.inspect %> /> </td>
 						<td class="price"> <%= money(amount) %> </td>
 					</tr>
 				<% end %>
 				
-				<% if @prices.empty? %>
+				<% if @prices_by_url.empty? %>
 					<tr> <td>None of our partners currently have this item in stock</td> </tr>
 				<% end %>
 			</table>

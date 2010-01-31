@@ -14,7 +14,7 @@
 		<tr class="separator"> <td colspan="<%= (2 + @facility_urls.size) %>"></td> </tr>
 		
 		<% @shopping_list.each do |purchase| %>
-		<% prices = (@prices[purchase.definitive_product_id] || {}) %>
+		<% prices = (@prices_by_url_by_product_id[purchase.definitive_product_id] || {}) %>
 		<tr>
 			<td class="move">
 				<a href="#" onclick="future_purchase_opts_move(<%= purchase.id %>)">

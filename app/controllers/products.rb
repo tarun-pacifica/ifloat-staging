@@ -60,7 +60,7 @@ class Products < Application
     
     @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(@data_properties)
     
-    @prices = @product.prices(session.currency)
+    @prices_by_url = @product.prices(session.currency)
     # TODO: remove test data
     # @prices["marinestore.co.uk"] = 57.22
     

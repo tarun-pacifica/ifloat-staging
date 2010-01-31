@@ -10,7 +10,7 @@
 	else
 		url = @partner_product_urls[purchase.definitive_product_id]
 		klass = (url.nil? ? "unavailable" : "available")
-		target_attr = "target=#{target.inspect}"
+		target_attr = "target=#{target.inspect}" unless url.nil?
 	end
 %>
 

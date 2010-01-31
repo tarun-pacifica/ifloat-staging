@@ -62,7 +62,7 @@ class Products < Application
     
     @prices = @product.prices(session.currency)
     # TODO: remove test data
-    @prices["marinestore.co.uk"] = 57.22
+    # @prices["marinestore.co.uk"] = 57.22
     
     @related_products_by_rel_name = ProductRelationship.related_products(@product)
     @related_products_by_rel_name.delete_if { |name, products| products.empty? }

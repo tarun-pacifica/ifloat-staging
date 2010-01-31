@@ -54,23 +54,18 @@ class Product
   # TODO: may be able to factor out the mapping bit to ProductMapping
   def self.prices(product_ids, currency)
     query =<<-EOS
-      SELECT DISTINCT pv.min_value, dp.id, f.primary_url
-      FROM property_values pv
-        INNER JOIN property_definitions pd ON pv.property_definition_id = pd.id
-        INNER JOIN products fp ON pv.product_id = fp.id
-        INNER JOIN facilities f ON fp.facility_id = f.id
-        INNER JOIN product_mappings pm ON fp.company_id = pm.company_id AND fp.reference = pm.reference
-        INNER JOIN products dp ON pm.definitive_product_id = dp.id
-      WHERE pv.type = 'CurrencyPropertyValue'
-        AND pv.unit = ?
-        AND pd.name = 'retail:price'
-        AND dp.id IN ?
+      SELECT DISTINCT pm.definitive_product_id, f.primary_url, fp.price
+      FROM product_mappings pm
+        INNER JOIN companies c ON pm.company_id = c.id
+        INNER JOIN facilities f ON c.id = f.company_id
+        INNER JOIN facility_products fp ON f.id = fp.facility_id AND pm.reference = fp.reference
+      WHERE pm.definitive_product_id IN ?
     EOS
     
     prices_by_url_by_product_id = {}
-    repository(:default).adapter.select(query, currency, product_ids).each do |record|
+    repository(:default).adapter.select(query, product_ids).each do |record|
       prices_by_url = (prices_by_url_by_product_id[record.definitive_product_id] ||= {})
-      prices_by_url[record.primary_url] = record.min_value
+      prices_by_url[record.primary_url] = record.price
     end
     prices_by_url_by_product_id
   end

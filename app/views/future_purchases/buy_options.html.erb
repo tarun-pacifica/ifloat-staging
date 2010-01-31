@@ -50,7 +50,7 @@
 		<tr class="separator"> <td colspan="3"></td> </tr>
 		
 		<% @future_buys.each do |purchase| %>
-		<% prices = (@prices[purchase.definitive_product_id] || {}) %>
+		<% prices = (@prices_by_url_by_product_id[purchase.definitive_product_id] || {}) %>
 		<tr>
 			<td class="move">
 				<a href="#" onclick="future_purchase_opts_move(<%= purchase.id %>)">

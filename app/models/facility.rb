@@ -91,7 +91,7 @@ class Facility
   end
   
   # TODO: spec
-  def retrieve_products(data)
+  def retrieve_products
     raise "logger block required" unless block_given?
     
     case primary_url

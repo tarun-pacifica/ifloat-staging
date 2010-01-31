@@ -17,7 +17,5 @@ class ProductMapping
   belongs_to :company
   belongs_to :product, :model => "DefinitiveProduct", :child_key =>[:definitive_product_id]
   
-  validates_is_unique :definitive_product_id, :scope => [:company_id, :reference]
-  
-  # TODO: add specs for uniqueness
+  validates_is_unique :definitive_product_id, :scope => [:company_id, :reference] # TODO: spec
 end

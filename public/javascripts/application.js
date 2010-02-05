@@ -695,10 +695,11 @@ function pick_lists_update_handle(data) {
 		}
 		
 		var pick_list = $("#pl_" + group);
+		console.log(pick_list);
 		pick_list.click(pick_list_show);
 		pick_list.mouseout(pick_list_hide);
-		pick_list.children("items").html(links.join(" "));
-		pick_list.children("total").html(total_products + ' <img src="/images/buttons/pick_list_arrow.png" />');
+		pick_list.children(".items").html(links.join(" "));
+		pick_list.children(".total").html(total_products + ' <img src="/images/buttons/pick_list_arrow.png" />');
 	}
 	
 	var prod_detail = $("#product_detail")[0];

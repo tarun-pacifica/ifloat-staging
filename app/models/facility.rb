@@ -27,19 +27,28 @@ class Facility
   validates_is_unique :name, :scope => :company_id
   validates_is_unique :primary_url, :unless => proc { |f| f.primary_url.nil? }
     
-  # TODO: add country support when needed (will need to relax the has 1 to a has n above)
-  def map_products(definitive_product_ids)
-    dpids_by_fp_ref = {}
-    ProductMapping.all(:company_id => company_id, :definitive_product_id => definitive_product_ids).each do |mapping|
-      dpids_by_fp_ref[mapping.reference] = mapping.definitive_product_id
+  # TODO: spec
+  def map_products(product_ids)
+    pids_by_fp_ref = {}
+    ProductMapping.all(:company_id => company_id, :product_id => product_ids).each do |mapping|
+      pids_by_fp_ref[mapping.reference] = mapping.product_id
     end
     
-    fps_by_dpid = {}
-    products.all(:reference => dpids_by_fp_ref.keys).each do |product|
-      dpid = dpids_by_fp_ref[product.reference]
-      fps_by_dpid[dpid] = product
+    fps_by_pid = {}
+    products.all(:reference => pids_by_fp_ref.keys).each do |product|
+      pid = pids_by_fp_ref[product.reference]
+      fps_by_pid[pid] = product
     end
-    fps_by_dpid
+    fps_by_pid
+  end
+  
+  # TODO: spec
+  def map_references(references)
+    pids_by_fp_ref = {}
+    ProductMapping.all(:company_id => company_id, :reference => references).each do |mapping|
+      (pids_by_fp_ref[mapping.reference] ||= []).push(mapping.product_id)
+    end
+    pids_by_fp_ref
   end
   
   # TODO: spec

@@ -6,8 +6,6 @@
 #
 # CachedFind operations (and filter value caching) are based on the Indexer and thus every time the global catalogue is updated (at product import time), all CachedFinds are marked as 'invalidated' and reset when they are next accessed.
 #
-# For future-proofing, Assets may be attached to a CachedFind. It is envisaged that this will allow Users (or the application itself) to assign images etc... to searches. This feature is currently speculative.
-#
 # = Processes
 #
 # === 1. Anonimize Unused CachedFinds
@@ -32,7 +30,6 @@ class CachedFind
   property :invalidated, Boolean, :default => true
   
   belongs_to :user, :required => false
-  has n, :attachments
   
   validates_with_block :language_code, :unless => :new? do
     attribute_dirty?(:language_code) ? [false, "cannot be updated"] : true
@@ -48,10 +45,6 @@ class CachedFind
       [false, "should be one or more words, each at least 3 characters long"]
     else true
     end
-  end
-  
-  before :destroy do
-    attachments.destroy!
   end
   
   before :valid? do

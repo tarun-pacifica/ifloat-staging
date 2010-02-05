@@ -44,31 +44,31 @@ class Products < Application
     html_by_product_id.values.join("\n")
   end
   
-  def purchase_buttons(id)
-    @product_id = id.to_i
-    @purchase = session.future_purchases.find { |purchase| purchase.definitive_product_id == @product_id }
-    render :layout => false
+  def picked_group(id)
+    provides :js
+    
+    product_id = id.to_i
+    pick = session.picked_products.find { |pick| pick.product_id == product_id }
+    response = (pick.nil? ? [nil, nil] : [pick.id, pick.group])
+    response << product_id
+    response.to_json
   end
   
   def show(id)
     product_id = id.to_i
-    @product = DefinitiveProduct.get(product_id)
+    @product = Product.get(product_id)
     return redirect("/") if @product.nil?
     
     gather_property_values(@product)
     gather_assets(@product)
     
     @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(@data_properties)
-    
     @prices_by_url = @product.prices(session.currency)
-    # TODO: remove test data
-    # @prices["marinestore.co.uk"] = 57.22
     
     @related_products_by_rel_name = ProductRelationship.related_products(@product)
     @related_products_by_rel_name.delete_if { |name, products| products.empty? }
     
-    @previous_finds = session.cached_finds
-    @recent_find = CachedFind.get(session[:most_recent_find_id])
+    @recent_find = session.most_recent_cached_find
     render
   end
   

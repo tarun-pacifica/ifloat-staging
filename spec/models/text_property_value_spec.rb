@@ -88,7 +88,7 @@ describe TextPropertyValue do
         {"brand" => ["Clio",  "FRA"], "colour" => ["Rouge", "FRA"]},
         {"brand" => ["Rouge", "ENG"], "colour" => ["Puce", "ENG"]}
       ].each_with_index.map do |info, i|
-        product = DefinitiveProduct.create(:company_id => i, :reference => "AF11235")
+        product = Product.create(:company_id => i, :reference => "AF11235")
         info.each do |key, info|
           TextPropertyValue.create(:product => product, :definition => @properties[key],
                                    :value => info[0], :language_code => info[1])

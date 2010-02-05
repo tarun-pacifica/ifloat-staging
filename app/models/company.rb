@@ -1,6 +1,6 @@
 # = Summary
 #
-# A Company represents any organisation with which Pristine does business (and indeed Pristine itself). Aside from it's own data, it is used to collect up DefinitiveProducts, Assets and Facilities (and thence Employees and Inventories).
+# A Company represents any organisation with which Pristine does business (and indeed Pristine itself). Aside from it's own data, it is used to collect up Products, Assets and Facilities (and thence Employees and FacilityProducts).
 # 
 # It is essential that a unique reference be created to identify each Company. This need is particularly apparent if Product references are considered (since the only way to guarantee the unique identification of a Product is via the two-level identifier [company_reference, product_reference]). Hence a Company record contains a reference field. This reference always begins with the pertinent three-character ISO 3166 country code and a hyphen. If the organisation has a registered company number (or reference) then this value should be appended. Otherwise, an underscored version of the company's name should be added. For example...
 # 

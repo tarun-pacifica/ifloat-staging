@@ -5,10 +5,10 @@
 	<div class="panel">
 		<div class="left"></div>
 		<div class="centre">
-			<% if @future_purchases.empty? %>
-			<div id="purchases"></div>
+			<% if @buy_options_exist %>
+			<a href="/picked_products/buy_options" id="purchases"></a>
 			<% else %>
-			<a href="/future_purchases/buy_options" id="purchases"></a>
+			<div id="purchases"></div>
 			<% end %>
 			<a href="#" id="blog"></a>
 			<% if session.authenticated? %>

@@ -137,14 +137,11 @@ class CachedFinds < Application
     @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)
     @text_value_definitions = PropertyDefinition.definitions_by_property_id(properties, session.language)
     
-    @previous_finds = session.cached_finds
-    @recent_find = CachedFind.get(session[:most_recent_find_id])
     render
   end
   
   def new
-    @future_purchases = session.future_purchases
-    @previous_finds = session.cached_finds
+    @buy_options_exist = session.picked_products.any? { |pick| pick.group =~ /^buy/ }
     render
   end
   
@@ -160,9 +157,9 @@ class CachedFinds < Application
     begin
       @find = session.ensure_cached_find(find_id)
     rescue NotFound
-      if session.authenticated? and find_id == session[:most_recent_find_id]
-        defunct_cf = CachedFind.get(find_id)
-        @find = session.cached_finds.find { |cf| cf.specification == defunct_cf.specification }
+      defunct_find = session.most_recent_cached_find
+      if session.authenticated? and find_id == defunct_find.id
+        @find = session.cached_finds.find { |cf| cf.specification == defunct_find.specification }
         session[:recalled] = (not @find.nil?)
       end
       return redirect(@find.nil? ? "/" : resource(@find))
@@ -170,12 +167,11 @@ class CachedFinds < Application
     
     @recalled = session[:recalled]
     session[:recalled] = false
-    session[:most_recent_find_id] = @find.id
+    session.most_recent_cached_find = @find
     @find.accessed_at = DateTime.now
     @find.ensure_valid
     @find.save
     
-    @previous_finds = session.cached_finds
     render
   end
   

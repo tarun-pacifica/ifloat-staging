@@ -18,12 +18,12 @@ Merb::Router.prepare do
   match('/cached_finds/:id/reset').to(:controller => 'cached_finds', :action => 'reset')
   resources :cached_finds
   
-  match('/future_purchases/buy/:facility_id').to(:controller => 'future_purchases', :action => 'buy')
-  match('/future_purchases/buy_options').to(:controller => 'future_purchases', :action => 'buy_options')
-  resources :future_purchases
+  match('/picked_products/buy/:facility_id').to(:controller => 'picked_products', :action => 'buy')
+  match('/picked_products/buy_options').to(:controller => 'picked_products', :action => 'buy_options')
+  resources :picked_products
   
   match('/products/batch/:ids').to(:controller => 'products', :action => 'batch')
-  match('/products/:id/purchase_buttons').to(:controller => 'products', :action => 'purchase_buttons')
+  match('/products/:id/picked_group').to(:controller => 'products', :action => 'picked_group')
   resources :products
   
   match('/purchases/track').to(:controller => 'purchases', :action => 'track')

@@ -117,7 +117,7 @@ describe CachedFind do
           :weight_dry => {"kg"  => [2]},
           :weight_wet => {"kg"  => [1.8]} }
       ].each_with_index do |info, i|
-        product = DefinitiveProduct.create(:company_id => i, :reference => "AF11235")
+        product = Product.create(:company_id => i, :reference => "AF11235")
         @products << product
         
         info.each do |key, values_by_language_unit|

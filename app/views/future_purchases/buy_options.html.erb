@@ -1,8 +1,8 @@
 <%= partial "cached_finds/find_header" %>
 
-<div id="future_purchase_options">
-	<% unless @shopping_list.empty? %>
-	<table class="shopping_list">
+<div id="buy_options">
+	<% unless @picks_by_group["buy_now"].nil? %>
+	<table id="bo_buy_now">
 		<tr>
 			<th>Shopping List</th>
 			<td> </td>
@@ -13,15 +13,15 @@
 		
 		<tr class="separator"> <td colspan="<%= (2 + @facility_urls.size) %>"></td> </tr>
 		
-		<% @shopping_list.each do |purchase| %>
-		<% prices = (@prices_by_url_by_product_id[purchase.definitive_product_id] || {}) %>
+		<% @picks_by_group["buy_now"].each do |pick| %>
+		<% prices = (@prices_by_url_by_product_id[pick.product_id] || {}) %>
 		<tr>
 			<td class="move">
-				<a href="#" onclick="future_purchase_opts_move(<%= purchase.id %>)">
-					<p>Move to Future Buys</p> <img src="/images/buttons/arrow_down.png" />
+				<a href="#" onclick="buy_opts_move(<%= pick.id %>)">
+					<p>Move to Wish List</p> <img src="/images/buttons/arrow_down.png" />
 				</a>
 			</td>
-			<td class="product" id="prod_<%= purchase.definitive_product_id %>"> </td>
+			<td class="product" id="prod_<%= pick.product_id %>"> </td>
 			<% @facility_urls.each do |url| %>
 			<td class="price"><%= money(prices[url]) || "Not currently in stock" %></td>
 			<% end %>
@@ -36,7 +36,7 @@
 				<% if count.zero? %>
 					No items to buy
 				<% else %>
-					<a href="/future_purchases/buy/<%= facility_id %>">Buy <%= count %> item<%= count == 1 ? '' : 's' %> for <%= money(total) %></a>
+					<a href="/picked_products/buy/<%= facility_id %>">Buy <%= count %> item<%= count == 1 ? '' : 's' %> for <%= money(total) %></a>
 				<% end%>
 			</td>
 			<% end %>
@@ -44,20 +44,20 @@
 	</table>
 	<% end %>
 	
-	<% unless @future_buys.empty? %>
-	<table class="future_buys">
-		<tr> <th>Future Buys</th> </tr>
+	<% unless @picks_by_group["buy_later"].nil? %>
+	<table class="bo_buy_later">
+		<tr> <th>Wish List</th> </tr>
 		<tr class="separator"> <td colspan="3"></td> </tr>
 		
-		<% @future_buys.each do |purchase| %>
-		<% prices = (@prices_by_url_by_product_id[purchase.definitive_product_id] || {}) %>
+		<% @picks_by_group["buy_later"].each do |pick| %>
+		<% prices = (@prices_by_url_by_product_id[pick.product_id] || {}) %>
 		<tr>
 			<td class="move">
-				<a href="#" onclick="future_purchase_opts_move(<%= purchase.id %>)">
+				<a href="#" onclick="buy_opts_move(<%= pick.id %>)">
 					<p>Move to Shopping List</p> <img src="/images/buttons/arrow_up.png" />
 				</a>
 			</td>
-			<td class="product" id="prod_<%= purchase.definitive_product_id %>"> </td>
+			<td class="product" id="prod_<%= pick.product_id %>"> </td>
 			<td class="price">
 				<% min_price, max_price = prices.values.minmax %>
 				<% if min_price.nil? %>
@@ -74,8 +74,8 @@
 	<% end %>
 </div>
 
-<div id="future_purchase_options_tmp"> </div>
+<div id="buy_options_tmp"> </div>
 
 <script type="text/javascript" charset="utf-8">
-	future_purchase_opts_load(<%= @product_ids.inspect %>);
+	buy_opts_load(<%= @product_ids.inspect %>);
 </script>

@@ -10,7 +10,7 @@ FileUtils.mkpath(ASSET_VARIANT_DIR)
 
 CSV_REPO = "../ifloat_csvs"
 
-CLASSES = [PropertyType, PropertyDefinition, PropertyValueDefinition, TitleStrategy, Company, Facility, Asset, DefinitiveProduct]
+CLASSES = [PropertyType, PropertyDefinition, PropertyValueDefinition, TitleStrategy, Company, Facility, Asset, Product]
 
 class ImportObject
   attr_accessor :primary_key, :resource
@@ -41,7 +41,7 @@ class ImportSet
     Company                 => [:reference],
     Facility                => [:company, :name],
     Asset                   => [:bucket, :company, :name],
-    DefinitiveProduct       => [:company, :reference],
+    Product                 => [:company, :reference],
     Attachment              => [:product, :role, :sequence_number],
     ProductMapping          => [:company, :product, :reference],
     ProductRelationship     => [:company, :product, :property_definition, :name, :value],
@@ -88,7 +88,6 @@ class ImportSet
   
   def import    
     @objects_by_pk_by_class = nil
-    GC.start
     def add; raise "add cannot be called once import has been"; end
     
     classes = []
@@ -110,7 +109,6 @@ class ImportSet
       
       classes.each do |klass|
         stopwatch(klass) { class_stats << [klass, import_class(klass, objects_by_class.delete(klass))] }
-        GC.start
         break unless @errors.empty?
       end
 
@@ -127,8 +125,8 @@ class ImportSet
     pias_by_product = stopwatch("derived primary image list") { primary_image_attachments }
     
     # stopwatch("ensured all products have a primary image") do
-    #   (@objects.select { |object| object.klass == DefinitiveProduct } - pias_by_product.keys).each do |product|
-    #     error(DefinitiveProduct, product.path, product.row, nil, "no image specified")
+    #   (@objects.select { |object| object.klass == Product } - pias_by_product.keys).each do |product|
+    #     error(Product, product.path, product.row, nil, "no image specified")
     #   end
     # end
     
@@ -146,13 +144,13 @@ class ImportSet
       end
     end
     
-    stopwatch("ensured no orphaned FuturePurchases") do
-      FuturePurchase.all_definitive_product_primary_keys.each do |company_ref, product_ref|
+    stopwatch("ensured no orphaned PickedProducts") do
+      PickedProduct.all_primary_keys.each do |company_ref, product_ref|
         company = get(Company, company_ref)
         if company.nil?
           error(Company, nil, nil, nil, "unable to delete company with user-referenced product: #{company_ref} / #{product_ref}")
         else
-          error(DefinitiveProduct, nil, nil, nil, "unable to delete user-referenced product: #{company_ref} / #{product_ref}") if get(DefinitiveProduct, company, product_ref).nil?
+          error(Product, nil, nil, nil, "unable to delete user-referenced product: #{company_ref} / #{product_ref}") if get(Product, company, product_ref).nil?
         end
       end
     end
@@ -474,7 +472,6 @@ CLASSES.each do |klass|
     nice_path = File.basename(path)
     nice_path = File.basename(File.dirname(path)) / nice_path unless nice_path == "#{klass.storage_name}.csv"
     stopwatch(nice_path) { parser.parse(path) }
-    GC.start
   end
 end
 

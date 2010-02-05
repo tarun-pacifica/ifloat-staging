@@ -15,44 +15,31 @@
 #
 # === 1. Purchase One or More Products
 #
-# TODO: mention that InventoryProducts are to be created from response data wherever possible (for non-anonymous purchases)
 # TODO: it may be prudent to e-mail support every time a complete parsing is not possible (as commission rides on it)
+#       - in any case we need to e-mail a confirmation of the purchase (pretty-print response)
 #
 # === 2. Abandon Obsolete Purchases
 #
-# Run Purchase.abandon_obsolete periodically. This marks all Purchases open for longer than OBSOLESCENCE_TIME as abandoned.
+# Run Purchase.obsolete.destroy! periodically. This marks all Purchases open for longer than OBSOLESCENCE_TIME as abandoned.
 #
 class Purchase
   include DataMapper::Resource
   
   OBSOLESCENCE_TIME = 24.hours
   
-  property :id, Serial
-  property :created_at, DateTime, :required => true, :default => proc { DateTime.now }
-  property :product_refs, Object, :required => true
-  property :response, Object
-  property :completed_at, DateTime
-  property :abandoned, Boolean, :default => false
+  property :id,               Serial
+  property :created_at,       DateTime, :required => true, :default => proc { DateTime.now }
+  property :completed_at,     DateTime
+  property :response,         Object
   
   belongs_to :facility
   belongs_to :user, :required => false
-  has n, :user_products
-  
-  validates_with_block :product_refs do
-    product_refs.is_a?(Array) and product_refs.size > 0 and
-    product_refs.all? { |ref| ref.is_a?(String) and not ref.blank? } ||
-      [false, "should be an Array of 1 or more non-blank Strings"]
-  end
-  
-  def self.abandon_obsolete
-    obsolete.update!(:completed_at => DateTime.now, :abandoned => true)
-  end
   
   def self.obsolete
     all(:created_at.lt => OBSOLESCENCE_TIME.ago, :completed_at => nil)
   end
   
-  def self.parse_track_params(params)
+  def self.parse_response(params)
     parsed_data = {:items => []}
     
     params.each do |key, value|
@@ -61,7 +48,7 @@ class Purchase
         parsed_data[key] = value
       when /^item_\d+$/
         item = {}
-        value.split("&").map do |pair|
+        Merb::Parse.unescape(value).split("&").map do |pair|
           key, value = pair.split("=")
           item[key] = Merb::Parse.unescape(value) unless value.nil?
         end
@@ -73,8 +60,9 @@ class Purchase
   end
   
   def complete!(params)    
-    self.response_data = Purchase.parse_track_params(params)
+    self.response = Purchase.parse_response(params)
     self.completed_at = DateTime.now
     save
+    self.response[:items].map { |item| item["reference"] }.compact.uniq
   end
 end

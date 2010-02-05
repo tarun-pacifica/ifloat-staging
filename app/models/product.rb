@@ -1,29 +1,28 @@
 # = Summary
 #
-# Anything that can be found, organised and purchased is a Product (note that this includes services). <b>Note that Product itself is an abstract superclass and should never be created directly.</b>
+# The backbone of the schema, a Product models the available pickable/purchasable items. Its data is based as far as possible on the original manufacturer's specifications and is tracked using PropertyValue objects (for schema-free flexibility). Products may also have arbitrary attachments for tracking images, data sheets and so on.
 #
-# The subclasses are...
+# Each Product belongs to a specific Company and may be related to other Products by means of ProductRelationship objects. FacilityProducts may be associated with Products by means of ProductMapping objects.
 #
-# DefinitiveProduct:: The 'ideal' definition of a Product based as far as possible on the original manufacturer's specifications and belonging to a specific Company. It may be related to other DefinitiveProducts by means of ProductRelationship objects.
-# UserProduct:: An instance of a DefinitiveProduct that the user has 'purchased' (or otherwise acquired) that may be associated with a specific Purchase and can form a tree to group the User's products into name assemblies (such as a boat). <em>Has exclusive use of properties in the 'purchase' first-level name-space.</em>
-#
-# Each individual piece of information associated with a Product is recorded as a PropertyValue and Products may have arbtitrary Attachments for managing images, data sheets and so on.
+# In order to aid with quality control (particularly in the case where a Product is mostly / entirely inferred from retailer information), Products carry a 'review_stage' flag which helps with data preparation in grouping products together that have had the same level of editorial attention. <em>Note that this simple revision number could become a foreign key out to a revisions schema to power more complex workflows.</em>
 #
 class Product
   include DataMapper::Resource
   
   REFERENCE_FORMAT = /^[A-Z_\d\-\.\/]+$/
   
-  property :id, Serial
-  property :type, Discriminator
-  property :reference, String, :format => REFERENCE_FORMAT, :required => true
+  property :id,           Serial
+  property :reference,    String,  :required => true, :format => REFERENCE_FORMAT
+  property :review_stage, Integer, :required => true, :default => 0
+  
+  belongs_to :company
   
   has n, :attachments
+  has n, :mappings, :model => "ProductMapping"
+  has n, :product_relationships
   has n, :values, :model => "PropertyValue"
   
-  validates_with_block :type do
-    (self.class != Product and self.kind_of?(Product)) || [false, "must be a sub-class of Product"]
-  end
+  validates_is_unique :reference, :scope => [:company_id]
   
   # TODO: spec
   def self.display_values(product_ids, language_code, property_names = nil)
@@ -54,17 +53,17 @@ class Product
   # TODO: may be able to factor out the mapping bit to ProductMapping
   def self.prices(product_ids, currency)
     query =<<-EOS
-      SELECT DISTINCT pm.definitive_product_id, f.primary_url, fp.price
+      SELECT DISTINCT pm.product_id, f.primary_url, fp.price
       FROM product_mappings pm
         INNER JOIN companies c ON pm.company_id = c.id
         INNER JOIN facilities f ON c.id = f.company_id
         INNER JOIN facility_products fp ON f.id = fp.facility_id AND pm.reference = fp.reference
-      WHERE pm.definitive_product_id IN ?
+      WHERE pm.product_id IN ?
     EOS
     
     prices_by_url_by_product_id = {}
     repository(:default).adapter.select(query, product_ids).each do |record|
-      prices_by_url = (prices_by_url_by_product_id[record.definitive_product_id] ||= {})
+      prices_by_url = (prices_by_url_by_product_id[record.product_id] ||= {})
       prices_by_url[record.primary_url] = record.price
     end
     prices_by_url_by_product_id

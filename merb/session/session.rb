@@ -15,16 +15,19 @@ module Merb
       cached_find
     end
     
-    def add_future_purchase(purchase)
-      return if future_purchases.any? { |fp| fp.definitive_product_id == purchase.definitive_product_id }
+    def add_picked_product(pick)
+      return if picked_products.any? { |p| p.product_id == pick.product_id }
       
-      purchase.user = user
-      self[:future_purchase_ids] = (future_purchase_ids << purchase.id) if purchase.save
+      pick.user = user
+      self[:picked_product_ids] = (picked_product_ids << pick.id) if pick.save
     end
     
     def add_purchase(purchase)
       purchase.user = user
-      self[:purchase_ids] = (purchase_ids << purchase.id) if purchase.save
+      if purchase.save
+        previous_purchase_ids = purchases.map { |p| (p.facility_id == purchase.facility_id) ? p.id : nil }.compact
+        self[:purchase_ids] = ((purchase_ids - previous_purchase_ids) << purchase.id)
+      end
     end
     
     def admin?
@@ -53,14 +56,9 @@ module Merb
       retrieve ? (CachedFind.get(find_id) or raise NotFound) : nil
     end
     
-    def ensure_future_purchase(purchase_id) # TODO: review all uses to prevent retrieval where unnecessary
-      raise NotFound unless future_purchase_ids.include?(purchase_id)
-      FuturePurchase.get(purchase_id) or raise NotFound
-    end
-    
-    def future_purchases
-      return [] if future_purchase_ids.empty?
-      FuturePurchase.all(:id => future_purchase_ids, :order => [:created_at])
+    def ensure_picked_product(pick_id) # TODO: review all uses to prevent retrieval where unnecessary
+      raise NotFound unless picked_product_ids.include?(pick_id)
+      PickedProduct.get(pick_id) or raise NotFound
     end
     
     def language
@@ -87,7 +85,7 @@ module Merb
       end
       self[:user_id] = user.id
       
-      [[:cached_finds, :specification], [:future_purchases, :definitive_product_id]].each do |set, discriminator|
+      [[:cached_finds, :specification], [:picked_products, :product_id]].each do |set, discriminator|
         session_set = send(set)
         user_set = user.send(set)
         
@@ -109,7 +107,20 @@ module Merb
     
     def logout
       self[:user_id] = nil
-      self[:cached_find_ids] = self[:future_purchase_ids] = []
+      self[:cached_find_ids] = self[:picked_product_ids] = []
+    end
+    
+    def most_recent_cached_find
+      CachedFind.get(self[:most_recent_find_id])
+    end
+    
+    def most_recent_cached_find=(cached_find)
+      self[:most_recent_find_id] = cached_find.id
+    end
+    
+    def picked_products
+      return [] if picked_product_ids.empty?
+      PickedProduct.all(:id => picked_product_ids, :order => [:created_at])
     end
     
     def purchases
@@ -117,10 +128,14 @@ module Merb
       Purchase.all(:id => purchase_ids)
     end
     
-    def remove_future_purchase(purchase)
-      ids = future_purchase_ids
-      ids.delete(purchase.id)
-      self[:future_purchase_ids] = ids
+    def remove_picked_products(picks)
+      ids = picked_product_ids
+      pick_ids = picks.map { |pick| pick.id }
+      
+      PickedProduct.all(:id => pick_ids).destroy!
+      
+      ids.delete(pick_ids)
+      self[:picked_product_ids] = ids
     end
     
     def remove_purchase(purchase)
@@ -142,8 +157,8 @@ module Merb
       self[:cached_find_ids] || []
     end
     
-    def future_purchase_ids
-      self[:future_purchase_ids] || []
+    def picked_product_ids
+      self[:picked_product_ids] || []
     end
     
     def purchase_ids

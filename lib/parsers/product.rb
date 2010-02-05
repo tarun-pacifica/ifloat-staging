@@ -1,4 +1,4 @@
-class DefinitiveProductParser < AbstractParser
+class ProductParser < AbstractParser
   ESSENTIAL_HEADERS = ["company.reference", "product.review_stage", "product.reference"]
   
   REQUIRED_PROPERTY_NAMES = ["reference:class"]
@@ -86,7 +86,7 @@ class DefinitiveProductParser < AbstractParser
     [:company, :reference, :review_stage].each do |attribute|
       attributes[attribute] = parsed_fields.delete([attribute])
     end
-    objects = [ImportObject.new(DefinitiveProduct, attributes)]
+    objects = [ImportObject.new(Product, attributes)]
     
     value_objects_by_property_name = {}
     

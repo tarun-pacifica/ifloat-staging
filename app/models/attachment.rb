@@ -1,8 +1,8 @@
 # = Summary
 #
-# Assets may be attached to CachedFinds and Products. Attachment objects track the nature of any such relationship. More specifically, the Asset is said to serve a 'role' with respect to the CachedFind etc... See ROLES for a complete list of allowed values.
+# Assets may be attached to Products. Attachment objects track the nature of any such relationship. More specifically, the Asset is said to serve a 'role' with respect to the Product. See ROLES for a complete list of allowed values.
 #
-# In order to support the import process (particularly for DefinitiveProducts), the import 'sequence number' must be recorded in the Attachment. The Product image Attachment with the lowest sequence number (for a given product) has special significance in indicating the asset that should be used for the list / gallery view.
+# In order to support the import process, the import 'sequence number' must be recorded in the Attachment. The Product image Attachment with the lowest sequence number (for a given product) has special significance in indicating the asset that should be used as that product's master image.
 #
 # === Sample Data
 #
@@ -21,17 +21,10 @@ class Attachment
   property :sequence_number, Integer, :required => true
   
   belongs_to :asset
-  belongs_to :cached_find, :required => false
-  belongs_to :product, :required => false
-  
-  validates_with_method :validate_parentage
-  def validate_parentage
-    ([cached_find_id, product_id].compact.size == 1) ||
-      [false, "should belong to either a CachedFind or a Product"]
-  end
+  belongs_to :product
   
   validates_within :role, :set => ROLES
-  validates_is_unique :sequence_number, :scope => [:cached_find_id, :product_id, :role]
+  validates_is_unique :sequence_number, :scope => [:product_id, :role]
   
   def self.product_role_assets(product_ids, include_chains = true)
     return [] if product_ids.empty?

@@ -3,6 +3,8 @@ bundle_path "gems"
 clear_sources
 source "http://gemcutter.org"
 
+# source :gemcutter
+
 def gems(names, version)
   names.each { |n| gem(n, version) }
 end

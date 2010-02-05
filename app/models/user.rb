@@ -29,11 +29,9 @@ class User
   has n, :blogs
   has n, :cached_finds
   has n, :contacts
-  has n, :future_purchases, :order => [:created_at]
+  has n, :picked_products, :order => [:created_at]
   has n, :locations
-  has n, :products, :model => "UserProduct"
   has n, :purchases
-  # TODO has n, :root_products
   
   before :valid? do
     self.login = login.downcase unless login.nil?

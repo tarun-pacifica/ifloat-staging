@@ -1,6 +1,8 @@
 # = Summary
 #
-# Imported product listings from retailer's e-stores (and any other facility stocking products) are tracked as FacilityProducts. The price of such products is currently tracked in an ultra-simple manner pending the need for both multi-currency-per-facility and point-in-time aware pricing
+# Imported product listings from retailer's e-stores (and any other facility stocking products) are tracked as FacilityProducts. The price of such products is currently tracked in an ultra-simple manner pending the need for both multi-currency-per-facility and point-in-time aware pricing.
+#
+# FacilityProducts may be associated with Products by means of ProductMapping objects.
 #
 class FacilityProduct
   include DataMapper::Resource

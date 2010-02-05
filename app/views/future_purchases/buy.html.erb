@@ -9,22 +9,20 @@
 		<% end =%>
 	</div>
 	
-	<a class="back" href="/future_purchases/buy_options">&lt;&lt; Back to iFloat</a>
+	<a class="back" href="/picked_products/buy_options">&lt;&lt; Back to iFloat</a>
 	
-	<div id="shopping_list" class="purchase_list">
+	<div id="#pl_buy_now" class="pick_list">
 		<span class="name">Shopping List</span>
-		<span class="total"><%= @current_purchases.size %></span>
-		
+		<span class="total"><%= @picks_by_group["buy_now"].size %></span>
 	</div>
-	<%= partial :purchase, :with => @current_purchases, :target => "partner_store" %>
+	<%= partial :pick, :with => @picks_by_group["buy_now"], :target => "partner_store" %>
 	
-	<% unless @future_purchases.empty? %>
-	<div id="future_purchases" class="purchase_list">
-		<span class="name">Future Buys</span>
-		<span class="total"><%= @future_purchases.empty? ? "" : @future_purchases.size %></span>
-		
+	<% unless @picks_by_group["buy_later"].empty? %>
+	<div id="#pl_buy_later" class="pick_list">
+		<span class="name">Wish List</span>
+		<span class="total"><%= @picks_by_group["buy_later"].size %></span>
 	</div>
-	<%= partial :purchase, :with => @future_purchases, :target => "partner_store" %>
+	<%= partial :pick, :with => @picks_by_group["buy_later"], :target => "partner_store" %>
 	<% end %>
 </div>
 

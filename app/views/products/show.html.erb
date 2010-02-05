@@ -43,6 +43,8 @@
 					<tr> <td>None of our partners currently have this item in stock</td> </tr>
 				<% end %>
 			</table>
+			
+			<div id="pick_buttons"> </div>
 		</div>
 		
 		<hr />
@@ -103,5 +105,5 @@
 <% end %>
 	
 	$("#product_detail")[0].product_id = <%= @product.id %>;
-	prod_detail_update_purchase_buttons(<%= @product.id %>);
+	prod_detail_update_pick_buttons(<%= @product.id %>);
 </script>

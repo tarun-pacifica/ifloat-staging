@@ -69,22 +69,22 @@ describe Facility do
   describe "mapping products" do
     before(:all) do
       @companies = [1, 2].map { |n| Company.create(:name => n, :reference => "GBR-#{n}") }
-      @def_products = (1..9).to_a.map { |n| DefinitiveProduct.create(:company => @companies[0], :reference => n) }
+      @products = (1..9).to_a.map { |n| Product.create(:company => @companies[0], :reference => n) }
       @facilities = [1, 2].map { |n| @companies[1].facilities.create(:name => n, :primary_url => n) }
       @fac_products = (1..9).to_a.map { |n| FacilityProduct.create(:facility => @facilities[n % 2], :reference => n) }
-      @mappings = (1..9).to_a.map { |n| ProductMapping.create(:company => @companies[1], :reference => n, :product => @def_products[n - 1]) }
+      @mappings = (1..9).to_a.map { |n| ProductMapping.create(:company => @companies[1], :reference => n, :product => @products[n - 1]) }
     end
     
     after(:all) do
-      (@mappings + @fac_products + @facilities + @def_products + @companies).flatten.each do |object|
+      (@mappings + @fac_products + @facilities + @products + @companies).flatten.each do |object|
         object.errors.full_messages.should == []
         object.destroy
       end
     end
     
-    it "should return the facility product for each definitive product ID specified" do
-      def_product_ids = @def_products.map { |product| product.id }
-      @facilities[0].map_products(def_product_ids).keys.sort.should == def_product_ids.values_at(1, 3, 5, 7)
+    it "should return the facility product for each product ID specified" do
+      product_ids = @products.map { |product| product.id }
+      @facilities[0].map_products(product_ids).keys.sort.should == product_ids.values_at(1, 3, 5, 7)
     end
   end
 

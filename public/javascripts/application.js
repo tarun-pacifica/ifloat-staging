@@ -39,6 +39,33 @@ function bubble_tooltip_hide() {
 	$("#bubble_tooltip").css("display", "none");
 }
 
+// Buy Options - TODO: rewrite section and get rid of 'fp' variable names
+
+function buy_opts_load(product_ids) {
+	var url = "/products/batch/" + product_ids.join("_");
+	$.get(url, buy_opts_load_handle, "html");	
+}
+
+function buy_opts_load_handle(data) {
+	var fp_opts = $("#buy_options");
+	var fp_opts_tmp = $("#buy_options_tmp");
+	fp_opts_tmp.html(data);
+	
+	fp_opts_tmp.children("a").each(
+		function (i, a) { fp_opts.find("#" + a.id).append(a); }
+	);
+	
+	fp_opts_tmp.empty();	
+}
+
+function buy_opts_move(purchase_id) {
+	var options = {type: "POST", url: "/picked_products/" + purchase_id};
+	options.data = {_method: "PUT"};
+	options.success = function() { window.location.reload(); };
+	options.error = pick_list_add_move_error;
+	$.ajax(options);
+}
+
 // Date Filter
 
 function date_filter_create(data, html) {
@@ -46,14 +73,6 @@ function date_filter_create(data, html) {
 	num_filter_create_min_max("min", "from", false, html);
 	num_filter_create_min_max("max", "to", false, html);
 	html.push('</table>');
-}
-
-// Diff Property
-
-function diff_property_handle_select(s) {
-	var select = $(s);
-	select.nextAll().hide();
-	select.nextAll("." + select.val() + "_values").show();
 }
 
 // Filter (Common)
@@ -170,7 +189,7 @@ function filter_load_all_handle(filters) {
 	filter_show_only(relevant_ids);	
 }
 
-// Filter Queue
+// Filter Queue - TODO this queue can now be essentially blocking ('apply' should block until an update is received - we now have a predictable state machine)
 
 function filter_handle_check(checkbox) {
 	var property_id = $(checkbox).parents(".filter")[0].id.match(/^filter_(\d+)$/)[1];
@@ -244,6 +263,7 @@ function filter_show_only(filter_ids) {
 
 function finder_recall(s) {
 	var specification = $("#cached_find_specification");
+	// TODO: add hidden value 'reset' which is true by default but whose value can be falsified by this function
 	specification.val(s.value);
 	specification.siblings("#submit").click();
 }
@@ -367,33 +387,6 @@ function fraction_helper_update_preview() {
 	var n = parseFloat(fraction_helper.find(".numerator").val());
 	var d = parseFloat(fraction_helper.find(".denominator").val());
 	fraction_helper.find("p.preview").text((isNaN(i) ? 0 : i) + n / d);
-}
-
-// Future Purchase Options
-
-function future_purchase_opts_load(product_ids) {
-	var url = "/products/batch/" + product_ids.join("_");
-	$.get(url, future_purchase_opts_load_handle, "html");	
-}
-
-function future_purchase_opts_load_handle(data) {
-	var fp_opts = $("#future_purchase_options");
-	var fp_opts_tmp = $("#future_purchase_options_tmp");
-	fp_opts_tmp.html(data);
-	
-	fp_opts_tmp.children("a").each(
-		function (i, a) { fp_opts.find("#" + a.id).append(a); }
-	);
-	
-	fp_opts_tmp.empty();	
-}
-
-function future_purchase_opts_move(purchase_id) {
-	var options = {type: "POST", url: "/future_purchases/" + purchase_id};
-	options.data = {_method: "PUT"};
-	options.success = function() { window.location.reload(); };
-	options.error = purchase_list_add_move_error;
-	$.ajax(options);
 }
 
 // Images
@@ -621,20 +614,138 @@ function num_filter_update_min_max(filter) {
 	filter.find("input.max").val(values[1]);
 }
 
+// Pick Lists
+
+function pick_list_add(group, product_id) {
+	pick_list_add_move(group, product_id);
+	pick_list_blink(group);
+}
+
+function pick_list_add_move(group, product_id, pick_id) {
+	var options = {type: "POST", success: pick_lists_update, error: pick_list_add_move_error};
+	
+	options.data = {group: group}
+	if(pick_id) {
+		options.url = "/picked_products/" + pick_id;
+		options.data._method = "PUT";
+	} else {
+		options.url = "/picked_products"
+		options.data.product_id = product_id;
+	}
+	
+	$.ajax(options);
+}
+
+function pick_list_add_move_error(request) {
+	if(request.status == 401) login_open("Please login / register to add items to that list...");
+}
+
+// TODO: revise to flash companion icon instead of text
+function pick_list_blink(group) {
+	var total = $("#pl_" + group).children("total");
+	total.animate({color:"#FCBB1A"}).animate({color:"white"});
+	total.animate({color:"#FCBB1A"}).animate({color:"white"});
+}
+
+function pick_list_hide() {
+	var list = $(this);
+	list.css("background-image", "url(/images/buttons/enabled.png)");
+	list.find("a").hide();
+}
+
+function pick_list_move(from_group, to_group, pick_id) {
+	pick_list_add_move(to_group, undefined, pick_id);
+	pick_list_blink(from_group);
+	pick_list_blink(to_group);
+}
+
+function pick_list_remove(group, pick_id) {
+	$.get("/picked_products/" + pick_id + "/delete", pick_lists_update);
+	pick_list_blink(group);
+}
+
+function pick_list_show() {
+	var list = $(this);
+	if(list.find(".total").text() == "") return;
+	list.css("background-image", "url(/images/buttons/hover.png)");
+	list.find("a").show();
+}
+
+function pick_lists_update() {
+	$.getJSON("/picked_products", pick_lists_update_handle);
+}
+
+function pick_lists_update_handle(data) {
+	var pick_lists = $(".pick_list");
+	pick_lists.unbind();
+	pick_lists.children("items").empty();
+	pick_lists.children("total").empty();
+	
+	for(group in data) {
+		var links = [];
+		
+		if(group == "buy_now") links.push('<a class="buy" href="/picked_products/buy_options">Buy from...</a>');
+		
+		var list = data[group];
+		var total_products = (group == "compare" ? 0 : list.length);
+		for(i in list) {
+			var url_title = list[i];
+			links.push('<a href="' + url_title[0] + '">' + url_title[1].join("<br/>") + '</a>');
+			if(group == "compare") total_products += url_title[1][1];
+		}
+		
+		var pick_list = $("#pl_" + group);
+		pick_list.click(pick_list_show);
+		pick_list.mouseout(pick_list_hide);
+		pick_list.children("items").html(links.join(" "));
+		pick_list.children("total").html(total_products + ' <img src="/images/buttons/pick_list_arrow.png" />');
+	}
+	
+	var prod_detail = $("#product_detail")[0];
+	if(prod_detail) prod_detail_update_pick_buttons(prod_detail.product_id);
+}
+
 // Product Detail
+
+function prod_detail_click_pick_button(b) {
+	if(b.klass == "add") pick_list_add(b.to_group, b.product_id);
+	else if(b.klass == "move") pick_list_move(b.from_group, b.to_group, b.pick_id);
+	else pick_list_remove(b.to_group, b.pick_id);
+}
 
 function prod_detail_select_image(event) {	
 	$("#product_detail_assets").find("img.main")[0].src = event.target.src;
 }
 
-function prod_detail_update_purchase_buttons(product_id) {
-	$.get("/products/" + product_id + "/purchase_buttons", prod_detail_update_purchase_buttons_handle, "html");
+function prod_detail_update_pick_buttons(product_id) {
+	$.getJSON("/products/" + product_id + "/picked_group", prod_detail_update_pick_buttons_handle);
 }
 
-function prod_detail_update_purchase_buttons_handle(data) {
-	var assets = $("#product_detail_assets .asset_links");
-	assets.find(".add").remove();
-	assets.append(data);
+function prod_detail_update_pick_buttons_handle(data) {
+	var pick_id = data[0];
+	var group = data[1];
+	var product_id = data[2];
+	
+	var actions = {add: "Add to", move: "Move to", remove: "Remove from"};
+	var groups = ["compare", "buy_later", "buy_now"];
+	var lists = {compare: "Compare List", buy_later: "Wish List", buy_now: "Shopping List"};
+	
+	var button_set = $("#pick_buttons");
+	button_set.empty();
+	
+	for(i in groups) {
+		var g = groups[i];
+		var klass = (group ? (group == g ? "remove" : "move") : "add");
+		
+		button_set.append('<div class="' + [klass, g].join(" ") + '" onclick="prod_detail_click_pick_button(this)">' + actions[klass] + ' ' + lists[g] + '</div>');
+		
+		var b = button_set.children("." + g)[0];
+		b.klass = klass;
+		b.from_group = group;
+		b.to_group = g;
+		b.pick_id = pick_id;
+		b.product_id = product_id;
+	}
 }
 
 // Product Grid
@@ -700,91 +811,6 @@ function prod_image_zoom(event, image_url) {
 function prod_image_unzoom(i) {
 	$(i).css("border-color", "gray");
 	$("#image_zoom").css("display", "none");
-}
-
-// Purchase Lists
-
-function purchase_list_add(future, product_id) {
-	purchase_list_add_move(future, product_id);
-	purchase_list_blink(future);
-}
-
-function purchase_list_add_move(future, product_id, purchase_id) {
-	var options = {type: "POST", success: purchase_list_update, error: purchase_list_add_move_error};
-	
-	if(purchase_id) {
-		options.url = "/future_purchases/" + purchase_id;
-		options.data = {_method: "PUT"};
-	} else {
-		options.url = "/future_purchases"
-		options.data = {product_id: product_id, deferred: future};
-	}
-	
-	$.ajax(options);
-}
-
-function purchase_list_add_move_error(request) {
-	if(request.status == 401) login_open("Please login / register to use the future buys list...");
-}
-
-function purchase_list_blink(future) {
-	var spans = $(future ? "#future_purchases" : "#shopping_list").find("span");
-	spans.animate({color:"#FCBB1A"}).animate({color:"white"});
-	spans.animate({color:"#FCBB1A"}).animate({color:"white"});
-}
-
-function purchase_list_hover(p) {
-	var list = $(p);
-	if(list.find(".total").text() == "") return;
-	list.css("background-image", "url(/images/buttons/hover.png)");
-	list.find("a").show();
-}
-
-function purchase_list_move(purchase_id) {
-	purchase_list_add_move(undefined, undefined, purchase_id);
-	purchase_list_blink(false);
-	purchase_list_blink(true);
-}
-
-function purchase_list_remove(future, purchase_id) {
-	$.get("/future_purchases/" + purchase_id + "/delete", purchase_list_update);
-	purchase_list_blink(future);
-}
-
-function purchase_list_unhover(p) {
-	var list = $(p);
-	list.css("background-image", "url(/images/buttons/enabled.png)");
-	list.find("a").hide();
-}
-
-function purchase_list_update() {
-	$.get("/future_purchases", purchase_list_update_handle, "html");
-}
-
-function purchase_list_update_handle(data) {
-	var shopping_list = $("#shopping_list");
-	var future_purchases = $("#future_purchases");
-	shopping_list.find("a").remove();
-	future_purchases.find("a").remove();
-	
-	var purchases_tmp = $("#future_purchases_tmp");
-	purchases_tmp.html(data);
-	
-	purchases_tmp.find("a.now").appendTo(shopping_list);
-	shopping_list.append('<a class="buy" href="/future_purchases/buy_options">Buy from...</a>');
-	purchases_tmp.find("a.future").appendTo(future_purchases);
-	
-	var list_length = shopping_list.find("a").hide().length - 1;
-	shopping_list.find(".total").text(list_length == 0 ? "" : list_length);
-	list_length = future_purchases.find("a").hide().length;
-	future_purchases.find(".total").text(list_length == 0 ? "" : list_length);
-	
-	purchases_tmp.empty();
-	
-	var product_detail = $("#product_detail");
-	if(product_detail.length > 0) {
-		prod_detail_update_purchase_buttons(product_detail[0].product_id);
-	}
 }
 
 // Relationship Product Listings (Product Detail View)

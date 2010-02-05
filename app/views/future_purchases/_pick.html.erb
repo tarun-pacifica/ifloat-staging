@@ -1,17 +1,19 @@
 <%
-	dom_id = "purchase_#{purchase.id}"
-	title = @purchase_titles_by_product_id[purchase.definitive_product_id]
+	dom_id = "pick_#{pick.id}"
+	title = @pick_titles_by_product_id[pick.product_id]
 	
 	klass, target_attr, url = nil, nil, nil
 	
 	if @partner_product_urls.nil?
-		klass = (purchase.deferred? ? "future" : "now")
-		url = "/products/#{purchase.definitive_product_id}"
+		klass = (pick.group == "buy_later" ? "future" : "now")
+		url = "/products/#{pick.product_id}"
 	else
-		url = @partner_product_urls[purchase.definitive_product_id]
+		url = @partner_product_urls[pick.product_id]
 		klass = (url.nil? ? "unavailable" : "available")
 		target_attr = "target=#{target.inspect}" unless url.nil?
 	end
 %>
 
 <a id=<%= dom_id.inspect %> class=<%= klass.inspect %> <%= target_attr %> href=<%= (url || '#').inspect %>><%= title %></a>
+
+<!-- TODO: DELETE THIS TEMPLATE WHEN NO LONGER NEEDED ON THE PARTNER PAGE -->

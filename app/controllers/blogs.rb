@@ -8,7 +8,6 @@ class Blogs < Application
     @blog_image_src = image_src(name)
     @images = Article.images(@articles)
     
-    @previous_finds = session.cached_finds
     render
   end
   

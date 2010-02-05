@@ -2,11 +2,6 @@ require File.join( File.dirname(__FILE__), '..', "spec_helper" )
 
 describe Attachment do
   
-  def set_parentage(attachment, combination)
-    attachment.cached_find_id    = (combination & 1) > 0 ? 1 : nil
-    attachment.product_id        = (combination & 2) > 0 ? 1 : nil
-  end
-
   describe "creation" do
     before(:each) do
       @attachment = Attachment.new(:asset_id => 1, :product_id => 1, :role => "image", :sequence_number => 1)
@@ -21,20 +16,8 @@ describe Attachment do
       @attachment.should_not be_valid
     end
     
-    it "should succeed with either a cached_find or a product" do
-      [1, 2].each do |combination|
-        set_parentage(@attachment, combination)
-        @attachment.should be_valid
-      end
-    end
-    
-    it "should fail without a cached_find or a product" do
-      set_parentage(@attachment, 0)
-      @attachment.should_not be_valid
-    end
-    
-    it "should fail with both a cached_find and a product" do
-      set_parentage(@attachment, 3)
+    it "should fail without a product" do
+      @attachment.product = nil
       @attachment.should_not be_valid
     end
     
@@ -74,7 +57,7 @@ describe Attachment do
 
   describe "asset retrieval for products" do
     before(:all) do      
-      @car, @bike = %w(CAR BIKE).map { |ref| DefinitiveProduct.create(:company_id => 1, :reference => ref) }
+      @car, @bike = %w(CAR BIKE).map { |ref| Product.create(:company_id => 1, :reference => ref) }
       
       @assets = %w(car___1.jpg car___2.jpg car___3.jpg car_plans.png bike___1.jpg bike___2.jpg).map do |name|
         asset = Asset.create(:company_id => 1, :bucket => "products", :name => name)

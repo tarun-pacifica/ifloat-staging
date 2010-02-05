@@ -3,10 +3,10 @@
 	<%= form :action => resource(:cached_finds), :onsubmit => "return finder_validate()" do %>
 		<%= hidden_field :language_code, :value => session.language %>
 		<p> 
-			<% if @previous_finds.blank? %>
+			<% if session.cached_finds.empty? %>
 			<%= select :prompt => "No previous finds", :disabled => true %>
 			<% else %>
-			<%= select :prompt => "Previous finds...", :onchange => "finder_recall(this)", :collection => @previous_finds, :text_method => :spec_date, :value_method => :specification %>
+			<%= select :prompt => "Previous finds...", :onchange => "finder_recall(this)", :collection => session.cached_finds, :text_method => :spec_date, :value_method => :specification %>
 			<% end %>
 			
 			<%= text_field :specification, :id => "cached_find_specification" %>

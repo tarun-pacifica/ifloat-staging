@@ -174,12 +174,11 @@ module Indexer
     query =<<-SQL
       SELECT p.id, a.checksum, a.name
       FROM products p
-        INNER JOIN product_mappings pm ON p.id = pm.definitive_product_id
+        INNER JOIN product_mappings pm ON p.id = pm.product_id
         INNER JOIN companies c ON pm.company_id = c.id
         INNER JOIN attachments at ON p.id = at.product_id
         INNER JOIN assets a ON at.asset_id = a.id
-      WHERE p.type = 'DefinitiveProduct'
-        AND c.reference = ?
+      WHERE c.reference = ?
         AND at.role = 'image'
       ORDER BY at.sequence_number
     SQL
@@ -198,7 +197,7 @@ module Indexer
       SELECT pv.product_id, pv.property_definition_id, pv.unit, pv.min_value, pv.max_value
       FROM property_values pv
         INNER JOIN property_definitions pd ON pv.property_definition_id = pd.id
-        INNER JOIN product_mappings pm ON pv.product_id = pm.definitive_product_id
+        INNER JOIN product_mappings pm ON pv.product_id = pm.product_id
         INNER JOIN companies c ON pm.company_id = c.id
       WHERE pd.filterable = ?
         AND (pv.min_value IS NOT NULL OR pv.max_value IS NOT NULL)
@@ -258,10 +257,9 @@ module Indexer
       FROM property_values pv
         INNER JOIN products p ON pv.product_id = p.id
         INNER JOIN property_definitions pd ON pv.property_definition_id = pd.id
-        INNER JOIN product_mappings pm ON pv.product_id = pm.definitive_product_id
+        INNER JOIN product_mappings pm ON pv.product_id = pm.product_id
         INNER JOIN companies c ON pm.company_id = c.id
-      WHERE p.type = 'DefinitiveProduct'
-        AND pv.text_value IS NOT NULL
+      WHERE pv.text_value IS NOT NULL
         AND c.reference = ?
     SQL
     

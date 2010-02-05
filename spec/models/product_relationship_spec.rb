@@ -19,7 +19,7 @@ describe ProductRelationship do
   describe "creation" do   
     before(:each) do
       @relationship = ProductRelationship.new(:company_id => 1,
-                                              :definitive_product_id => 1,
+                                              :product_id => 1,
                                               :property_definition => @text_property,
                                               :name => "used_on",
                                               :value => "Astra")
@@ -69,7 +69,7 @@ describe ProductRelationship do
     before(:all) do
       @text_property2 = @text_type.definitions.create(:name => "marketing:edition", :sequence_number => 1)
       @relationship = ProductRelationship.create(:company_id => 1,
-                                                 :definitive_product_id => 1,
+                                                 :product_id => 1,
                                                  :property_definition => @text_property,
                                                  :name => "used_on",
                                                  :value => "Astra")
@@ -81,32 +81,32 @@ describe ProductRelationship do
     end
     
     it "should succeed with a different company" do
-      ProductRelationship.new(:company_id => 2, :definitive_product_id => 1, :property_definition => @text_property,
+      ProductRelationship.new(:company_id => 2, :product_id => 1, :property_definition => @text_property,
                               :name => "used_on", :value => "Astra").should be_valid
     end
     
     it "should succeed with a different product" do
-      ProductRelationship.new(:company_id => 1, :definitive_product_id => 2, :property_definition => @text_property,
+      ProductRelationship.new(:company_id => 1, :product_id => 2, :property_definition => @text_property,
                               :name => "used_on", :value => "Astra").should be_valid
     end
     
     it "should succeed with a different property definition" do
-      ProductRelationship.new(:company_id => 1, :definitive_product_id => 1, :property_definition => @text_property2,
+      ProductRelationship.new(:company_id => 1, :product_id => 1, :property_definition => @text_property2,
                               :name => "used_on", :value => "Astra").should be_valid
     end
     
     it "should succeed with a different name" do
-      ProductRelationship.new(:company_id => 1, :definitive_product_id => 1, :property_definition => @text_property,
+      ProductRelationship.new(:company_id => 1, :product_id => 1, :property_definition => @text_property,
                               :name => "works_with", :value => "Astra").should be_valid
     end
     
     it "should succeed with a different value" do
-      ProductRelationship.new(:company_id => 1, :definitive_product_id => 1, :property_definition => @text_property,
+      ProductRelationship.new(:company_id => 1, :product_id => 1, :property_definition => @text_property,
                               :name => "used_on", :value => "Polo").should be_valid
     end
     
     it "should fail with the same value" do
-      ProductRelationship.new(:company_id => 1, :definitive_product_id => 1, :property_definition => @text_property,
+      ProductRelationship.new(:company_id => 1, :product_id => 1, :property_definition => @text_property,
                               :name => "used_on", :value => "Astra").should_not be_valid
     end
   end
@@ -117,7 +117,7 @@ describe ProductRelationship do
       
       @products = []
       ["Necklace", "Clasp", "Earring"].each_with_index do |thing, i|
-        product = DefinitiveProduct.create(:company => @sparklies, :reference => "ABC#{i}")
+        product = Product.create(:company => @sparklies, :reference => "ABC#{i}")
         TextPropertyValue.create(:product => product, :definition => @text_property,
                                  :value => thing, :language_code => "ENG")
         @products << product
@@ -164,14 +164,14 @@ describe ProductRelationship do
       
       @products = []
       ["Necklace", "Clasp", "Earring"].each_with_index do |thing, i|
-        product = DefinitiveProduct.create(:company => @sparklies, :reference => "ABC#{i}")
+        product = Product.create(:company => @sparklies, :reference => "ABC#{i}")
         TextPropertyValue.create(:product => product, :definition => @text_property,
                                  :value => thing, :language_code => "ENG")
         @products << product
       end
       
       ["Clasp", "Earring"].each_with_index do |thing, i|
-        product = DefinitiveProduct.create(:company => @tinselies, :reference => "CBA#{i}")
+        product = Product.create(:company => @tinselies, :reference => "CBA#{i}")
         TextPropertyValue.create(:product => product, :definition => @text_property,
                                  :value => thing, :language_code => "ENG")
         @products << product

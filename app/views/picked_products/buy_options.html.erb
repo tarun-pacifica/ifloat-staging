@@ -1,8 +1,8 @@
 <%= partial "cached_finds/find_header" %>
 
-<div id="buy_options">
+<div id="picked_product_options">
 	<% unless @picks_by_group["buy_now"].nil? %>
-	<table id="bo_buy_now">
+	<table id="ppo_buy_now">
 		<tr>
 			<th>Shopping List</th>
 			<td> </td>
@@ -31,12 +31,12 @@
 		<tr class="total">
 			<th colspan="2">Totals</th>
 			<% @facility_urls.each do |url| %>
-			<% facility_id, count, total = @totals_info[url] %>
+			<% count = @counts_by_url[url] %>
 			<td class="buy">
 				<% if count.zero? %>
 					No items to buy
 				<% else %>
-					<a href="/picked_products/buy/<%= facility_id %>">Buy <%= count %> item<%= count == 1 ? '' : 's' %> for <%= money(total) %></a>
+					<a href="/picked_products/buy/<%= @facilities_by_url[url].id %>">Buy <%= count %> item<%= count == 1 ? '' : 's' %> for <%= money(@totals_by_url[url]) %></a>
 				<% end%>
 			</td>
 			<% end %>
@@ -45,7 +45,7 @@
 	<% end %>
 	
 	<% unless @picks_by_group["buy_later"].nil? %>
-	<table class="bo_buy_later">
+	<table class="ppo_buy_later">
 		<tr> <th>Wish List</th> </tr>
 		<tr class="separator"> <td colspan="3"></td> </tr>
 		

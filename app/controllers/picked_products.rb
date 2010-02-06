@@ -46,15 +46,15 @@ class PickedProducts < Application
     
     @counts_by_url = Hash.new(0)
     @totals_by_url = Hash.new(0)
-    @prices_by_url_by_product_id.values_at(*prod_ids_by_group["buy_now"]).each do |prices_by_url|
+    @prices_by_url_by_product_id.values_at(*prod_ids_by_group["buy_now"]).compact.each do |prices_by_url|
       prices_by_url.each do |url, price|
         @counts_by_url[url] += 1
         @totals_by_url[url] += price
       end
     end
     
-    @facility_urls = @counts_by_url.keys.sort
     @facilities_by_url = Facility.all.hash_by { |facility| facility.primary_url }
+    @facility_urls = (@counts_by_url.empty? ? @facilities_by_url.keys : @counts_by_url.keys).sort
     
     render
   end

@@ -66,6 +66,22 @@ class PickedProducts < Application
     ""
   end
   
+  def compare(klass)
+    klass = Merb::Parse.unescape(klass)
+    product_ids = session.picked_products.map { |pick| pick.group == "compare" ? pick.product_id : nil }.compact
+    
+    class_product_ids = []
+    Product.display_values(product_ids, session.language, ["reference:class"]).each do |product_id, values_by_property|
+      class_product_ids << product_id if values_by_property.values.first.first.to_s == klass
+    end
+    
+    return redirect("/") if class_product_ids.empty?
+    return redirect(url(:product, :id => class_product_ids.first)) if class_product_ids.size == 1
+    
+    # TODO: handle the need to display the actual comparison table
+    #       need to abstract out differential value logic
+  end
+  
   def delete(id)
     pick = session.ensure_picked_product(id.to_i)
     session.remove_picked_products([pick])
@@ -92,7 +108,7 @@ class PickedProducts < Application
     unless compare_picks.nil?
       compare_picks_by_class = compare_picks.group_by { |url, title_parts| title_parts.last }
       picks_by_group["compare"] = compare_picks_by_class.map do |klass, picks_info|
-        ["/product_picks/compare/#{klass}", [klass, picks_info.size]]
+        ["/picked_products/compare/#{klass}", [klass, picks_info.size]]
       end
     end
     
@@ -131,7 +147,7 @@ class PickedProducts < Application
   def titles(product_ids)
     property_names = %w(marketing:brand reference:class)
     
-    titles_by_product_id = Hash.new("")
+    titles_by_product_id = {}
     Product.display_values(product_ids, session.language, property_names).each do |product_id, values_by_property|
       parts = {}
       values_by_property.each { |property, values| parts[property.name] = values.first.to_s }

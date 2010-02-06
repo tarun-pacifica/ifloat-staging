@@ -17,7 +17,7 @@
 	</div>
 	<%= partial :pick, :with => @picks_by_group["buy_now"], :target => "partner_store" %>
 	
-	<% unless @picks_by_group["buy_later"].empty? %>
+	<% unless @picks_by_group["buy_later"].nil? %>
 	<div id="#pl_buy_later" class="pick_list">
 		<span class="name">Wish List</span>
 		<span class="total"><%= @picks_by_group["buy_later"].size %></span>

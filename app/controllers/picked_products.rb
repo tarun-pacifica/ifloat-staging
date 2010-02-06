@@ -108,7 +108,7 @@ class PickedProducts < Application
     unless compare_picks.nil?
       compare_picks_by_class = compare_picks.group_by { |url, title_parts| title_parts.last }
       picks_by_group["compare"] = compare_picks_by_class.map do |klass, picks_info|
-        ["/picked_products/compare/#{klass}", [klass, picks_info.size]]
+        ["/picked_products/compare/#{Merb::Parse.escape(klass)}", [klass, picks_info.size]]
       end
     end
     

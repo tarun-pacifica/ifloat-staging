@@ -504,4 +504,5 @@ puts "=== Compiling Indexes ==="
 stopwatch(Indexer::COMPILED_PATH) do
   Indexer.compile
   CachedFind.all.update!(:invalidated => true)
+  PickedProduct.all.update!(:invalidated => true)
 end

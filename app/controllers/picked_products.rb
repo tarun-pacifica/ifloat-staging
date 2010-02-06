@@ -14,7 +14,6 @@ class PickedProducts < Application
     
     product_ids = prod_ids_by_group.values.flatten
     fac_prods_by_prod_id = facility.map_products(product_ids)
-    @pick_titles_by_product_id = titles(product_ids)
             
     @partner_product_urls = {}
     fac_prods_by_prod_id.each do |product_id, facility_product|
@@ -91,17 +90,13 @@ class PickedProducts < Application
   def index
     provides :js
     
-    picks = session.picked_products
-    titles_by_product_id = titles(picks.map { |pick| pick.product_id })
-    
     picks_by_group = {}
-    picks.each do |pick|
+    session.picked_products.each do |pick|
       product_id = pick.product_id
-      title_parts = titles_by_product_id[product_id]
       url = url(:product, :id => product_id)
       
       pick_group = (picks_by_group[pick.group] ||= [])
-      pick_group << [url, title_parts]
+      pick_group << [url, pick.title]
     end
     
     compare_picks = picks_by_group["compare"]
@@ -112,6 +107,7 @@ class PickedProducts < Application
       end
     end
     
+    # TODO: do something with session.picked_product_title_changes
     picks_by_group.to_json
   end
   
@@ -142,17 +138,5 @@ class PickedProducts < Application
       url
     else nil
     end
-  end
-  
-  def titles(product_ids)
-    property_names = %w(marketing:brand reference:class)
-    
-    titles_by_product_id = {}
-    Product.display_values(product_ids, session.language, property_names).each do |product_id, values_by_property|
-      parts = {}
-      values_by_property.each { |property, values| parts[property.name] = values.first.to_s }
-      titles_by_product_id[product_id] = parts.values_at(*property_names).compact
-    end
-    titles_by_product_id
   end
 end

@@ -1,6 +1,6 @@
 <%
 	dom_id = "pick_#{pick.id}"
-	title = @pick_titles_by_product_id[pick.product_id]
+	title = pick.title.join("<br/>")
 	
 	klass, target_attr, url = nil, nil, nil
 	

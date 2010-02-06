@@ -13,14 +13,17 @@ class PickedProduct
   
   GROUPS = %w(buy_later buy_now compare)
   
-  property :id,         Serial
-  property :created_at, DateTime, :default => proc { DateTime.now }
-  property :group,      String,   :required => true
+  property :id,           Serial
+  property :created_at,   DateTime, :default => proc { DateTime.now }
+  property :group,        String,   :required => true
+  property :cached_brand, String,   :required => true
+  property :cached_class, String,   :required => true
+  property :invalidated,  Boolean,  :required => true
   
   belongs_to :product
   belongs_to :user, :required => false
   
-  validates_within :group, :set => GROUPS # TODO: spec
+  validates_within :group, :set => GROUPS
   
   def self.obsolete
     all(:user_id => nil, :accessed_at.lt => Merb::Config[:session_ttl].ago)
@@ -36,5 +39,10 @@ class PickedProduct
     SQL
     
     repository(:default).adapter.select(query).map { |record| [record.cref, record.pref] }
+  end
+  
+  # TODO: spec
+  def title
+    [cached_brand, cached_class]
   end
 end

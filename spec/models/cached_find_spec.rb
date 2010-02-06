@@ -73,6 +73,7 @@ describe CachedFind do
     end
   end
   
+  it "needs specs that reflect 'invalidated is required' - and possibly ensure_valid method"
   it "needs updated specs for execution"
   it "needs specs for filter_values & filter_values_relevant"
   it "needs specs for the filter! command"

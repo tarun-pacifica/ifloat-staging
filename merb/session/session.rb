@@ -125,7 +125,7 @@ module Merb
     
     def picked_products
       return [] if picked_product_ids.empty?
-      picks = PickedProduct.all(:id => picked_product_ids, :order => [:created_at])
+      picks = PickedProduct.all(:id => picked_product_ids, :order => [:cached_class, :cached_brand, :created_at])
       update_picked_product_title_values(picks.select { |pick| pick.invalidated? }, true)
       picks
     end

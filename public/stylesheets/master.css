@@ -534,8 +534,7 @@ img.icon {
 }
 
 #main_header #find_bar #cached_find_specification {
-	margin-left: 5px;
-	width: 250px;
+	width: 180px;
 }
 
 #main_header #find_bar .finder {
@@ -547,12 +546,12 @@ img.icon {
 }
 
 #main_header #find_bar select {
-	margin: 0 20px;
-	width: 210px;
+	margin: 0 0 0 2px;
+	width: 15px;
 }
 
 #main_header #find_bar .pick_list {
-	background: url(/images/buttons/enabled.png) repeat-x;
+	background: black;
 	border-left: 1px solid #4263A0;
 	border-right: 1px solid #4263A0;
 	color: white;

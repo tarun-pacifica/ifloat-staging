@@ -642,7 +642,7 @@ function pick_list_add_move_error(request) {
 
 // TODO: revise to flash companion icon instead of text
 function pick_list_blink(group) {
-	var total = $("#pl_" + group).children("total");
+	var total = $("#pl_" + group).children(".name,.total");
 	total.animate({color:"#FCBB1A"}).animate({color:"white"});
 	total.animate({color:"#FCBB1A"}).animate({color:"white"});
 }
@@ -678,8 +678,9 @@ function pick_lists_update() {
 function pick_lists_update_handle(data) {
 	var pick_lists = $(".pick_list");
 	pick_lists.unbind();
-	pick_lists.children("items").empty();
-	pick_lists.children("total").empty();
+	pick_lists.css("background", "black");
+	pick_lists.children(".items").empty();
+	pick_lists.children(".total").empty();
 	
 	for(group in data) {
 		var links = [];
@@ -695,12 +696,15 @@ function pick_lists_update_handle(data) {
 		}
 		
 		var pick_list = $("#pl_" + group);
-		console.log(pick_list);
 		pick_list.click(pick_list_show);
-		pick_list.mouseout(pick_list_hide);
+		pick_list.mouseenter(pick_list_show);
+		pick_list.mouseleave(pick_list_hide);
+		pick_list.css("background", "url(/images/buttons/enabled.png) repeat-x;");
 		pick_list.children(".items").html(links.join(" "));
-		pick_list.children(".total").html(total_products + ' <img src="/images/buttons/pick_list_arrow.png" />');
+		pick_list.children(".total").html(total_products);	
 	}
+	
+	pick_lists.mouseleave();
 	
 	var prod_detail = $("#product_detail")[0];
 	if(prod_detail) prod_detail_update_pick_buttons(prod_detail.product_id);

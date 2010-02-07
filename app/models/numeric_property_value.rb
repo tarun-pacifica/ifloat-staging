@@ -58,6 +58,13 @@ class NumericPropertyValue < PropertyValue
     {:min_value => min, :max_value => max}
   end
   
+  def comparison_key # TODO: spec
+    key = [min_value]
+    key << max_value if range?
+    key << unit unless unit.nil?
+    key
+  end
+  
   def range?
     min_value != max_value
   end

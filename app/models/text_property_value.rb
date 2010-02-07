@@ -20,6 +20,10 @@ class TextPropertyValue < PropertyValue
     true
   end
   
+  def comparison_key # TODO: spec
+    [text_value]
+  end
+  
   def to_s # TODO: spec
     text_value
   end

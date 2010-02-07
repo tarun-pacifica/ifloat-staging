@@ -49,6 +49,26 @@ class Product
     values_by_property_by_product_id
   end
   
+  # TODO: spec
+  def self.partition_data_properties(values_by_property_by_product_id)
+    value_identities_by_property = {}
+    values_by_property_by_product_id.each do |product_id, values_by_property|
+      values_by_property.each do |property, values|
+        next unless property.display_as_data?
+        value_identity = values.map { |v| v.comparison_key }.sort
+        (value_identities_by_property[property] ||= []).push(value_identity)
+      end
+    end
+    
+    product_count = values_by_property_by_product_id.size
+    value_identities_by_property.keys.partition do |property|
+      identities = value_identities_by_property[property]
+      identities.size == product_count and identities.uniq.size == 1
+    end.map do |prop_segment|
+      prop_segment.sort_by { |p| p.sequence_number }
+    end
+  end
+  
   # TODO: spec, implement supply country filtering support when required (retail:country)
   # TODO: may be able to factor out the mapping bit to ProductMapping
   def self.prices(product_ids, currency)

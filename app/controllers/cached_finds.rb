@@ -87,7 +87,6 @@ class CachedFinds < Application
     find.ensure_valid
     
     product_ids = find.filtered_product_ids_by_image_checksum[image_checksum]
-    @product_count = product_ids.size
     return redirect(resource(find)) if product_ids.nil? or product_ids.empty?
     
     return redirect(url(:product, :id => product_ids.first)) if product_ids.size == 1
@@ -95,24 +94,8 @@ class CachedFinds < Application
     @image = Asset.first(:checksum => image_checksum)
     return redirect(resource(find)) if @image.nil?
     
-    @values_by_property_by_product_id = Product.display_values(product_ids, session.language)
-    
-    value_identities_by_property = {}
-    @values_by_property_by_product_id.each do |product_id, values_by_property|
-      values_by_property.each do |property, values|
-        next unless property.display_as_data?
-        value_identity = values.map { |v| value_identity(v) }.sort
-        (value_identities_by_property[property] ||= []).push(value_identity)
-      end
-    end
-    
-    properties = value_identities_by_property.keys
-    @common_properties, @diff_properties = properties.partition do |property|
-      identities = value_identities_by_property[property]
-      identities.size == @product_count and identities.uniq.size == 1
-    end.map do |prop_segment|
-      prop_segment.sort_by { |p| p.sequence_number }
-    end
+    @values_by_property_by_product_id = Product.display_values(product_ids, session.language)    
+    @common_properties, @diff_properties = Product.partition_data_properties(@values_by_property_by_product_id)
     
     primary_property_id = params[:sort_by].to_i
     properties_in_comparison_order = @diff_properties.sort_by do |p|
@@ -124,7 +107,7 @@ class CachedFinds < Application
       values_by_property = @values_by_property_by_product_id[product_id]
       properties_in_comparison_order.map do |property|
         values = values_by_property[property]
-        values.nil? ? [] : values.map { |v| value_identity(v) }.min
+        values.nil? ? [] : values.map { |v| v.comparison_key }.min
       end
     end
     
@@ -133,6 +116,7 @@ class CachedFinds < Application
       @values_by_property[property] = values if @common_properties.include?(property)
     end
     
+    properties = (@common_properties + @diff_properties)
     @friendly_name_sections = PropertyDefinition.friendly_name_sections(properties, session.language)
     @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)
     @text_value_definitions = PropertyDefinition.definitions_by_property_id(properties, session.language)
@@ -173,15 +157,5 @@ class CachedFinds < Application
     @find.save
     
     render
-  end
-  
-  
-  private
-  
-  def value_identity(property_value)
-    v = property_value.value
-    parts = (v.is_a?(Range) ? [v.first, v.last] : [v])
-    parts << property_value.unit unless property_value.class.text? or property_value.unit.nil?
-    parts
   end
 end

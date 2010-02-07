@@ -29,7 +29,7 @@ module Merb
     
     def product_image(image)
       url, popup_url = (image.nil? ? Array.new(2) { "/images/no_image.png" } : [image.url(:tiny), image.url(:small)])
-      "<img src=#{url.inspect} onmouseover=\"prod_image_zoom(event, #{popup_url.inspect})\" onmouseout=\"prod_image_unzoom(this)\" />"
+      "<img class=\"product\" src=#{url.inspect} onmouseover=\"prod_image_zoom(event, '#{popup_url}')\" onmouseout=\"prod_image_unzoom(this)\" />"
     end
     
     def product_summary(product_id, values_by_name, image)

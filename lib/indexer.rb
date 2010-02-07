@@ -99,6 +99,8 @@ module Indexer
   
   # TODO: get rid of extended logic here and revert to simple group_by once all ingested products are guaranteed to have a primary image - also should be able to get rid of 'no image' image in this case
   def self.image_checksums_for_product_ids(product_ids)
+    return {} if product_ids.empty? or not ensure_loaded
+    
     prod_ids_by_checksum = product_ids.group_by { |id| @@image_checksum_index[id] }
     prod_ids_by_checksum.delete(nil)
     prod_ids_by_checksum

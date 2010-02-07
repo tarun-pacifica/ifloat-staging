@@ -98,15 +98,13 @@ class PickedProducts < Application
       checksums_by_product_id[prod_ids.first] = checksum
     end
     assets_by_checksum = Asset.all(:checksum => checksums_by_product_id.values).hash_by(:checksum)
-    p assets_by_checksum # - {} ???
     
     picks_by_group = {}
     picks.each do |pick|
       product_id = pick.product_id
       
       asset = assets_by_checksum[checksums_by_product_id[product_id]]
-      p asset
-      asset_urls = (asset.nil? ? nil : [asset.url(:small), asset.url(:tiny)])
+      asset_urls = (asset.nil? ? Array.new(2) { "/images/no_image.png" } : [asset.url(:small), asset.url(:tiny)])
       link_url = url(:product, :id => product_id)
       
       (picks_by_group[pick.group] ||= []) << [asset_urls, pick.title_parts, link_url]

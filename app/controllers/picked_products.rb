@@ -79,8 +79,7 @@ class PickedProducts < Application
     picks_by_group = {}
     picks.each do |pick|
       product_id = pick.product_id
-      image = images_by_product_id[product_id]
-      image_urls = (image.nil? ? Array.new(2) { "/images/no_image.png" } : [image.url(:tiny), image.url(:small)])
+      image_urls = product_image_urls(images_by_product_id[product_id])
       (picks_by_group[pick.group] ||= []) << [image_urls, pick.title_parts, url(:product, :id => product_id)]
     end
     
@@ -109,7 +108,7 @@ class PickedProducts < Application
     end
     
     # TODO: should be able to remove once product batch rendering is client side
-    @product_ids = prod_ids_by_group.values_at("buy_later", "buy_now").flatten
+    @product_ids = prod_ids_by_group.values_at("buy_later", "buy_now").flatten.compact
     @prices_by_url_by_product_id = Product.prices(@product_ids, session.currency)
     
     @counts_by_url = Hash.new(0)

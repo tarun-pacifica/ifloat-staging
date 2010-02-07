@@ -1,42 +1,22 @@
 class Products < Application
-  BATCH_CACHE_DIR = "caches/products_batch"
-  
   def batch(ids)
     product_ids = ids.split("_").map { |id| id.to_i }.uniq[0..99]
     
-    cache_dir = BATCH_CACHE_DIR / Indexer.last_loaded_md5
-    Dir[BATCH_CACHE_DIR / "*"].each { |dir| FileUtils.rm_r(dir) unless dir == cache_dir }
-    FileUtils.mkpath(cache_dir)
-    
-    html_by_product_id = {}
-    product_ids.each do |product_id|
-      path = cache_dir / "#{session.language}_#{product_id}.html"
-      html_by_product_id[product_id] = File.read(path) if File.exists?(path)
-    end
-    
-    missing_ids = (product_ids - html_by_product_id.keys)
-    return html_by_product_id.values.join("\n") if missing_ids.empty?
-    
     images_by_product_id = Product.primary_images(product_ids)
-    values_by_property_by_product_id = Product.display_values(missing_ids, session.language, ["auto:title", "marketing:summary"])
+    property_names = %w(auto:title marketing:summary)
+    values_by_property_by_product_id = Product.display_values(product_ids, session.language, property_names)
     
-    missing_ids.each do |product_id|
-      values_by_name = {}
-      (values_by_property_by_product_id[product_id] || {}).each do |property, values|
-        values_by_name[property.name] = values
-      end
-      
-      html = html_by_product_id[product_id] = product_summary(product_id, values_by_name, images_by_product_id[product_id])
-      
-      path = cache_dir / "#{session.language}_#{product_id}.html"
-      Tempfile.open(File.basename(path)) do |f|
-        f.write html
-        File.delete(path) if File.exists?(path)
-        File.link(f.path, path)
-      end
-    end
+    properties = values_by_property_by_product_id.values.map { |vbp| vbp.keys }.flatten.uniq
+    title_property, summary_property = properties.hash_by(:name).values_at(*property_names)
     
-    html_by_product_id.values.join("\n")
+    product_ids.map do |product_id|
+      values_by_property = values_by_property_by_product_id[product_id]
+      
+      { :id         => product_id,
+        :image_urls => product_image_urls(images_by_product_id[product_id]),
+        :titles     => (values_by_property[title_property] || []).map { |t| t.to_s },
+        :summary    => (values_by_property[summary_property] || []).first.to_s }
+    end.to_json
   end
   
   def picked_group(id)

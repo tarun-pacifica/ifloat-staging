@@ -24,6 +24,12 @@
 				<td><%= product_image(@images_by_product_id[product_id])%></td>
 				<% end %>
 			</tr>
+			<tr>
+				<td></td>
+				<% @product_ids.each do |product_id| %>
+				<td class="choose"><a href=<%= url(:product, :id => product_id).inspect %>>choose</a></td>
+				<% end %>
+			</tr>
 			<% parity = :even %>
 			<% @diff_properties.each do |property| %>
 			<tr class="<%= parity = (parity == :even ? :odd : :even) %>">

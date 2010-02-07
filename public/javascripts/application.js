@@ -827,11 +827,16 @@ function prod_link_detailed(info) {
 	var titles = info.titles;
 	var summary = info.summary;
 	
+	title_lines = [];
+	for(i in titles) {
+		var tag = (i == 4 ? "h2" : "h1");
+		title_lines.push("<" + tag + ">" + titles[i] + "</" + tag + ">");
+	}
+	
 	return '<a class="product" id="prod_' + id + '" href="/products/' + id + '">' +
-		prod_image(image_urls[0], image_urls[1]) +
-		// product_titles
+		prod_image(image_urls[0], image_urls[1]) + title_lines.join(" ") +
   	(summary ? '<p>#{(values_by_name["marketing:summary"] || []).first}</p>' : '') +
-  	'<hr /> </a>';
+		"<hr /> </a>";
 }
 
 // Relationship Product Listings (Product Detail View)

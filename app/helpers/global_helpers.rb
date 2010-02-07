@@ -4,18 +4,7 @@ module Merb
     def defined_value(value, definition)
       return value if definition.nil?
       definition.gsub!(/(['"])/) { '\\' + $1 }
-      "<span class=\"defined\" onmouseover=\"bubble_tooltip_show(event, '#{definition}')\" onmouseout=\"bubble_tooltip_hide()\">#{value}</span>"
-    end
-    
-    def product_summary(product_id, values_by_name, image_url)
-      <<-EOS
-      <a class="product" id="prod_#{product_id}" href="/products/#{product_id}">
-      	<img src=#{image_url.inspect} onmouseover="prod_image_zoom(event)" onmouseout="prod_image_unzoom(this)"/>
-      	#{product_titles(values_by_name["auto:title"])}
-      	<p>#{(values_by_name["marketing:summary"] || []).first}</p>
-      	<hr />
-      </a>
-      EOS
+      "<span class=\"defined\" onmouseover=\"bubble_tooltip_show(event, '#{definition}', 'right')\" onmouseout=\"bubble_tooltip_hide()\">#{value}</span>"
     end
     
     def money(amount, currency = session.currency)
@@ -36,6 +25,26 @@ module Merb
       v = value.value
       values = (value.range? ? [v.first, v.last] : [v])
 			"number_format([#{values.join(', ')}], #{value.unit.nil? ? 'undefined' : value.unit.inspect}, #{value.class.date?})"
+    end
+    
+    def product_image(image)
+      url, popup_url = (image.nil? ? Array.new(2) { "/images/no_image.png" } : [image.url(:tiny), image.url(:small)])
+      "<img src=#{url.inspect} onmouseover=\"prod_image_zoom(event, #{popup_url.inspect})\" onmouseout=\"prod_image_unzoom(this)\" />"
+    end
+    
+    def product_summary(product_id, values_by_name, image)
+      <<-EOS
+      <a class="product" id="prod_#{product_id}" href="/products/#{product_id}">
+      	#{product_image(image)}
+      	#{product_titles(values_by_name["auto:title"])}
+      	<p>#{(values_by_name["marketing:summary"] || []).first}</p>
+      	<hr />
+      </a>
+      EOS
+    end
+    
+    def property_icon(url, tooltip, position)
+      "<img class=\"icon\" src=#{url.inspect} onmouseover=\"bubble_tooltip_show(event, '#{tooltip}', '#{position}')\" onmouseout=\"bubble_tooltip_hide()\" />"
     end
     
     def product_titles(titles)

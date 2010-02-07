@@ -804,7 +804,7 @@ function prod_image(small_url, tiny_url) {
 
 function prod_image_zoom(event, image_url) {
 	var zoom = $("#image_zoom");
-	zoom[0].src = image_url ? image_url : event.target.src;
+	zoom[0].src = image_url;
 	
 	var image = $(event.target)
 	var position = image.offset();
@@ -891,7 +891,7 @@ function text_filter_create(data, html) {
 			html.push(value);
 		} else {
 			definition = definition.replace("'", "\\'").replace('"', '\\"');
-			html.push('<span class="defined" onmouseover="bubble_tooltip_show(event, \'' + definition + '\')" onmouseout="bubble_tooltip_hide()">' + value + '</span>');
+			html.push('<span class="defined" onmouseover="bubble_tooltip_show(event, \'' + definition + '\', \'right\')" onmouseout="bubble_tooltip_hide()">' + value + '</span>');
 		}
 		
 		html.push('</div>');

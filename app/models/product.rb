@@ -90,6 +90,24 @@ class Product
   end
   
   # TODO: spec
+  def self.primary_images(product_ids)
+    checksums_by_product_id = {}
+    Indexer.image_checksums_for_product_ids(product_ids).each do |checksum, prod_ids|
+      prod_ids.each do |prod_id|
+        checksums_by_product_id[prod_id] = checksum
+      end
+    end
+    
+    assets_by_checksum = Asset.all(:checksum => checksums_by_product_id.values).hash_by(:checksum)
+    
+    assets_by_product_id = {}
+    checksums_by_product_id.each do |prod_id, checksum|
+      assets_by_product_id[prod_id] = assets_by_checksum[checksum]
+    end
+    assets_by_product_id
+  end
+  
+  # TODO: spec
   def display_values(language_code, property_names = nil)
     Product.display_values([id], language_code, property_names)[id]
   end

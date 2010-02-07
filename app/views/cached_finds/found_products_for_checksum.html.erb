@@ -35,7 +35,7 @@
 				<% dom_class = ((primary and @diff_properties.size > 1) ? 'class="primary"' : '') %>
 				<td <%= dom_class %>>
 					<% unless primary %> <a href="?sort_by=<%= property.id %>"> <% end %>
-						<img class="icon" src=<%= @icon_urls_by_property_id[property.id].inspect %> onmouseover="bubble_tooltip_show(event, '<%= @friendly_name_sections[property.id].last %>', 'above')" onmouseout="bubble_tooltip_hide()" />
+					<%= property_icon(@icon_urls_by_property_id[property.id], @friendly_name_sections[property.id].last, :above) %>
 					<% unless primary %> </a> <% end %>
 				</td>
 				<% end %>

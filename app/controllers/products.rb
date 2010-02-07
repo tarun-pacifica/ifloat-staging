@@ -17,13 +17,8 @@ class Products < Application
     missing_ids = (product_ids - html_by_product_id.keys)
     return html_by_product_id.values.join("\n") if missing_ids.empty?
     
+    images_by_product_id = Product.primary_images(product_ids)
     values_by_property_by_product_id = Product.display_values(missing_ids, session.language, ["auto:title", "marketing:summary"])
-    
-    image_urls = Hash.new("/images/no_image.png")
-    Attachment.product_role_assets(product_ids, false).each do |product_id, assets_by_role|
-      product_images = assets_by_role["image"]
-      image_urls[product_id] = product_images.first.url unless product_images.nil?
-    end
     
     missing_ids.each do |product_id|
       values_by_name = {}
@@ -31,7 +26,7 @@ class Products < Application
         values_by_name[property.name] = values
       end
       
-      html = html_by_product_id[product_id] = product_summary(product_id, values_by_name, image_urls[product_id])
+      html = html_by_product_id[product_id] = product_summary(product_id, values_by_name, images_by_product_id[product_id])
       
       path = cache_dir / "#{session.language}_#{product_id}.html"
       Tempfile.open(File.basename(path)) do |f|

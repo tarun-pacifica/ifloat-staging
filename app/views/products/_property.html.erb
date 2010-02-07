@@ -14,7 +14,7 @@
 
 <tr id=<%= property_id.inspect %> class="property">
 	<td>
-		<img src=<%= @icon_urls_by_property_id[property.id].inspect %> onmouseover="bubble_tooltip_show(event, '<%= title %>')" onmouseout="bubble_tooltip_hide()" />
+		<%= property_icon(@icon_urls_by_property_id[property.id], title, :right) %>
 	</td>
 	
 	<td>

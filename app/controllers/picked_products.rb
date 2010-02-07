@@ -67,18 +67,28 @@ class PickedProducts < Application
   
   def compare(klass)
     klass = Merb::Parse.unescape(klass)
-    product_ids = session.picked_products.map { |pick| pick.group == "compare" ? pick.product_id : nil }.compact
+    picks = session.picked_products.select { |pick| pick.group == "compare" and pick.cached_class = klass }
+    @product_ids = picks.map { |pick| pick.product_id }
     
-    class_product_ids = []
-    Product.display_values(product_ids, session.language, ["reference:class"]).each do |product_id, values_by_property|
-      class_product_ids << product_id if values_by_property.values.first.first.to_s == klass
+    return redirect("/") if @product_ids.empty?
+    return redirect(url(:product, :id => @product_ids.first)) if @product_ids.size == 1
+    
+    @values_by_property_by_product_id = Product.display_values(@product_ids, session.language)    
+    @common_properties, @diff_properties = Product.partition_data_properties(@values_by_property_by_product_id)
+    
+    @values_by_property = {}
+    @values_by_property_by_product_id.values.first.each do |property, values|
+      @values_by_property[property] = values if @common_properties.include?(property)
     end
     
-    return redirect("/") if class_product_ids.empty?
-    return redirect(url(:product, :id => class_product_ids.first)) if class_product_ids.size == 1
+    properties = (@common_properties + @diff_properties)
+    @friendly_name_sections = PropertyDefinition.friendly_name_sections(properties, session.language)
+    @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)
+    @text_value_definitions = PropertyDefinition.definitions_by_property_id(properties, session.language)
     
-    # TODO: handle the need to display the actual comparison table
-    #       need to abstract out differential value logic
+    @images_by_product_id = Product.primary_images(@product_ids)
+    
+    render
   end
   
   def delete(id)
@@ -92,32 +102,24 @@ class PickedProducts < Application
     
     picks = session.picked_products
     product_ids = picks.map { |pick| pick.product_id }
-    
-    checksums_by_product_id = {}
-    Indexer.image_checksums_for_product_ids(product_ids).each do |checksum, prod_ids|
-      checksums_by_product_id[prod_ids.first] = checksum
-    end
-    assets_by_checksum = Asset.all(:checksum => checksums_by_product_id.values).hash_by(:checksum)
+    images_by_product_id = Product.primary_images(product_ids)    
     
     picks_by_group = {}
     picks.each do |pick|
       product_id = pick.product_id
-      
-      asset = assets_by_checksum[checksums_by_product_id[product_id]]
-      asset_urls = (asset.nil? ? Array.new(2) { "/images/no_image.png" } : [asset.url(:small), asset.url(:tiny)])
-      link_url = url(:product, :id => product_id)
-      
-      (picks_by_group[pick.group] ||= []) << [asset_urls, pick.title_parts, link_url]
+      image = images_by_product_id[product_id]
+      image_urls = (image.nil? ? Array.new(2) { "/images/no_image.png" } : [image.url(:small), image.url(:tiny)])
+      (picks_by_group[pick.group] ||= []) << [image_urls, pick.title_parts, url(:product, :id => product_id)]
     end
     
     compare_picks = picks_by_group["compare"]
     unless compare_picks.nil?
-      compare_picks_by_class = compare_picks.group_by { |asset_urls, title_parts, link_url| title_parts.last }
+      compare_picks_by_class = compare_picks.group_by { |image_urls, title_parts, link_url| title_parts.last }
       picks_by_group["compare"] = compare_picks_by_class.map do |klass, info_for_picks|
-        info = info_for_picks.find { |asset_urls, title_parts, link_url| not asset_urls.nil? }
-        asset_urls = (info.nil? ? nil : info.first)
+        info = info_for_picks.find { |image_urls, title_parts, link_url| not image_urls.nil? }
+        image_urls = (info.nil? ? nil : info.first)
         link_url = "/picked_products/compare/#{Merb::Parse.escape(klass)}"
-        [asset_urls, [klass, info_for_picks.size], link_url]
+        [image_urls, [klass, info_for_picks.size], link_url]
       end
     end
     

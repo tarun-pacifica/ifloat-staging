@@ -90,20 +90,36 @@ class PickedProducts < Application
   def index
     provides :js
     
+    picks = session.picked_products
+    product_ids = picks.map { |pick| pick.product_id }
+    
+    checksums_by_product_id = {}
+    Indexer.image_checksums_for_product_ids(product_ids).each do |checksum, prod_ids|
+      checksums_by_product_id[prod_ids.first] = checksum
+    end
+    assets_by_checksum = Asset.all(:checksum => checksums_by_product_id.values).hash_by(:checksum)
+    p assets_by_checksum # - {} ???
+    
     picks_by_group = {}
-    session.picked_products.each do |pick|
+    picks.each do |pick|
       product_id = pick.product_id
-      url = url(:product, :id => product_id)
       
-      pick_group = (picks_by_group[pick.group] ||= [])
-      pick_group << [url, pick.title]
+      asset = assets_by_checksum[checksums_by_product_id[product_id]]
+      p asset
+      asset_urls = (asset.nil? ? nil : [asset.url(:small), asset.url(:tiny)])
+      link_url = url(:product, :id => product_id)
+      
+      (picks_by_group[pick.group] ||= []) << [asset_urls, pick.title_parts, link_url]
     end
     
     compare_picks = picks_by_group["compare"]
     unless compare_picks.nil?
-      compare_picks_by_class = compare_picks.group_by { |url, title_parts| title_parts.last }
-      picks_by_group["compare"] = compare_picks_by_class.map do |klass, picks_info|
-        ["/picked_products/compare/#{Merb::Parse.escape(klass)}", [klass, picks_info.size]]
+      compare_picks_by_class = compare_picks.group_by { |asset_urls, title_parts, link_url| title_parts.last }
+      picks_by_group["compare"] = compare_picks_by_class.map do |klass, info_for_picks|
+        info = info_for_picks.find { |asset_urls, title_parts, link_url| not asset_urls.nil? }
+        asset_urls = (info.nil? ? nil : info.first)
+        link_url = "/picked_products/compare/#{Merb::Parse.escape(klass)}"
+        [asset_urls, [klass, info_for_picks.size], link_url]
       end
     end
     

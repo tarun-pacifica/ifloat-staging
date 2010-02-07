@@ -690,9 +690,15 @@ function pick_lists_update_handle(data) {
 		var list = data[group];
 		var total_products = (group == "compare" ? 0 : list.length);
 		for(i in list) {
-			var url_title = list[i];
-			links.push('<a href="' + url_title[0] + '">' + url_title[1].join("<br/>") + '</a>');
-			if(group == "compare") total_products += url_title[1][1];
+			var info = list[i];
+			var image_urls = info[0];
+			var image = (image_urls ? '<img src="' + image_urls[1] + '" />' : "");
+				// TODO: add mouseover / mouseleave to tag to popup preview
+
+			var title_parts = info[1];
+			var link_url = info[2];
+			links.push('<a href="' + link_url + '">' + image + title_parts.join("<br/>") + '</a>');
+			if(group == "compare") total_products += title_parts[1];
 		}
 		
 		var pick_list = $("#pl_" + group);

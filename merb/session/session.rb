@@ -138,11 +138,8 @@ module Merb
     def remove_picked_products(picks)
       ids = picked_product_ids
       pick_ids = picks.map { |pick| pick.id }
-      
-      PickedProduct.all(:id => pick_ids).destroy!
-      
-      ids.delete(pick_ids)
-      self[:picked_product_ids] = ids
+      PickedProduct.all(:id => pick_ids).destroy!      
+      self[:picked_product_ids] = (ids - pick_ids)
     end
     
     def remove_purchase(purchase)
@@ -179,7 +176,7 @@ module Merb
       changes = []
       Product.display_values(picks_by_product_id.keys, language, property_names).each do |product_id, values_by_property|
         pick = picks_by_product_id[product_id]
-        old_title = pick.title
+        old_title = pick.title_parts
         
         values_by_property.each do |property, values|
           attribute = "cached_#{property.name.split(':').last}"
@@ -188,7 +185,7 @@ module Merb
         pick.invalidated = false
         next unless save_and_track_changes and pick.save
         
-        new_title = pick.title
+        new_title = pick.title_parts
         changes << [old_title, new_title] unless new_title == old_title
       end
       

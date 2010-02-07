@@ -42,7 +42,7 @@ class PickedProduct
   end
   
   # TODO: spec
-  def title
+  def title_parts
     [cached_brand, cached_class]
   end
 end

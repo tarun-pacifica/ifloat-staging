@@ -108,7 +108,7 @@ class PickedProducts < Application
     picks.each do |pick|
       product_id = pick.product_id
       image = images_by_product_id[product_id]
-      image_urls = (image.nil? ? Array.new(2) { "/images/no_image.png" } : [image.url(:small), image.url(:tiny)])
+      image_urls = (image.nil? ? Array.new(2) { "/images/no_image.png" } : [image.url(:tiny), image.url(:small)])
       (picks_by_group[pick.group] ||= []) << [image_urls, pick.title_parts, url(:product, :id => product_id)]
     end
     

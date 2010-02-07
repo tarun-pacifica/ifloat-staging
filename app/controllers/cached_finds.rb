@@ -78,7 +78,7 @@ class CachedFinds < Application
     
     checksums.map do |checksum|
       asset = assets_by_checksum[checksum]
-      [checksum, totals_by_checksum[checksum], asset.url(:small), asset.url(:tiny)]
+      [checksum, totals_by_checksum[checksum], asset.url(:tiny), asset.url(:small)]
     end.unshift(total).to_json
   end
   

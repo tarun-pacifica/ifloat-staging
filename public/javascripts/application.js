@@ -798,8 +798,8 @@ function prod_grid_update_handle(images) {
 
 // Product Images
 
-function prod_image(small_url, tiny_url) {
-	return '<img src="' + tiny_url + '" onmouseover="prod_image_zoom(event, \'' + small_url + '\')" onmouseout="prod_image_unzoom(this)" />';
+function prod_image(url, popup_url) {
+	return '<img class="product" src="' + url + '" onmouseover="prod_image_zoom(event, \'' + popup_url + '\')" onmouseout="prod_image_unzoom(this)" />';
 }
 
 function prod_image_zoom(event, image_url) {
@@ -817,6 +817,21 @@ function prod_image_zoom(event, image_url) {
 function prod_image_unzoom(i) {
 	$(i).css("border-color", "gray");
 	$("#image_zoom").css("display", "none");
+}
+
+// Product Links
+
+function prod_link_detailed(info) {
+	var id = info.product_id;
+	var image_urls = info.image_urls;
+	var titles = info.titles;
+	var summary = info.summary;
+	
+	return '<a class="product" id="prod_' + id + '" href="/products/' + id + '">' +
+		prod_image(image_urls[0], image_urls[1]) +
+		// product_titles
+  	(summary ? '<p>#{(values_by_name["marketing:summary"] || []).first}</p>' : '') +
+  	'<hr /> </a>';
 }
 
 // Relationship Product Listings (Product Detail View)

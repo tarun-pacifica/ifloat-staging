@@ -710,8 +710,7 @@ function pick_lists_update_handle(data) {
 	
 	pick_lists.mouseleave();
 	
-	var prod_detail = $("#product_detail")[0];
-	if(prod_detail) prod_detail_update_pick_buttons(prod_detail.product_id);
+	if($("#pick_buttons")[0]) prod_detail_update_pick_buttons($("#product_detail")[0].product_id);
 }
 
 // Product Detail

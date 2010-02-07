@@ -710,7 +710,8 @@ function pick_lists_update_handle(data) {
 	
 	pick_lists.mouseleave();
 	
-	if($("#pick_buttons")[0]) prod_detail_update_pick_buttons($("#product_detail")[0].product_id);
+	var pb = $("#pick_buttons")[0];
+	if(pb) prod_detail_update_pick_buttons(pb.product_id);
 }
 
 // Product Detail
@@ -721,7 +722,7 @@ function prod_detail_click_pick_button(b) {
 	else pick_list_remove(b.to_group, b.pick_id);
 }
 
-function prod_detail_select_image(event) {	
+function prod_detail_select_image(event) {
 	$("#product_detail_assets").find("img.main")[0].src = event.target.src;
 }
 

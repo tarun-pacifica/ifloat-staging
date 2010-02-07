@@ -692,9 +692,7 @@ function pick_lists_update_handle(data) {
 		for(i in list) {
 			var info = list[i];
 			var image_urls = info[0];
-			var image = (image_urls ? '<img src="' + image_urls[1] + '" />' : "");
-				// TODO: add mouseover / mouseleave to tag to popup preview
-
+			var image = (image_urls ? prod_image(image_urls[0], image_urls[1]) : "");
 			var title_parts = info[1];
 			var link_url = info[2];
 			links.push('<a href="' + link_url + '">' + image + title_parts.join("<br/>") + '</a>');
@@ -777,27 +775,20 @@ function prod_grid_update_handle(images) {
 	results.find(".product").remove();
 	var insertion_point = results.find("hr.result_terminator");
 	
-	var small_urls = [];
 	for(i in images) {
 		var image_data = images[i];
 		
 		var checksum = image_data[0];
 		var count = image_data[1];
-		var small_url = image_data[2];
-		var tiny_url = image_data[3];
-		
 		image_prod_count += count;
-		small_urls.push(small_url);
 		
 		var link_url = "/cached_finds/" + r.find_id + '/found_products_for_checksum/' + checksum;
 		var count_overlay = '<div class="count">' + count + ' item' + (count > 1 ? "s" : "") + '</div>';
 		
-		var prod_html = '<a class="product" href="' + link_url + '"> ' + count_overlay + '<img src="' + tiny_url + '" onmouseover="prod_image_zoom(event, \'' + small_url + '\')" onmouseout="prod_image_unzoom(this)" /> </a>';
+		var prod_html = '<a class="product" href="' + link_url + '"> ' + count_overlay + prod_image(image_data[2], image_data[3]) + ' </a>';
 		insertion_point.before(prod_html);
 	}
-	
-	// for(i in small_urls) image_preload(small_urls[i]);
-	
+		
 	$("#cached_find_report .displayed_count").text(image_prod_count);
 	$("#cached_find_report .filtered_count").text(total_prod_count);
 	
@@ -806,6 +797,10 @@ function prod_grid_update_handle(images) {
 }
 
 // Product Images
+
+function prod_image(small_url, tiny_url) {
+	return '<img src="' + tiny_url + '" onmouseover="prod_image_zoom(event, \'' + small_url + '\')" onmouseout="prod_image_unzoom(this)" />';
+}
 
 function prod_image_zoom(event, image_url) {
 	var zoom = $("#image_zoom");

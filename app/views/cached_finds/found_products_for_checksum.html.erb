@@ -17,11 +17,9 @@
 	<% end %>
 	
 	<div id="product_detail_diff_summary">
-		<img class="main" src=<%= @image.url(:tiny).inspect %> />
-		<h1>There are <span><%= @product_count %></span> products with this image</h1>
-		<p class="help">Choose one below</p>
-		<% if @diff_properties.size > 1 %>
-		<p class="help">Click on a symbol to sort by that column</p>
+		<%= product_image(@image) %>
+		<% @title_parts.each do |part| %>
+		<h1><%= part.join(" / ") %></h1>
 		<% end %>
 		<hr />
 	</div>

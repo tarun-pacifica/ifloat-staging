@@ -120,6 +120,14 @@ class CachedFinds < Application
     @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)
     @text_value_definitions = PropertyDefinition.definitions_by_property_id(properties, session.language)
     
+    properties_by_name = properties.hash_by(:name)
+    title_properties = properties_by_name.values_at("marketing:brand", "marketing:range", "marketing:model")
+    @title_parts = @values_by_property_by_product_id.map do |product_id, values_by_property|
+      values_by_property.values_at(*title_properties).compact.map do |values_for_property|
+        values_for_property.map { |value| value.to_s }
+      end
+    end.transpose.map { |set| set.flatten.uniq! }
+    
     render
   end
   

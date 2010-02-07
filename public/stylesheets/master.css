@@ -1156,13 +1156,8 @@ img.icon {
 
 #product_detail_diff_summary h1 {
 	font-size: 16px;
-	font-weight: normal;
-	margin: 0;
-}
-
-#product_detail_diff_summary h1 span {
-	color: #17A1FF;
 	font-weight: bold;
+	margin: 0 0 10px 0;
 }
 
 #product_detail_diff_summary hr {
@@ -1172,7 +1167,8 @@ img.icon {
 	margin: 0;
 }
 
-#product_detail_diff_summary img.main {
+#product_detail_diff_summary img.product {
+	border: 1px solid gray;
 	float: left;
 	height: 100px;
 	margin-right: 10px;

@@ -5,8 +5,8 @@
 	<div class="panel">
 		<div class="left"></div>
 		<div class="centre">
-			<% if @buy_options_exist %>
-			<a href="/picked_products/buy_options" id="purchases"></a>
+			<% if @show_purchases_button %>
+			<a href="/picked_products/options" id="purchases"></a>
 			<% else %>
 			<div id="purchases"></div>
 			<% end %>

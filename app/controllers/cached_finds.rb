@@ -132,7 +132,7 @@ class CachedFinds < Application
   end
   
   def new
-    @buy_options_exist = session.picked_products.any? { |pick| pick.group =~ /^buy/ }
+    @show_purchases_button = session.picked_products.any? { |pick| pick.group =~ /^buy/ }
     render
   end
   

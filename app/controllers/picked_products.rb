@@ -2,10 +2,10 @@ class PickedProducts < Application
   def buy(facility_id)
     facility = Facility.get(facility_id) 
     raise NotFound if facility.nil?
-    return redirect("/picked_products/buy_options") if facility.primary_url.nil?
+    return redirect("/picked_products/options") if facility.primary_url.nil?
     
     @picks_by_group = session.picked_products.group_by { |pick| pick.group }
-    return redirect("/picked_products/buy_options") if @picks_by_group["buy_now"].empty?
+    return redirect("/picked_products/options") if @picks_by_group["buy_now"].empty?
     
     prod_ids_by_group = {}
     @picks_by_group.each do |group, picks|
@@ -22,39 +22,11 @@ class PickedProducts < Application
     
     first_available_product = fac_prods_by_prod_id.values_at(*prod_ids_by_group["buy_now"]).compact.first
     @partner_url = partner_url(facility, first_available_product)
-    return redirect("/picked_products/buy_options") if @partner_url.nil?
+    return redirect("/picked_products/options") if @partner_url.nil?
     
     session.add_purchase(Purchase.new(:facility => facility))
     
     @transitional = true
-    render
-  end
-  
-  def buy_options
-    @picks_by_group = session.picked_products.group_by { |pick| pick.group }
-    return redirect("/") if @picks_by_group["buy_later"].nil? and @picks_by_group["buy_now"].nil?
-    
-    prod_ids_by_group = {}
-    @picks_by_group.each do |group, picks|
-      prod_ids_by_group[group] = picks.map { |pick| pick.product_id }
-    end
-    
-    # TODO: should be able to remove once product batch rendering is client side
-    @product_ids = prod_ids_by_group.values_at("buy_later", "buy_now").flatten
-    @prices_by_url_by_product_id = Product.prices(@product_ids, session.currency)
-    
-    @counts_by_url = Hash.new(0)
-    @totals_by_url = Hash.new(0)
-    @prices_by_url_by_product_id.values_at(*prod_ids_by_group["buy_now"]).compact.each do |prices_by_url|
-      prices_by_url.each do |url, price|
-        @counts_by_url[url] += 1
-        @totals_by_url[url] += price
-      end
-    end
-    
-    @facilities_by_url = Facility.all.hash_by { |facility| facility.primary_url }
-    @facility_urls = (@counts_by_url.empty? ? @facilities_by_url.keys : @counts_by_url.keys).sort
-    
     render
   end
   
@@ -125,6 +97,34 @@ class PickedProducts < Application
     
     # TODO: do something with session.picked_product_title_changes
     picks_by_group.to_json
+  end
+  
+  def options
+    @picks_by_group = session.picked_products.group_by { |pick| pick.group }
+    return redirect("/") if @picks_by_group["buy_later"].nil? and @picks_by_group["buy_now"].nil?
+    
+    prod_ids_by_group = {}
+    @picks_by_group.each do |group, picks|
+      prod_ids_by_group[group] = picks.map { |pick| pick.product_id }
+    end
+    
+    # TODO: should be able to remove once product batch rendering is client side
+    @product_ids = prod_ids_by_group.values_at("buy_later", "buy_now").flatten
+    @prices_by_url_by_product_id = Product.prices(@product_ids, session.currency)
+    
+    @counts_by_url = Hash.new(0)
+    @totals_by_url = Hash.new(0)
+    @prices_by_url_by_product_id.values_at(*prod_ids_by_group["buy_now"]).compact.each do |prices_by_url|
+      prices_by_url.each do |url, price|
+        @counts_by_url[url] += 1
+        @totals_by_url[url] += price
+      end
+    end
+    
+    @facilities_by_url = Facility.all.hash_by { |facility| facility.primary_url }
+    @facility_urls = (@counts_by_url.empty? ? @facilities_by_url.keys : @counts_by_url.keys).sort
+    
+    render
   end
   
   def update(id, group)

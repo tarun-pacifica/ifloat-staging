@@ -19,8 +19,8 @@ Merb::Router.prepare do
   resources :cached_finds
   
   match('/picked_products/buy/:facility_id').to(:controller => 'picked_products', :action => 'buy')
-  match('/picked_products/buy_options').to(:controller => 'picked_products', :action => 'buy_options')
   match('/picked_products/compare/:klass').to(:controller => 'picked_products', :action => 'compare')
+  match('/picked_products/options').to(:controller => 'picked_products', :action => 'options')
   resources :picked_products
   
   match('/products/batch/:ids').to(:controller => 'products', :action => 'batch')

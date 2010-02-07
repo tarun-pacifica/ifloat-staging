@@ -574,11 +574,11 @@ img.icon {
 	height: 28px;
 	margin-left: -1px;
 	overflow: hidden;
-	padding: 7px 0 7px 25px;
+	padding: 7px 0 7px 0; /*POOH*/
 	text-decoration: none;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	width: 125px;
+	width: 150px;
 }
 
 #main_header #find_bar .pick_list a:hover {
@@ -595,6 +595,14 @@ img.icon {
 
 #main_header #find_bar .pick_list a.buy:hover {
 	text-decoration: underline;
+}
+
+#main_header #find_bar .pick_list img {
+	border: 1px solid gray;
+	float: left;
+	height: 25px;
+	margin: 0 7px;
+	width: 25px;
 }
 
 #main_header #find_bar .pick_list .name {

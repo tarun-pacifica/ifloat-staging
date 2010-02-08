@@ -765,7 +765,7 @@ img.icon {
 /* Partner Panel */
 
 #partner_panel {
-	background: url(/images/backgrounds/partner_panel.png) repeat-y;
+	background: url(/images/partner/backgrounds/panel.png) repeat-y;
 	height: 100%;
 	overflow-x: hidden;
 	overflow-y: auto;

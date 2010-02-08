@@ -3,8 +3,7 @@ class CachedFinds < Application
     find = session.add_cached_find(CachedFind.new(:language_code => language_code, :specification => specification))
     
     if find.valid?
-      session[:recalled] = (not find.accessed_at.nil?)
-      CachedFindEvent.log!(specification, session[:recalled], request.remote_ip)
+      CachedFindEvent.log!(specification, (not find.accessed_at.nil?), request.remote_ip)
       redirect(resource(find))
     else redirect("/")
     end
@@ -149,15 +148,10 @@ class CachedFinds < Application
       @find = session.ensure_cached_find(find_id)
     rescue NotFound
       defunct_find = session.most_recent_cached_find
-      if session.authenticated? and find_id == defunct_find.id
-        @find = session.cached_finds.find { |cf| cf.specification == defunct_find.specification }
-        session[:recalled] = (not @find.nil?)
-      end
+      @find = session.cached_finds.find { |cf| cf.specification == defunct_find.specification } if session.authenticated? and find_id == defunct_find.id
       return redirect(@find.nil? ? "/" : resource(@find))
     end
     
-    @recalled = session[:recalled]
-    session[:recalled] = false
     session.most_recent_cached_find = @find
     @find.accessed_at = DateTime.now
     @find.ensure_valid

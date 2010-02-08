@@ -27,9 +27,6 @@
 	</div>
 	
 	<div class="title">Filters</div>
-	<% if @recalled %>
-	<p class="recall">Filters adjusted to their most recent settings for <span class="spec"><%= @find.specification %></span>.</p>
-	<% end %>
 	<a href=<%= (resource(@find) + "/reset").inspect %>>reset all filters</a>
 	<h1>Click to filter by...</h1>
 	<table> </table>

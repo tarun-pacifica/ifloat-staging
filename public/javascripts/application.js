@@ -596,6 +596,7 @@ function pick_list_add(group, product_id) {
 
 function pick_list_add_move(group, product_id, pick_id) {
 	var options = {type: "POST", success: pick_lists_update, error: pick_list_add_move_error};
+	if($("#picked_product_options").length > 0) options.success = function() { window.location.reload(); };
 	
 	options.data = {group: group}
 	if(pick_id) {
@@ -685,17 +686,6 @@ function pick_lists_update_handle(data) {
 	
 	var pb = $("#pick_buttons")[0];
 	if(pb) prod_detail_update_pick_buttons(pb.product_id);
-}
-
-// Pick Options - TODO: rewrite section and get rid of 'fp' variable names
-
-function pick_opts_move(purchase_id) {
-	alert("rewrite");
-	var options = {type: "POST", url: "/picked_products/" + purchase_id};
-	options.data = {_method: "PUT"};
-	options.success = function() { window.location.reload(); };
-	options.error = pick_list_add_move_error;
-	$.ajax(options);
 }
 
 // Product Detail

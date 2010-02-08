@@ -1206,7 +1206,7 @@ img.icon {
 }
 
 #product_detail_assets .asset_links a {
-	background: url(/images/buttons/asset_enabled.png) no-repeat;
+	background: url(/images/product_detail/buttons/asset.png) no-repeat;
 	display: block;
 	color: #404040;
 	height: 22px;
@@ -1215,7 +1215,7 @@ img.icon {
 }
 
 #product_detail_assets .asset_links a:hover {
-	background: url(/images/buttons/asset_hover.png) no-repeat;
+	background: url(/images/product_detail/buttons/asset_hover.png) no-repeat;
 	color: white;
 }
 

@@ -53,7 +53,7 @@ class Products < Application
     assets_by_role = product.role_assets
     
     @image_urls = (assets_by_role.delete("image") || []).map { |asset| asset.url }
-    @image_urls << "/images/no_image.png" if @image_urls.empty?
+    @image_urls << "/images/products/no_image.png" if @image_urls.empty?
     
     @asset_urls_with_names = []
     assets_by_role.sort.each do |role, assets|

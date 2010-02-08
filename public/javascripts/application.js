@@ -494,7 +494,7 @@ function num_filter_create_min_max(min_max, label, fraction_helper, html) {
 	html.push('<tr>');
 	html.push('<td class="label">' + label + '</td>');
 	html.push('<td>');
-	if(fraction_helper) html.push('<img class="fraction_helper" src="/images/buttons/fraction_helper.png" onclick="fraction_helper_open(this)" />');
+	if(fraction_helper) html.push('<img class="fraction_helper" src="/images/filters/buttons/fraction_helper.png" onclick="fraction_helper_open(this)" />');
 	html.push('<input class="' + min_max + '" type="text" onkeyup="num_filter_handle_input(this)" />');
 	html.push('(' + (min_max == "min" ? "&ge;" : "&le;") + ' <span class="' + min_max + '_all"> </span>)');
 	html.push('</td>');
@@ -872,7 +872,7 @@ function text_filter_create(data, html) {
 		var style = (relevant[value] ? '' : 'style="text-decoration:line-through;color:gray"');
 		html.push('<div class="list_item" ' + style + '>');
 		
-		html.push('<img class="select_one" src="/images/buttons/select_one.png" onclick="text_filter_select_one(this)"/>');
+		html.push('<img class="select_one" src="/images/filters/buttons/select_one.png" onclick="text_filter_select_one(this)"/>');
 		
 		var checked = (excluded[value] ? '' : 'checked="checked"');
 		html.push('<input type="checkbox" ' + checked + ' value="' + value + '" onclick="text_filter_handle_check(this)" />');

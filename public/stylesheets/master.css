@@ -525,7 +525,6 @@ img.icon {
 }
 
 #main_header #find_bar {
-	background: url(/images/backgrounds/find_bar.png) repeat-x;
 	height: 26px;
 	padding-top: 10px;
 	position: absolute;

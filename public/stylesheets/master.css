@@ -165,45 +165,45 @@ img.icon {
 }
 
 #bubble_tooltip .top .left {
-	background: url(/images/backgrounds/bubble/top_left.png) no-repeat;
+	background: url(/images/bubble_tooltip/backgrounds/top_left.png) no-repeat;
 }
 
 #bubble_tooltip .top .center {
-	background: url(/images/backgrounds/bubble/top_center.png) repeat-x;
+	background: url(/images/bubble_tooltip/backgrounds/top_center.png) repeat-x;
 	width: auto;
 }
 
 #bubble_tooltip .top .right {
-	background: url(/images/backgrounds/bubble/top_right.png) no-repeat;
+	background: url(/images/bubble_tooltip/backgrounds/top_right.png) no-repeat;
 }
 
 #bubble_tooltip .middle .left {
-	background: url(/images/backgrounds/bubble/middle_left.png) repeat-y;
+	background: url(/images/bubble_tooltip/backgrounds/middle_left.png) repeat-y;
 	height: auto;
 }
 
 #bubble_tooltip .middle .center {
-	background: url(/images/backgrounds/bubble/middle_center.png);
+	background: url(/images/bubble_tooltip/backgrounds/middle_center.png);
 	height: auto;
 	width: auto;
 }
 
 #bubble_tooltip .middle .right {
-	background: url(/images/backgrounds/bubble/middle_right.png) repeat-y;
+	background: url(/images/bubble_tooltip/backgrounds/middle_right.png) repeat-y;
 	height: auto;
 }
 
 #bubble_tooltip .bottom .left {
-	background: url(/images/backgrounds/bubble/bottom_left.png) no-repeat;
+	background: url(/images/bubble_tooltip/backgrounds/bottom_left.png) no-repeat;
 }
 
 #bubble_tooltip .bottom .center {
-	background: url(/images/backgrounds/bubble/bottom_center.png) repeat-x;
+	background: url(/images/bubble_tooltip/backgrounds/bottom_center.png) repeat-x;
 	width: auto;
 }
 
 #bubble_tooltip .bottom .right {
-	background: url(/images/backgrounds/bubble/bottom_right.png) no-repeat;
+	background: url(/images/bubble_tooltip/backgrounds/bottom_right.png) no-repeat;
 }
 
 /* Cached Find */

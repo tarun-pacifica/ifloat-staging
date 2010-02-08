@@ -658,7 +658,7 @@ function pick_lists_update_handle(data) {
 	for(group in data) {
 		var links = [];
 		
-		if(group == "buy_now") links.push('<a class="buy" href="/picked_products/buy_options">Buy from...</a>');
+		if(group == "buy_now") links.push('<a class="buy" href="/picked_products/options">Buy from...</a>');
 		
 		var list = data[group];
 		var total_products = (group == "compare" ? 0 : list.length);
@@ -689,18 +689,6 @@ function pick_lists_update_handle(data) {
 
 // Pick Options - TODO: rewrite section and get rid of 'fp' variable names
 
-function pick_opts_load(product_ids) {
-	var url = "/products/batch/" + product_ids.join("_");
-	$.getJSON(url, pick_opts_load_handle);	
-}
-
-function pick_opts_load_handle(products) {
-	for(i in products) {
-		var product = products[i];
-		$("#prod_" + product.id).html(prod_link_detailed(product));
-	}
-}
-
 function pick_opts_move(purchase_id) {
 	alert("rewrite");
 	var options = {type: "POST", url: "/picked_products/" + purchase_id};
@@ -716,6 +704,12 @@ function prod_detail_click_pick_button(b) {
 	if(b.klass == "add") pick_list_add(b.to_group, b.product_id);
 	else if(b.klass == "move") pick_list_move(b.from_group, b.to_group, b.pick_id);
 	else pick_list_remove(b.to_group, b.pick_id);
+}
+
+function prod_detail_more_relations(d) {
+	var more_bar = $(d).parent();
+	more_bar.prevAll().show();
+	more_bar.hide();
 }
 
 function prod_detail_select_image(event) {
@@ -818,7 +812,6 @@ function prod_image_unzoom(i) {
 // Product Links
 
 function prod_link_detailed(product) {
-	var id = product.id;
 	var image_urls = product.image_urls;
 	var titles = product.titles;
 	var summary = product.summary;
@@ -829,55 +822,19 @@ function prod_link_detailed(product) {
 		title_lines.push("<" + tag + ">" + titles[i] + "</" + tag + ">");
 	}
 	
-	return '<a class="product" id="prod_' + id + '" href="/products/' + id + '">' + prod_image(image_urls[0], image_urls[1]) + title_lines.join(" ") + '<p>' + summary + '</p> <hr /> </a>';
+	return '<a class="product" href="/products/' + product.id + '">' + prod_image(image_urls[0], image_urls[1]) + title_lines.join(" ") + '<p>' + summary + '</p> <hr /> </a>';
 }
 
-// Relationship Product Listings (Product Detail View)
-
-function relationship_list_build(product_ids_by_section) {
-	var product_ids = [];
-	for(var section in product_ids_by_section) {
-		product_ids = product_ids.concat(product_ids_by_section[section]);
-	}
-	
+function prod_links_load(product_ids) {
 	var url = "/products/batch/" + product_ids.join("_");
-	$.get(url, relationship_list_handle_batch, "html");
+	$.getJSON(url, prod_links_load_handle);	
 }
 
-function relationship_list_handle_batch(data) {
-	var relations_tmp = $("#product_detail_relations_tmp");
-	relations_tmp.html(data);
-	
-	var relations = $("#product_detail_relations");
-	var r = relations[0];
-	var pibs = r.product_ids_by_section;
-	var shown = r.initially_shown_per_section;
-	
-	for(var section in pibs) {
-		var section_id = "section_" + section.replace(/ /g, "_");
-		relations.append('<div id="' + section_id + '"> </div>');
-		var section_div = relations.find("#" + section_id);
-		
-		section_div.append("<h2>" + section + "...</h2>");
-		
-		var product_ids = pibs[section];
-		for(var i in product_ids) {
-			var cloned_list_item = relations_tmp.find("#prod_" + product_ids[i]).clone();
-			cloned_list_item.appendTo(section_div);
-			if(i >= shown) cloned_list_item.hide();
-		}
-		
-		var hidden = (product_ids.length - shown);
-		if(hidden > 0) section_div.append('<div class="more"> <div onclick="relationship_list_more(this)">' + hidden + ' More Results</div> </div>');
+function prod_links_load_handle(products) {
+	for(i in products) {
+		var product = products[i];
+		$("#prod_" + product.id).html(prod_link_detailed(product));
 	}
-	
-	relations_tmp.empty();
-}
-
-function relationship_list_more(d) {
-	var more_bar = $(d).parent();
-	more_bar.prevAll().show();
-	more_bar.hide();
 }
 
 // Text Filters

@@ -34,7 +34,7 @@
 			<table class="prices">
 				<% @prices_by_url.each do |url, amount| %>
 					<tr>
-						<td> <img src="/images/estore_logos/<%= url %>.png" alt=<%= url.inspect %> /> </td>
+						<td> <img src="/images/partner/facilities/<%= url %>.png" alt=<%= url.inspect %> /> </td>
 						<td class="price"> <%= money(amount) %> </td>
 					</tr>
 				<% end %>

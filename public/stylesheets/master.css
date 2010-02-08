@@ -213,7 +213,7 @@ img.icon {
 	width: 906px;
 }
 
-#cached_find img.found_none {
+#cached_find img.no_results {
 	float: right;
 }
 
@@ -786,7 +786,7 @@ img.icon {
 }
 
 #partner_panel .finder {
-	background: url(/images/backgrounds/find_widget.png) repeat-x;
+	background: url(/images/partner/backgrounds/finder.png) repeat-x;
 	margin: 5px 0 0 0;
 	padding: 4px 5px;
 	width: 140px;

@@ -11,56 +11,33 @@
 	
 	<a class="back" href="/picked_products/options">&lt;&lt; Back to iFloat</a>
 	
-	<div id="#pl_buy_now" class="pick_list">
+	<div id="pl_buy_now" class="pick_list">
 		<span class="name">Shopping List</span>
-		<span class="total"><%= @picks_by_group["buy_now"].size %></span>
+		<span class="total"></span>
+		<div class="items"></div>
 	</div>
-	<%= partial :pick, :with => @picks_by_group["buy_now"], :target => "partner_store" %>
 	
-	<% unless @picks_by_group["buy_later"].nil? %>
-	<div id="#pl_buy_later" class="pick_list">
+	<div id="pl_buy_later" class="pick_list">
 		<span class="name">Wish List</span>
-		<span class="total"><%= @picks_by_group["buy_later"].size %></span>
+		<span class="total"></span>
+		<div class="items"></div>
 	</div>
-	<%= partial :pick, :with => @picks_by_group["buy_later"], :target => "partner_store" %>
-	<% end %>
 </div>
 
 <script type="text/javascript">
 $(document).ready(function() {
 	var partner_panel = $("#partner_panel");
+	partner_panel[0].urls_by_product_id = <%= @partner_product_urls.to_json %>;
+	pick_lists_update();
+	
 	var partner_store = $("#partner_store");
-	
 	var find_bar_width = partner_panel.width() + 5;
-	function auto_size_partner_store() {
-		partner_store.width($(window).width() - find_bar_width);
-	}
-	
+	function auto_size_partner_store() { partner_store.width($(window).width() - find_bar_width); }
 	auto_size_partner_store();
 	$(window).resize(auto_size_partner_store);
 	partner_store.css("left", find_bar_width);
 	partner_store.attr("src", <%= @partner_url.inspect %>);
-	
-	function hide_unavailable() {
-		var item = $(this);
-		item.text(this.original_text);
-		item.css("color", "gray");
-	}
-	
-	function show_unavailable() {
-		var item = $(this);
-		this.original_text = item.text();
-		item.text("UNAVAILABLE");
-		item.css("color", "red");
-	}
-	
-	unavailable_items = partner_panel.find("a.unavailable");
-	unavailable_items.mouseover(show_unavailable);
-	unavailable_items.mouseout(hide_unavailable);
 });
 </script>
 
 <iframe id="partner_store" name="partner_store"></iframe>
-
-
-

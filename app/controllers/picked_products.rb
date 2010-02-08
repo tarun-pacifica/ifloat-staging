@@ -80,14 +80,14 @@ class PickedProducts < Application
     picks.each do |pick|
       product_id = pick.product_id
       image_urls = product_image_urls(images_by_product_id[product_id])
-      (picks_by_group[pick.group] ||= []) << [image_urls, pick.title_parts, url(:product, :id => product_id)]
+      (picks_by_group[pick.group] ||= []) << [product_id, image_urls, pick.title_parts, url(:product, :id => product_id)]
     end
     
     compare_picks = picks_by_group["compare"]
     unless compare_picks.nil?
-      compare_picks_by_class = compare_picks.group_by { |image_urls, title_parts, link_url| title_parts.last }
+      compare_picks_by_class = compare_picks.group_by { |product_id, image_urls, title_parts, link_url| title_parts.last }
       picks_by_group["compare"] = compare_picks_by_class.map do |klass, info_for_picks|
-        info = info_for_picks.find { |image_urls, title_parts, link_url| not image_urls.nil? }
+        info = info_for_picks.find { |product_id, image_urls, title_parts, link_url| not image_urls.nil? }
         image_urls = (info.nil? ? nil : info.first)
         link_url = "/picked_products/compare/#{Merb::Parse.escape(klass)}"
         [image_urls, [klass, info_for_picks.size], link_url]

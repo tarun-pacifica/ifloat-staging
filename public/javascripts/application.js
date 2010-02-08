@@ -650,42 +650,72 @@ function pick_lists_update() {
 }
 
 function pick_lists_update_handle(data) {
+	var partner_panel = $("#partner_panel");
+	var partner = (partner_panel.length > 0);
+	var urls_by_product_id = (partner ? partner_panel[0].urls_by_product_id : {}) 
+	
 	var pick_lists = $(".pick_list");
-	pick_lists.unbind();
-	pick_lists.css("background", "black");
-	pick_lists.children(".items").empty();
-	pick_lists.children(".total").empty();
+	if (!partner) {
+		pick_lists.unbind();
+		pick_lists.css("background", "black");
+		pick_lists.children(".items").empty();
+		pick_lists.children(".total").empty();
+	}
 	
 	for(group in data) {
 		var links = [];
 		
-		if(group == "buy_now") links.push('<a class="buy" href="/picked_products/options">Buy from...</a>');
+		if(!partner && group == "buy_now") links.push('<a class="buy" href="/picked_products/options">Buy from...</a>');
 		
 		var list = data[group];
 		var total_products = (group == "compare" ? 0 : list.length);
 		for(i in list) {
 			var info = list[i];
-			var image_urls = info[0];
-			var image = (image_urls ? prod_image(image_urls[0], image_urls[1]) : "");
-			var title_parts = info[1];
-			var link_url = info[2];
-			links.push('<a href="' + link_url + '">' + image + title_parts.join("<br/>") + '</a>');
+			var product_id = info[0]
+			var image_urls = info[1];
+			var image = prod_image(image_urls[0], partner ? undefined : image_urls[1]);
+			var title_parts = info[2];
+			var target = (partner ? "partner_store" : "")
+			var link_url = (partner ? urls_by_product_id[product_id] : info[3]);
+			var klass = (link_url ? "available" : "unavailable");
+			if(!link_url) link_url = "#";
+			links.push('<a class="' + klass + '" target="' + target + '" href="' + link_url + '">' + image + title_parts.join("<br/>") + '</a>');
 			if(group == "compare") total_products += title_parts[1];
 		}
 		
 		var pick_list = $("#pl_" + group);
-		pick_list.click(pick_list_show);
-		pick_list.mouseenter(pick_list_show);
-		pick_list.mouseleave(pick_list_hide);
-		pick_list.css("background", "url(/images/buttons/enabled.png) repeat-x;");
 		pick_list.children(".items").html(links.join(" "));
-		pick_list.children(".total").html(total_products);	
+		pick_list.children(".total").html(total_products);
+		if(!partner) {
+			pick_list.click(pick_list_show);
+			pick_list.mouseenter(pick_list_show);
+			pick_list.mouseleave(pick_list_hide);
+			pick_list.css("background", "url(/images/buttons/enabled.png) repeat-x;");
+		}
 	}
 	
-	pick_lists.mouseleave();
-	
-	var pb = $("#pick_buttons")[0];
-	if(pb) prod_detail_update_pick_buttons(pb.product_id);
+	if (partner) {
+		function hide_unavailable() {
+			var item = $(this);
+			item.html(this.original_html);
+			item.css("color", "gray");
+		}
+
+		function show_unavailable() {
+			var item = $(this);
+			this.original_html = item.html();
+			item.html("<p>UNAVAILABLE</p>");
+			item.css("color", "red");
+		}
+
+		unavailable_items = partner_panel.find("a.unavailable");
+		unavailable_items.mouseover(show_unavailable);
+		unavailable_items.mouseout(hide_unavailable);
+	} else {
+		pick_lists.mouseleave();
+		var pb = $("#pick_buttons")[0];
+		if(pb) prod_detail_update_pick_buttons(pb.product_id);
+	}
 }
 
 // Product Detail
@@ -779,7 +809,8 @@ function prod_grid_update_handle(images) {
 // Product Images
 
 function prod_image(url, popup_url) {
-	return '<img class="product" src="' + url + '" onmouseover="prod_image_zoom(event, \'' + popup_url + '\')" onmouseout="prod_image_unzoom(this)" />';
+	if(popup_url) return '<img class="product" src="' + url + '" onmouseover="prod_image_zoom(event, \'' + popup_url + '\')" onmouseout="prod_image_unzoom(this)" />';
+	return '<img class="product" src="' + url + '" />';
 }
 
 function prod_image_zoom(event, image_url) {

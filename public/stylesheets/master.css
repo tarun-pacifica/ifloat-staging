@@ -639,14 +639,14 @@ img.icon {
 /* Marquee */
 
 #marquee {
-	background: url(/images/logo.png) no-repeat 10px 0;
+	background: url(/images/marquee/logo.png) no-repeat 10px 0;
 	margin: 150px auto 0;
 	padding-top: 123px;
 	width: 613px;
 }
 
 #marquee .finder {
-	background: url(/images/backgrounds/marquee/find.png) repeat-x;
+	background: url(/images/marquee/backgrounds/find.png) repeat-x;
 	height: 42px;
 	margin-top: -3px;
 	text-align: center;
@@ -660,11 +660,11 @@ img.icon {
 }
 
 #marquee .finder div.left {
-	background: url(/images/backgrounds/marquee/find_left.png) no-repeat;
+	background: url(/images/marquee/backgrounds/find_left.png) no-repeat;
 }
 
 #marquee .finder div.right {
-	background: url(/images/backgrounds/marquee/find_right.png) no-repeat;
+	background: url(/images/marquee/backgrounds/find_right.png) no-repeat;
 }
 
 #marquee .finder form {
@@ -682,7 +682,7 @@ img.icon {
 }
 
 #marquee .panel {
-	background: url(/images/backgrounds/marquee/panel.png) repeat-x;
+	background: url(/images/marquee/backgrounds/panel.png) repeat-x;
 	clear: both;
 	height: 167px;
 	margin-top: 10px;
@@ -711,35 +711,35 @@ img.icon {
 }
 
 #marquee .panel div.centre a#blog {
-	background: url(/images/buttons/marquee/blog_enabled.png) no-repeat;
+	background: url(/images/marquee/buttons/blog_enabled.png) no-repeat;
 }
 
 #marquee .panel div.centre a#blog:hover {
-	background: url(/images/buttons/marquee/blog_hover.png) no-repeat 1px;
+	background: url(/images/marquee/buttons/blog_hover.png) no-repeat 1px;
 }
 
 #marquee .panel div.centre a#login {
-	background: url(/images/buttons/marquee/login_enabled.png) no-repeat;
+	background: url(/images/marquee/buttons/login_enabled.png) no-repeat;
 }
 
 #marquee .panel div.centre a#login:hover {
-	background: url(/images/buttons/marquee/login_hover.png) no-repeat 1px;
+	background: url(/images/marquee/buttons/login_hover.png) no-repeat 1px;
 }
 
 #marquee .panel div.centre a#logout {
-	background: url(/images/buttons/marquee/logout.png) no-repeat 1px;
+	background: url(/images/marquee/buttons/logout.png) no-repeat 1px;
 }
 
 #marquee .panel div.centre a#logout:hover {
-	background: url(/images/buttons/marquee/logout_hover.png) no-repeat 1px;
+	background: url(/images/marquee/buttons/logout_hover.png) no-repeat 1px;
 }
 
 #marquee .panel div.centre a#purchases {
-	background: url(/images/buttons/marquee/purchases_enabled.png) no-repeat;
+	background: url(/images/marquee/buttons/purchases_enabled.png) no-repeat;
 }
 
 #marquee .panel div.centre a#purchases:hover {
-	background: url(/images/buttons/marquee/purchases_hover.png) no-repeat 1px;
+	background: url(/images/marquee/buttons/purchases_hover.png) no-repeat 1px;
 }
 
 #marquee .panel div.centre div {
@@ -751,15 +751,15 @@ img.icon {
 }
 
 #marquee .panel div.centre div#purchases {
-	background: url(/images/buttons/marquee/purchases_disabled.png) no-repeat 1px;
+	background: url(/images/marquee/buttons/purchases_disabled.png) no-repeat 1px;
 }
 
 #marquee .panel div.left {
-	background: url(/images/backgrounds/marquee/panel_left.png) no-repeat;
+	background: url(/images/marquee/backgrounds/panel_left.png) no-repeat;
 }
 
 #marquee .panel div.right {
-	background: url(/images/backgrounds/marquee/panel_right.png) no-repeat;
+	background: url(/images/marquee/backgrounds/panel_right.png) no-repeat;
 }
 
 /* Partner Panel */

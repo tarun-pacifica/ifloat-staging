@@ -24,7 +24,7 @@
 <script type="text/javascript" charset="utf-8">
 	$("body").css("background", "url(/images/backgrounds/sky.png) repeat-x");
 	
-	<% Dir[Merb.root / "public" / "images" / "buttons" / "marquee" / "*.png"].each do |path| %>
-	image_preload("/images/buttons/marquee/<%= File.basename(path) %>");
+	<% Dir[Merb.root / "public" / "images" / "marquee" / "buttons" / "*.png"].each do |path| %>
+	image_preload("/images/marquee/buttons/<%= File.basename(path) %>");
 	<% end %>
 </script>

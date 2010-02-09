@@ -564,7 +564,7 @@ img.icon {
 }
 
 #main_header #find_bar .pick_list a {
-	background: url(/images/buttons/pick_list_item.png) no-repeat;
+	background: url(/images/pick_lists/buttons/item.png) no-repeat;
 	border-left: 1px solid #4263A0;
 	border-right: 1px solid #4263A0;
 	color: white;
@@ -842,7 +842,7 @@ img.icon {
 }
 
 #partner_panel .pick_list a.available {
-	background: url(/images/buttons/pick_list_item.png) no-repeat;
+	background: url(/images/pick_lists/buttons/item.png) no-repeat;
 }
 
 #partner_panel .pick_list a.available:hover {
@@ -850,7 +850,7 @@ img.icon {
 }
 
 #partner_panel .pick_list a.unavailable {
-	background: url(/images/buttons/pick_list_item_unavailable.png) no-repeat;
+	background: url/images/pick_lists/buttons/item_unavailable.png) no-repeat;
 	color: gray;
 }
 

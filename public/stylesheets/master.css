@@ -990,7 +990,7 @@ img.icon {
 }
 
 #picked_product_options tr.separator td {
-	background: url(/images/backgrounds/table_header_seperator.png) repeat-x;
+	background: url(/images/pick_options/backgrounds/table_header_seperator.png) repeat-x;
 	border-left: 1px solid #404040;
 	border-right: 1px solid #404040;
 	height: 5px;

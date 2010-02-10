@@ -1,12 +1,6 @@
 module Password
   FORMAT = /^\{SSHA\}(.+?)$/
   
-  def self.ensure(pass)
-    return [pass, nil] if pass =~ FORMAT
-    pass = gen_string(8) if pass.blank?
-    return [hash(pass), pass]
-  end
-  
   def self.gen_string(length)
     alphanum = ('0'..'9').to_a + ('a'..'z').to_a + ('A'..'Z').to_a
     alphanum_size = alphanum.size
@@ -19,6 +13,10 @@ module Password
     pass_utf8 = bytes.pack("U*")
     hash = Digest::SHA1.digest(pass_utf8 + salt)
     "{SSHA}" + [hash + salt].pack("m").chomp
+  end
+  
+  def self.hashed?(pass)
+    pass =~ FORMAT
   end
   
   def self.match?(hashed_pass, pass)

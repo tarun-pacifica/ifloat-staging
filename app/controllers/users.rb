@@ -3,13 +3,10 @@ class Users < Application
   
   def create(name, nickname, login, password, confirmation, challenge)
     nickname = nil if nickname.blank?    
-    hashed_password = (password.blank? ? nil : Password.hash(password))
-    
-    user = User.new(:name => name, :nickname => nickname, :login => login, :password => hashed_password)
+    user = User.new(:name => name, :nickname => nickname, :login => login, :password => password, :confirmation => confirmation, :created_from => request.remote_ip)
     user.valid?
     errors = user.errors.full_messages
-    errors << "Password doesn't match confirmation" if (not password.nil?) and password != confirmation
-    
+
     if errors.empty?
       if user.save
         # TODO: reactivate before going live

@@ -17,14 +17,17 @@
 class User
   include DataMapper::Resource
   
-  property :id, Serial
-  property :name, String, :required => true
-  property :nickname, String
-  property :login, String, :length => 255, :required => true, :format => :email_address, :unique => true
-  property :password, String, :length => 255, :required => true
-  property :admin, Boolean, :default => false
-  property :disabled_at, DateTime
-  property :send_marketing, Boolean, :default => false
+  # TODO: update spec with field definitions
+  property :id,             Serial
+  property :name,           String,    :required => true
+  property :nickname,       String
+  property :login,          String,    :required => true, :length => 255, :format => :email_address, :unique => true
+  property :password,       String,    :required => true, :length => 255
+  property :admin,          Boolean,   :required => true, :default => false
+  property :disabled_at,    DateTime
+  property :send_marketing, Boolean,   :required => true, :default => false
+  property :created_at,     DateTime,  :required => true, :default => proc { DateTime.now }
+  property :created_from,   IPAddress, :required => true
   
   has n, :blogs
   has n, :cached_finds
@@ -37,6 +40,19 @@ class User
     self.login = login.downcase unless login.nil?
   end
   
+  # TODO: spec
+  validates_with_block :password, :if => proc { |u| u.attribute_dirty?(:password) and not u.password.blank? } do
+    (password == @confirmation) || [false, "Password doesn't match confirmation"]
+  end
+  
+  # TODO: spec
+  before :save do
+    unless Password.hashed?(password)
+      @plain_password = password
+      self.password = Password.hash(@plain_password)
+    end
+  end
+  
   # TODO: spec (and add password checks to spec given now not nullable)
   def self.authenticate(login, pass)
     user = User.first(:login => login)
@@ -45,6 +61,7 @@ class User
   end
   
   attr_reader :plain_password
+  attr_writer :confirmation
   
   def display_name
     nickname || name
@@ -56,6 +73,7 @@ class User
   
   # TODO: spec
   def reset_password
-    self.password, @plain_password = Password.ensure(nil)
+    @plain_password = Password.gen_string(8)
+    self.password = Password.hash(@plain_password)
   end
 end

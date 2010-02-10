@@ -21,12 +21,13 @@ users = [
 ]
 
 users.each do |info|
-  pass = info.delete(:password)
+  info[:created_from] = "0.0.0.0"
+  
   user = User.first(:login => info[:login])
   if user.nil?
-    user = User.new(info.update(:password => Password.hash(pass)))
+    user = User.new(info.update(:confirmation => info[:password]))
   else
-    info[:password] = Password.hash(pass) unless Password.match?(user.password, pass)
+    info.delete(:password) if Password.match?(user.password, info[:password])
     user.attributes = info
   end
   whiny_save(user)

@@ -100,7 +100,7 @@ img.icon {
 }
 
 #blog_info .title {
-	background: url(/images/backgrounds/panel_heading.png) repeat-x;
+	background: url(/images/blog/backgrounds/panel_header.png) repeat-x;
 	color: white;
 	height: 16px;
 	padding: 4px 10px;
@@ -302,7 +302,7 @@ img.icon {
 }
 
 #cached_find_filters .title {
-	background: url(/images/backgrounds/panel_heading.png) repeat-x;
+	background: url(/images/filters/backgrounds/header.png) repeat-x;
 	color: white;
 	height: 16px;
 	padding: 4px 10px;
@@ -378,7 +378,7 @@ img.icon {
 }
 
 #cached_find_report {
-	background: url(/images/backgrounds/panel_heading.png) repeat-x;
+	background: url(/images/find_results/backgrounds/header.png) repeat-x;
 	border-left: 1px solid silver;
 	border-right: 1px solid silver;
 	color: white;
@@ -982,7 +982,7 @@ img.icon {
 }
 
 #picked_product_options th {
-	background: url(/images/backgrounds/panel_heading.png) repeat-x;
+	background: url(/images/pick_options/backgrounds/table_header.png) repeat-x;
 	border-left: 1px solid gray;
 	color: white;
 	height: 16px;
@@ -1065,7 +1065,7 @@ img.icon {
 }
 
 #product_detail_compare td.choose {
-	background: url(/images/backgrounds/panel_heading.png) repeat-x;
+	background: url(/images/product_compare/backgrounds/panel_header.png) repeat-x;
 	text-align: center;
 }
 
@@ -1081,7 +1081,7 @@ img.icon {
 }
 
 #product_detail_data .title {
-	background: url(/images/backgrounds/panel_heading.png) repeat-x;
+	background: url(/images/product_detail/backgrounds/panel_header.png) repeat-x;
 	color: white;
 	height: 16px;
 	padding: 4px 10px;
@@ -1145,7 +1145,7 @@ img.icon {
 }
 
 #product_detail_diff_products td.choose {
-	background: url(/images/backgrounds/panel_heading.png) repeat-x;
+	background: url(/images/product_differentiate/backgrounds/panel_header.png) repeat-x;
 	width: 50px;
 	text-align: center;
 }

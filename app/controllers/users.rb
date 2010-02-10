@@ -1,4 +1,6 @@
 class Users < Application
+  redact_params :password, :confirmation
+  
   def create(name, nickname, login, password, confirmation, challenge)
     nickname = nil if nickname.blank?    
     hashed_password = (password.blank? ? nil : Password.hash(password))

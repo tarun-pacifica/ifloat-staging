@@ -1,7 +1,7 @@
 class Users < Application
   redact_params :password, :confirmation
   
-  def create(name, nickname, login, password, confirmation, challenge)
+  def create(name, nickname, login, password, confirmation)
     nickname = nil if nickname.blank?    
     user = User.new(:name => name, :nickname => nickname, :login => login, :password => password, :confirmation => confirmation, :created_from => request.remote_ip)
     user.valid?
@@ -13,7 +13,7 @@ class Users < Application
         # send_mail(MainMailer, :registration,
         #           {:from => "admin@ifloat.biz", :to => user.login, :subject => "iFloat Registration"},
         #           {:user => user})
-        session.login!(login, password, challenge)
+        session.login!(login, password)
         "<p>Successfully registered and logged in as <strong>#{user.name}</strong>. Confirmation e-mail sent to <strong>#{login}</strong>.</p>"
       else raise Unauthenticated, "Unable to register, please try again later"
       end
@@ -22,7 +22,7 @@ class Users < Application
     end
   end
   
-  def login(submit, login, password, challenge)
+  def login(submit, login, password)
     if submit == "Reset Password"
       raise Unauthenticated, "Specify an account" if login.blank?
       user = User.first(:login => login)
@@ -38,7 +38,7 @@ class Users < Application
       
     else
       raise Unauthenticated, "Specify an account and password" if login.blank? or password.blank?
-      session.login!(login, password, challenge)
+      session.login!(login, password)
       "<p>Successfully logged in as <strong>#{session.user.name}</strong>.</p>"
       
     end

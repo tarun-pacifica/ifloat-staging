@@ -14,8 +14,8 @@ class ProductMapping
   property :id, Serial
   property :reference, String, :required => true, :format => /^[A-Z_\d\-\.\/]+$/
 
-  belongs_to :company
-  belongs_to :product
+  belongs_to :company, :index => true
+  belongs_to :product, :index => true
   
   validates_is_unique :product_id, :scope => [:company_id, :reference] # TODO: spec
 end

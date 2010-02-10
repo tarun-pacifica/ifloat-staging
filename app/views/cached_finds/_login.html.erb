@@ -3,7 +3,6 @@
 
 	<form class="login" action="/users/login" method="POST" onsubmit="return login_submit(this)">
 		<h1>Login</h1>
-		<%= hidden_field :challenge, :value => session.login_challenge %>
 		<p> <label>E-mail: <input type="text" name="login" /></label> </p>
 		<p> <label>Password: <input type="password" name="password" /></label> </p>
 		<p class="submit"> <%= submit "Login", :onclick => "login_operation('login')" %> <%= submit "Reset Password", :onclick => "login_operation('reset')" %> </p>
@@ -11,7 +10,6 @@
 
 	<form class="register" action="/users" method="POST" onsubmit="return login_submit(this)">
 		<h1>Register</h1>
-		<%= hidden_field :challenge, :value => session.login_challenge %>
 		<p> <label>Name: <input type="text" name="name" /></label> </p>
 		<p> <label>Nickname: <input type="text" name="nickname" /></label> </p>
 		<p> <label>E-mail: <input type="text" name="login" /></label> </p>
@@ -26,5 +24,4 @@
 	var options = {autoOpen: false, close: login_reset, modal: true, width: "700px"};
 	var login_register = $("#login_register")
 	login_register.dialog(options);
-	login_register[0].failure_count = 0;
 </script>

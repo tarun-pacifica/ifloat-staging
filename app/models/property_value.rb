@@ -43,7 +43,7 @@ class PropertyValue
   property :auto_generated, Boolean, :required => true
   property :sequence_number, Integer, :required => true
   
-  belongs_to :product
+  belongs_to :product, :index => true
   belongs_to :definition, :model => "PropertyDefinition", :child_key => [:property_definition_id]
   
   validates_with_block :type do

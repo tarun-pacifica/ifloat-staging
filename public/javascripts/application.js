@@ -372,17 +372,11 @@ function image_preload(url) {
 
 function login_error(request) {
 	var login_register = $("#login_register");
-	var lr = login_register[0];
 	login_register.find("form .errors").remove();
 	
-	if((lr.failure_count += 1) > 4) {
-		login_register.html('<p class="error">5 successive failures - reloading page.</p>');
-		window.location.reload();
-	} else {
-		var operation = lr.operation;
-		var form = login_register.find(operation == "register" ? "form.register" : "form.login");
-		form.append(request.responseText);
-	}
+	var operation = login_register[0].operation;
+	var form = login_register.find(operation == "register" ? "form.register" : "form.login");
+	form.append(request.responseText);
 }
 
 function login_open(message) {

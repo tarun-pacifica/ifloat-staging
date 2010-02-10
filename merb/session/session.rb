@@ -74,16 +74,10 @@ module Merb
       [language, "ENG"].uniq
     end
     
-    def login!(login, pass, challenge)
-      user = nil
-      begin
-        raise Unauthenticated unless login_challenge == challenge 
-        user = User.authenticate(login, pass)
-        raise Unauthenticated, "Unknown account / password" if user.nil?
-        raise Unauthenticated, "Disabled account" unless user.enabled?
-      rescue Exception => e
-        raise e
-      end
+    def login!(login, pass)
+      user = User.authenticate(login, pass)
+      raise Unauthenticated, "Unknown account / password" if user.nil?
+      raise Unauthenticated, "Disabled account" unless user.enabled?
       self[:user_id] = user.id
       
       [[:cached_finds, :specification], [:picked_products, :product_id]].each do |set, discriminator|
@@ -100,10 +94,6 @@ module Merb
         
         self["#{set.to_s[0..-2]}_ids"] = user_set.map { |item| item.id }
       end
-    end
-    
-    def login_challenge
-      self[:login_challenge] ||= Password.gen_string(32)
     end
     
     def logout

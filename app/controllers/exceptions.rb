@@ -1,4 +1,8 @@
 class Exceptions < Merb::Controller
+  def action_not_found
+    redirect "/"
+  end
+  
   def common_error
     ControllerError.log!(request)
     exception = request.exceptions.first

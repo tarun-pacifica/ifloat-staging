@@ -516,6 +516,11 @@ img.icon {
 	text-align: center;
 }
 
+#login_register p.error {
+	color: red;
+	font-weight: bold;
+}
+
 /* Main Header */
 
 #main_header {

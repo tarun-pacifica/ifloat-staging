@@ -623,7 +623,7 @@ function pick_list_blink(group) {
 
 function pick_list_hide() {
 	var list = $(this);
-	list.css("background-image", "url(/images/buttons/enabled.png)");
+	list.css("background-image", "url(/images/pick_lists/backgrounds/enabled.png)");
 	list.find("a").hide();
 }
 
@@ -641,7 +641,7 @@ function pick_list_remove(group, pick_id) {
 function pick_list_show() {
 	var list = $(this);
 	if(list.find(".total").text() == "") return;
-	list.css("background-image", "url(/images/buttons/hover.png)");
+	list.css("background-image", "url(/images/pick_lists/backgrounds/active.png)");
 	list.find("a").show();
 }
 
@@ -690,7 +690,7 @@ function pick_lists_update_handle(data) {
 			pick_list.click(pick_list_show);
 			pick_list.mouseenter(pick_list_show);
 			pick_list.mouseleave(pick_list_hide);
-			pick_list.css("background", "url(/images/buttons/enabled.png) repeat-x;");
+			pick_list.css("background", "url(/images/pick_lists/backgrounds/enabled.png) repeat-x;");
 		}
 	}
 	

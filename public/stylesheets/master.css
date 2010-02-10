@@ -585,7 +585,7 @@ img.icon {
 }
 
 #main_header #find_bar .pick_list a.buy {
-	background: url(/images/buttons/enabled.png) repeat-x;
+	background: url(/images/pick_lists/backgrounds/enabled.png) repeat-x;
 	padding: 4px 0 0 0;
 	height: 19px;
 	text-align: center;
@@ -811,7 +811,7 @@ img.icon {
 }
 
 #partner_panel .pick_list {
-	background: url(/images/buttons/enabled.png) repeat-x;
+	background: url(/images/pick_lists/backgrounds/enabled.png) repeat-x;
 	color: white;
 	cursor: default;
 	margin-top: 5px;
@@ -1227,7 +1227,7 @@ img.icon {
 }
 
 #product_detail_assets .asset_links #pick_buttons div {
-	background: url(/images/buttons/enabled.png) repeat-x;
+	background: url(/images/pick_lists/backgrounds/enabled.png) repeat-x;
 	border-left: 1px solid #4263A0;
 	border-right: 1px solid #4263A0;
 	color: white;
@@ -1331,7 +1331,7 @@ img.icon {
 }
 
 #product_detail_relations .more div {
-	background: url(/images/buttons/enabled.png) repeat-x;
+	background: url(/images/product_detail/backgrounds/enabled.png) repeat-x;
 	border-left: 1px solid #4263A0;
 	border-right: 1px solid #4263A0;
 	color: white;

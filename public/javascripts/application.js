@@ -82,8 +82,8 @@ function filter_create(info) {
 			var max = data.chosen[1];
 			
 			if (unit != attributes.unit) {
-				min = num_filter_convert(min, unit, attributes.unit);
-				max = num_filter_convert(max, unit, attributes.unit);
+				min = num_filter_convert(min, attributes.unit, unit);
+				max = num_filter_convert(max, attributes.unit, unit);
 			}
 			
 			attributes.values[unit] = [min, max];

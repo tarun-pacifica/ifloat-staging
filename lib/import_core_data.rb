@@ -58,16 +58,18 @@ class ImportSet
   
   def add(object)
     @objects << object
+    klass = object.klass
     
-    pk = object.primary_key = object.attributes.values_at(*PRIMARY_KEYS[object.klass])
-    error(object.klass, object.path, object.row, nil, "unable to establish primary key") if pk.nil?
+    pk = object.attributes.values_at(*PRIMARY_KEYS[klass])
+    error(klass, object.path, object.row, nil, "unable to establish primary key") if pk.nil?
     return if pk.nil? or pk.any? { |v| v.nil? }
+    object.primary_key = pk
     
-    objects_by_pk = (@objects_by_pk_by_class[object.klass] ||= {})
+    objects_by_pk = (@objects_by_pk_by_class[klass] ||= {})
     existing = objects_by_pk[pk]
     
     if existing.nil? then objects_by_pk[pk] = object
-    else error(object.klass, object.path, object.row, nil, "duplicate of #{existing.path} row #{existing.row}: #{friendly_pk(pk)}")
+    else error(klass, object.path, object.row, nil, "duplicate of #{existing.path} row #{existing.row}: #{friendly_pk(pk)}")
     end
   end
   
@@ -196,7 +198,7 @@ class ImportSet
         attributes[key] = (value.is_a?(ImportObject) ? value.resource_id : value)
       end
       
-      pk = attributes.values_at(*pk_fields) # TODO: stop tracking primary key in import object
+      pk = attributes.values_at(*pk_fields)
       pk_md5 = Digest::MD5.hexdigest(pk.join("::"))
       existing_value_md5, existing_id = existing_catalogue[pk_md5]
       if existing_id.nil?
@@ -241,7 +243,7 @@ class ImportSet
       next if object.resource.save
       object.resource.errors.full_messages.each { |message| error(klass, object.path, object.row, nil, message) }
     end
-    
+            
     stats
   end
   
@@ -261,7 +263,7 @@ class ImportSet
   
   def primary_image_attachments
     attachments_by_product = {}
-    @objects_by_pk_by_class[Attachment].each do |pk, attachment|
+    (@objects_by_pk_by_class[Attachment] || []).each do |pk, attachment|
       product, role, sequence_number = pk
       next unless role == "image"
       a = attachments_by_product[product]

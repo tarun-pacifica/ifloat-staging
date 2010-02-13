@@ -133,7 +133,8 @@ class ProductParser < AbstractParser
     when :company
       @import_set.get!(Company, value)
       
-    when :id
+    # TODO: remove review_stage when it has been expunged from all product CSVs
+    when :id, :review_stage
       raise "invalid #{domain} (expected an integer): #{value.inspect}" unless value =~ /^(\d+)$/
       value.to_i
       
@@ -156,7 +157,7 @@ class ProductParser < AbstractParser
         fields << f
         ImportObject.new(ProductRelationship, attributes.merge(:value => f))
       end
-          
+      
     when :values
       parse_value(value, fields, *domain_info)
       
@@ -171,6 +172,7 @@ class ProductParser < AbstractParser
       [:company]
       
     when /^product\.(.+?)$/
+      warn "WARNING: product.review_stage is deprecated" if $1 == "review_stage" # TODO: remove when ready
       [$1.to_sym]
       
     when /^mapping\.reference\.(.+?)$/

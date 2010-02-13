@@ -44,7 +44,7 @@ class PropertyValue
   property :sequence_number, Integer, :required => true
   
   belongs_to :product, :index => true
-  belongs_to :definition, :model => "PropertyDefinition", :child_key => [:property_definition_id]
+  belongs_to :definition, :model => "PropertyDefinition", :child_key => [:property_definition_id], :index => true
   
   validates_with_block :type do
     (self.class != PropertyValue and self.kind_of?(PropertyValue)) || [false, "must be a sub-class of PropertyValue"]

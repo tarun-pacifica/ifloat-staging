@@ -321,7 +321,7 @@ def build_asset_csv
 
     name = path_parts.pop
     errors << [relative_path, "invalid asset name format"] unless name =~ Asset::NAME_FORMAT
-    errors << [relative_path, "extension not jpg or pdf"] unless name =~ /(jpg|pdf|png)$/
+    errors << [relative_path, "extension not jpg, pdf or png"] unless name =~ /(jpg|pdf|png)$/
     
     paths_by_name = (paths_by_names_by_company_refs[company_ref] ||= {})
     existing_path = paths_by_name[name]

@@ -1,5 +1,5 @@
 class ProductParser < AbstractParser
-  ESSENTIAL_HEADERS = ["company.reference", "product.review_stage", "product.reference"]
+  ESSENTIAL_HEADERS = ["company.reference", "product.reference"]
   
   REQUIRED_PROPERTY_NAMES = ["reference:class"]
   
@@ -83,7 +83,7 @@ class ProductParser < AbstractParser
   
   def generate_objects(parsed_fields)
     attributes = {}
-    [:company, :reference, :review_stage].each do |attribute|
+    [:company, :reference].each do |attribute|
       attributes[attribute] = parsed_fields.delete([attribute])
     end
     objects = [ImportObject.new(Product, attributes)]
@@ -133,7 +133,7 @@ class ProductParser < AbstractParser
     when :company
       @import_set.get!(Company, value)
       
-    when :id, :review_stage
+    when :id
       raise "invalid #{domain} (expected an integer): #{value.inspect}" unless value =~ /^(\d+)$/
       value.to_i
       

@@ -4,8 +4,6 @@
 #
 # Each Product belongs to a specific Company and may be related to other Products by means of ProductRelationship objects. FacilityProducts may be associated with Products by means of ProductMapping objects.
 #
-# In order to aid with quality control (particularly in the case where a Product is mostly / entirely inferred from retailer information), Products carry a 'review_stage' flag which helps with data preparation in grouping products together that have had the same level of editorial attention. <em>Note that this simple revision number could become a foreign key out to a revisions schema to power more complex workflows.</em>
-#
 class Product
   include DataMapper::Resource
   
@@ -13,7 +11,6 @@ class Product
   
   property :id,           Serial
   property :reference,    String,  :required => true, :format => REFERENCE_FORMAT
-  property :review_stage, Integer, :required => true, :default => 0
   
   belongs_to :company
   

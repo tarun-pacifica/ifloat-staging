@@ -133,17 +133,25 @@ class ImportSet
     # end
     
     stopwatch("ensured all primary images are 400x400 in size") do
-      pias_by_product.values.map { |attachment| attachment.attributes[:asset] }.uniq.each do |asset|
-        path = asset.attributes[:file_path]
-        begin
-          ImageScience.with_image(path) do |img|
-            w, h = img.width, img.height
-            error(Asset, asset.path, asset.row, nil, "not 400x400 (#{w}x#{h}): #{path}") unless w == 400 and h == 400
-          end
-        rescue Exception => e
-          error(Asset, asset.path, asset.row, nil, "unable to read image (#{e}): #{path}")
+      assets = pias_by_product.values.map { |attachment| attachment.attributes[:asset] }.uniq
+      assets_by_path = assets.hash_by { |asset| asset.attributes[:file_path] }
+      
+      `identify #{assets_by_path.keys.map { |k| k.inspect }.join(" ")}`.lines.each do |line|
+        unless line =~ /^(.+?\.(jpg|png)).*?(\d+x\d+)/
+          error(Asset, nil, nil, nil, "unable to read IM.identify report line: #{line.inspect}")
+          next
+        end
+        next if $3 == "400x400"
+        
+        asset = assets_by_path[$1]
+        if asset.nil?
+          error(Asset, nil, nil, nil, "unable to associate IM.identify report line: #{line.inspect}")
+        else
+          error(Asset, asset.path, asset.row, nil, "not 400x400 (#{$3}): #{$1.inspect}")
         end
       end
+      
+      error(Asset, nil, nil, nil, "IM.identify command failed") unless $?.success?
     end
     
     stopwatch("ensured no orphaned PickedProducts") do
@@ -409,6 +417,13 @@ def stopwatch(message)
   result = yield
   puts "#{'%6.2f' % (Time.now - start)}s : #{message}"
   result
+end
+
+
+# Ensure the relevant ImageMagick tools are available
+
+%w(composite convert identify).each do |tool|
+  mail_fail("Failed to locate the #{tool.inspect} tool - is ImageMagick installed?") if `which #{tool}`.blank?
 end
 
 

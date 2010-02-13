@@ -187,7 +187,8 @@ class ProductParser < AbstractParser
       unit = nil if unit.blank?
       valid, error = PropertyType.validate_unit(unit, *property_type.attributes.values_at(:name, :core_type, :units))
       raise "invalid unit (#{error}): #{unit.inspect}" unless valid
-      [:values, property, seq_num.to_i, unit, (component || :value).to_sym]
+      klass = PropertyType.value_class(property_type.attributes[:core_type])
+      [:values, klass, property, seq_num.to_i, unit, (component || :value).to_sym]
 
     when /^relationship\.([a-z_]+)\.(.+?)(\.(.+?))?$/
       relationship_name, company_ref, property_name = $1, $2, $4
@@ -205,19 +206,18 @@ class ProductParser < AbstractParser
     end
   end
   
-  def parse_value(value, fields, property, seq_num, unit, component)
-    return parse_value_auto(fields, property, seq_num, unit, component) if value == "AUTO"
+  def parse_value(value, fields, klass, property, seq_num, unit, component)
+    return parse_value_auto(fields, klass, property, seq_num, unit, component) if value == "AUTO"
     
     case component
       
     when :tolerance
       raise "invalid property value tolerance (expected a number): #{value.inspect}" unless value =~ /^\d+(\.\d+)?$/
-      property_value = fields[[:values, property, seq_num, unit, :value]]
+      property_value = fields[[:values, klass, property, seq_num, unit, :value]]
       return :deferred unless property_value.is_a?(PropertyValue)
       property_value.tolerance = value.to_f
       
     when :value
-      klass = PropertyType.value_class(property.attributes[:property_type].attributes[:core_type])
       attributes = {:definition => property, :auto_generated => false, :sequence_number => seq_num}
       attributes.update(klass.parse_or_error(value))
       attributes[:unit] = unit unless unit.nil?
@@ -228,21 +228,21 @@ class ProductParser < AbstractParser
     end
   end
   
-  def parse_value_auto(fields, property, seq_num, unit, component)
+  def parse_value_auto(fields, klass, property, seq_num, unit, component)
     return nil unless component == :value
     
     @all_units_by_property[property].each do |search_unit|
       next if search_unit == unit
       
-      object = fields[[:values, property, seq_num, search_unit, component]]
+      object = fields[[:values, klass, property, seq_num, search_unit, component]]
       next if object.nil?
 
-      tolerance_key = [:values, property, seq_num, search_unit, :tolerance]
+      tolerance_key = [:values, klass, property, seq_num, search_unit, :tolerance]
       return :deferred if @headers.values.include?(tolerance_key) and not fields.has_key?(tolerance_key)
       
       attributes = {:definition => property, :auto_generated => true, :sequence_number => seq_num}
-      attributes.update(object.klass.convert(object.attributes, unit))
-      return ImportObject.new(object.klass, attributes)
+      attributes.update(klass.convert(object.attributes, unit))
+      return ImportObject.new(klass, attributes)
     end
     
     :deferred
@@ -262,7 +262,7 @@ class ProductParser < AbstractParser
     headers.values.each do |head|
       next unless head.first == :values
       
-      property, seq_num, unit, component = head[1..-1]
+      property, seq_num, unit, component = head[2..-1]
       properties << property
       next unless component == :value
       

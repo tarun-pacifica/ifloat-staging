@@ -33,7 +33,6 @@ end
 sorted_column_names = universal_columns.keys.sort_by do |col_name|
   case col_name
   when "company.reference" then [0]
-  when "product.review_stage" then [1]
   when "product.reference" then [2]
   when /^mapping\.(.+?)$/ then [3, $1]
   when /^raw:.*?(\d+)$/ then [7, $1.to_i]

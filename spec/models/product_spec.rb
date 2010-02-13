@@ -7,11 +7,6 @@ describe Product do
       @product = Product.new(:company_id => 1, :reference => "AF11235")
     end
     
-    it "should succeed with valid data (having a default review stage of 0)" do
-      @product.should be_valid
-      @product.review_stage.should == 0
-    end
-    
     it "should fail without a company" do
       @product.company = nil
       @product.should_not be_valid
@@ -24,11 +19,6 @@ describe Product do
     
     it "should fail with an invalid reference" do
       @product.reference = " abc "
-      @product.should_not be_valid
-    end
-    
-    it "should fail without a review stage" do
-      @product.review_stage = nil
       @product.should_not be_valid
     end
   end

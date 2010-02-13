@@ -136,23 +136,24 @@ class ImportSet
       assets = pias_by_product.values.map { |attachment| attachment.attributes[:asset] }.uniq
       assets_by_path = assets.hash_by { |asset| asset.attributes[:file_path] }
       
-      `identify #{assets_by_path.keys.map { |k| k.inspect }.join(" ")}`.lines.each do |line|
+      `gm identify #{assets_by_path.keys.map { |k| k.inspect }.join(" ")}`.lines.each do |line|
         unless line =~ /^(.+?\.(jpg|png)).*?(\d+x\d+)/
-          error(Asset, nil, nil, nil, "unable to read IM.identify report line: #{line.inspect}")
+          error(Asset, nil, nil, nil, "unable to read GM.identify report line: #{line.inspect}")
           next
         end
         next if $3 == "400x400"
         
         asset = assets_by_path[$1]
         if asset.nil?
-          error(Asset, nil, nil, nil, "unable to associate IM.identify report line: #{line.inspect}")
+          error(Asset, nil, nil, nil, "unable to associate GM.identify report line: #{line.inspect}")
         else
           error(Asset, asset.path, asset.row, nil, "not 400x400 (#{$3}): #{$1.inspect}")
         end
       end
       
-      error(Asset, nil, nil, nil, "IM.identify command failed") unless $?.success?
+      error(Asset, nil, nil, nil, "GM.identify command failed") unless $?.success?
     end
+    exit 1
     
     stopwatch("ensured no orphaned PickedProducts") do
       PickedProduct.all_primary_keys.each do |company_ref, product_ref|
@@ -420,11 +421,9 @@ def stopwatch(message)
 end
 
 
-# Ensure the relevant ImageMagick tools are available
+# Ensure that GraphicsMagick is installed
 
-%w(composite convert identify).each do |tool|
-  mail_fail("Failed to locate the #{tool.inspect} tool - is ImageMagick installed?") if `which #{tool}`.blank?
-end
+mail_fail("Failed to locate the 'gm' tool - is GraphicsMagick installed?") if `which gm`.blank?
 
 
 # Ensure each class has an associated parser

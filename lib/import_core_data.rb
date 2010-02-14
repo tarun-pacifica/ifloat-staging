@@ -8,21 +8,19 @@ ASSET_REPO = "../ifloat_assets"
 ASSET_VARIANT_DIR = "/tmp/ifloat_asset_variants"
 FileUtils.mkpath(ASSET_VARIANT_DIR)
 
+CSV_DUMP_DIR = "/tmp/ifloat_csv_dumps"
+FileUtils.mkpath(CSV_DUMP_DIR)
 CSV_REPO = "../ifloat_csvs"
 
 CLASSES = [PropertyType, PropertyDefinition, PropertyValueDefinition, TitleStrategy, Company, Facility, Asset, Product]
 
 class ImportObject
-  attr_accessor :primary_key, :resource
+  attr_accessor :primary_key, :resource_id
   attr_reader :klass, :attributes, :path, :row
   
   def initialize(klass, attributes)
     @klass = klass
     @attributes = attributes
-  end
-  
-  def resource_id
-    @resource.nil? ? attributes[:id] : @resource.id
   end
   
   def set_source(path, row)
@@ -54,6 +52,7 @@ class ImportSet
     @errors = []
     @objects = []
     @objects_by_pk_by_class = {}
+    @objects_checkpoint = 0
   end
   
   def add(object)
@@ -73,10 +72,33 @@ class ImportSet
     end
   end
   
+  def add_from_dump(name)
+    objects = Marshal.load(File.open(CSV_DUMP_DIR / name)).each do |object|
+      object, error = marshal_unisolate(object)
+      
+      if error.nil? then add(object)
+      else error(object.klass, object.path, object.row, nil, error) # TODO: column is not reported on cached items
+      end
+    end
+  end
+  
+  def checkpoint
+    @objects_checkpoint = @objects.size
+  end
+  
+  def dump_exists?(name)
+    File.exist?(CSV_DUMP_DIR / name)
+  end
+  
+  def dump_from_checkpoint(name)
+    objects = @objects[@objects_checkpoint..-1]
+    Marshal.dump(objects.map { |object| marshal_isolate(object) }, File.open(CSV_DUMP_DIR / name, "w"))
+  end
+  
   def error(klass, path, row, column, message)
     @errors << [klass, path, row, column, message]
   end
-  
+    
   def get(klass, *pk_value)
     objects = (@objects_by_pk_by_class[klass] || {})
     pk_value.empty? ? objects : objects[pk_value]
@@ -88,7 +110,7 @@ class ImportSet
     object
   end
   
-  def import    
+  def import
     @objects_by_pk_by_class = nil
     def add; raise "add cannot be called once import has been"; end
     
@@ -153,7 +175,6 @@ class ImportSet
       
       error(Asset, nil, nil, nil, "GM.identify command failed") unless $?.success?
     end
-    exit 1
     
     stopwatch("ensured no orphaned PickedProducts") do
       PickedProduct.all_primary_keys.each do |company_ref, product_ref|
@@ -196,7 +217,7 @@ class ImportSet
     pk_fields, value_fields = pk_and_value_fields(klass)
     existing_catalogue = value_md5s_and_ids_by_pk_md5(klass, pk_fields, value_fields)
     
-    to_save = []
+    to_save = {}
     to_save_pk_md5s = []
     to_skip_pk_md5s = []
     
@@ -211,11 +232,11 @@ class ImportSet
       pk_md5 = Digest::MD5.hexdigest(pk.join("::"))
       existing_value_md5, existing_id = existing_catalogue[pk_md5]
       if existing_id.nil?
-        object.resource = klass.new(attributes)
-        to_save << object
+        to_save[object] = klass.new(attributes)
         to_save_pk_md5s << pk_md5
         next
       end
+      object.resource_id = existing_id
       
       values = value_fields.map do |attribute|
         value = attributes[attribute]
@@ -229,16 +250,11 @@ class ImportSet
       end
       
       value_md5 = (values.empty? ? nil : Digest::MD5.hexdigest(values.join("::")))
-            
-      if value_md5 == existing_value_md5
-        object.attributes[:id] = existing_id
-        to_skip_pk_md5s << pk_md5
-        next
-      end
+      to_skip_pk_md5s << pk_md5 and next if value_md5 == existing_value_md5
       
-      object.resource = klass.get(existing_id)
-      object.resource.attributes = attributes
-      to_save << object
+      resource = klass.get(existing_id)
+      resource.attributes = attributes
+      to_save[object] = resource
       to_save_pk_md5s << pk_md5
     end
     
@@ -247,13 +263,56 @@ class ImportSet
     to_destroy_ids.each_slice(1000) { |ids| klass.all(:id => ids).destroy! }
     stats = {:created => 0, :updated => 0, :destroyed => to_destroy_ids.size, :skipped => to_skip_pk_md5s.size}
     
-    to_save.each do |object|
-      stats[object.resource.new? ? :created : :updated] += 1
-      next if object.resource.save
-      object.resource.errors.full_messages.each { |message| error(klass, object.path, object.row, nil, message) }
+    to_save.each do |object, resource|
+      action = (resource.new? ? :created : :updated)
+      if resource.save
+        object.resource_id = resource.id
+      else
+        resource.errors.full_messages.each { |message| error(klass, object.path, object.row, nil, message) }
+        action = :skipped
+      end
+      stats[action] += 1
     end
-            
     stats
+  end
+  
+  def marshal_isolate(object)
+    isolated_attributes = {}
+    object.attributes.each do |key, value|
+      isolated_attributes[key] = (value.is_a?(ImportObject) ? marshal_isolate_parent(value) : value)
+    end    
+    [object.klass, object.path, object.row, isolated_attributes]
+  end
+  
+  def marshal_isolate_parent(object)
+    pk_value = object.primary_key.map { |value| value.is_a?(ImportObject) ? marshal_isolate_parent(value) : value }
+    [object.klass, pk_value]
+  end
+  
+  def marshal_unisolate(isolated_object)
+    klass, path, row, isolated_attributes = isolated_object
+    
+    attributes = {}
+    error = nil
+    begin
+      isolated_attributes.each do |key, value|        
+        value = marshal_unisolate_parent(*value) if value.is_a?(Array) and value.first.is_a?(Class)
+        attributes[key] = value
+      end
+    rescue Exception => e
+      error = e.message
+    end
+    
+    object = ImportObject.new(klass, attributes)
+    object.set_source(path, row)
+    [object, error]
+  end
+  
+  def marshal_unisolate_parent(klass, pk_value)
+    pk_value.map! do |value|
+      (value.is_a?(Array) and value.first.is_a?(Class)) ? marshal_unisolate_parent(*value) : value
+    end
+    get!(klass, *pk_value)
   end
   
   def pk_and_value_fields(klass)
@@ -421,6 +480,14 @@ def stopwatch(message)
 end
 
 
+# Disable DM's identity map for the duration of this script
+
+class DataMapper::IdentityMap
+  def set(key, value); end
+  def []=(key, value); end
+end
+
+
 # Ensure that GraphicsMagick is installed
 
 mail_fail("Failed to locate the 'gm' tool - is GraphicsMagick installed?") if `which gm`.blank?
@@ -481,13 +548,28 @@ mail_fail(errors.join("\n")) unless errors.empty?
 # Parse each class
 
 puts "=== Parsing CSVs ==="
+freshly_parsed_classes = []
 import_set = ImportSet.new
 CLASSES.each do |klass|
   parser = parsers_by_class[klass].new(import_set)
   csv_paths_by_class[klass].each do |path|
     nice_path = File.basename(path)
     nice_path = File.basename(File.dirname(path)) / nice_path unless nice_path == "#{klass.storage_name}.csv"
-    stopwatch(nice_path) { parser.parse(path) }
+    
+    checksum = Digest::MD5.file(path).hexdigest
+    dump_name = "#{nice_path}_#{checksum}.dump".tr("/", "_")
+    
+    load_from_cache = import_set.dump_exists?(dump_name)
+    load_from_cache = false if klass == Product and freshly_parsed_classes.include?(PropertyType)
+    
+    if load_from_cache
+      stopwatch("#{nice_path} [cached]") { import_set.add_from_dump(dump_name) }
+    else
+      p import_set.checkpoint
+      stopwatch(nice_path) { parser.parse(path) }
+      stopwatch("#{nice_path} [cache creation]") { import_set.dump_from_checkpoint(dump_name) }
+      parsed_afresh << klass
+    end
   end
 end
 
@@ -522,3 +604,5 @@ stopwatch(Indexer::COMPILED_PATH) do
   CachedFind.all.update!(:invalidated => true)
   PickedProduct.all.update!(:invalidated => true)
 end
+
+# TODO: foreach unique prefix in the CSV dump dir, clear out all but the newest file

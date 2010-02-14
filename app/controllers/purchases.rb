@@ -9,7 +9,7 @@ class Purchases < Application
     purchase = purchases.find { |purc| purc.facility_id == facility.id }
     raise NotFound unless purchase
     
-    references = purchase.complete!(params)
+    references = purchase.complete!(params, request.remote_ip)
     session.remove_purchase(purchase)
     
     prod_ids_by_ref = facility.map_references(references)

@@ -27,10 +27,13 @@ class Purchase
   
   OBSOLESCENCE_TIME = 24.hours
   
-  property :id,               Serial
-  property :created_at,       DateTime, :required => true, :default => proc { DateTime.now }
-  property :completed_at,     DateTime
-  property :response,         Object
+  property :id,           Serial
+  property :created_at,   DateTime,  :required => true, :default => proc { DateTime.now }
+  property :created_ip,   IPAddress, :required => true # TODO: update spec
+  
+  property :response,     Object
+  property :completed_at, DateTime
+  property :completed_ip, IPAddress # TODO: update spec
   
   belongs_to :facility
   belongs_to :user, :required => false
@@ -71,9 +74,10 @@ class Purchase
     parsed_data
   end
   
-  def complete!(params)    
+  def complete!(params, ip_address)    
     self.response = Purchase.parse_response(params)
     self.completed_at = DateTime.now
+    self.completed_ip = ip_address
     save
     self.response[:items].map { |item| item["reference"] }.compact.uniq
   end

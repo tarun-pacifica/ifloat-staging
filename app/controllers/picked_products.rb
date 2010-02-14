@@ -24,7 +24,7 @@ class PickedProducts < Application
     @partner_url = partner_url(facility, first_available_product)
     return redirect("/picked_products/options") if @partner_url.nil?
     
-    session.add_purchase(Purchase.new(:facility => facility))
+    session.add_purchase(Purchase.new(:facility => facility, :created_ip => request.remote_ip))
     
     @transitional = true
     render

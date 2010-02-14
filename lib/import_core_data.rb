@@ -6,6 +6,8 @@ ASSET_CSV_PATH = "/tmp/assets.csv"
 ASSET_ERRORS_PATH = "/tmp/basic_asset_errors.csv"
 ASSET_REPO = "../ifloat_assets"
 ASSET_VARIANT_DIR = "/tmp/ifloat_asset_variants"
+ASSET_VARIANT_SIZES = {:small => "200x200", :tiny => "100x100"}
+
 FileUtils.mkpath(ASSET_VARIANT_DIR)
 
 CSV_DUMP_DIR = "/tmp/ifloat_csv_dumps"
@@ -155,26 +157,11 @@ class ImportSet
     # end
     
     stopwatch("ensured all primary images are 400x400 in size") do
-      assets = pias_by_product.values.map { |attachment| attachment.attributes[:asset] }.uniq
-      assets_by_path = assets.hash_by { |asset| asset.attributes[:file_path] }
-      
-      `gm identify #{assets_by_path.keys.map { |k| k.inspect }.join(" ")}`.lines.each do |line|
-        unless line =~ /^(.+?\.(jpg|png)).*?(\d+x\d+)/
-          error(Asset, nil, nil, nil, "unable to read GM.identify report line: #{line.inspect}")
-          next
-        end
-        next if $3 == "400x400"
-        
-        asset = assets_by_path[$1]
-        if asset.nil?
-          error(Asset, nil, nil, nil, "unable to associate GM.identify report line: #{line.inspect}")
-        else
-          error(Asset, asset.path, asset.row, nil, "not 400x400 (#{$3}): #{$1.inspect}")
-        end
+      pias_by_product.values.map { |attachment| attachment.attributes[:asset] }.uniq.each do |asset|
+        path, size = asset.attributes.values_at(:file_path, :pixel_size)
+        error(Asset, asset.path, asset.row, nil, "not 400x400 (#{size}): #{path.inspect}") unless size == "400x400"
       end
-      
-      error(Asset, nil, nil, nil, "GM.identify command failed") unless $?.success?
-    end unless pias_by_product.empty?
+    end
     
     stopwatch("ensured no orphaned PickedProducts") do
       PickedProduct.all_primary_keys.each do |company_ref, product_ref|
@@ -407,56 +394,50 @@ def build_asset_csv
     end
     
     checksum = Digest::MD5.file(path).hexdigest
-    
-    variants = [nil, nil]
-    variants = %w(small tiny).map do |variant|
-      variant_path, error = create_asset_variant(path, checksum, variant)
-      errors << [relative_path, error] unless error.nil?
-      variant_path
-    end if File.extname(path) =~ Asset::IMAGE_FORMAT
-    
-    assets << ([bucket, company_ref, name, path, checksum] + variants)
+    assets << [bucket, company_ref, name, path, checksum]
   end
+  return errors unless errors.empty?
   
-  if errors.empty?
-    FasterCSV.open(ASSET_CSV_PATH, "w") do |csv|
-      csv << ["bucket", "company.reference", "name", "file_path", "checksum", "file_path_small", "file_path_tiny"]
-      assets.sort.each { |asset| csv << asset }
+  assets_by_path = assets.hash_by { |bucket, company_ref, name, path, checksum| path }
+  assets_by_path.keys.map { |k| k =~ /(jpg|png)$/ ? k.inspect : nil }.compact.each_slice(500) do |paths|
+    `gm identify #{paths.join(" ")}`.lines.each do |line|
+      unless line =~ /^(.+?\.(jpg|png)).*?(\d+x\d+)/
+        errors <<  [nil, "unable to read GM.identify report line: #{line.inspect}"]
+        next
+      end
+
+      asset = assets_by_path[$1]
+      if asset.nil? then errors << [nil, "unable to associate GM.identify report line: #{line.inspect}"]
+      else asset << $3
+      end
     end
-    return nil
+  end
+  return errors unless errors.empty?
+  
+  assets.each do |info|
+    bucket, company_ref, name, path, checksum, size = info
+    next unless size == "400x400"
+    
+    ext = File.extname(path)
+    [:small, :tiny].map do |variant|
+      variant_path = ASSET_VARIANT_DIR / "#{checksum}-#{variant}#{ext}"
+      info << variant_path
+      next if File.exist?(variant_path)
+      
+      variant_size = ASSET_VARIANT_SIZES[variant]
+      report = `gm convert -size #{variant_size} #{path.inspect} -resize #{variant_size} +profile '*' #{variant_path.inspect}`
+      errors << [path, "GM.convert failed: #{report.inspect}"] unless $?.success?
+    end
   end
   
-  FasterCSV.open(ASSET_ERRORS_PATH, "w") do |error_report|
-    error_report << ["path", "error"]
-    errors.each { |error| error_report << error }
+  return errors unless errors.empty?
+  FasterCSV.open(ASSET_CSV_PATH, "w") do |csv|
+    csv << ["bucket", "company.reference", "name", "file_path", "checksum", "pixel_size", "file_path_small", "file_path_tiny"]
+    assets.sort.each { |asset| csv << asset }
   end
-  ASSET_ERRORS_PATH
+  nil
 end
 
-def create_asset_variant(source_path, checksum, variant)
-  path = ASSET_VARIANT_DIR / "#{checksum}-#{variant}#{File.extname(source_path)}"
-  return [File.size(path).zero? ? nil : path, nil] if File.exist?(path)
-  
-  width, height =
-    case variant
-    when "small" then [200, 200]
-    when "tiny"  then [100, 100]
-    else raise "unknown variant #{variant.inspect}"
-    end
-  
-  begin
-    ImageScience.with_image(source_path) do |img|
-      unless img.width == 400 and img.height == 400
-        FileUtils.touch(path)
-        return [nil, nil]
-      end
-      img.resize(width, height) { |resized| resized.save(path) }    
-    end
-    [path, nil]
-  rescue Exception => e
-    [nil, "unable to create #{variant} variant: #{e}"]
-  end
-end
 
 def mail(success, message, attachment_path = nil)
   puts "Import #{success} on #{`hostname`.chomp} (#{Merb.environment} environment)"
@@ -521,8 +502,14 @@ puts "=== Building Asset CSV ==="
 stopwatch("assets.csv") do
   error_message = "Failed to build asset CSV from asset repository #{ASSET_REPO.inspect}."
   begin
-    error_report_path = build_asset_csv
-    mail_fail(error_message, error_report_path) unless error_report_path.nil?
+    errors = build_asset_csv
+    unless errors.nil?
+      FasterCSV.open(ASSET_ERRORS_PATH, "w") do |error_report|
+        error_report << ["path", "error"]
+        errors.each { |error| error_report << error }
+      end
+      mail_fail(error_message, ASSET_ERRORS_PATH)
+    end
   rescue SystemExit
     exit 1
   rescue Exception => e
@@ -577,7 +564,7 @@ CLASSES.each do |klass|
       import_set.checkpoint
       stopwatch(nice_path) { parser.parse(path) }
       stopwatch(" --> [updated cache]") { import_set.dump_from_checkpoint(dump_name) }
-      parsed_afresh << klass
+      freshly_parsed_classes << klass
     end
   end
 end

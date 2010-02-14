@@ -46,6 +46,7 @@ class Asset
   property :bucket, String, :required => true, :unique_index => :name_per_company_per_bucket
   property :name, String, :required => true, :length => 255, :format => NAME_FORMAT, :unique_index => :name_per_company_per_bucket
   property :description, String, :length => 255
+  property :pixel_size, String
   property :view, String
   property :source_notes, String, :length => 255
   property :chain_id, Integer, :writer => :protected, :unique_index => :chain_seq_num_per_chain

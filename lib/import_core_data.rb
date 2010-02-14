@@ -253,7 +253,7 @@ class ImportSet
     to_save.each do |object, resource|
       action = (resource.new? ? :created : :updated)
       errors = nil
-      
+    
       begin
         if resource.save then object.resource_id = resource.id
         else errors = resource.errors.full_messages
@@ -261,12 +261,12 @@ class ImportSet
       rescue Exception => e
         errors = [e.message]
       end
-      
+    
       unless errors.nil?
         errors.each { |message| error(klass, object.path, object.row, nil, message) }
         action = :skipped
       end
-      
+    
       stats[action] += 1
     end
     stats
@@ -472,9 +472,9 @@ end
 
 # Disable DM's identity map for the duration of this script
 
-class DataMapper::IdentityMap
-  def set(key, value); end
-  def []=(key, value); end
+module DataMapper::Resource
+  private
+  def add_to_identity_map; end
 end
 
 
@@ -498,7 +498,7 @@ end
 
 # Build an asset import CSV from the contents of the asset repo
 
-puts "=== Building Asset CSV ==="
+puts "=== Compiling Assets ==="
 stopwatch("assets.csv") do
   error_message = "Failed to build asset CSV from asset repository #{ASSET_REPO.inspect}."
   begin

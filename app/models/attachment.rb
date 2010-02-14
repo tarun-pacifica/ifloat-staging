@@ -17,11 +17,10 @@ class Attachment
            "user_experience", "safety_data_sheet"]
   
   property :id, Serial
-  property :role, String
+  property :role, String, :unique_index => :seq_num_per_prod_per_role
   property :sequence_number, Integer, :required => true, :unique_index => :seq_num_per_prod_per_role
   
   belongs_to :asset
-    property :asset_id, Integer, :unique_index => :seq_num_per_prod_per_role
   belongs_to :product
     property :product_id, Integer, :unique_index => :seq_num_per_prod_per_role
   

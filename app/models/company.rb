@@ -23,7 +23,7 @@ class Company
   property :id, Serial
   property :name, String, :required => true
   property :description, String, :length => 255
-  property :reference, String, :required => true, :format => REFERENCE_FORMAT, :unique => true
+  property :reference, String, :required => true, :format => REFERENCE_FORMAT, :unique_index => true
   property :primary_url, String, :length => 255
 
   has n, :assets

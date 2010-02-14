@@ -43,20 +43,20 @@ class Asset
   NAME_FORMAT = /^([\w\-\.]+?)(___(\d+))?\.([a-z]{3,})$/
   
   property :id, Serial
-  property :bucket, String, :required => true
-  property :name, String, :required => true, :length => 255, :format => NAME_FORMAT
+  property :bucket, String, :required => true, :unique_index => :name_per_company_per_bucket
+  property :name, String, :required => true, :length => 255, :format => NAME_FORMAT, :unique_index => :name_per_company_per_bucket
   property :description, String, :length => 255
   property :view, String
   property :source_notes, String, :length => 255
-  property :chain_id, Integer, :writer => :protected
-  property :chain_sequence_number, Integer, :writer => :protected
+  property :chain_id, Integer, :writer => :protected, :unique_index => :chain_seq_num_per_chain
+  property :chain_sequence_number, Integer, :writer => :protected, :unique_index => :chain_seq_num_per_chain
   property :checksum, String
   
   belongs_to :company
+    property :company_id, Integer, :unique_index => :name_per_company_per_bucket
   has n, :attachments
   
   validates_within :bucket, :set => BUCKETS
-  validates_is_unique :name, :scope => [:company_id, :bucket]
   validates_within :view, :set => CUBIC_VIEWS
   
   validates_with_block :chain_id do
@@ -65,7 +65,6 @@ class Asset
   
   validates_absent :chain_sequence_number, :if => proc { |asset| asset.chain_id.nil? }
   validates_present :chain_sequence_number, :if => proc { |asset| not asset.chain_id.nil? }
-  validates_is_unique :chain_sequence_number, :scope => [:chain_id], :allow_nil => true
   
   before :valid? do
     root_name, chain_seq_num = self.class.parse_chain(name)

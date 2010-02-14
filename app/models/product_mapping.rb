@@ -12,10 +12,10 @@ class ProductMapping
   include DataMapper::Resource
   
   property :id, Serial
-  property :reference, String, :required => true, :format => /^[A-Z_\d\-\.\/]+$/
+  property :reference, String, :required => true, :format => /^[A-Z_\d\-\.\/]+$/, :unique_index => :prod_per_company_per_ref
 
-  belongs_to :company, :index => true
-  belongs_to :product, :index => true
-  
-  validates_is_unique :product_id, :scope => [:company_id, :reference] # TODO: spec
+  belongs_to :company
+    property :company_id, Integer, :unique_index => :prod_per_company_per_ref
+  belongs_to :product
+    property :product_id, Integer, :unique_index => :prod_per_company_per_ref
 end

@@ -20,7 +20,7 @@ class PropertyType
   
   property :id, Serial
   property :core_type, String, :required => true
-  property :name, String, :required => true, :format => /^[a-z_]{3,}$/, :unique => true
+  property :name, String, :required => true, :format => /^[a-z_]{3,}$/, :unique_index => :true
   property :units, Object, :length => 255
   
   has n, :definitions, :model => "PropertyDefinition"

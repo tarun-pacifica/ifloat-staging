@@ -10,16 +10,15 @@ class Product
   REFERENCE_FORMAT = /^[A-Z_\d\-\.\/]+$/
   
   property :id,           Serial
-  property :reference,    String,  :required => true, :format => REFERENCE_FORMAT
+  property :reference,    String,  :required => true, :format => REFERENCE_FORMAT, :unique_index => :ref_per_company
   
   belongs_to :company
+    property :company_id, Integer, :unique_index => :ref_per_company
   
   has n, :attachments
   has n, :mappings, :model => "ProductMapping"
   has n, :product_relationships
   has n, :values, :model => "PropertyValue"
-  
-  validates_is_unique :reference, :scope => [:company_id]
   
   # TODO: spec
   def self.display_values(product_ids, language_code, property_names = nil)

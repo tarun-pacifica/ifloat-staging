@@ -29,15 +29,17 @@ class ProductRelationship
   }
   
   property :id, Serial
-  property :name, String
-  property :value, String, :required => true
+  property :name, String, :unique_index => :val_per_company_per_prod_per_prop_per_name
+  property :value, String, :required => true, :unique_index => :val_per_company_per_prod_per_prop_per_name
 
   belongs_to :company, :required => false
+    property :company_id, Integer, :unique_index => :val_per_company_per_prod_per_prop_per_name
   belongs_to :product
+    property :product_id, Integer, :unique_index => :val_per_company_per_prod_per_prop_per_name
   belongs_to :property_definition, :required => false
+    property :property_definition_id, Integer, :unique_index => :val_per_company_per_prod_per_prop_per_name
   
   validates_within :name, :set => NAMES.keys
-  validates_is_unique :value, :scope => [:company_id, :product_id, :property_definition_id, :name]
   
   validates_with_block :property_definition, :if => :property_definition do
     property_definition.text? || [false, "should be a text property"]

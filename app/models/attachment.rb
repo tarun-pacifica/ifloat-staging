@@ -18,13 +18,14 @@ class Attachment
   
   property :id, Serial
   property :role, String
-  property :sequence_number, Integer, :required => true
+  property :sequence_number, Integer, :required => true, :unique_index => :seq_num_per_prod_per_role
   
   belongs_to :asset
+    property :asset_id, Integer, :unique_index => :seq_num_per_prod_per_role
   belongs_to :product
+    property :product_id, Integer, :unique_index => :seq_num_per_prod_per_role
   
   validates_within :role, :set => ROLES
-  validates_is_unique :sequence_number, :scope => [:product_id, :role]
   
   def self.product_role_assets(product_ids, include_chains = true)
     return [] if product_ids.empty?

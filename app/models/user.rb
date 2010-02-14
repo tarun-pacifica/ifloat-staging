@@ -21,7 +21,7 @@ class User
   property :id,             Serial
   property :name,           String,    :required => true
   property :nickname,       String
-  property :login,          String,    :required => true, :length => 255, :format => :email_address, :unique => true
+  property :login,          String,    :required => true, :length => 255, :format => :email_address, :unique => true, :unique_index => true
   property :password,       String,    :required => true, :length => 255
   property :admin,          Boolean,   :required => true, :default => false
   property :disabled_at,    DateTime

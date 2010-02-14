@@ -15,18 +15,16 @@ class Facility
   include DataMapper::Resource
   
   property :id, Serial
-  property :name, String, :required => true
-  property :primary_url, String, :length => 255
+  property :name, String, :required => true, :unique_index => :name_per_company
+  property :primary_url, String, :length => 255, :unique_index => true
   
   belongs_to :company
+    property :company_id, Integer, :unique_index => :name_per_company
   belongs_to :location, :required => false
   has n, :employees
   has n, :products, :model => "FacilityProduct"
   has n, :purchases
   
-  validates_is_unique :name, :scope => :company_id
-  validates_is_unique :primary_url, :unless => proc { |f| f.primary_url.nil? }
-    
   # TODO: spec
   def map_products(product_ids)
     pids_by_fp_ref = {}

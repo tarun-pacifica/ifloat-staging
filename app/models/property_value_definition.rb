@@ -12,11 +12,10 @@ class PropertyValueDefinition
   include DataMapper::Resource
   
   property :id, Serial
-  property :language_code, String, :required => true, :format => /^[A-Z]{3}$/
-  property :value, String, :required => true
+  property :language_code, String, :required => true, :format => /^[A-Z]{3}$/, :unique_index => :val_per_lang_per_prop_type
+  property :value, String, :required => true, :unique_index => :val_per_lang_per_prop_type
   property :definition, String, :required => true, :length => 255
   
   belongs_to :property_type
-  
-  validates_is_unique :value, :scope => [:property_type_id, :language_code]
+    property :property_type_id, Integer, :unique_index => :val_per_lang_per_prop_type
 end

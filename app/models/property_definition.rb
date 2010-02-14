@@ -29,7 +29,7 @@ class PropertyDefinition
   NAME_FORMAT = /^[a-z]{3,}:[a-z_]{3,}$/
   
   property :id, Serial
-  property :name, String, :required => true, :format => NAME_FORMAT, :unique => true
+  property :name, String, :required => true, :format => NAME_FORMAT, :unique_index => true
   property :findable, Boolean, :default => false
   property :filterable, Boolean, :default => false
   property :display_as_data, Boolean, :default => false

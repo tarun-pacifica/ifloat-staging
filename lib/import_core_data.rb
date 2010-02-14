@@ -174,7 +174,7 @@ class ImportSet
       end
       
       error(Asset, nil, nil, nil, "GM.identify command failed") unless $?.success?
-    end
+    end unless pias_by_product.empty?
     
     stopwatch("ensured no orphaned PickedProducts") do
       PickedProduct.all_primary_keys.each do |company_ref, product_ref|
@@ -217,7 +217,7 @@ class ImportSet
     pk_fields, value_fields = pk_and_value_fields(klass)
     existing_catalogue = value_md5s_and_ids_by_pk_md5(klass, pk_fields, value_fields)
     
-    to_save = {}
+    to_save = []
     to_save_pk_md5s = []
     to_skip_pk_md5s = []
     
@@ -232,7 +232,7 @@ class ImportSet
       pk_md5 = Digest::MD5.hexdigest(pk.join("::"))
       existing_value_md5, existing_id = existing_catalogue[pk_md5]
       if existing_id.nil?
-        to_save[object] = klass.new(attributes)
+        to_save << [object, klass.new(attributes)]
         to_save_pk_md5s << pk_md5
         next
       end
@@ -254,7 +254,7 @@ class ImportSet
       
       resource = klass.get(existing_id)
       resource.attributes = attributes
-      to_save[object] = resource
+      to_save << [object, resource]
       to_save_pk_md5s << pk_md5
     end
     
@@ -265,12 +265,21 @@ class ImportSet
     
     to_save.each do |object, resource|
       action = (resource.new? ? :created : :updated)
-      if resource.save
-        object.resource_id = resource.id
-      else
-        resource.errors.full_messages.each { |message| error(klass, object.path, object.row, nil, message) }
+      errors = nil
+      
+      begin
+        if resource.save then object.resource_id = resource.id
+        else errors = resource.errors.full_messages
+        end
+      rescue Exception => e
+        errors = [e.message]
+      end
+      
+      unless errors.nil?
+        errors.each { |message| error(klass, object.path, object.row, nil, message) }
         action = :skipped
       end
+      
       stats[action] += 1
     end
     stats
@@ -565,9 +574,9 @@ CLASSES.each do |klass|
     if load_from_cache
       stopwatch("#{nice_path} [cached]") { import_set.add_from_dump(dump_name) }
     else
-      p import_set.checkpoint
+      import_set.checkpoint
       stopwatch(nice_path) { parser.parse(path) }
-      stopwatch("#{nice_path} [cache creation]") { import_set.dump_from_checkpoint(dump_name) }
+      stopwatch(" --> [updated cache]") { import_set.dump_from_checkpoint(dump_name) }
       parsed_afresh << klass
     end
   end

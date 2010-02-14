@@ -161,7 +161,6 @@ class ImportSet
         warn "WARNING: no primary image specified in #{path} rows #{rows.inspect}"
       end
     end
-    exit
     
     stopwatch("ensured all primary images are 400x400 in size") do
       pias_by_product.values.map { |attachment| attachment.attributes[:asset] }.uniq.each do |asset|

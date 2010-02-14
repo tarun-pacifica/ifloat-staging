@@ -50,6 +50,8 @@ class ImportSet
     TextPropertyValue       => [:product, :definition, :sequence_number, :language_code]
   }
   
+  TRUNK_CLASSES = [PropertyType, PropertyDefinition, Company, Asset, Product]
+  
   def initialize
     @errors = []
     @objects = []
@@ -267,10 +269,38 @@ class ImportSet
     to_destroy_ids.each_slice(1000) { |ids| klass.all(:id => ids).destroy! }
     stats = {:created => 0, :updated => 0, :destroyed => to_destroy_ids.size, :skipped => to_skip_pk_md5s.size}
     
+    unless TRUNK_CLASSES.include?(klass)
+      to_create, to_save = to_save.partition { |object, resource| resource.new? }
+      
+      table_name = @adapter.send(:quote_name, klass.storage_name)
+      
+      properties = klass.properties
+      properties.delete(klass.serial)
+      
+      bind_set = "(" + Array.new(properties.size) { "?" }.join(", ") + ")"
+      column_names = properties.map { |property| @adapter.send(:quote_name, property.name.to_s) }.join(", ")
+      
+      to_create.each_slice(1000) do |slice|
+        bind_sets = Array.new(slice.size) { bind_set }.join(", ")
+        bind_values = slice.map do |object, resource|
+          resource.attributes # forces the type discriminator attribute to be populated
+          resource.dirty_attributes.values_at(*properties)
+        end.flatten
+        
+        begin
+          @adapter.execute("INSERT INTO #{table_name} (#{column_names}) VALUES #{bind_sets}", *bind_values)
+          stats[:created] += slice.size
+        rescue Exception => e
+          error(klass, nil, nil, nil, e.message)
+          return stats
+        end
+      end
+    end
+    
     to_save.each do |object, resource|
       action = (resource.new? ? :created : :updated)
       errors = nil
-    
+      
       begin
         if resource.save then object.resource_id = resource.id
         else errors = resource.errors.full_messages

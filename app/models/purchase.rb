@@ -35,6 +35,18 @@ class Purchase
   belongs_to :facility
   belongs_to :user, :required => false
   
+  # TODO: spec
+  def self.all_facility_primary_keys
+    query =<<-SQL
+      SELECT DISTINCT c.reference AS cref, f.name AS fname
+      FROM purchases p
+        INNER JOIN facilities f ON p.facility_id = f.id
+        INNER JOIN companies c ON f.company_id = c.id
+    SQL
+    
+    repository(:default).adapter.select(query).map { |record| [record.cref, record.fname] }
+  end
+  
   def self.obsolete
     all(:created_at.lt => OBSOLESCENCE_TIME.ago, :completed_at => nil)
   end

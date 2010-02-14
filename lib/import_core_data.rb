@@ -150,11 +150,18 @@ class ImportSet
   def verify_integrity
     pias_by_product = stopwatch("derived primary image list") { primary_image_attachments }
     
-    # stopwatch("ensured all products have a primary image") do
-    #   (@objects.select { |object| object.klass == Product } - pias_by_product.keys).each do |product|
-    #     error(Product, product.path, product.row, nil, "no image specified")
-    #   end
-    # end
+    stopwatch("ensured all products have a primary image") do
+      warning_rows_by_path = {}
+      (@objects.select { |object| object.klass == Product } - pias_by_product.keys).each do |product|
+        (warning_rows_by_path[File.basename(product.path)] ||= []).push(product.row)
+        # error(Product, product.path, product.row, nil, "no image specified")
+      end
+      
+      warning_rows_by_path.sort.each do |path, rows|
+        warn "WARNING: no primary image specified in #{path} rows #{rows.inspect}"
+      end
+    end
+    exit
     
     stopwatch("ensured all primary images are 400x400 in size") do
       pias_by_product.values.map { |attachment| attachment.attributes[:asset] }.uniq.each do |asset|
@@ -170,6 +177,17 @@ class ImportSet
           error(Company, nil, nil, nil, "unable to delete company with user-referenced product: #{company_ref} / #{product_ref}")
         else
           error(Product, nil, nil, nil, "unable to delete user-referenced product: #{company_ref} / #{product_ref}") if get(Product, company, product_ref).nil?
+        end
+      end
+    end
+    
+    stopwatch("ensured no orphaned Purchases") do
+      Purchase.all_facility_primary_keys.each do |company_ref, facility_url|
+        company = get(Company, company_ref)
+        if company.nil?
+          error(Company, nil, nil, nil, "unable to delete company with facility with user-referenced purchases: #{company_ref} / #{facility_url}")
+        else
+          error(Facility, nil, nil, nil, "unable to delete facility with user-referenced purchases: #{company_ref} / #{facility_url}") if get(Facility, company, facility_url).nil?
         end
       end
     end

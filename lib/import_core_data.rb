@@ -223,9 +223,9 @@ class ImportSet
     pk_fields, value_fields = pk_and_value_fields(klass)
     existing_catalogue = value_md5s_and_ids_by_pk_md5(klass, pk_fields, value_fields)
     
-    to_save = []
-    to_save_pk_md5s = []
-    to_skip_pk_md5s = []
+    skipped = []
+    to_create = {}
+    to_update = {}
     
     objects.each do |object|
       attributes = {}
@@ -237,11 +237,8 @@ class ImportSet
       pk = attributes.values_at(*pk_fields)
       pk_md5 = Digest::MD5.hexdigest(pk.join("::"))
       existing_value_md5, existing_id = existing_catalogue[pk_md5]
-      if existing_id.nil?
-        to_save << [object, klass.new(attributes)]
-        to_save_pk_md5s << pk_md5
-        next
-      end
+      to_create[pk_md5] = [object, attributes] and next if existing_id.nil?
+
       object.resource_id = existing_id
       
       values = value_fields.map do |attribute|
@@ -256,53 +253,58 @@ class ImportSet
       end
       
       value_md5 = (values.empty? ? nil : Digest::MD5.hexdigest(values.join("::")))
-      to_skip_pk_md5s << pk_md5 and next if value_md5 == existing_value_md5
-      
-      resource = klass.get(existing_id)
-      resource.attributes = attributes
-      to_save << [object, resource]
-      to_save_pk_md5s << pk_md5
+      if value_md5 == existing_value_md5 then skipped << pk_md5
+      else to_update[pk_md5] = [object, attributes]
+      end
     end
     
-    to_destroy_pk_md5s = (existing_catalogue.keys - to_save_pk_md5s) - to_skip_pk_md5s
+    to_update_ids = to_update.values.map { |obj, attr| obj.resource_id }
+    resources_by_id = klass.all(:id => to_update_ids).hash_by(:id)
+    
+    to_keep = skipped + to_create.keys + to_update.keys
+    to_destroy_pk_md5s = (existing_catalogue.keys - to_keep)
     to_destroy_ids = existing_catalogue.values_at(*to_destroy_pk_md5s).map { |value_md5, id| id }
     to_destroy_ids.each_slice(1000) { |ids| klass.all(:id => ids).destroy! }
-    stats = {:created => 0, :updated => 0, :destroyed => to_destroy_ids.size, :skipped => to_skip_pk_md5s.size}
+    stats = {:created => 0, :updated => 0, :destroyed => to_destroy_ids.size, :skipped => skipped.size}
     
     unless TRUNK_CLASSES.include?(klass)
-      to_create, to_save = to_save.partition { |object, resource| resource.new? }
-      
       table_name = @adapter.send(:quote_name, klass.storage_name)
       
       properties = klass.properties
       properties.delete(klass.serial)
       
       bind_set = "(" + Array.new(properties.size) { "?" }.join(", ") + ")"
-      column_names = properties.map { |property| @adapter.send(:quote_name, property.name.to_s) }.join(", ")
+      column_names = properties.map { |property| property.name }
+      column_names_list = column_names.map { |name| @adapter.send(:quote_name, name.to_s) }.join(", ")
       
-      to_create.each_slice(1000) do |slice|
+      to_create.values.each_slice(1000) do |slice|
         bind_sets = Array.new(slice.size) { bind_set }.join(", ")
-        bind_values = slice.map do |object, resource|
-          resource.attributes # forces the type discriminator attribute to be populated
-          resource.dirty_attributes.values_at(*properties)
+        bind_values = slice.map do |object, attributes|
+          attributes[:type] = klass
+          attributes.values_at(*column_names)
         end.flatten
         
         begin
-          @adapter.execute("INSERT INTO #{table_name} (#{column_names}) VALUES #{bind_sets}", *bind_values)
+          @adapter.execute("INSERT INTO #{table_name} (#{column_names_list}) VALUES #{bind_sets}", *bind_values)
           stats[:created] += slice.size
         rescue Exception => e
           error(klass, nil, nil, nil, e.message)
           return stats
         end
       end
+      
+      to_create.clear
     end
     
-    to_save.each do |object, resource|
-      action = (resource.new? ? :created : :updated)
-      errors = nil
+    (to_create.values + to_update.values).each do |object, attributes|
+      res_id = object.resource_id
+      resource = (res_id.nil? ? klass.new : resources_by_id[res_id])
+      resource.attributes = attributes
       
+      action = (res_id.nil? ? :created : :updated)
+      errors = nil
       begin
-        if resource.save then object.resource_id = resource.id
+        if resource.save then object.resource_id ||= resource.id
         else errors = resource.errors.full_messages
         end
       rescue Exception => e

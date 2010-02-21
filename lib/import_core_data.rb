@@ -3,16 +3,16 @@
 require "lib/parsers/abstract"
 
 ASSET_CSV_PATH = "/tmp/assets.csv"
-ASSET_ERRORS_PATH = "/tmp/basic_asset_errors.csv"
 ASSET_REPO = "../ifloat_assets"
 ASSET_VARIANT_DIR = "/tmp/ifloat_asset_variants"
-ASSET_VARIANT_SIZES = {:small => "200x200", :tiny => "100x100"}
-
 FileUtils.mkpath(ASSET_VARIANT_DIR)
+ASSET_VARIANT_SIZES = {:small => "200x200", :tiny => "100x100"}
 
 CSV_DUMP_DIR = "/tmp/ifloat_csv_dumps"
 FileUtils.mkpath(CSV_DUMP_DIR)
 CSV_REPO = "../ifloat_csvs"
+
+ERRORS_PATH = "/tmp/errors.csv"
 
 CLASSES = [PropertyType, PropertyDefinition, PropertyValueDefinition, TitleStrategy, Company, Facility, Asset, Product]
 
@@ -408,79 +408,86 @@ def build_asset_csv
   errors = []
   
   paths_by_names_by_company_refs = {}
-  
-  Dir[ASSET_REPO / "**" / "*"].each do |path|
-    next unless File.file?(path)
+  stopwatch("catalogued assets") do
+    Dir[ASSET_REPO / "**" / "*"].each do |path|
+      next unless File.file?(path)
     
-    raise "unable to extract relative path from #{path.inspect}" unless path =~ /^#{ASSET_REPO}\/(.+)/
-    relative_path = $1
-    path_parts = relative_path.split("/")
+      raise "unable to extract relative path from #{path.inspect}" unless path =~ /^#{ASSET_REPO}\/(.+)/
+      relative_path = $1
+      path_parts = relative_path.split("/")
     
-    unless (3..4).include?(path_parts.size)
-      errors << [relative_path, "not in a bucket/company or bucket/company/class directory"]
-      next
-    end
-    
-    errors << [relative_path, "empty file"] if File.size(path).zero?
-    
-    bucket = path_parts.shift
-    errors << [relative_path, "unknown bucket"] unless Asset::BUCKETS.include?(bucket)
-
-    company_ref = path_parts.shift
-    company_ref = $1 if company_ref =~ /^(.+?)___/
-    errors << [relative_path, "invalid company reference format"] unless company_ref =~ Company::REFERENCE_FORMAT
-
-    name = path_parts.pop
-    errors << [relative_path, "invalid asset name format"] unless name =~ Asset::NAME_FORMAT
-    errors << [relative_path, "extension not jpg, pdf or png"] unless name =~ /(jpg|pdf|png)$/
-    
-    paths_by_name = (paths_by_names_by_company_refs[company_ref] ||= {})
-    existing_path = paths_by_name[name]
-    if existing_path.nil? then paths_by_name[name] = relative_path
-    else errors << [relative_path, "duplicate of #{existing_path}"]
-    end
-    
-    checksum = Digest::MD5.file(path).hexdigest
-    assets << [bucket, company_ref, name, path, checksum]
-  end
-  return errors unless errors.empty?
-  
-  assets_by_path = assets.hash_by { |bucket, company_ref, name, path, checksum| path }
-  assets_by_path.keys.map { |k| k =~ /(jpg|png)$/ ? k.inspect : nil }.compact.each_slice(500) do |paths|
-    `gm identify #{paths.join(" ")}`.lines.each do |line|
-      unless line =~ /^(.+?\.(jpg|png)).*?(\d+x\d+)/
-        errors <<  [nil, "unable to read GM.identify report line: #{line.inspect}"]
+      unless (3..4).include?(path_parts.size)
+        errors << [relative_path, "not in a bucket/company or bucket/company/class directory"]
         next
       end
+    
+      errors << [relative_path, "empty file"] if File.size(path).zero?
+    
+      bucket = path_parts.shift
+      errors << [relative_path, "unknown bucket"] unless Asset::BUCKETS.include?(bucket)
 
-      asset = assets_by_path[$1]
-      if asset.nil? then errors << [nil, "unable to associate GM.identify report line: #{line.inspect}"]
-      else asset << $3
+      company_ref = path_parts.shift
+      company_ref = $1 if company_ref =~ /^(.+?)___/
+      errors << [relative_path, "invalid company reference format"] unless company_ref =~ Company::REFERENCE_FORMAT
+
+      name = path_parts.pop
+      errors << [relative_path, "invalid asset name format"] unless name =~ Asset::NAME_FORMAT
+      errors << [relative_path, "extension not jpg, pdf or png"] unless name =~ /(jpg|pdf|png)$/
+    
+      paths_by_name = (paths_by_names_by_company_refs[company_ref] ||= {})
+      existing_path = paths_by_name[name]
+      if existing_path.nil? then paths_by_name[name] = relative_path
+      else errors << [relative_path, "duplicate of #{existing_path}"]
+      end
+    
+      checksum = Digest::MD5.file(path).hexdigest
+      assets << [bucket, company_ref, name, path, checksum]
+    end
+  end
+  return errors unless errors.empty?
+  
+  stopwatch("catalogued image sizes") do
+    assets_by_path = assets.hash_by { |bucket, company_ref, name, path, checksum| path }
+    assets_by_path.keys.map { |k| k =~ /(jpg|png)$/ ? k.inspect : nil }.compact.each_slice(500) do |paths|
+      `gm identify #{paths.join(" ")}`.lines.each do |line|
+        unless line =~ /^(.+?\.(jpg|png)).*?(\d+x\d+)/
+          errors <<  [nil, "unable to read GM.identify report line: #{line.inspect}"]
+          next
+        end
+
+        asset = assets_by_path[$1]
+        if asset.nil? then errors << [nil, "unable to associate GM.identify report line: #{line.inspect}"]
+        else asset << $3
+        end
       end
     end
   end
   return errors unless errors.empty?
   
-  assets.each do |info|
-    bucket, company_ref, name, path, checksum, size = info
-    next unless size == "400x400"
+  stopwatch("created missing image variants") do
+    assets.each do |info|
+      bucket, company_ref, name, path, checksum, size = info
+      next unless size == "400x400"
     
-    ext = File.extname(path)
-    [:small, :tiny].map do |variant|
-      variant_path = ASSET_VARIANT_DIR / "#{checksum}-#{variant}#{ext}"
-      info << variant_path
-      next if File.exist?(variant_path)
+      ext = File.extname(path)
+      [:small, :tiny].map do |variant|
+        variant_path = ASSET_VARIANT_DIR / "#{checksum}-#{variant}#{ext}"
+        info << variant_path
+        next if File.exist?(variant_path)
       
-      variant_size = ASSET_VARIANT_SIZES[variant]
-      report = `gm convert -size #{variant_size} #{path.inspect} -resize #{variant_size} +profile '*' #{variant_path.inspect}`
-      errors << [path, "GM.convert failed: #{report.inspect}"] unless $?.success?
+        variant_size = ASSET_VARIANT_SIZES[variant]
+        report = `gm convert -size #{variant_size} #{path.inspect} -resize #{variant_size} +profile '*' #{variant_path.inspect}`
+        errors << [path, "GM.convert failed: #{report.inspect}"] unless $?.success?
+      end
     end
   end
-  
   return errors unless errors.empty?
-  FasterCSV.open(ASSET_CSV_PATH, "w") do |csv|
-    csv << ["bucket", "company.reference", "name", "file_path", "checksum", "pixel_size", "file_path_small", "file_path_tiny"]
-    assets.sort.each { |asset| csv << asset }
+  
+  stopwatch("assets.csv") do
+    FasterCSV.open(ASSET_CSV_PATH, "w") do |csv|
+      csv << ["bucket", "company.reference", "name", "file_path", "checksum", "pixel_size", "file_path_small", "file_path_tiny"]
+      assets.sort.each { |asset| csv << asset }
+    end
   end
   nil
 end
@@ -546,22 +553,20 @@ end
 # Build an asset import CSV from the contents of the asset repo
 
 puts "=== Compiling Assets ==="
-stopwatch("assets.csv") do
-  error_message = "Failed to build asset CSV from asset repository #{ASSET_REPO.inspect}."
-  begin
-    errors = build_asset_csv
-    unless errors.nil?
-      FasterCSV.open(ASSET_ERRORS_PATH, "w") do |error_report|
-        error_report << ["path", "error"]
-        errors.each { |error| error_report << error }
-      end
-      mail_fail(error_message, ASSET_ERRORS_PATH)
+error_message = "Some errors occurred whilst compilig assets from #{ASSET_REPO.inspect}."
+begin
+  errors = build_asset_csv
+  unless errors.nil?
+    FasterCSV.open(ASSET_ERRORS_PATH, "w") do |error_report|
+      error_report << ["path", "error"]
+      errors.each { |error| error_report << error }
     end
-  rescue SystemExit
-    exit 1
-  rescue Exception => e
-    mail_fail(error_message, nil, e)
+    mail_fail(error_message, ASSET_ERRORS_PATH)
   end
+rescue SystemExit
+  exit 1
+rescue Exception => e
+  mail_fail(error_message, nil, e)
 end
 
 
@@ -616,10 +621,15 @@ CLASSES.each do |klass|
   end
 end
 
+mail_fail("Some errors occurred whilst parsing CSVs from #{CSV_REPO.inspect} (and /tmp/assets.csv).", ERRORS_PATH) if import_set.write_errors(ERRORS_PATH)
+
+
+# Verify global integrity
+
 puts "=== Verifying Global Integrity ==="
 import_set.verify_integrity
 
-mail_fail("Some errors occurred whilst parsing CSVs from #{CSV_REPO.inspect} (and the auto-generated /tmp/assets.csv).", "/tmp/errors.csv") if import_set.write_errors("/tmp/errors.csv")
+mail_fail("Some errors occurred whilst verifying the integrity of CSVs from #{CSV_REPO.inspect} (and /tmp/assets.csv).", ERRORS_PATH) if import_set.write_errors(ERRORS_PATH)
 
 
 # Import the entire set
@@ -627,7 +637,7 @@ mail_fail("Some errors occurred whilst parsing CSVs from #{CSV_REPO.inspect} (an
 puts "=== Importing Objects ==="
 class_stats = import_set.import
 
-mail_fail("Some errors occurred whilst importing objects defined in CSVs from #{CSV_REPO.inspect} (and the auto-generated /tmp/assets.csv).", "/tmp/errors.csv") if import_set.write_errors("/tmp/errors.csv")
+mail_fail("Some errors occurred whilst importing objects defined in CSVs from #{CSV_REPO.inspect} (and /tmp/assets.csv).", ERRORS_PATH) if import_set.write_errors(ERRORS_PATH)
 
 report = ["Asset repository @ #{repo_summary(ASSET_REPO)}", "CSV repository @ #{repo_summary(CSV_REPO)}", ""]
 report += class_stats.map do |klass, stats|

@@ -1,0 +1,31 @@
+/* Property Icons */
+
+#property_icons h1 {
+	color: white;
+	margin: 0;
+}
+
+#property_icons table {
+	float: left;
+	font-size: 14px;
+	margin: 10px 0 0 10px;
+}
+
+#property_icons table td {
+	padding: 5px;
+}
+
+#property_icons table td.blank {
+	color: red;
+}
+
+#property_icons table td.not_needed {
+	color: gray;
+	font-style: italic;
+}
+
+#property_icons table th {
+	background: blue;
+	color: orange;
+	padding: 5px;
+}

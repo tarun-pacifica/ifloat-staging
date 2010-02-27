@@ -4,7 +4,7 @@ module Merb
     def defined_value(value, definition)
       return value if definition.nil?
       definition.gsub!(/(['"])/) { '\\' + $1 }
-      "<span class=\"defined\" onmouseover=\"bubble_tooltip_show(event, '#{definition}', 'right')\" onmouseout=\"bubble_tooltip_hide()\">#{value}</span>"
+      "<span class=\"defined\" onmouseover=\"tooltip_show(event, '#{definition}', 'right')\" onmouseout=\"tooltip_hide()\">#{value}</span>"
     end
     
     def money(amount, currency = session.currency)
@@ -24,12 +24,12 @@ module Merb
     def number_format_js(value)
       v = value.value
       values = (value.range? ? [v.first, v.last] : [v])
-			"number_format([#{values.join(', ')}], #{value.unit.nil? ? 'undefined' : value.unit.inspect}, #{value.class.date?})"
+			"util_format_number([#{values.join(', ')}], #{value.unit.nil? ? 'undefined' : value.unit.inspect}, #{value.class.date?})"
     end
     
     def product_image(image)
       url, popup_url = product_image_urls(image)
-      "<img class=\"product\" src=#{url.inspect} onmouseover=\"prod_image_zoom(event, '#{popup_url}')\" onmouseout=\"prod_image_unzoom(this)\" />"
+      "<img class=\"product\" src=#{url.inspect} onmouseover=\"product_image_popup(event, '#{popup_url}')\" onmouseout=\"product_image_unpopup(this)\" />"
     end
     
     def product_image_urls(image)
@@ -48,7 +48,7 @@ module Merb
     end
     
     def property_icon(url, tooltip, position)
-      "<img class=\"icon\" src=#{url.inspect} onmouseover=\"bubble_tooltip_show(event, '#{tooltip}', '#{position}')\" onmouseout=\"bubble_tooltip_hide()\" />"
+      "<img class=\"icon\" src=#{url.inspect} onmouseover=\"tooltip_show(event, '#{tooltip}', '#{position}')\" onmouseout=\"tooltip_hide()\" />"
     end
     
     def product_titles(titles)

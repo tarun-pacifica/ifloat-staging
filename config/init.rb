@@ -40,9 +40,15 @@ Merb::BootLoader.before_app_loads do
     end
   end
   
-  # Cache the latest version of conversions.js
-  path = "public/javascripts/conversions.js"
-  script = Conversion.javascript
-  File.open(path, "w") { |f| f.write script } unless File.exist?(path) and File.read(path) == script
+  # Merge all JS files - TODO: lint + minify
+  path = "public/javascripts/compiled.js"
+  File.delete(path) if File.exist?(path)
+  raise $?.inspect unless system("cat public/javascripts/*.js > #{path}")
+  File.open(path, "a") { |f| f.write Conversion.javascript }
+  
+  # Merge all CSS files - TODO: lint + minify
+  path = "public/stylesheets/compiled.css"
+  File.delete(path) if File.exist?(path)
+  raise $?.inspect unless system("cat public/stylesheets/*.css > #{path}")
   
 end

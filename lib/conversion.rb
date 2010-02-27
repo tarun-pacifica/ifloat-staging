@@ -65,11 +65,11 @@ module Conversion
     end
     
     <<-SCRIPT
-    var conversions = #{conversions.to_json};
+    var util_conversions = #{conversions.to_json};
 
-    function num_filter_convert(value, from_unit, to_unit) {
+    function util_convert(value, from_unit, to_unit) {
     	var conversion_key = [from_unit, to_unit].sort().join(">>");
-    	var ab_values = conversions[conversion_key];
+    	var ab_values = util_conversions[conversion_key];
 
     	if(ab_values == undefined) {
     		alert("no conversion available for" + from_unit + " -> " + to_unit);

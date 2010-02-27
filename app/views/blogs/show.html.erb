@@ -1,4 +1,4 @@
-<%= partial "cached_finds/find_header" %>
+<%= partial "common/header" %>
 
 <div id="blog">
 	<div id="blog_info">
@@ -38,7 +38,7 @@
 		<% image = @images[article.asset_id] %>
 		<div class="article">
 			<% if @admin %>
-			<p class="update" onclick="article_edit(this)">Click here to update <%= article.title.inspect %>...</p>
+			<p class="update" onclick="blog_article_edit(this)">Click here to update <%= article.title.inspect %>...</p>
 			<%= form :action => resource(article), :class => "update" do %>
 				<%= hidden_field :_method, :value => "PUT" %>
 				<h3>Update Article</h3>

@@ -1,7 +1,7 @@
-<%= partial "cached_finds/login" %>
+<%= partial "common/login" %>
 
 <div id="marquee">
-	<%= partial :finder %>
+	<%= partial "common/finder" %>
 	<div class="panel">
 		<div class="left"></div>
 		<div class="centre">
@@ -12,7 +12,7 @@
 			<% end %>
 			<a href="#" id="blog"></a>
 			<% if session.authenticated? %>
-			<a id="logout" href="#" onclick="logout()"></a>
+			<a id="logout" href="#" onclick="login_logout()"></a>
 			<% else %>
 			<a id="login" href="#" onclick="login_open()"></a>
 			<% end %>
@@ -25,6 +25,6 @@
 	$("body").css("background", "url(/images/marquee/backgrounds/sky.png) repeat-x");
 	
 	<% Dir[Merb.root / "public" / "images" / "marquee" / "buttons" / "*.png"].each do |path| %>
-	image_preload("/images/marquee/buttons/<%= File.basename(path) %>");
+	util_preload_image("/images/marquee/buttons/<%= File.basename(path) %>");
 	<% end %>
 </script>

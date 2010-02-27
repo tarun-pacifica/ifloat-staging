@@ -1,71 +1,57 @@
-<%= partial :find_header %>
+<%= partial "common/header" %>
 
-<div id="cached_find">
+<div id="body">
 
 <% if @find.all_product_count.zero? %>
 
-<img class="no_results" src="/images/products/no_results.png" />
+<img id="no_results" src="/images/products/no_results.png" />
 
 
 <% else %>
 
-<div id="cached_find_filters">	
-	<div id="fraction_helper" title="Fraction Helper">
-		<p>
-			<input class="integer" type="text" size="9" maxlength="9" onkeyup="fraction_helper_handle_input(this)" />
-			and
-			<select class="numerator" onchange="fraction_helper_handle_select(this)">
-				<option>0</option>
-				<option>1</option>
-			</select>
-			/
-			<select class="denominator" onchange="fraction_helper_handle_select(this)">
-				<%= [2, 4, 8, 16, 32, 64].map { |n| "<option>#{n}</option>" } %>
-			</select>
-		</p>
-		<p class="preview"> </p>
+<div id="filter_panel" class="panel minor">
+	<div class="title"> <h2>Filters</h2> </div>
+	<div class="controls">
+		<div id="filter_panel_add"> </div>
+		<div id="filter_panel_remove"> </div>
 	</div>
-	
-	<div class="title">Filters</div>
-	<a href=<%= (resource(@find) + "/reset").inspect %>>reset all filters</a>
-	<h1>Click to filter by...</h1>
-	<table> </table>
+	<div class="body">
+		<!-- sections go here -->
+	</div>
 </div>
 
-<div id="cached_find_output">
-	<div id="cached_find_report">
-		Showing
-		<span class="displayed_count">?</span>
-		/ 
-		<span class="filtered_count">?</span>
-		products for
-		<span class="spec"><%= @find.specification %></span>
+<div id="find_results_panel" class="panel major">
+	<div class="title">
+		<h2>
+			Showing <span id="find_results_count">? / ?</span>
+			products for <span class="spec"><%= @find.specification %></span>
+		</h2>
 	</div>
 	
-	<div id="cached_find_results">
+	<div id="find_results_products">
 		
-		<hr class="result_terminator"/>
-		<div class="footer"> </div>
+		<hr class="terminator" />
 	</div>
 </div>
 
 <script type="text/javascript" charset="utf-8">
-	var results = $("#cached_find_results");
-	var r = results[0];
-	r.filter_queue = [];
-	r.filter_queue_active = -1;
-	r.find_id = <%= @find.id %>;
-	prod_grid_update(results);
-	
-	var options = {autoOpen: false, modal: true};
-	options.buttons = {
-		"Paste Value": fraction_helper_paste_value,
-		"Cancel": function() { $(this).dialog("close"); }
+	var body_state = {
+		filter_queue: [],
+		filter_queue_active: -1,
+		find_id: <%= @find.id %>
 	};
-	options.close = function() { this.input.css("background", "white"); }
-	$("#fraction_helper").dialog(options);
 	
-	filter_load_all(r.find_id);
+	find_results_update();
+	
+	// var options = {autoOpen: false, modal: true};
+	// 	options.buttons = {
+	// 		"Paste Value": fraction_helper_paste_value,
+	// 		"Cancel": function() { $(this).dialog("close"); }
+	// 	};
+	// 	options.close = function() { this.input.css("background", "white"); }
+	// 	$("#fraction_helper").dialog(options);
+	// 	
+	// 	filter_load_all(r.find_id);
 </script>
 
 <% end %>

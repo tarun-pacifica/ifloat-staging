@@ -1,0 +1,51 @@
+#find_results_panel {
+	float: left;
+	margin-left: 5px;
+	width: 649px;
+}
+
+#find_results_panel .title {
+	background: url(/images/find_results/backgrounds/header.png) repeat-x;
+	border-left: 1px solid silver;
+	border-right: 1px solid silver;
+	color: white;
+	display: table-cell;
+	float: left;
+	height: 16px;
+	padding: 4px 10px;
+}
+
+#find_results_panel .title .spec {
+	color: #FCBB1A;
+	font-weight: bold;
+}
+
+#find_results_products {
+	border: 1px solid silver;
+}
+
+#find_results_products a.product {
+	color: #17A1FF;
+	float: left;
+	font-size: 10px;
+	font-weight: bold;
+	margin: 5px 0 0 5px;
+	position: relative;
+	text-decoration: none;
+}
+
+#find_results_products a.product .tally {
+	background: white;
+	border-left: 1px solid gray;
+	border-top: 1px solid gray;
+	bottom: 3px;
+	padding: 1px 2px;
+	position: absolute;
+	right: 1px;
+}
+
+#find_results_products a.product img {
+	border: 1px solid gray;
+	height: 100px;
+	width: 100px;
+}

@@ -8,14 +8,14 @@
 		<a href="mailto:admin@ifloat.biz">Contact Us</a> |
 		<a href="/terms.pdf">Terms</a> |
 		<% if session.authenticated? %>
-		<a href="#" onclick="logout()">Log Out (<%= session.user.nickname || session.user.name %>)</a>
+		<a href="#" onclick="login_logout()">Log Out (<%= session.user.nickname || session.user.name %>)</a>
 		<% else %>
 		<a href="#" onclick="login_open()">Log In</a>
 		<% end %>
 	</span>
 	<img src="/images/common_header/logo.png" />
 	<div id="find_bar">
-		<%= partial "cached_finds/finder" %>
+		<%= partial "common/finder" %>
 		
 		<div id="pl_buy_now" class="pick_list">
 			<span class="name">Shopping List</span>
@@ -37,9 +37,9 @@
 	</div>
 </div>
 
-<%= partial "cached_finds/login" %>
+<%= partial "common/login" %>
 
-<div id="bubble_tooltip">
+<div id="tooltip">
 	<table>
 		<tr class="top">
 			<td class="left">&nbsp;</td>
@@ -59,14 +59,14 @@
 	</table>
 </div>
 
-<img id="image_zoom" src="" />
+<img id="image_popup" src="" />
 
 <script type="text/javascript" charset="utf-8">
 	var vert = ["top", "middle", "bottom"];
 	var horiz = ["left", "center", "right"];
 	for(v in vert) {
 		for(h in horiz) {
-			image_preload("/images/bubble_tooltip/backgrounds/" + vert[v] + "_" + horiz[h] + ".png");
+			util_preload_image("/images/tooltip/backgrounds/" + vert[v] + "_" + horiz[h] + ".png");
 		}
 	}
 		

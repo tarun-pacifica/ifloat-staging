@@ -1,0 +1,62 @@
+#tooltip {
+	display: none;
+	position: absolute;
+}
+
+#tooltip p {
+	margin: 0;
+}
+
+#tooltip table {
+	border-collapse: collapse;
+	margin: 0;
+	width: auto;
+}
+
+#tooltip td {
+	padding: 0;
+	height: 17px;
+	width: 15px;
+}
+
+#tooltip .top .left {
+	background: url(/images/tooltip/backgrounds/top_left.png) no-repeat;
+}
+
+#tooltip .top .center {
+	background: url(/images/tooltip/backgrounds/top_center.png) repeat-x;
+	width: auto;
+}
+
+#tooltip .top .right {
+	background: url(/images/tooltip/backgrounds/top_right.png) no-repeat;
+}
+
+#tooltip .middle .left {
+	background: url(/images/tooltip/backgrounds/middle_left.png) repeat-y;
+	height: auto;
+}
+
+#tooltip .middle .center {
+	background: url(/images/tooltip/backgrounds/middle_center.png);
+	height: auto;
+	width: auto;
+}
+
+#tooltip .middle .right {
+	background: url(/images/tooltip/backgrounds/middle_right.png) repeat-y;
+	height: auto;
+}
+
+#tooltip .bottom .left {
+	background: url(/images/tooltip/backgrounds/bottom_left.png) no-repeat;
+}
+
+#tooltip .bottom .center {
+	background: url(/images/tooltip/backgrounds/bottom_center.png) repeat-x;
+	width: auto;
+}
+
+#tooltip .bottom .right {
+	background: url(/images/tooltip/backgrounds/bottom_right.png) no-repeat;
+}

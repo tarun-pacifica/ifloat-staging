@@ -9,4 +9,5 @@ doc/*
 gems/*
 log/
 public/assets
-public/javascripts/conversions.js
+public/javascripts/compiled.js
+public/stylesheets/compiled.css

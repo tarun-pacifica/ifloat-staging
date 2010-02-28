@@ -6,7 +6,7 @@
 			<% if session.cached_finds.empty? %>
 			<%= select :prompt => "No previous finds", :disabled => true %>
 			<% else %>
-			<%= select :prompt => "Previous finds...", :onchange => "finder_recall(this)", :collection => session.cached_finds, :text_method => :spec_date, :value_method => :specification %>
+			<%= select :prompt => "Previous finds...", :onchange => "finder_recall(this)", :collection => session.cached_finds, :text_method => :spec_count, :value_method => :specification %>
 			<% end %>
 			
 			<%= text_field :specification, :id => "cached_find_specification" %>

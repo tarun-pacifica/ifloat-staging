@@ -33,8 +33,9 @@ class NumericPropertyValue < PropertyValue
     false
   end
   
-  def self.format(min_value, max_value, range_separator = "...")
-    [min_value, max_value].uniq.map { |v| format_value(v) }.join(range_separator)
+  def self.format(min_value, max_value, range_separator = "...", unit = nil)
+    [min_value, max_value].uniq.map { |v| format_value(v) }.join(range_separator) +
+    (unit.nil? ? "" : " #{unit}")
   end
   
   def self.format_value(value)

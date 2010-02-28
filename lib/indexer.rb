@@ -5,6 +5,7 @@ module Indexer
   @@image_checksum_index = {}
   @@last_loaded_md5 = nil
   @@numeric_filtering_index = {}
+  @@property_display_cache = {}
   @@text_filtering_index = {}
   @@text_finding_index = {}
   
@@ -16,10 +17,11 @@ module Indexer
     Tempfile.open(File.basename(COMPILED_PATH)) do |f|
       records = text_records
       indexes = {
-        :image_checksums => compile_image_checksum_index,
-        :numeric_filtering => compile_numeric_filtering_index,
-        :text_filtering => compile_text_filtering_index(records),
-        :text_finding => compile_text_finding_index(records)
+        :image_checksums         => compile_image_checksum_index,
+        :numeric_filtering       => compile_numeric_filtering_index,
+        :property_display_cache  => compile_property_display_cache,
+        :text_filtering          => compile_text_filtering_index(records),
+        :text_finding            => compile_text_finding_index(records)
       }
       
       FileUtils.mkpath(File.dirname(COMPILED_PATH))
@@ -121,6 +123,7 @@ module Indexer
       indexes = Marshal.load(f)
       @@image_checksum_index = indexes[:image_checksums]
       @@numeric_filtering_index = indexes[:numeric_filtering]
+      @@property_display_cache = indexes[:property_display_cache]
       @@text_filtering_index = indexes[:text_filtering]
       @@text_finding_index = indexes[:text_finding]
     end
@@ -130,12 +133,14 @@ module Indexer
     @@last_loaded_md5 = source_md5
   end
   
-  def self.numeric_limits_for_product_ids(product_ids)
+  def self.numeric_limits_for_product_ids(product_ids, single_property_id = nil)
     return {} if product_ids.empty? or not ensure_loaded
     
     limits_by_unit_by_property_id = {}
     
     @@numeric_filtering_index.each do |property_id, units_by_product_id|
+      next unless single_property_id.nil? or single_property_id == property_id
+      
       relevant_product_ids = (product_ids & units_by_product_id.keys)
       next if relevant_product_ids.empty?
       
@@ -167,6 +172,11 @@ module Indexer
     end.inject { |union, product_ids| union & product_ids }
   end
   
+  # TODO: extend to support multiple languages
+  def self.property_display_cache
+    return {} unless ensure_loaded
+    @@property_display_cache
+  end
   
   private
   
@@ -190,6 +200,24 @@ module Indexer
       iui[record.id] ||= record.checksum
     end
     iui
+  end
+  
+  # TODO: extend to support other languages
+  def self.compile_property_display_cache
+    properties = PropertyDefinition.all
+    friendly_names = PropertyDefinition.friendly_name_sections(properties, "ENG")
+    icon_urls = PropertyDefinition.icon_urls_by_property_id(properties)
+    
+    pdc = {}
+    properties.each do |property|
+      pdc[property.id] = {
+        :seq_num        => property.sequence_number,
+        :friendly_name  => friendly_names[property.id],
+        :icon_url       => icon_urls[property.id],
+        :type           => property.property_type.core_type,
+      }
+    end
+    pdc
   end
   
   def self.compile_numeric_filtering_index

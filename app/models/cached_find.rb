@@ -25,7 +25,7 @@ class CachedFind
   property :language_code, String, :required => true, :format => /^[A-Z]{3}$/
   property :specification, String, :length => 255
   property :description, String, :length => 255
-  property :filters, Object, :writer => :protected, :lazy => false
+  property :filters, Object, :accessor => :protected, :lazy => false
   property :accessed_at, DateTime
   property :invalidated, Boolean, :required => true, :default => true
   
@@ -68,88 +68,77 @@ class CachedFind
     @all_product_ids ||= Indexer.product_ids_for_phrase(specification, language_code)
   end
   
+  # TODO: spec
   def ensure_valid
-    invalidated? ? execute! : nil
-  end
-  
-  def execute!
-    raise "cannot execute invalid CachedFind" unless valid?
+    return [] unless invalidated?
     
-    text_property_ids = Indexer.filterable_text_property_ids_for_product_ids(all_product_ids, language_code)
+    changes = [] # TODO: track changes
+    new_filters = {}
     numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(all_product_ids)
+    pdc = Indexer.property_display_cache
     
-    properties = PropertyDefinition.all(:id => text_property_ids + numeric_limits_by_property_id.keys)
-    PropertyType.all(:id => properties.map { |p| p.property_type_id }).map
-    friendly_names = PropertyDefinition.friendly_name_sections(properties, language_code)
-    
-    # TODO: copy old values where possible
-    filters = []
-    properties.each do |property|
-      filter = {
-        :prop_id            => property.id,
-        :prop_seq_num       => property.sequence_number,
-        :prop_friendly_name => friendly_names[property.id],
-        :prop_type          => property.property_type.core_type,
-        :include_unknown    => true,
-        :data               => []
-      }
+    filters.each do |property_id, filter|
+      property = pdc[property_id]
+      next if property.nil?
       
-      if ["currency", "date", "numeric"].include?(filter[:prop_type])
-        limits = numeric_limits_by_property_id[property.id]
-        filter[:data] += numeric_filter_choose(nil, nil, nil, limits)
-        filter[:data] << limits
-      end
+      data =
+        case property[:type]
+        when "currency", "date", "numeric"
+          limits = numeric_limits_by_property_id[property_id]
+          next if limits.nil?
+          min, max, unit = filter[:data]
+          numeric_filter_choose(min, max, unit, limits)
+        when "text"
+          values = text_filter_values
+          next if values.nil?
+          filter[:data] & values
+        end
       
-      filters << filter
+      new_filters[property_id] = {:data => data, :include_unknown => filter[:include_unknown]}
     end
-    self.filters = filters.sort_by { |filter| filter[:prop_seq_num] }
-    filters.each { |filter| filter.delete(:prop_seq_num) }
     
     self.invalidated = false
+    self.filters = new_filters
+    save ? changes : []
+  end
+  
+  # TODO: spec and move down
+  def unfilter!(property_id)
+    return unless filters.has_key?(property_id)
+    self.filters = Marshal.load(Marshal.dump(self.filters)).delete(property_id)
     save
   end
   
   # TODO: spec
-  def filter!(property_id, operation, params)
-    filters = Marshal.load(Marshal.dump(self.filters))
-    filter = filters.find { |filter| filter[:prop_id] == property_id }
-    return if filter.nil?
+  def filter!(property_id, params)
+    prop_info = Indexer.property_display_cache[property_id]
+    return if property.nil?
+    return unless filters.has_key?(property_id) or property_ids_unused.include?(property_id)
     
-    if operation == "include_unknown"
-      filter[:include_unknown] = (params["value"] == "true")
-      self.filters = filters
-      save
-      return
-    end
+    new_filters = Marshal.load(Marshal.dump(self.filters))
+    filter = (new_filters[property_id] || {})
+    new_filters[property_id] = filter if filter.empty?
     
-    data = filter[:data]
+    filter[:include_unknown] = (params["include_unknown"] == "true")
     
-    case filter[:prop_type]
+    case prop_info[:type]
     when "currency", "date", "numeric"
+      limits = Indexer.numeric_limits_for_product_ids(all_product_ids, property_id)[property_id]
+      return if limits.nil?
       min, max = params.values_at("min", "max").map { |v| v.to_f }
-      unit = params["unit"]
-      unit = nil if unit.blank?
-      filter[:data][0..2] = numeric_filter_choose(min, max, unit, data.last)
+      unit = params["unit"]; unit = nil if unit.blank?
+      filter[:data] = numeric_filter_choose(min, max, unit, limits)
     when "text"
-      value = params["value"]
-      p [operation, value, data]
-      case operation
-      when "exclude"
-        p data.include?(value)
-        p text_filter_words(property_id).include?(value)
-        data << value unless data.include?(value) or not text_filter_words(property_id).include?(value)
-      when "include"
-        data.delete(value)
-      when "include_only"
-        data.replace(text_filter_words(property_id))
-        data.delete(value)
-      end
+      values = text_filter_values(property_id)
+      return if values.nil?
+      filter[:data].replace(params["count"].to_i.times.map { |i| params["value_#{i}"] } & values)
     end
     
     self.filters = filters
     save
   end
-  
+    
+  # TODO: spec
   def filter_values
     fpids = filtered_product_ids(true)
     text_values = Indexer.filterable_text_values_for_product_ids(all_product_ids, fpids, language_code)
@@ -162,7 +151,7 @@ class CachedFind
     relevant_values_by_property_id = {}
     
     filters.each do |filter|
-      property_id, type = filter.values_at(:prop_id, :prop_type)
+      property_id, type = filter.values_at(:id, :type)
       relevant_values = (type == "text" ? text_values_by_property_id[property_id].last : nil)
       
       if filter_fresh?(filter)
@@ -183,15 +172,15 @@ class CachedFind
     return [] if all_product_count.zero?
     
     used_filters = filters.select { |filter| not filter_fresh?(filter) }
-    used_filters = used_filters.select { |filter| filter[:prop_id] == Indexer.class_property_id } if class_only
+    used_filters = used_filters.select { |filter| filter[:id] == Indexer.class_property_id } if class_only
     return all_product_ids if used_filters.empty?
     
     # TODO: spec examples where this kicks in
     relevant_product_ids = all_product_ids
-    focussed_property_ids = used_filters.reject { |filter| filter[:include_unknown] }.map { |filter| filter[:prop_id] }
+    focussed_property_ids = used_filters.reject { |filter| filter[:include_unknown] }.map { |filter| filter[:id] }
     relevant_product_ids &= Indexer.product_ids_for_filterable_property_ids(focussed_property_ids, language_code) unless focussed_property_ids.empty?
     
-    text_filters, numeric_filters = used_filters.partition { |filter| filter[:prop_type] == "text" }
+    text_filters, numeric_filters = used_filters.partition { |filter| filter[:type] == "text" }
     excluded_product_ids = Indexer.excluded_product_ids_for_numeric_filters(numeric_filters)
     excluded_product_ids += Indexer.excluded_product_ids_for_text_filters(text_filters, language_code)
     relevant_product_ids - excluded_product_ids
@@ -202,23 +191,41 @@ class CachedFind
     Indexer.image_checksums_for_product_ids(filtered_product_ids)
   end
   
-  def spec_date
-    if accessed_at.nil? then specification
-    else "#{specification} (#{accessed_at.strftime('%Y/%m/%d %H:%M:%S')})"
+  # TODO: spec
+  def filters_unused
+    Indexer.property_display_cache.values_at(*property_ids_unused).sort_by { |info| info[:seq_num] }
+  end
+  
+  # TODO: spec
+  def filters_used(range_sep)
+    filters.values.sort_by! { |filter| filter[:seq_num] }.map do |filter|
+      section, name = filter[:friendly_name]
+      summary = filter_summarize(filter, range_sep)
+      {:section => section, :name => name, :icon_url => filter[:icon_url], :summary => summary}
     end
+  end
+  
+  # TODO: spec
+  def spec_count
+    "#{specification} (#{filtered_product_ids.size} / #{all_product_count})"
   end
   
   
   private
-  
-  def filter_fresh?(filter)
-    filter[:include_unknown] and
-    case filter[:prop_type]
-    when "currency", "date", "numeric"
+    
+  def filter_summarize(filter, range_sep)
+    type = filter[:type]
+    
+    if type == "text"
+      values = filter[:data]
+      return values.empty? ? "[none]" : values.sort.join(", ").truncate(50)
+    end
+    
+    begin
       min, max, unit, limits = filter[:data]
-      [min, max, unit] == numeric_filter_choose(nil, nil, unit, limits)
-    when "text"
-      filter[:data].empty?
+      PropertyType.value_class(type).format(min, max, range_sep, unit)
+    rescue
+      "unknown type #{type.inspect}"
     end
   end
   
@@ -237,8 +244,15 @@ class CachedFind
     [min, max, unit]
   end
   
-  def text_filter_words(property_id)
-    words_by_property_id = Indexer.filterable_text_values_for_product_ids(all_product_ids, [], language_code, property_id)
-    words_by_property_id[property_id].first
+  def property_ids_unused
+    text_property_ids = Indexer.filterable_text_property_ids_for_product_ids(all_product_ids, language_code)
+    numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(all_product_ids)
+    (text_property_ids + numeric_limits_by_property_id.keys).reject { |id| filters.has_key?(id) }
+  end
+  
+  def text_filter_values(property_id)
+    words_by_prop_id = Indexer.filterable_text_values_for_product_ids(all_product_ids, [], language_code, property_id)
+    all_values, relevant_values = words_by_prop_id[property_id]
+    all_values
   end
 end

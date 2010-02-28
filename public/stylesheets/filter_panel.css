@@ -1,5 +1,11 @@
+#filter_panel .sections .filter {
+	margin-left: 5px;
+	width: 240px;
+}
+
 #filter_panel .sections .filter img.property_icon {
 	cursor: pointer;
+	margin-top: 2px;
 }
 
 #filter_panel .sections .filter .remove {
@@ -17,9 +23,13 @@
 	background: aqua;
 }
 
-#filter_panel .sections .filter .summary {
+#filter_panel .sections .filter td {
+	padding: 0;
+}
+
+#filter_panel .sections .filter td.summary {
 	padding: 0 5px;
-	width: 149px;
+	width: 100%;
 }
 
 #filter_panel_add {

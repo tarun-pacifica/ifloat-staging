@@ -10,7 +10,10 @@
     <title>iFloat - Find, Buy, Float</title>
     <% end %>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	<link rel="stylesheet" href="/stylesheets/compiled.css" type="text/css" media="screen" charset="utf-8" />
+	<!-- <link rel="stylesheet" href="/stylesheets/compiled.css" type="text/css" media="screen" charset="utf-8" /> -->
+	<% Dir["public/stylesheets/*.css"].each do |path| %>
+		<link rel="stylesheet" href="/stylesheets/<%= File.basename(path) %>" type="text/css" media="screen" charset="utf-8" />
+	<% end %>
 	<% unless @skip_javascript %>
 	<link rel="stylesheet" href="/stylesheets/ui/ui.all.css" type="text/css" media="screen" charset="utf-8" />
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.1/jquery.min.js"></script>

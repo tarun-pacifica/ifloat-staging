@@ -113,7 +113,7 @@ class CachedFind
     filter = (new_filters[property_id] || {})
     new_filters[property_id] = filter if filter.empty?
     
-    filter[:include_unknown] = (params["include_unknown"] == "true")
+    filter[:include_unknown] = (property_id == Indexer.class_property_id ? false : params["include_unknown"] == "true")
     
     case prop_info[:type]
     when "currency", "date", "numeric"
@@ -162,7 +162,7 @@ class CachedFind
   end
   
   # TODO: spec for class_only filtering
-  def filtered_product_ids(class_only = false) # TODO: make this more explicit - what's the effect?
+  def filtered_product_ids(class_only = false)
     return [] if all_product_count.zero?
     
     property_ids = filters.keys

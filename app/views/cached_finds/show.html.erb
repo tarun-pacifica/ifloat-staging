@@ -4,7 +4,7 @@
 
 <% if @find.all_product_count.zero? %>
 
-<img id="no_results" src="/images/products/no_results.png" />
+<img id="no_results" src="/images/find_results/no_results.png" />
 
 
 <% else %>
@@ -12,11 +12,27 @@
 <div id="filter_panel" class="panel minor">
 	<div class="title"> <h2>Filters</h2> </div>
 	<div class="controls">
-		<div id="filter_panel_add"> </div>
-		<div id="filter_panel_remove"> </div>
+		<div id="filter_panel_add" class="button" onclick="filter_panel_add()">Add</div>
+		<div id="filter_panel_remove_all" class="button" onclick="filter_panel_remove_all()">Remove All</div>
 	</div>
-	<div class="body">
-		<!-- sections go here -->
+	<div class="sections">
+		<h3>Section 1</h3>
+		<table>
+			<tr class="filter">
+				<td><img class="property_icon" src="/assets/property_icons/0a2f672223294d6b57f4209bdb06ea3e.png" onclick="filter_panel_edit(1234)" onmouseover="tooltip_show(event, 'filter 1')" onmouseout="tooltip_hide()" /></td>
+				<td class="summary">value 1, value 2, value 3...</td>
+				<td><div class="remove" onclick="filter_panel_remove(1234)"></div></td>
+			</tr>
+		</table>
+
+		<h3>Section 2</h3>
+		<table>
+			<tr class="filter">
+				<td><img class="property_icon" src="/assets/property_icons/0a2f672223294d6b57f4209bdb06ea3e.png" onclick="filter_panel_edit(1234)" onmouseover="tooltip_show(event, 'filter 1')" onmouseout="tooltip_hide()" /></td>
+				<td class="summary">value 1, value 2, value 3...</td>
+				<td><div class="remove" onclick="filter_panel_remove(1234)"></div></td>
+			</tr>
+		</table>
 	</div>
 </div>
 
@@ -24,11 +40,11 @@
 	<div class="title">
 		<h2>
 			Showing <span id="find_results_count">? / ?</span>
-			products for <span class="spec"><%= @find.specification %></span>
+			products for <strong><%= @find.specification.inspect %></strong>
 		</h2>
 	</div>
 	
-	<div id="find_results_products">
+	<div id="find_results_products" class="body">
 		
 		<hr class="terminator" />
 	</div>

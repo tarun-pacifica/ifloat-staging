@@ -1,4 +1,4 @@
-function utiL_preload_image(url) {
+function util_preload_image(url) {
 	(new Image()).src = url;
 }
 

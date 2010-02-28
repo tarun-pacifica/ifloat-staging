@@ -5,7 +5,9 @@ class CachedFinds < Application
     if find.valid?
       CachedFindEvent.log!(specification, (not find.accessed_at.nil?), request.remote_ip)
       redirect(resource(find))
-    else redirect("/")
+    else 
+      p find.errors
+      redirect("/")
     end
   end
   

@@ -21,13 +21,13 @@ class CachedFind
   
   ANONIMIZATION_TIME = 1.month
   
-  property :id, Serial
-  property :language_code, String, :required => true, :format => /^[A-Z]{3}$/
-  property :specification, String, :length => 255
-  property :description, String, :length => 255
-  property :filters, Object, :accessor => :protected, :lazy => false
-  property :accessed_at, DateTime
-  property :invalidated, Boolean, :required => true, :default => true
+  property :id,            Serial
+  property :language_code, String,  :required => true, :format => /^[A-Z]{3}$/
+  property :specification, String,  :length => 255
+  property :description,   String,  :length => 255
+  property :filters,       Object,  :accessor => :protected, :lazy => false
+  property :accessed_at,   DateTime
+  property :invalidated,   Boolean, :required => true, :default => true
   
   belongs_to :user, :required => false
   
@@ -50,6 +50,7 @@ class CachedFind
   before :valid? do
     self.specification = (specification || "").split.uniq.join(" ")
     self.description = specification if description.blank?
+    self.filters = {}
   end
   
   def self.obsolete
@@ -78,11 +79,11 @@ class CachedFind
     pdc = Indexer.property_display_cache
     
     filters.each do |property_id, filter|
-      property = pdc[property_id]
-      next if property.nil?
+      prop_info = pdc[property_id]
+      next if prop_info.nil?
       
       data =
-        case property[:type]
+        case prop_info[:type]
         when "currency", "date", "numeric"
           limits = numeric_limits_by_property_id[property_id]
           next if limits.nil?
@@ -100,13 +101,6 @@ class CachedFind
     self.invalidated = false
     self.filters = new_filters
     save ? changes : []
-  end
-  
-  # TODO: spec and move down
-  def unfilter!(property_id)
-    return unless filters.has_key?(property_id)
-    self.filters = Marshal.load(Marshal.dump(self.filters)).delete(property_id)
-    save
   end
   
   # TODO: spec
@@ -168,19 +162,29 @@ class CachedFind
   end
   
   # TODO: spec for class_only filtering
-  def filtered_product_ids(class_only = false)
+  def filtered_product_ids(class_only = false) # TODO: make this more explicit - what's the effect?
     return [] if all_product_count.zero?
     
-    used_filters = filters.select { |filter| not filter_fresh?(filter) }
-    used_filters = used_filters.select { |filter| filter[:id] == Indexer.class_property_id } if class_only
-    return all_product_ids if used_filters.empty?
+    property_ids = filters.keys
+    property_ids &= [Indexer.class_property_id] if class_only    
+    return all_product_ids if property_ids.empty?
     
     # TODO: spec examples where this kicks in
+    # - the idea is that all products are relevant by default
+    # - since we use exclusion based filtering, any product without a value will not be excluded normally
+    # - thus if we mark a filter as not including unknown, we specifically limit the products to the set with that filter's property_id
     relevant_product_ids = all_product_ids
-    focussed_property_ids = used_filters.reject { |filter| filter[:include_unknown] }.map { |filter| filter[:id] }
+    focussed_property_ids = property_ids.reject { |id| filters[id][:include_unknown] }
     relevant_product_ids &= Indexer.product_ids_for_filterable_property_ids(focussed_property_ids, language_code) unless focussed_property_ids.empty?
     
-    text_filters, numeric_filters = used_filters.partition { |filter| filter[:type] == "text" }
+    numeric_filters, text_filters = {}, {}
+    pdc = Indexer.property_display_cache
+    property_ids.each do |property_id|
+      prop_info = pdc[property_id]
+      next if prop_info.nil?
+      (prop_info[:type] == "text" ? text_filters : numeric_filters)[property_id] = filters[property_id][:data]
+    end
+    
     excluded_product_ids = Indexer.excluded_product_ids_for_numeric_filters(numeric_filters)
     excluded_product_ids += Indexer.excluded_product_ids_for_text_filters(text_filters, language_code)
     relevant_product_ids - excluded_product_ids
@@ -208,6 +212,13 @@ class CachedFind
   # TODO: spec
   def spec_count
     "#{specification} (#{filtered_product_ids.size} / #{all_product_count})"
+  end
+  
+  # TODO: spec
+  def unfilter!(property_id)
+    return unless filters.has_key?(property_id)
+    self.filters = Marshal.load(Marshal.dump(self.filters)).delete(property_id)
+    save
   end
   
   

@@ -40,18 +40,14 @@ module Indexer
     end
   end
     
-  def self.excluded_product_ids_for_numeric_filters(filters)
-    return [] if filters.empty? or not ensure_loaded
-    
-    filters_by_pid = {}
-    filters.each { |filter| filters_by_pid[filter[:prop_id]] = filter }
+  def self.excluded_product_ids_for_numeric_filters(filters_by_property_id)
+    return [] if filters_by_property_id.empty? or not ensure_loaded
     
     product_ids = []
     @@numeric_filtering_index.each do |property_id, units_by_product_id|
-      filter = filters_by_pid[property_id]
-      next if filter.nil?
+      min, max, unit = filters_by_property_id[property_id]
+      next if min.nil?
       
-      min, max, unit, limits = filter[:data]
       units_by_product_id.each do |product_id, min_max_by_unit|
         min_max = min_max_by_unit[unit]
         next if min_max.nil?
@@ -61,19 +57,15 @@ module Indexer
     product_ids.uniq
   end
   
-  def self.excluded_product_ids_for_text_filters(filters, language_code)
-    return [] if filters.empty? or not ensure_loaded
-    
-    filters_by_pid = {}
-    filters.each { |filter| filters_by_pid[filter[:prop_id]] = filter }
+  def self.excluded_product_ids_for_text_filters(filters_by_property_id, language_code)
+    return [] if filters_by_property_id.empty? or not ensure_loaded
     
     product_ids = []
     (@@text_filtering_index[language_code] || {}).each do |property_id, products|
-      filter = filters_by_pid[property_id]
-      next if filter.nil?
+      inclusions = filters_by_property_id[property_id]
+      next if inclusions.nil?
       
-      exclusions = filter[:data]
-      products.each { |product_id, values| product_ids << product_id if (values - exclusions).empty? }
+      products.each { |product_id, values| product_ids << product_id if (values & inclusions).empty? }
     end
     product_ids.uniq
   end

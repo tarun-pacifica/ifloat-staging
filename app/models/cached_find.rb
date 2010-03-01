@@ -75,27 +75,13 @@ class CachedFind
     
     changes = [] # TODO: track changes
     new_filters = {}
-    numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(all_product_ids)
     pdc = Indexer.property_display_cache
     
     filters.each do |property_id, filter|
       prop_info = pdc[property_id]
       next if prop_info.nil?
-      
-      data =
-        case prop_info[:type]
-        when "currency", "date", "numeric"
-          limits = numeric_limits_by_property_id[property_id]
-          next if limits.nil?
-          min, max, unit = filter[:data]
-          numeric_filter_choose(min, max, unit, limits)
-        when "text"
-          values = text_filter_values
-          next if values.nil?
-          filter[:data] & values
-        end
-      
-      new_filters[property_id] = {:data => data, :include_unknown => filter[:include_unknown]}
+      data = filter_data(prop_info[:type], filter[:data])      
+      new_filters[property_id] = {:data => data, :include_unknown => filter[:include_unknown]} unless data.nil?
     end
     
     self.invalidated = false
@@ -115,18 +101,17 @@ class CachedFind
     
     filter[:include_unknown] = (property_id == Indexer.class_property_id ? false : params["include_unknown"] == "true")
     
-    case prop_info[:type]
-    when "currency", "date", "numeric"
-      limits = Indexer.numeric_limits_for_product_ids(all_product_ids, property_id)[property_id]
-      return if limits.nil?
-      min, max = params.values_at("min", "max").map { |v| v.to_f }
-      unit = params["unit"]; unit = nil if unit.blank?
-      filter[:data] = numeric_filter_choose(min, max, unit, limits)
-    when "text"
-      values = text_filter_values(property_id)
-      return if values.nil?
-      filter[:data].replace(params["count"].to_i.times.map { |i| params["value_#{i}"] } & values)
-    end
+    data_in =
+      case prop_info[:type]
+      when "currency", "date", "numeric"
+        min, max = params.values_at("min", "max").map { |v| v.to_f }
+        unit = params["unit"]; unit = nil if unit.blank?
+        [min, max, unit]
+      when "text"
+        params["count"].to_i.times.map { |i| params["value_#{i}"] }
+      end
+    data = filter_data(prop_info[:type], data_in)
+    filter[:data] = data unless data.nil?
     
     self.filters = filters
     save
@@ -223,6 +208,17 @@ class CachedFind
   
   
   private
+  
+  def filter_data(type, data_in)
+    case type
+    when "currency", "date", "numeric"
+      limits = Indexer.numeric_limits_for_product_ids(all_product_ids, property_id)[property_id]
+      limits.nil? ? nil : numeric_filter_choose(data_in[0], data_in[1], data_in[2], limits)
+    when "text"
+      all_values, relevant_values = Indexer.filterable_text_values_for_product_ids(all_product_ids, [], language_code, property_id)[property_id]
+      all_values.nil? ? nil : (data_in & all_values)
+    end
+  end
     
   def filter_summarize(filter, range_sep)
     type = filter[:type]
@@ -259,11 +255,5 @@ class CachedFind
     text_property_ids = Indexer.filterable_text_property_ids_for_product_ids(all_product_ids, language_code)
     numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(all_product_ids)
     (text_property_ids + numeric_limits_by_property_id.keys).reject { |id| filters.has_key?(id) }
-  end
-  
-  def text_filter_values(property_id)
-    words_by_prop_id = Indexer.filterable_text_values_for_product_ids(all_product_ids, [], language_code, property_id)
-    all_values, relevant_values = words_by_prop_id[property_id]
-    all_values
   end
 end

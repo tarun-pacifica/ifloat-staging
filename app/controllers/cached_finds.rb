@@ -5,8 +5,7 @@ class CachedFinds < Application
     if find.valid?
       CachedFindEvent.log!(specification, (not find.accessed_at.nil?), request.remote_ip)
       redirect(resource(find))
-    else 
-      p find.errors
+    else
       redirect("/")
     end
   end
@@ -18,50 +17,11 @@ class CachedFinds < Application
     find.filters_used("&ndash;").to_json
   end
   
-  # TODO - this is now the only method that needs to ensure the cached find so that the filter panel refresh can throw up an alert
-  # def filters(id)
-  #   provides :js
-  #   
-  #   find = session.ensure_cached_find(id.to_i)
-  #   return "reset".to_json if find.ensure_valid
-  #   
-  #   filters = find.filters
-  #   properties = PropertyDefinition.all(:id => filters.map { |filter| filter[:prop_id] })
-  #   icon_urls = PropertyDefinition.icon_urls_by_property_id(properties)
-  #   text_value_definitions = PropertyDefinition.definitions_by_property_id(properties, find.language_code)
-  #   text_values, relevant_numeric_limits = find.filter_values
-  #   relevant_values_by_prop_id = find.filter_values_relevant(text_values, relevant_numeric_limits)
-  #   
-  #   filters.each do |filter|
-  #     prop_id = filter[:prop_id]
-  #     filter[:icon_url] = icon_urls[prop_id]
-  #     filter[:relevant] = relevant_values_by_prop_id.has_key?(prop_id)
-  #     
-  #     if filter[:prop_type] == "text"
-  #       all_values, relevant_values = text_values[prop_id]
-  #       definitions = text_value_definitions[prop_id]
-  #       (definitions.keys - all_values).each { |v| definitions.delete(v) }
-  #       filter[:data] = {
-  #         :all         => all_values,
-  #         :definitions => definitions,
-  #         :excluded    => filter[:data],
-  #         :relevant    => (relevant_values.sort == all_values ? "all" : relevant_values)
-  #       }
-  #     else
-  #       filter[:data] = {
-  #         :chosen => filter[:data][0..2].map { |v| v.nil? ? "" : v },
-  #         :limits => filter[:data][3]
-  #       }
-  #     end
-  #   end
-  #   
-  #   filters.to_json
-  # end
-  
-  def filters_unused(id)
+  def filters(id, list)
+    raise NotFound unless %w(unused used).include?(list)
     provides :js
     find = session.ensure_cached_find(id.to_i)
-    find.unused_filters.to_json
+    (list == "used" ? find.filters_used("&ndash;") : find.filters_unused).to_json
   end
   
   def found_images(id, limit)

@@ -202,11 +202,14 @@ module Indexer
     
     pdc = {}
     properties.each do |property|
+      section, name = friendly_names[property.id]
       pdc[property.id] = {
-        :seq_num        => property.sequence_number,
-        :friendly_name  => friendly_names[property.id],
-        :icon_url       => icon_urls[property.id],
-        :type           => property.property_type.core_type,
+        :id       => property.id,
+        :seq_num  => property.sequence_number,
+        :section  => section,
+        :name     => name,
+        :icon_url => icon_urls[property.id],
+        :type     => property.property_type.core_type,
       }
     end
     pdc

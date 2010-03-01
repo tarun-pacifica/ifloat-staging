@@ -1,11 +1,11 @@
 function find_results_make(checksum, count, image_url, popup_image_url) {
-	var url = '/cached_finds/' + body_state.find_id + '/found_products_for_checksum/' + checksum;
+	var url = '/cached_finds/' + $ifloat_body.find_id + '/found_products_for_checksum/' + checksum;
 	var tally = '<div class="tally">' + count + ' item' + (count > 1 ? 's' : '') + '</div>';
 	return '<a class="product" href="' + url + '"> ' + tally + product_image_make(image_url, popup_image_url) + ' </a>';
 }
 
 function find_results_update() {
-	var url = '/cached_finds/' + body_state.find_id + '/found_images/36'
+	var url = '/cached_finds/' + $ifloat_body.find_id + '/found_images/36'
 	$.getJSON(url, find_results_update_handle);
 }
 
@@ -30,6 +30,6 @@ function find_results_update_handle(data) {
 		
 	$('#find_results_count').text(image_prod_count + ' / ' + total_prod_count);
 	
-	body_state.filter_queue_active = -1;
+	$ifloat_body.filter_queue_active = -1;
 	// filter_queue_execute();
 }

@@ -182,15 +182,15 @@ class CachedFind
   
   # TODO: spec
   def filters_unused
-    Indexer.property_display_cache.values_at(*property_ids_unused).sort_by { |info| info[:seq_num] }
+    Indexer.property_display_cache.values_at(*property_ids_unused).compact.sort_by { |info| info[:seq_num] }
   end
   
   # TODO: spec
   def filters_used(range_sep)
-    filters.values.sort_by! { |filter| filter[:seq_num] }.map do |filter|
-      section, name = filter[:friendly_name]
-      summary = filter_summarize(filter, range_sep)
-      {:section => section, :name => name, :icon_url => filter[:icon_url], :summary => summary}
+    infos = Indexer.property_display_cache.values_at(*(filters.keys)).compact.sort_by { |info| info[:seq_num] }
+    infos.map do |info|
+      filter = filters[info[:id]]
+      info.merge(:summary=> filter_summarize(info[:type], filter[:data], range_sep))
     end
   end
   
@@ -220,16 +220,16 @@ class CachedFind
     end
   end
     
-  def filter_summarize(filter, range_sep)
+  def filter_summarize(type, data, range_sep)
     type = filter[:type]
     
     if type == "text"
-      values = filter[:data]
+      values = data
       return values.empty? ? "[none]" : values.sort.join(", ").truncate(50)
     end
     
     begin
-      min, max, unit, limits = filter[:data]
+      min, max, unit = data
       PropertyType.value_class(type).format(min, max, range_sep, unit)
     rescue
       "unknown type #{type.inspect}"

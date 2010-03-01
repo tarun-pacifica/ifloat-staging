@@ -1,3 +1,83 @@
+function filter_panel_add() {
+	if($ifloat_body.filter_unused_count > 0) $("#filter_choose").dialog("open");
+}
+
+function filter_panel_choose_load_handle(filters) {
+	$ifloat_body.filter_unused_count = filters.length;
+	
+	var html = [];
+	var parity = "odd";
+	var section = '';
+	
+	var section_count = 0;
+	var section_count_max = 0;
+	
+	for(i in filters) {
+		var filter = filters[i];
+		section_count += 1;
+		
+		if(section != filter.section) {
+			if(html.length > 0) html.push('<hr class="terminator" /> </div>');
+			html.push('<div class="section ' + parity + '">');
+			html.push('<h3>' + filter.section + '</h3>');
+			parity = (parity == "odd" ? "even" : "odd")
+			section = filter.section;
+			
+			if(section_count_max < section_count) section_count_max = section_count;
+			section_count = 0;
+		}
+		
+		html.push('<div class="filter">');
+		html.push('<img class="property_icon" src="' + filter.icon_url + '" onclick="filter_choose(' + filter.id + ')" />');
+		html.push('<p>' + filter.name + '</p>');
+		html.push('</div>');
+	}
+	
+	if(html.length > 0) html.push('<hr class="terminator" /> </div>');
+	
+	var filter_choose = $("#filter_choose");
+	if(! $ifloat_body.filter_choose_created) {
+		filter_choose.dialog({autoOpen: false, modal: true});
+		$ifloat_body.filter_choose_created = true
+	}
+	filter_choose.html(html.join(' '));
+	filter_choose.data("width.dialog", section_count_max * 78);
+	
+}
+
+function filter_panel_load() {
+	$.getJSON('/cached_finds/' + $ifloat_body.find_id + '/filters/used', filter_panel_load_handle);
+	$.getJSON('/cached_finds/' + $ifloat_body.find_id + '/filters/unused', filter_panel_choose_load_handle);
+}
+
+function filter_panel_load_handle(filters) {
+	var html = [];
+	var section = '';
+	
+	for(i in filters) {
+		var filter = filters[i];
+		
+		if(section != filter.section) {
+			html.push('<h3>' + filter.section + '</h3>');
+			section = filter.section;
+		}
+		
+		html.push('<table class="filter">');
+		html.push('<tr>');
+		html.push('<td class="icon">');
+		html.push('<img class="property_icon" src="' + filter.icon_url + '" onclick="filter_panel_edit(' + filter.id + ')" onmouseover="tooltip_show(event, ' + filter.name + ')" onmouseout="tooltip_hide()" />');
+		html.push('</td>');
+		html.push('<td class="summary">' + filter.summary + '</td>');
+		html.push('<td><div class="remove" onclick="filter_panel_remove(' + filter.id + ')"></div></td>');
+		html.push('</tr>');
+		html.push('</table>');
+	}
+	
+	$("#filter_panel .sections").html(html.length == 0 ? '&nbsp;' : html.join(' '));
+}
+
+// vvv LEGACY CODE vvv
+
 // Date Filter
 
 function date_filter_create(data, html) {
@@ -391,14 +471,14 @@ function text_filter_select_one(image) {
 	text_filter_handle_check(checkbox[0], true);
 }
 
-function text_filter_update_summary(filter) {
-	var list = filter.find(".list_item input:checkbox").map(function() {
-		var relevant = ($(this).parent().css("text-decoration") == "none");
-		if(this.checked && relevant) return this.value;
-		else return undefined;
-	});
-	if(list.length == 0) list.push("[none]");
-	var summary = list.get().join(", ");
-	if(summary.length > 50) summary = summary.substr(0, 46) + "...";
-	filter.prev().find(".summary").text(summary);
-}
+// function text_filter_update_summary(filter) {
+// 	var list = filter.find(".list_item input:checkbox").map(function() {
+// 		var relevant = ($(this).parent().css("text-decoration") == "none");
+// 		if(this.checked && relevant) return this.value;
+// 		else return undefined;
+// 	});
+// 	if(list.length == 0) list.push("[none]");
+// 	var summary = list.get().join(", ");
+// 	if(summary.length > 50) summary = summary.substr(0, 46) + "...";
+// 	filter.prev().find(".summary").text(summary);
+// }

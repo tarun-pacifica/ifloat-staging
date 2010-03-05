@@ -6,7 +6,6 @@ caches/*
 doc/*
 !doc/README
 !doc/rdoc/
-gems/*
 log/
 public/assets
 public/javascripts/compiled.js

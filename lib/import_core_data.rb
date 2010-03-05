@@ -87,6 +87,7 @@ class ImportSet
   end
   
   def checkpoint
+    @errors_checkpoint = @errors.size
     @objects_checkpoint = @objects.size
   end
   
@@ -101,6 +102,10 @@ class ImportSet
   
   def error(klass, path, row, column, message)
     @errors << [klass, path, row, column, message]
+  end
+  
+  def errors_since_checkpoint?
+    @errors.size > @errors_checkpoint
   end
     
   def get(klass, *pk_value)
@@ -617,7 +622,9 @@ CLASSES.each do |klass|
     else
       import_set.checkpoint
       stopwatch(nice_path) { parser.parse(path) }
-      stopwatch(" --> [updated cache]") { import_set.dump_from_checkpoint(dump_name) }
+      if import_set.errors_since_checkpoint? then puts "          --> errors detected [cache not updated]"
+      else stopwatch("--> [updated cache]") { import_set.dump_from_checkpoint(dump_name) }
+      end
       freshly_parsed_classes << klass
     end
   end

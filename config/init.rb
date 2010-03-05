@@ -1,3 +1,6 @@
+# http://github.com/carlhuda/bundler/issues/#issue/107
+require 'lib' / 'bundler_runtime_patch'
+
 if RUBY_VERSION =~ /^1\.9\./
   require "csv"
   FasterCSV = CSV

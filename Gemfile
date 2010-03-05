@@ -1,7 +1,7 @@
-bundle_path "gems"
+source :gemcutter
 
-clear_sources
-source "http://gemcutter.org"
+# http://github.com/carlhuda/bundler/issues/#issue/107
+gem "bundler", "0.9.10"
 
 def gems(names, version)
   names.each { |n| gem(n, version) }
@@ -11,10 +11,9 @@ end
 gems %w(data_objects do_mysql), "0.10.1"
 gems %w(dm-core dm-aggregates dm-migrations dm-types dm-validations), "0.10.2"
 gems %w(merb-core merb-action-args merb-helpers merb-mailer merb_datamapper), "1.1.0.pre"
-# merb-assets merb-exceptions ?
 
 # Others
-gem "cloudfiles", "1.4.4"
-gem "fastercsv", "1.5.0" unless RUBY_VERSION =~ /^1\.9\./
-gem "json", "1.2.0"
-gem "thin", "1.2.5"
+gem "cloudfiles", "1.4.6"
+gem "fastercsv",  "1.5.1" unless RUBY_VERSION =~ /^1\.9\./
+gem "json",       "1.2.2"
+gem "thin",       "1.2.7"

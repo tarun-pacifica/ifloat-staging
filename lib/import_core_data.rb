@@ -606,6 +606,9 @@ puts "=== Parsing CSVs ==="
 freshly_parsed_classes = []
 import_set = ImportSet.new
 CLASSES.each do |klass|
+  # TODO: remove once the corresponding get in the product parser is removed
+  next if klass == Product and import_set.get(Company, "GBR-02934378").nil?
+  
   parser = parsers_by_class[klass].new(import_set)
   csv_paths_by_class[klass].each do |path|
     nice_path = File.basename(path)

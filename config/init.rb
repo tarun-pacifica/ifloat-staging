@@ -7,6 +7,7 @@ if RUBY_VERSION =~ /^1\.9\./
 end
 
 require "fileutils"
+require "set"
 
 require "lib" / "asset_store"
 require "lib" / "conversion"

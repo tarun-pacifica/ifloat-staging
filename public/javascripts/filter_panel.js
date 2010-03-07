@@ -1,84 +1,14 @@
 function filter_panel_add() {
-	if($ifloat_body.filter_unused_count > 0) $('#filter_choose').dialog('open');
+	filter_choose_open();
 }
 
-function filter_panel_choose_load_handle(filters) {
-	$ifloat_body.filter_unused_count = filters.length;
-	
-	var filters_by_section = util_group_by(filters, 'section');
-	
-	var section_count_max = 2;
-	for(section in filters_by_section) {
-		var count = filters_by_section[section].length;
-		if(count > section_count_max) section_count_max = count;
-	}
-	
-	var sections = [];
-	for(i in filters) {
-		var section = filters[i].section;
-		if(sections.length == 0 || (sections[sections.length -1] != section)) sections.push(section);
-	}
-	
-	var row_count = 0;
-	var rows = [[]];
-	for(i in sections) {
-		var section = sections[i];
-		var section_count = filters_by_section[section].length;
-		if(row_count + section_count < section_count_max) {
-			rows[rows.length - 1].push(section);
-			row_count += section_count;
-		} else {
-			rows.push([section]);
-			row_count = section_count;
-		}
-	}
-		
-	var html = [];	
-	for(i in rows) {
-		var row = rows[i];
-		html.push('<div class="row ' + (i % 2 ? "even" : "odd") + '">');
-		
-		for(j in row) {
-			var section = row[j];
-			html.push('<div class="section">');
-			html.push('<h3>' + section + '</h3>');
-			
-			var filters = filters_by_section[section];
-			for(k in filters) {
-				var filter = filters[k];
-				html.push('<div class="filter">');
-				html.push(filter_panel_property_icon(filter, 'filter_panel_choose', 'above'));
-				// html.push('<p>' + filter.name + '</p>');
-				html.push('</div>');
-			}
-			
-			html.push('</div>');
-		}
-		
-		html.push('<hr class="terminator" />');
-		html.push('</div>');
-	}
-	
-	var filter_choose = $('#filter_choose');
-	if(! $ifloat_body.filter_choose_created) {
-		filter_choose.dialog({autoOpen: false, modal: true});
-		$ifloat_body.filter_choose_created = true
-	}
-	filter_choose.data('width.dialog', section_count_max * 78);
-	filter_choose.html(html.join(' '));
-}
-
-function filter_panel_choose_section_focus(event) {
-	$(event.target).find('.filter').show();
-}
-
-function filter_panel_choose_section_unfocus(event) {
-	$(event.target).find('.filter').hide();
+function filter_panel_edit(filter_id) {
+	filter_configure(filter_id);
 }
 
 function filter_panel_load() {
 	$.getJSON('/cached_finds/' + $ifloat_body.find_id + '/filters/used', filter_panel_load_handle);
-	$.getJSON('/cached_finds/' + $ifloat_body.find_id + '/filters/unused', filter_panel_choose_load_handle);
+	filter_choose_load();
 }
 
 function filter_panel_load_handle(filters) {

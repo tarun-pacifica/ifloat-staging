@@ -10,7 +10,13 @@ class CachedFinds < Application
     end
   end
   
-  def filter(id, property_id)
+  def filter_get(id, property_id)
+    provides :js
+    find = session.ensure_cached_find(id.to_i)
+    find.filter_detail(property_id.to_i).to_json
+  end
+  
+  def filter_set(id, property_id)
     provides :js
     find = session.ensure_cached_find(id.to_i)
     find.filter!(property_id.to_i, params)
@@ -18,8 +24,8 @@ class CachedFinds < Application
   end
   
   def filters(id, list)
-    raise NotFound unless %w(unused used).include?(list)
     provides :js
+    raise NotFound unless %w(unused used).include?(list)
     find = session.ensure_cached_find(id.to_i)
     (list == "used" ? find.filters_used("&ndash;") : find.filters_unused).to_json
   end

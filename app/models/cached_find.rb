@@ -80,7 +80,7 @@ class CachedFind
     filters.each do |property_id, filter|
       prop_info = pdc[property_id]
       next if prop_info.nil?
-      data = filter_data(prop_info[:type], filter[:data])      
+      data = filter_data(property_id, prop_info[:type], filter[:data])      
       new_filters[property_id] = {:data => data, :include_unknown => filter[:include_unknown]} unless data.nil?
     end
     
@@ -90,16 +90,35 @@ class CachedFind
   end
   
   # TODO: spec
+  def filter_detail(property_id)
+    prop_info = Indexer.property_display_cache[property_id]
+    return nil if prop_info.nil?
+    
+    filter = (filters[property_id] || {:include_unknown => (property_id == Indexer.class_property_id ? nil : true)})
+    
+    apids, fpids = all_product_ids, filtered_product_ids(true)
+    values_by_unit = {}
+    Indexer.filterable_values_for_property_id(property_id, apids, fpids, language_code).each do |unit, values|
+      all_values, relevant_values = values
+      relevant = Set.new(relevant_values)
+      selected = Set.new(filter[:data].nil? ? all_values : filter[:data])
+      values_by_unit[unit] = all_values.map { |v| [v, relevant.include?(v), selected.include?(v)] }
+    end
+    
+    {:include_unknown => filter[:include_unknown], :values_by_unit => values_by_unit}
+  end
+  
+  # TODO: spec
   def filter!(property_id, params)
     prop_info = Indexer.property_display_cache[property_id]
-    return if property.nil?
+    return if prop_info.nil?
     return unless filters.has_key?(property_id) or property_ids_unused.include?(property_id)
     
     new_filters = Marshal.load(Marshal.dump(self.filters))
     filter = (new_filters[property_id] || {})
     new_filters[property_id] = filter if filter.empty?
     
-    filter[:include_unknown] = (property_id == Indexer.class_property_id ? false : params["include_unknown"] == "true")
+    filter[:include_unknown] = (property_id == Indexer.class_property_id ? nil : params["include_unknown"] == "true")
     
     data_in =
       case prop_info[:type]
@@ -110,19 +129,11 @@ class CachedFind
       when "text"
         params["count"].to_i.times.map { |i| params["value_#{i}"] }
       end
-    data = filter_data(prop_info[:type], data_in)
+    data = filter_data(property_id, prop_info[:type], data_in)
     filter[:data] = data unless data.nil?
     
     self.filters = filters
     save
-  end
-    
-  # TODO: spec
-  def filter_values
-    fpids = filtered_product_ids(true)
-    text_values = Indexer.filterable_text_values_for_product_ids(all_product_ids, fpids, language_code)
-    numeric_limits = Indexer.numeric_limits_for_product_ids(fpids)
-    [text_values, numeric_limits]
   end
   
   # TODO: spec
@@ -209,14 +220,17 @@ class CachedFind
   
   private
   
-  def filter_data(type, data_in)
+  def filter_data(property_id, type, data_in = nil)
     case type
     when "currency", "date", "numeric"
       limits = Indexer.numeric_limits_for_product_ids(all_product_ids, property_id)[property_id]
-      limits.nil? ? nil : numeric_filter_choose(data_in[0], data_in[1], data_in[2], limits)
+      return nil if limits.nil?
+      data_in = [] if data_in.nil? 
+      numeric_filter_choose(data_in[0], data_in[1], data_in[2], limits)
     when "text"
       all_values, relevant_values = Indexer.filterable_text_values_for_product_ids(all_product_ids, [], language_code, property_id)[property_id]
-      all_values.nil? ? nil : (data_in & all_values)
+      return nil if all_values.nil?
+      data_in.nil? ? all_values : (data_in & all_values)
     end
   end
     
@@ -252,8 +266,6 @@ class CachedFind
   end
   
   def property_ids_unused
-    text_property_ids = Indexer.filterable_text_property_ids_for_product_ids(all_product_ids, language_code)
-    numeric_limits_by_property_id = Indexer.numeric_limits_for_product_ids(all_product_ids)
-    (text_property_ids + numeric_limits_by_property_id.keys).reject { |id| filters.has_key?(id) }
+    Indexer.property_ids_for_product_ids(all_product_ids, language_code).reject { |id| filters.has_key?(id) }
   end
 end

@@ -65,7 +65,7 @@ function filter_panel_load_handle(filters) {
 		html.push('<table class="filter">');
 		html.push('<tr>');
 		html.push('<td class="icon">');
-		html.push('<img class="property_icon" src="' + filter.icon_url + '" onclick="filter_panel_edit(' + filter.id + ')" onmouseover="tooltip_show(event, ' + filter.name + ')" onmouseout="tooltip_hide()" />');
+		html.push('<img class="property_icon" src="' + filter.icon_url + '" onclick="filter_panel_edit(' + filter.id + ')" onmouseover="tooltip_show(event, \'' + filter.name + '\')" onmouseout="tooltip_hide()" />');
 		html.push('</td>');
 		html.push('<td class="summary">' + filter.summary + '</td>');
 		html.push('<td><div class="remove" onclick="filter_panel_remove(' + filter.id + ')"></div></td>');

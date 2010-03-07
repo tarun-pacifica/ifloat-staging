@@ -9,18 +9,18 @@
 }
 
 #filter_panel .sections .filter .remove {
-	background: blue;
+	background: url(/images/filter_panel/buttons/remove.png) no-repeat;
 	cursor: pointer;
-	height: 13px;
+	height: 12px;
 	width: 13px;
 }
 
 #filter_panel .sections .filter .remove:hover {
-	background: red;
+	background-position: 0 -12px;
 }
 
 #filter_panel .sections .filter .remove:active {
-	background: aqua;
+	background-position: 0 -24px;
 }
 
 #filter_panel .sections .filter td {

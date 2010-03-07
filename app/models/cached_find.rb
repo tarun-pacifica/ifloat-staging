@@ -91,8 +91,7 @@ class CachedFind
   
   # TODO: spec
   def filter_detail(property_id)
-    prop_info = Indexer.property_display_cache[property_id]
-    return nil if prop_info.nil?
+    return nil unless Indexer.property_display_cache.has_key?(property_id)
     
     filter = (filters[property_id] || {:include_unknown => (property_id == Indexer.class_property_id ? nil : true)})
     

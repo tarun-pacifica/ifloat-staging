@@ -72,53 +72,6 @@ module Indexer
     product_ids.uniq
   end
   
-  # def self.filterable_numeric_values_for_product_ids(all_product_ids, relevant_product_ids, single_property_id = nil)
-  #   return {} if all_product_ids.empty? or not ensure_loaded
-  #   
-  #   values_by_unit_property_id = {}
-  #   
-  #   @@numeric_filtering_index.each do |property_id, units_by_product_id|
-  #     next unless single_property_id.nil? or single_property_id == property_id
-  #     values_by_unit = (values_by_unit_property_id[property_id] ||= {})
-  #     
-  #     units_by_product_id.each do |product_id, min_max_by_unit|
-  #       all_valu
-  #       min_max = min_max_by_unit[unit]
-  #       next if min_max.nil?
-  #       product_ids << product_id if min > min_max.last or max < min_max.first
-  #     end
-  #   end
-  #   
-  #   (@@text_filtering_index[language_code] || {}).each do |property_id, products|
-  #     next unless single_property_id.nil? or single_property_id == property_id
-  #     all_values = products.values_at(*all_product_ids).flatten.compact.uniq.sort
-  #     relevant_values = products.values_at(*relevant_product_ids).flatten.uniq.compact
-  #     values_by_property_id[property_id] = [all_values, relevant_values] unless all_values.empty?
-  #   end
-  #   values_by_unit_property_id
-  # end
-  
-  # def self.filterable_text_property_ids_for_product_ids(product_ids, language_code)
-  #   return [] if product_ids.empty? or not ensure_loaded
-  #   
-  #   (@@text_filtering_index[language_code] || {}).map do |property_id, products|
-  #     (products.keys & product_ids).empty? ? nil : property_id
-  #   end.compact
-  # end
-  # 
-  # def self.filterable_text_values_for_product_ids(all_product_ids, relevant_product_ids, language_code, single_property_id = nil)
-  #   return {} if all_product_ids.empty? or not ensure_loaded
-  #   
-  #   values_by_property_id = {}
-  #   (@@text_filtering_index[language_code] || {}).each do |property_id, products|
-  #     next unless single_property_id.nil? or single_property_id == property_id
-  #     all_values = products.values_at(*all_product_ids).flatten.compact.uniq.sort
-  #     relevant_values = products.values_at(*relevant_product_ids).flatten.uniq.compact
-  #     values_by_property_id[property_id] = [all_values, relevant_values] unless all_values.empty?
-  #   end
-  #   values_by_property_id
-  # end
-  
   # TODO: get rid of extended logic here and revert to simple group_by once all ingested products are guaranteed to have a primary image - also should be able to get rid of 'no image' image in this case
   def self.image_checksums_for_product_ids(product_ids)
     return {} if product_ids.empty? or not ensure_loaded
@@ -152,28 +105,6 @@ module Indexer
     
     @@last_loaded_md5 = source_md5
   end
-  
-  # def self.numeric_limits_for_product_ids(product_ids, single_property_id = nil)
-  #   return {} if product_ids.empty? or not ensure_loaded
-  #   
-  #   limits_by_unit_by_property_id = {}
-  #   
-  #   @@numeric_filtering_index.each do |property_id, units_by_product_id|
-  #     next unless single_property_id.nil? or single_property_id == property_id
-  #     
-  #     relevant_product_ids = (product_ids & units_by_product_id.keys)
-  #     next if relevant_product_ids.empty?
-  #     
-  #     limits_by_unit = limits_by_unit_by_property_id[property_id] = {}
-  #     units_by_product_id.values_at(*relevant_product_ids).each do |min_max_by_unit|
-  #       limits_by_unit.update(min_max_by_unit) do |unit, old_min_max, new_min_max|
-  #         (old_min_max + new_min_max).minmax
-  #       end
-  #     end
-  #   end
-  #   
-  #   limits_by_unit_by_property_id
-  # end
   
   def self.product_ids_for_property_ids(property_ids, language_code)
     return [] if property_ids.empty? or not ensure_loaded

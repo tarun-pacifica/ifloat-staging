@@ -217,7 +217,7 @@ module Indexer
       next if values_by_product_id.nil?      
       
       all_values = values_by_product_id.values_at(*all_prod_ids).flatten.compact.uniq.sort
-      relevant_values = products.values_at(*relevant_product_ids).flatten.compact.uniq
+      relevant_values = values_by_product_id.values_at(*relevant_prod_ids).flatten.compact.uniq
       values_by_root_key[root_key] = [all_values, relevant_values] unless all_values.empty?
     end
     values_by_root_key

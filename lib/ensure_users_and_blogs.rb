@@ -4,7 +4,7 @@ require "pp"
 
 def whiny_save(object)
   return object if object.save
-  puts "Failed to save #{object.klass}..."
+  puts "Failed to save #{object.class}..."
   pp object.attributes
   object.errors.full_messages.each { |m| puts " - #{m}" }
   exit 1

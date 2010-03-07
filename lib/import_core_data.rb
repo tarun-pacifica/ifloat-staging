@@ -284,10 +284,13 @@ class ImportSet
       
       to_create.values.each_slice(1000) do |slice|
         bind_sets = Array.new(slice.size) { bind_set }.join(", ")
-        bind_values = slice.map do |object, attributes|
+        bind_values = []
+        slice.each do |object, attributes|
           attributes[:type] = klass
-          attributes.values_at(*column_names)
-        end.flatten
+          attributes.values_at(*column_names).each do |v|
+            bind_values << (v.is_a?(Array) ? Base64.encode64(Marshal.dump(v)) : v)
+          end
+        end
         
         begin
           @adapter.execute("INSERT INTO #{table_name} (#{column_names_list}) VALUES #{bind_sets}", *bind_values)

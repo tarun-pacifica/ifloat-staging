@@ -3,7 +3,7 @@ function tooltip_show(event, text, relative_position) {
 	bubble.find("p").text(text);
 	
 	var target = $(event.target);
-	var position = target.position();
+	var position = target.offset();
 	var left, top;
 	
 	if(relative_position == "above") {

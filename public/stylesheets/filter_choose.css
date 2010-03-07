@@ -6,22 +6,6 @@
 	background: #DCE9F7;
 }
 
-/*#filter_choose .even .odd {
-	background: #DCE9F7;
-}
-
-#filter_choose .even .even {
-	background: white;
-}
-
-#filter_choose .odd .odd {
-	background: white;
-}
-
-#filter_choose .odd .even {
-	background: #DCE9F7;
-}*/
-
 #filter_choose .row {
 	border-bottom: 1px solid silver;
 }

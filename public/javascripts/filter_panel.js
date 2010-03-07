@@ -1,11 +1,11 @@
 function filter_panel_add() {
-	if($ifloat_body.filter_unused_count > 0) $("#filter_choose").dialog("open");
+	if($ifloat_body.filter_unused_count > 0) $('#filter_choose').dialog('open');
 }
 
 function filter_panel_choose_load_handle(filters) {
 	$ifloat_body.filter_unused_count = filters.length;
 	
-	var filters_by_section = util_group_by(filters, "section");
+	var filters_by_section = util_group_by(filters, 'section');
 	
 	var section_count_max = 2;
 	for(section in filters_by_section) {
@@ -33,26 +33,22 @@ function filter_panel_choose_load_handle(filters) {
 		}
 	}
 		
-	console.log(rows);
-	
-	var html = [];
-	
+	var html = [];	
 	for(i in rows) {
 		var row = rows[i];
 		html.push('<div class="row ' + (i % 2 ? "even" : "odd") + '">');
 		
 		for(j in row) {
 			var section = row[j];
-			// html.push('<div class="section ' + (j % 2 ? "even" : "odd") + '">');
-			html.push('<div class="section ' + (j > 0 ? "tail" : "head") + '">');
+			html.push('<div class="section">');
 			html.push('<h3>' + section + '</h3>');
 			
 			var filters = filters_by_section[section];
 			for(k in filters) {
 				var filter = filters[k];
 				html.push('<div class="filter">');
-				html.push('<img class="property_icon" src="' + filter.icon_url + '" onclick="filter_choose(' + filter.id + ')" />');
-				html.push('<p>' + filter.name + '</p>');
+				html.push(filter_panel_property_icon(filter, 'filter_panel_choose', 'above'));
+				// html.push('<p>' + filter.name + '</p>');
 				html.push('</div>');
 			}
 			
@@ -63,21 +59,21 @@ function filter_panel_choose_load_handle(filters) {
 		html.push('</div>');
 	}
 	
-	var filter_choose = $("#filter_choose");
+	var filter_choose = $('#filter_choose');
 	if(! $ifloat_body.filter_choose_created) {
 		filter_choose.dialog({autoOpen: false, modal: true});
 		$ifloat_body.filter_choose_created = true
 	}
-	filter_choose.data("width.dialog", section_count_max * 78);
+	filter_choose.data('width.dialog', section_count_max * 78);
 	filter_choose.html(html.join(' '));
 }
 
 function filter_panel_choose_section_focus(event) {
-	$(event.target).find(".filter").show();
+	$(event.target).find('.filter').show();
 }
 
 function filter_panel_choose_section_unfocus(event) {
-	$(event.target).find(".filter").hide();
+	$(event.target).find('.filter').hide();
 }
 
 function filter_panel_load() {
@@ -100,7 +96,7 @@ function filter_panel_load_handle(filters) {
 		html.push('<table class="filter">');
 		html.push('<tr>');
 		html.push('<td class="icon">');
-		html.push('<img class="property_icon" src="' + filter.icon_url + '" onclick="filter_panel_edit(' + filter.id + ')" onmouseover="tooltip_show(event, \'' + filter.name + '\')" onmouseout="tooltip_hide()" />');
+		html.push(filter_panel_property_icon(filter, 'filter_panel_edit'));
 		html.push('</td>');
 		html.push('<td class="summary">' + filter.summary + '</td>');
 		html.push('<td><div class="remove" onclick="filter_panel_remove(' + filter.id + ')"></div></td>');
@@ -108,7 +104,12 @@ function filter_panel_load_handle(filters) {
 		html.push('</table>');
 	}
 	
-	$("#filter_panel .sections").html(html.length == 0 ? '&nbsp;' : html.join(' '));
+	$('#filter_panel .sections').html(html.length == 0 ? '&nbsp;' : html.join(' '));
+}
+
+function filter_panel_property_icon(filter, onclick, tooltip_position) {
+	if(tooltip_position == undefined) tooltip_position = 'above';
+	return '<img class="property_icon" src="' + filter.icon_url + '" onclick="' + onclick + '(' + filter.id + ')" onmouseover="tooltip_show(event, \'' + filter.name + '\', \'' + tooltip_position + '\')" onmouseout="tooltip_hide()" />';
 }
 
 // vvv LEGACY CODE vvv

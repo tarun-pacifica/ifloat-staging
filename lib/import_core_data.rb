@@ -228,9 +228,9 @@ class ImportSet
     pk_fields, value_fields = pk_and_value_fields(klass)
     existing_catalogue = value_md5s_and_ids_by_pk_md5(klass, pk_fields, value_fields)
     
-    skipped = []
-    to_create = {}
-    to_update = {}
+    skipped_pk_md5s = []
+    to_create = []
+    to_update = []
     
     objects.each do |object|
       attributes = {}
@@ -242,7 +242,7 @@ class ImportSet
       pk = attributes.values_at(*pk_fields)
       pk_md5 = Digest::MD5.hexdigest(pk.join("::"))
       existing_value_md5, existing_id = existing_catalogue[pk_md5]
-      to_create[pk_md5] = [object, attributes] and next if existing_id.nil?
+      to_create << [pk_md5, object, attributes] and next if existing_id.nil?
 
       object.resource_id = existing_id
       
@@ -258,19 +258,19 @@ class ImportSet
       end
       
       value_md5 = (values.empty? ? nil : Digest::MD5.hexdigest(values.join("::")))
-      if value_md5 == existing_value_md5 then skipped << pk_md5
-      else to_update[pk_md5] = [object, attributes]
+      if value_md5 == existing_value_md5 then skipped_pk_md5s << pk_md5
+      else to_update << [pk_md5, object, attributes]
       end
     end
     
-    to_update_ids = to_update.values.map { |obj, attr| obj.resource_id }
+    to_update_ids = to_update.map { |pk_md5, obj, attr| obj.resource_id }
     resources_by_id = klass.all(:id => to_update_ids).hash_by(:id)
     
-    to_keep = skipped + to_create.keys + to_update.keys
-    to_destroy_pk_md5s = (existing_catalogue.keys - to_keep)
+    to_keep_pk_md5s = skipped_pk_md5s + (to_create + to_update).map { |pk_md5, object, attributes| pk_md5 }
+    to_destroy_pk_md5s = (existing_catalogue.keys - to_keep_pk_md5s)
     to_destroy_ids = existing_catalogue.values_at(*to_destroy_pk_md5s).map { |value_md5, id| id }
     to_destroy_ids.each_slice(1000) { |ids| klass.all(:id => ids).destroy! }
-    stats = {:created => 0, :updated => 0, :destroyed => to_destroy_ids.size, :skipped => skipped.size}
+    stats = {:created => 0, :updated => 0, :destroyed => to_destroy_ids.size, :skipped => skipped_pk_md5s.size}
     
     unless TRUNK_CLASSES.include?(klass)
       table_name = @adapter.send(:quote_name, klass.storage_name)
@@ -282,10 +282,10 @@ class ImportSet
       column_names = properties.map { |property| property.name }
       column_names_list = column_names.map { |name| @adapter.send(:quote_name, name.to_s) }.join(", ")
       
-      to_create.values.each_slice(1000) do |slice|
+      to_create.each_slice(1000) do |slice|
         bind_sets = Array.new(slice.size) { bind_set }.join(", ")
         bind_values = []
-        slice.each do |object, attributes|
+        slice.each do |pk_md5, object, attributes|
           attributes[:type] = klass
           attributes.values_at(*column_names).each do |v|
             bind_values << (v.is_a?(Array) ? Base64.encode64(Marshal.dump(v)) : v)
@@ -304,7 +304,7 @@ class ImportSet
       to_create.clear
     end
     
-    (to_create.values + to_update.values).each do |object, attributes|
+    (to_create + to_update).each do |pk_md5, object, attributes|
       res_id = object.resource_id
       resource = (res_id.nil? ? klass.new : resources_by_id[res_id])
       resource.attributes = attributes

@@ -5,44 +5,79 @@ function filter_panel_add() {
 function filter_panel_choose_load_handle(filters) {
 	$ifloat_body.filter_unused_count = filters.length;
 	
-	var html = [];
-	var parity = "odd";
-	var section = '';
+	var filters_by_section = util_group_by(filters, "section");
 	
-	var section_count = 0;
-	var section_count_max = 0;
-	
-	for(i in filters) {
-		var filter = filters[i];
-		section_count += 1;
-		
-		if(section != filter.section) {
-			if(html.length > 0) html.push('<hr class="terminator" /> </div>');
-			html.push('<div class="section ' + parity + '">');
-			html.push('<h3>' + filter.section + '</h3>');
-			parity = (parity == "odd" ? "even" : "odd")
-			section = filter.section;
-			
-			if(section_count_max < section_count) section_count_max = section_count;
-			section_count = 0;
-		}
-		
-		html.push('<div class="filter">');
-		html.push('<img class="property_icon" src="' + filter.icon_url + '" onclick="filter_choose(' + filter.id + ')" />');
-		html.push('<p>' + filter.name + '</p>');
-		html.push('</div>');
+	var section_count_max = 2;
+	for(section in filters_by_section) {
+		var count = filters_by_section[section].length;
+		if(count > section_count_max) section_count_max = count;
 	}
 	
-	if(html.length > 0) html.push('<hr class="terminator" /> </div>');
+	var sections = [];
+	for(i in filters) {
+		var section = filters[i].section;
+		if(sections.length == 0 || (sections[sections.length -1] != section)) sections.push(section);
+	}
+	
+	var row_count = 0;
+	var rows = [[]];
+	for(i in sections) {
+		var section = sections[i];
+		var section_count = filters_by_section[section].length;
+		if(row_count + section_count < section_count_max) {
+			rows[rows.length - 1].push(section);
+			row_count += section_count;
+		} else {
+			rows.push([section]);
+			row_count = section_count;
+		}
+	}
+		
+	console.log(rows);
+	
+	var html = [];
+	
+	for(i in rows) {
+		var row = rows[i];
+		html.push('<div class="row ' + (i % 2 ? "even" : "odd") + '">');
+		
+		for(j in row) {
+			var section = row[j];
+			// html.push('<div class="section ' + (j % 2 ? "even" : "odd") + '">');
+			html.push('<div class="section ' + (j > 0 ? "tail" : "head") + '">');
+			html.push('<h3>' + section + '</h3>');
+			
+			var filters = filters_by_section[section];
+			for(k in filters) {
+				var filter = filters[k];
+				html.push('<div class="filter">');
+				html.push('<img class="property_icon" src="' + filter.icon_url + '" onclick="filter_choose(' + filter.id + ')" />');
+				html.push('<p>' + filter.name + '</p>');
+				html.push('</div>');
+			}
+			
+			html.push('</div>');
+		}
+		
+		html.push('<hr class="terminator" />');
+		html.push('</div>');
+	}
 	
 	var filter_choose = $("#filter_choose");
 	if(! $ifloat_body.filter_choose_created) {
 		filter_choose.dialog({autoOpen: false, modal: true});
 		$ifloat_body.filter_choose_created = true
 	}
-	filter_choose.html(html.join(' '));
 	filter_choose.data("width.dialog", section_count_max * 78);
-	
+	filter_choose.html(html.join(' '));
+}
+
+function filter_panel_choose_section_focus(event) {
+	$(event.target).find(".filter").show();
+}
+
+function filter_panel_choose_section_unfocus(event) {
+	$(event.target).find(".filter").hide();
 }
 
 function filter_panel_load() {

@@ -110,8 +110,8 @@ class CachedFind
   # TODO: spec
   def filter!(property_id, params)
     prop_info = Indexer.property_display_cache[property_id]
-    return if prop_info.nil?
-    return unless filters.has_key?(property_id) or property_ids_unused.include?(property_id)
+    return nil if prop_info.nil?
+    return nil unless filters.has_key?(property_id) or property_ids_unused.include?(property_id)
     
     new_filters = Marshal.load(Marshal.dump(self.filters))
     filter = (new_filters[property_id] || {})

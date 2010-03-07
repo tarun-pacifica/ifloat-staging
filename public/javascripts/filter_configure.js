@@ -4,8 +4,20 @@ function filter_configure(filter_id) {
 }
 
 function filter_configure_handle(filter) {
+	if(filter == null) {
+		alert("The product catalogue has been updated, making the selected filter obsolete. Please click OK to refresh the page.");
+		window.location.reload();
+		return;
+	}
+	
 	console.log(filter);
 	
 	filter_choose_close();
-	$('#filter_configure').dialog('open');
+	
+	var filter_configure = $('#filter_configure');
+	if(! $ifloat_body.filter_configure_created) {
+		filter_configure.dialog({autoOpen: false, modal: true});
+		$ifloat_body.filter_configure_created = true
+	}
+	filter_configure.dialog('open');
 }

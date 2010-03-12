@@ -1,0 +1,46 @@
+#filter_configure {
+	padding: 0;
+}
+
+#filter_configure .location {
+	height: 61px;
+	width: 100%;
+}
+
+#filter_configure .location img {
+	float: left;
+}
+
+#filter_configure .location img.property_icon {
+	float: none;
+	padding: 0 10px 0 20px;
+	vertical-align: middle;
+}
+
+#filter_configure .location h3 {
+	background: #B9B9B9;
+	border-top: 1px solid #969696;
+	border-bottom: 1px solid white;
+	float: left;
+	font-weight: normal;
+	height: 39px;
+	margin: 0px;
+	padding: 20px 20px 0 20px;
+}
+
+#filter_configure .location h3.back {
+	background-image: url(/images/filter_configure/backgrounds/location_button.png);
+	border: none;
+	cursor: pointer;
+	height: 41px;
+}
+
+#filter_configure .location p {
+	background: #B9B9B9;
+	border-top: 1px solid #969696;
+	border-bottom: 1px solid white;
+	color: #2478BD;
+	height: 39px;
+	margin: 0;
+	padding: 12px 0 8px 0;
+}

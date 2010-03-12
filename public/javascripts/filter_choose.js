@@ -1,5 +1,8 @@
 function filter_choose_close() {
-	$('#filter_choose').dialog('close');
+	var filter_choose = $('#filter_choose');
+	var isOpen = filter_choose.dialog('isOpen');
+	if(isOpen) $('#filter_choose').dialog('close');
+	return isOpen;
 }
 
 function filter_choose_load() {

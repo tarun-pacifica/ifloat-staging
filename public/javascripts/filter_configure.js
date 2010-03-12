@@ -3,21 +3,46 @@ function filter_configure(filter_id) {
 	// TODO: spinner
 }
 
+function filter_configure_apply() {
+	
+}
+
+function filter_configure_back() {
+	$('#filter_configure').dialog('close');
+	filter_choose_open();
+}
+
 function filter_configure_handle(filter) {
 	if(filter == null) {
-		alert("The product catalogue has been updated, making the selected filter obsolete. Please click OK to refresh the page.");
+		alert('The product catalogue has been updated, making the selected filter obsolete. Please click OK to refresh the page.');
 		window.location.reload();
 		return;
 	}
 	
-	console.log(filter);
-	
-	filter_choose_close();
+	var from_filter_choose = filter_choose_close();
 	
 	var filter_configure = $('#filter_configure');
 	if(! $ifloat_body.filter_configure_created) {
 		filter_configure.dialog({autoOpen: false, modal: true});
 		$ifloat_body.filter_configure_created = true
+		filter_configure.data('width.dialog', 800);
 	}
-	filter_configure.dialog('open');
+	
+	var html = [];
+	
+	html.push('<div class="location">');
+	
+	if(from_filter_choose) {
+		html.push('<h3 class="back" onclick="filter_configure_back()">Back to all filters</h3>');
+		html.push('<img src="/images/filter_configure/backgrounds/location_sep_button.png" />');
+	}
+	html.push('<h3>' + filter.section + '</h3>');
+	html.push('<img src="/images/filter_configure/backgrounds/location_sep.png" />');
+	html.push('<p> <img class="property_icon" src="' + filter.icon_url + '" /> ' + filter.name + '</p>');
+	
+	html.push('</div>');
+	
+	filter_configure.html(html.join(' '));
+	
+	filter_configure.dialog('open');	
 }

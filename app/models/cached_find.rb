@@ -91,7 +91,8 @@ class CachedFind
   
   # TODO: spec
   def filter_detail(property_id)
-    return nil unless Indexer.property_display_cache.has_key?(property_id)
+    prop_info = Indexer.property_display_cache[property_id]
+    return nil if prop_info.nil?
     
     filter = (filters[property_id] || {:include_unknown => (property_id == Indexer.class_property_id ? nil : true)})
     
@@ -104,7 +105,7 @@ class CachedFind
       values_by_unit[unit] = all_values.map { |v| [v, relevant.include?(v), selected.include?(v)] }
     end
     
-    {:include_unknown => filter[:include_unknown], :values_by_unit => values_by_unit}
+    prop_info.merge(:include_unknown => filter[:include_unknown], :values_by_unit => values_by_unit)
   end
   
   # TODO: spec

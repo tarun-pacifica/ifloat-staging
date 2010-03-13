@@ -55,14 +55,14 @@ function filter_configure_handle(filter) {
 }
 
 function filter_configure_values_numeric(variant, values_by_unit, html) {
-	null_unit = false;
+	blank_unit = false;
 	units = [];
 	for(unit in values_by_unit) {
-		if(unit == null) null_unit = true;
+		if(unit == '') blank_unit = true;
 		units.push(unit);
 	}
 	
-	if(! null_unit) {
+	if(! blank_unit) {
 		html.push('<p class="units">Measurements in ');
 		html.push('<select class="unit" onchange="filter_configure_values_numeric_handle_select(event)">');
 		for(unit in values_by_unit) {
@@ -73,9 +73,9 @@ function filter_configure_values_numeric(variant, values_by_unit, html) {
 		html.push('</p>');
 	}
 	
-	if(null_unit) {
+	if(blank_unit) {
 		var vbu = {};
-		vbu[null] = values_by_unit[null];
+		vbu[''] = values_by_unit[''];
 		values_by_unit = vbu;
 	}
 	

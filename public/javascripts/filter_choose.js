@@ -67,9 +67,10 @@ function filter_choose_load_handle(filters) {
 	}
 	
 	var filter_choose = $('#filter_choose');
-	if(! $ifloat_body.filter_choose_created) {
+	if(filter_choose.length == 0) {
+		$("body").append('<div id="filter_choose" title="Choose a filter..."> </div>');
+		filter_choose = $('#filter_choose');
 		filter_choose.dialog({autoOpen: false, modal: true});
-		$ifloat_body.filter_choose_created = true
 	}
 	filter_choose.data('width.dialog', section_count_max * 78);
 	filter_choose.html(html.join(' '));

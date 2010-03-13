@@ -22,9 +22,10 @@ function filter_configure_handle(filter) {
 	var from_filter_choose = filter_choose_close();
 	
 	var filter_configure = $('#filter_configure');
-	if(! $ifloat_body.filter_configure_created) {
-		filter_configure.dialog({autoOpen: false, modal: true});
-		$ifloat_body.filter_configure_created = true
+	if(filter_configure.length == 0) {
+		$("body").append('<div id="filter_configure" title="Configure the filter..."> </div>');
+		filter_configure = $('#filter_configure');
+		filter_configure.dialog({autoOpen: false, modal: true, buttons: {Apply: filter_configure_apply}});
 		filter_configure.data('width.dialog', 800);
 	}
 	

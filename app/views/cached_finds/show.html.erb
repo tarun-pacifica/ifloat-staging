@@ -36,7 +36,8 @@
 	var $ifloat_body = {
 		filter_queue: [],
 		filter_queue_active: -1,
-		find_id: <%= @find.id %>
+		find_id: <%= @find.id %>,
+		language: <%= session.language.inspect %>
 	};
 	
 	filter_panel_load();

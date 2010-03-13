@@ -70,7 +70,7 @@ function filter_choose_load_handle(filters) {
 	if(filter_choose.length == 0) {
 		$("body").append('<div id="filter_choose" title="Choose a filter..."> </div>');
 		filter_choose = $('#filter_choose');
-		filter_choose.dialog({autoOpen: false, modal: true});
+		filter_choose.dialog({autoOpen: false, modal: true, resizable: false});
 	}
 	filter_choose.data('width.dialog', section_count_max * 78);
 	filter_choose.html(html.join(' '));

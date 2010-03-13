@@ -41,22 +41,117 @@ function filter_configure_handle(filter) {
 	html.push('<p> <img class="property_icon" src="' + filter.icon_url + '" /> ' + filter.name + '</p>');
 	html.push('</div>');
 	
-	html.push('<table summary="values">');
 	if(filter.include_unknown != null) {
 		var checked = (filter.include_unknown ? 'checked="checked"' : '');
-		var checkbox = '<input class="include_unkown" type="checkbox" ' + checked + ' /> Show products with no "' + filter.name + '" value';
-		html.push('<tr class="include_unknown"> <td colspan="3"> ' + checkbox + ' </td> </tr>');
+		html.push('<p class="include_unknown"> <input type="checkbox" ' + checked + ' /> Show products with no "' + filter.name + '" value </p>');
 	}
-	if(filter.type == "text") filter_configure_values_text(filter.values_by_unit, html);
-	else filter_configure_values_numeric(filter.values_by_unit, html);
-	html.push('</table>');
+	if(filter.type == 'text') filter_configure_values_text(filter.values_by_unit, html);
+	else filter_configure_values_numeric(filter.type, filter.values_by_unit, html);
+	
 	
 	filter_configure.html(html.join(' '));
+	if(filter.type != 'text') filter_configure_values_numeric_build_sliders(filter_configure);
 	filter_configure.dialog('open');	
 }
 
-function filter_configure_values_numeric(values_by_unit, html) {
+function filter_configure_values_numeric(variant, values_by_unit, html) {
+	null_unit = false;
+	units = [];
+	for(unit in values_by_unit) {
+		if(unit == null) null_unit = true;
+		units.push(unit);
+	}
 	
+	if(! null_unit) {
+		html.push('<p class="units">Measurements in ');
+		html.push('<select class="unit" onchange="filter_configure_values_numeric_handle_select(event)">');
+		for(unit in values_by_unit) {
+			var selected = (unit == units[0] ? 'selected="selected"' : '');
+			html.push('<option ' + selected + '>' + unit + '</option>');
+		}
+		html.push('</select>');
+		html.push('</p>');
+	}
+	
+	if(null_unit) {
+		var vbu = {};
+		vbu[null] = values_by_unit[null];
+		values_by_unit = vbu;
+	}
+	
+	for(unit in values_by_unit) {
+		html.push('<div class="slider_set" title="' + unit + '">');
+		html.push('<p class="min">min:</p> <div class="min"> </div>');
+		html.push('<p class="max">max:</p> <div class="max"> </div>');
+		html.push('</div>');
+	}
+	
+	$ifloat_body.filter_unit = units[0];
+	$ifloat_body.filter_values_by_unit = values_by_unit;
+}
+
+function filter_configure_values_numeric_build_sliders(filter_configure) {
+	values_by_unit = $ifloat_body.filter_values_by_unit;
+	for(unit in values_by_unit) {
+		var extremes = {};
+		var values = values_by_unit[unit];
+		for(i in values) {
+			var v = values[i];
+			if(extremes['min'] == undefined) { if(v[1]) extremes['min'] = extremes['max'] = i; }
+			else if(! v[1]) break;
+			else extremes['max'] = i;
+		}
+		
+		var slider_set = filter_configure.find('.slider_set[title=' + unit + ']');
+		var options = {  max: values.length - 1,
+			             slide: filter_configure_values_numeric_handle_slide,
+			              stop: filter_configure_values_numeric_handle_slide };
+		for(extreme in extremes) {
+			options['range'] = extreme;
+			options['value'] = extremes[extreme];
+			slider_set.find('div.' + extreme).slider(options);
+		}
+		
+		if(unit != $ifloat_body.filter_unit) slider_set.hide();
+		filter_configure_values_numeric_update_minmax(unit);
+	}
+}
+
+function filter_configure_values_numeric_handle_select(event) {
+	var filter_configure = $('#filter_configure');
+	var unit = $(event.target).val();
+	
+	filter_configure.find('.slider_set[title=' + $ifloat_body.filter_unit + ']').hide();
+	filter_configure.find('.slider_set[title=' + unit + ']').show();
+	
+	$ifloat_body.filter_unit = unit;
+}
+
+function filter_configure_values_numeric_handle_slide() {
+	var slider = $(this);
+	var my_value = slider.slider('value');
+	var other = slider.siblings('div');
+	var other_value = other.slider('value');
+	
+	if((slider.hasClass('min') && my_value > other_value) ||
+	   (slider.hasClass('max') && my_value < other_value)) other.slider('value', my_value);
+	
+	filter_configure_values_numeric_update_minmax();
+}
+
+function filter_configure_values_numeric_update_minmax(unit) {
+	if(unit == undefined) unit = $ifloat_body.filter_unit;
+	var values = $ifloat_body.filter_values_by_unit[unit];
+	
+	var slider_set = $('#filter_configure').find('.slider_set[title=' + unit + ']');
+	
+	var extremes = {min: null, max: null};
+	for (extreme in extremes) {
+		var i = slider_set.find('div.' + extreme).slider('value');
+		var value = values[i][0]; // TODO: format - or perhaps this is all handled server side now?
+		if(unit != null) value += ' ' + unit;
+		slider_set.find('p.' + extreme).text(extreme + ': ' + value);
+	}
 }
 
 function filter_configure_values_text(values_by_unit, html) {
@@ -78,6 +173,7 @@ function filter_configure_values_text(values_by_unit, html) {
 		while(column.length < length) column.push(values.shift());
 	}
 	
+	html.push('<table summary="values">');
 	for (i in columns[0]) {
 		html.push('<tr>');
 		
@@ -91,4 +187,5 @@ function filter_configure_values_text(values_by_unit, html) {
 		
 		html.push('</tr>');
 	}
+	html.push('</table>');
 }

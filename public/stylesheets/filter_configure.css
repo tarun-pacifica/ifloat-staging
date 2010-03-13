@@ -4,7 +4,7 @@
 
 #filter_configure .location {
 	height: 61px;
-	width: 100%;
+	width: 700px;
 }
 
 #filter_configure .location img {
@@ -43,4 +43,28 @@
 	height: 39px;
 	margin: 0;
 	padding: 12px 0 8px 0;
+}
+
+#filter_configure .slider_set {
+	background: #DCE9F7;
+	padding: 5px 20px 20px 20px;
+}
+
+#filter_configure .slider_set p {
+	margin: 10px 0;
+}
+
+#filter_configure p.include_unknown {
+	color: #17A1FF;
+	text-align: center;
+}
+
+#filter_configure p.units {
+	text-align: center;
+}
+
+#filter_configure table {
+	background: #DCE9F7;
+	padding: 10px;
+	width: 700px;
 }

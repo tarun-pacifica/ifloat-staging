@@ -4,7 +4,22 @@ function filter_configure(filter_id) {
 }
 
 function filter_configure_apply() {
+	var filter_configure = $("#filter_configure");
 	
+	var filter_id = filter_configure.data('id');
+	var include_unknown = (filter_configure.find(".include_unknown input:checked").length == 1);
+	
+	var unit, value;
+	if(filter_configure.data('type') == 'text') {
+		unit = $ifloat_body.language;
+		value = filter_configure.find("table input:checked").map(function() {return $(this).val();}).toArray().join("::");
+	} else {
+		unit = filter_configure.data('unit');
+		var slider_set = filter_configure.find('.slider_set[title=' + unit + ']');
+		value = slider_set.data('min') + '::' + slider_set.data('max');
+	}
+	
+	console.log([filter_id, include_unknown, unit, value]);
 }
 
 function filter_configure_back() {
@@ -48,35 +63,31 @@ function filter_configure_handle(filter) {
 	if(filter.type == 'text') filter_configure_values_text(filter.values_by_unit, html);
 	else filter_configure_values_numeric(filter.type, filter.values_by_unit, html);
 	
-	
 	filter_configure.html(html.join(' '));
-	if(filter.type != 'text') filter_configure_values_numeric_build_sliders(filter_configure);
-	filter_configure.dialog('open');	
+	if(filter.type != 'text') filter_configure_values_numeric_build_sliders(filter_configure, filter.values_by_unit);
+	
+	filter_configure.data('id', filter.id);
+	filter_configure.data('type', filter.type);
+	filter_configure.dialog('open');
 }
 
 function filter_configure_values_numeric(variant, values_by_unit, html) {
-	blank_unit = false;
-	units = [];
+	var selected_unit;
+	var unit_count = 0;
 	for(unit in values_by_unit) {
-		if(unit == '') blank_unit = true;
-		units.push(unit);
+		if(selected_unit == undefined) selected_unit = unit;
+		unit_count += 1;
 	}
 	
-	if(! blank_unit) {
+	if(unit_count > 1) {
 		html.push('<p class="units">Measurements in ');
 		html.push('<select class="unit" onchange="filter_configure_values_numeric_handle_select(event)">');
 		for(unit in values_by_unit) {
-			var selected = (unit == units[0] ? 'selected="selected"' : '');
+			var selected = (unit == selected_unit ? 'selected="selected"' : '');
 			html.push('<option ' + selected + '>' + unit + '</option>');
 		}
 		html.push('</select>');
 		html.push('</p>');
-	}
-	
-	if(blank_unit) {
-		var vbu = {};
-		vbu[''] = values_by_unit[''];
-		values_by_unit = vbu;
 	}
 	
 	for(unit in values_by_unit) {
@@ -85,13 +96,14 @@ function filter_configure_values_numeric(variant, values_by_unit, html) {
 		html.push('<p class="max">max:</p> <div class="max"> </div>');
 		html.push('</div>');
 	}
-	
-	$ifloat_body.filter_unit = units[0];
-	$ifloat_body.filter_values_by_unit = values_by_unit;
 }
 
-function filter_configure_values_numeric_build_sliders(filter_configure) {
-	values_by_unit = $ifloat_body.filter_values_by_unit;
+function filter_configure_values_numeric_build_sliders(filter_configure, values_by_unit) {
+	var selected_unit;
+	for(unit in values_by_unit) { selected_unit = unit; break; }
+	filter_configure.data('unit', selected_unit);
+	filter_configure.data('values_by_unit', values_by_unit);
+	
 	for(unit in values_by_unit) {
 		var extremes = {};
 		var values = values_by_unit[unit];
@@ -107,12 +119,14 @@ function filter_configure_values_numeric_build_sliders(filter_configure) {
 			             slide: filter_configure_values_numeric_handle_slide,
 			              stop: filter_configure_values_numeric_handle_slide };
 		for(extreme in extremes) {
+			var i = extremes[extreme]
 			options['range'] = extreme;
-			options['value'] = extremes[extreme];
+			options['value'] = i;
+			slider_set.data(extreme, values[i][0]);
 			slider_set.find('div.' + extreme).slider(options);
 		}
-		
-		if(unit != $ifloat_body.filter_unit) slider_set.hide();
+				
+		if(unit != selected_unit) slider_set.hide();
 		filter_configure_values_numeric_update_minmax(unit);
 	}
 }
@@ -121,10 +135,10 @@ function filter_configure_values_numeric_handle_select(event) {
 	var filter_configure = $('#filter_configure');
 	var unit = $(event.target).val();
 	
-	filter_configure.find('.slider_set[title=' + $ifloat_body.filter_unit + ']').hide();
+	filter_configure.find('.slider_set[title=' + filter_configure.data('unit') + ']').hide();
 	filter_configure.find('.slider_set[title=' + unit + ']').show();
 	
-	$ifloat_body.filter_unit = unit;
+	filter_configure.data('unit', unit);
 }
 
 function filter_configure_values_numeric_handle_slide() {
@@ -140,15 +154,17 @@ function filter_configure_values_numeric_handle_slide() {
 }
 
 function filter_configure_values_numeric_update_minmax(unit) {
-	if(unit == undefined) unit = $ifloat_body.filter_unit;
-	var values = $ifloat_body.filter_values_by_unit[unit];
-	
-	var slider_set = $('#filter_configure').find('.slider_set[title=' + unit + ']');
+	var filter_configure = $('#filter_configure');
+	if(unit == undefined) unit = filter_configure.data('unit');
+	var slider_set = filter_configure.find('.slider_set[title=' + unit + ']');
+	var values = filter_configure.data('values_by_unit')[unit];
 	
 	var extremes = {min: null, max: null};
 	for (extreme in extremes) {
 		var i = slider_set.find('div.' + extreme).slider('value');
-		slider_set.find('p.' + extreme).text(extreme + ': ' + values[i][3]);
+		var value = values[i];
+		slider_set.data(extreme, value[0]);
+		slider_set.find('p.' + extreme).text(extreme + ': ' + value[3]);
 	}
 }
 
@@ -190,7 +206,7 @@ function filter_configure_values_text(values_by_unit, html) {
 				value = '<span class="defined" onmouseover="tooltip_show(event, ' + definition + ', ' + position + ')" onmouseout="tooltip_hide()">' + value + '</span>';
 			}
 			
-			html.push('<td> <input ' + klass + ' type="checkbox" ' + checked + ' /> ' + value + '</td>');
+			html.push('<td> <input ' + klass + ' value="' + v[0] + '" type="checkbox" ' + checked + ' /> ' + value + '</td>');
 		}
 		
 		html.push('</tr>');

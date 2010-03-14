@@ -10,6 +10,12 @@ function find_results_update() {
 }
 
 function find_results_update_handle(data) {
+	if(data == null) {
+		alert('The product catalogue has been updated so we need to refresh the page. Please click OK to proceed.');
+		window.location.reload();
+		return;
+	}
+	
 	var image_prod_count = 0;
 	var total_prod_count = data.shift();
 	var image_count = data.length;

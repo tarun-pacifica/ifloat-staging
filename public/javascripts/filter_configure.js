@@ -1,25 +1,37 @@
 function filter_configure(filter_id) {
-	$.getJSON('/cached_finds/' + $ifloat_body.find_id + '/filter/' + filter_id, filter_configure_handle);
+	$.getJSON(filter_configure_url(filter_id), filter_configure_handle);
 	// TODO: spinner
 }
 
 function filter_configure_apply() {
 	var filter_configure = $("#filter_configure");
 	
-	var filter_id = filter_configure.data('id');
-	var include_unknown = (filter_configure.find(".include_unknown input:checked").length == 1);
+	var data = {include_unknown: filter_configure.find(".include_unknown input:checked").length == 1}
 	
-	var unit, value;
 	if(filter_configure.data('type') == 'text') {
-		unit = $ifloat_body.language;
-		value = filter_configure.find("table input:checked").map(function() {return $(this).val();}).toArray().join("::");
+		data['unit'] = $ifloat_body.language;
+		data['value'] = filter_configure.find("table input:checked").map(function() {return $(this).val();}).toArray().join("::");
 	} else {
-		unit = filter_configure.data('unit');
-		var slider_set = filter_configure.find('.slider_set[title=' + unit + ']');
-		value = slider_set.data('min') + '::' + slider_set.data('max');
+		data['unit'] = filter_configure.data('unit');
+		var slider_set = filter_configure.find('.slider_set[title=' + data['unit'] + ']');
+		data['value'] = slider_set.data('min') + '::' + slider_set.data('max');
+	}
+		
+	$.post(filter_configure_url(filter_configure.data('id')), data, filter_configure_apply_handle, "json");
+	// TODO: spinner
+}
+
+function filter_configure_apply_handle(data) {
+	if(data == null) {
+		alert('The product catalogue has been updated so we need to refresh the page. Please click OK to proceed.');
+		window.location.reload();
+		return;
 	}
 	
-	console.log([filter_id, include_unknown, unit, value]);
+	filter_panel_load_handle(data[0]);
+	filter_choose_load_handle(data[1]);
+	find_results_update_handle(data[2]);
+	$('#filter_configure').dialog('close');
 }
 
 function filter_configure_back() {
@@ -29,7 +41,7 @@ function filter_configure_back() {
 
 function filter_configure_handle(filter) {
 	if(filter == null) {
-		alert('The product catalogue has been updated, making the selected filter obsolete. Please click OK to refresh the page.');
+		alert('The product catalogue has been updated so we need to refresh the page. Please click OK to proceed.');
 		window.location.reload();
 		return;
 	}
@@ -69,6 +81,10 @@ function filter_configure_handle(filter) {
 	filter_configure.data('id', filter.id);
 	filter_configure.data('type', filter.type);
 	filter_configure.dialog('open');
+}
+
+function filter_configure_url(filter_id) {
+	return '/cached_finds/' + $ifloat_body.find_id + '/filter/' + filter_id;
 }
 
 function filter_configure_values_numeric(variant, values_by_unit, html) {

@@ -10,6 +10,12 @@ function filter_choose_load() {
 }
 
 function filter_choose_load_handle(filters) {
+	if(filters == null) {
+		alert('The product catalogue has been updated so we need to refresh the page. Please click OK to proceed.');
+		window.location.reload();
+		return;
+	}
+	
 	$ifloat_body.filter_unused_count = filters.length;
 	
 	var filters_by_section = util_group_by(filters, 'section');

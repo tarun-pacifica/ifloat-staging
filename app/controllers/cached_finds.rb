@@ -13,28 +13,31 @@ class CachedFinds < Application
   def filter_get(id, property_id)
     provides :js
     find = session.ensure_cached_find(id.to_i)
-    find.filter_detail(property_id.to_i).to_json
+    result = find.filter_detail(property_id.to_i)
+    (find.ensure_valid.empty? ? result : nil).to_json
   end
   
   def filter_set(id, property_id)
     provides :js
     find = session.ensure_cached_find(id.to_i)
-    find.filter!(property_id.to_i, params)
-    find.filters_used("&ndash;").to_json
+    find.filter!(property_id.to_i, params)    
+    result = [find.filters_used("&ndash;"), find.filters_unused, found_images(id, 36, true)]
+    (find.ensure_valid.empty? ? result : nil).to_json
   end
   
   def filters(id, list)
     provides :js
     raise NotFound unless %w(unused used).include?(list)
     find = session.ensure_cached_find(id.to_i)
-    (list == "used" ? find.filters_used("&ndash;") : find.filters_unused).to_json
+    result = (list == "used" ? find.filters_used("&ndash;") : find.filters_unused)
+    (find.ensure_valid.empty? ? result : nil).to_json
   end
   
-  def found_images(id, limit)
+  # TODO: get rid of 'raw' hack and do a proper refactoring and ensure this method runs the ensure_valid logic
+  def found_images(id, limit, raw = false)
     provides :js
     
     find = session.ensure_cached_find(id.to_i)
-    find.ensure_valid
     
     total = 0
     totals_by_checksum = {}
@@ -47,10 +50,12 @@ class CachedFinds < Application
     assets_by_checksum = {}
     Asset.all(:checksum => checksums).each { |a| assets_by_checksum[a.checksum] = a }
     
-    checksums.map do |checksum|
+    results = checksums.map do |checksum|
       asset = assets_by_checksum[checksum]
       [checksum, totals_by_checksum[checksum], asset.url(:tiny), asset.url(:small)]
-    end.unshift(total).to_json
+    end.unshift(total)
+    
+    (raw ? results : results.to_json)
   end
   
   def found_products_for_checksum(id, image_checksum)

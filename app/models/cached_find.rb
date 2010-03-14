@@ -50,7 +50,7 @@ class CachedFind
   before :valid? do
     self.specification = (specification || "").split.uniq.join(" ")
     self.description = specification if description.blank?
-    self.filters = {}
+    self.filters ||= {}
   end
   
   def self.obsolete
@@ -126,25 +126,23 @@ class CachedFind
     return nil if prop_info.nil?
     return nil unless filters.has_key?(property_id) or property_ids_unused.include?(property_id)
     
-    new_filters = Marshal.load(Marshal.dump(self.filters))
-    filter = (new_filters[property_id] || {})
-    new_filters[property_id] = filter if filter.empty?
-    
-    filter[:include_unknown] = (property_id == Indexer.class_property_id ? nil : params["include_unknown"] == "true")
-    
+    type = prop_info[:type]
     data_in =
-      case prop_info[:type]
+      case type
       when "currency", "date", "numeric"
         min, max = params.values_at("min", "max").map { |v| v.to_f }
         unit = params["unit"]; unit = nil if unit.blank?
         [min, max, unit]
       when "text"
-        params["count"].to_i.times.map { |i| params["value_#{i}"] }
+        params["value"].split("::")
       end
-    data = filter_data(property_id, prop_info[:type], data_in)
-    filter[:data] = data unless data.nil?
+    data = filter_data(property_id, type, data_in)
+    return nil if data.nil?
     
-    self.filters = filters
+    self.filters = Marshal.load(Marshal.dump(filters))
+    filter = (filters[property_id] ||= {})
+    filter[:data] = data
+    filter[:include_unknown] = (property_id == Indexer.class_property_id ? nil : params["include_unknown"] == "true")
     save
   end
   
@@ -183,19 +181,8 @@ class CachedFind
     # - thus if we mark a filter as not including unknown, we specifically limit the products to the set with that filter's property_id
     relevant_product_ids = all_product_ids
     focussed_property_ids = property_ids.reject { |id| filters[id][:include_unknown] }
-    relevant_product_ids &= Indexer.product_ids_for_filterable_property_ids(focussed_property_ids, language_code) unless focussed_property_ids.empty?
-    
-    numeric_filters, text_filters = {}, {}
-    pdc = Indexer.property_display_cache
-    property_ids.each do |property_id|
-      prop_info = pdc[property_id]
-      next if prop_info.nil?
-      (prop_info[:type] == "text" ? text_filters : numeric_filters)[property_id] = filters[property_id][:data]
-    end
-    
-    excluded_product_ids = Indexer.excluded_product_ids_for_numeric_filters(numeric_filters)
-    excluded_product_ids += Indexer.excluded_product_ids_for_text_filters(text_filters, language_code)
-    relevant_product_ids - excluded_product_ids
+    relevant_product_ids &= Indexer.product_ids_for_property_ids(focussed_property_ids, language_code) unless focussed_property_ids.empty?
+    relevant_product_ids - Indexer.excluded_product_ids_for_filters(filters, language_code)
   end
   
   # TODO: spec
@@ -225,7 +212,7 @@ class CachedFind
   # TODO: spec
   def unfilter!(property_id)
     return unless filters.has_key?(property_id)
-    self.filters = Marshal.load(Marshal.dump(self.filters)).delete(property_id)
+    self.filters = Marshal.load(Marshal.dump(filters)).delete(property_id)
     save
   end
   
@@ -240,15 +227,13 @@ class CachedFind
       data_in = [] if data_in.nil? 
       numeric_filter_choose(data_in[0], data_in[1], data_in[2], limits)
     when "text"
-      all_values, relevant_values = Indexer.filterable_text_values_for_product_ids(all_product_ids, [], language_code, property_id)[property_id]
+      all_values, relevant_values = Indexer.filterable_values_for_property_id(property_id, all_product_ids, [], language_code)[language_code]
       return nil if all_values.nil?
       data_in.nil? ? all_values : (data_in & all_values)
     end
   end
     
   def filter_summarize(type, data, range_sep)
-    type = filter[:type]
-    
     if type == "text"
       values = data
       return values.empty? ? "[none]" : values.sort.join(", ").truncate(50)

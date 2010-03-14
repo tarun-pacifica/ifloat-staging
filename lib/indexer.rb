@@ -40,35 +40,32 @@ module Indexer
     end
   end
   
-  # TODO: reimplement
-  def self.excluded_product_ids_for_numeric_filters(filters_by_property_id)
-    raise "reimplement"
+  def self.excluded_product_ids_for_filters(filters_by_property_id, language_code)
     return [] if filters_by_property_id.empty? or not ensure_loaded
     
     product_ids = []
-    @@numeric_filtering_index.each do |property_id, units_by_product_id|
-      min, max, unit = filters_by_property_id[property_id]
-      next if min.nil?
+    text_index = @@text_filtering_index[language_code]
+    
+    filters_by_property_id.each do |property_id, filter|
+      prop_info = @@property_display_cache[property_id]
+      next if prop_info.nil?
       
-      units_by_product_id.each do |product_id, min_max_by_unit|
-        min_max = min_max_by_unit[unit]
-        next if min_max.nil?
-        product_ids << product_id if min > min_max.last or max < min_max.first
+      type = prop_info[:type]
+      
+      case prop_info[:type]
+      when "currency", "date", "numeric"
+        min, max, unit = filter[:data]
+        ((@@numeric_filtering_index[unit] || {})[property_id] || {}).each do |product_id, values|
+          product_ids << product_id if min > values.last or max < values.first
+        end
+      when "text"
+        inclusions = filter[:data]
+        (text_index[property_id] || {}).each do |product_id, values|
+          product_ids << product_id if (values & inclusions).empty?
+        end
       end
     end
-    product_ids.uniq
-  end
-  
-  def self.excluded_product_ids_for_text_filters(filters_by_property_id, language_code)
-    return [] if filters_by_property_id.empty? or not ensure_loaded
     
-    product_ids = []
-    (@@text_filtering_index[language_code] || {}).each do |property_id, products|
-      inclusions = filters_by_property_id[property_id]
-      next if inclusions.nil?
-      
-      products.each { |product_id, values| product_ids << product_id if (values & inclusions).empty? }
-    end
     product_ids.uniq
   end
   
@@ -166,6 +163,7 @@ module Indexer
         value = record[key]
         values << (value.is_a?(String) ? value : value.to_f)
       end
+      values.sort!
     end
     
     index.each do |r, properties|

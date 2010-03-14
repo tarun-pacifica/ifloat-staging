@@ -19,6 +19,7 @@ function filter_choose_load_handle(filters) {
 		var count = filters_by_section[section].length;
 		if(count > section_count_max) section_count_max = count;
 	}
+	if(section_count_max > 9) section_count_max = 9;
 	
 	var sections = [];
 	for(i in filters) {
@@ -55,7 +56,6 @@ function filter_choose_load_handle(filters) {
 				var filter = filters[k];
 				html.push('<div class="filter">');
 				html.push(filter_panel_property_icon(filter, 'filter_configure', 'above'));
-				// html.push('<p>' + filter.name + '</p>');
 				html.push('</div>');
 			}
 			

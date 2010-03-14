@@ -61,12 +61,8 @@ class CachedFind
     all(:user_id.not => nil, :accessed_at.lt => ANONIMIZATION_TIME.ago)
   end
   
-  def all_product_count
-    all_product_ids.size
-  end
-  
   def all_product_ids
-    @all_product_ids ||= Indexer.product_ids_for_phrase(specification, language_code)
+    @all_product_ids ||= Indexer.image_checksums_for_product_ids(Indexer.product_ids_for_phrase(specification, language_code)).values.flatten # TODO: remove outer call once all products are guaranteed to have a primary image
   end
   
   # TODO: spec
@@ -169,7 +165,7 @@ class CachedFind
   
   # TODO: spec for class_only filtering
   def filtered_product_ids(class_only = false)
-    return [] if all_product_count.zero?
+    return [] if all_product_ids.empty?
     
     property_ids = filters.keys
     property_ids &= [Indexer.class_property_id] if class_only    
@@ -206,7 +202,7 @@ class CachedFind
   
   # TODO: spec
   def spec_count
-    "#{specification} (#{filtered_product_ids.size} / #{all_product_count})"
+    "#{specification} (#{filtered_product_ids.size} / #{all_product_ids.size})"
   end
   
   # TODO: spec

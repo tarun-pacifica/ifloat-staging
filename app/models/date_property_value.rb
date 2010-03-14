@@ -3,15 +3,22 @@
 # See the PropertyValue superclass.
 #
 class DatePropertyValue < NumericPropertyValue
+  FORMATS = {
+    :compact => ["%Y", "%Y-%m", "%Y-%m-%d"],
+    :verbose => ["%Y", "%B %Y", "%B %d, %Y"]
+  }
+  
   validates_absent :tolerance, :unit
   
   def self.date?
     true
   end
   
-  def self.format_value(value)
+  def self.format_value(value, params = {})
     v = value.to_i
-    [v / 10000, (v / 100) % 100, v % 100].delete_if { |v| v.zero? }.map { |i| "%.2i" % i }.join("-")
+    ymd = [v / 10000, (v / 100) % 100, v % 100].select { |n| n > 0 }    
+    format = FORMATS[params[:verbose] ? :verbose : compact][ymd.size - 1]
+    Date.new(*ymd).strftime(format)
   end
   
     

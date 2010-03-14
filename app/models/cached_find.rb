@@ -109,7 +109,7 @@ class CachedFind
         [v, relevant.include?(v), selected.include?(v)] <<
           case type
           when "currency", "date", "numeric"
-            value_class.format(v, v, nil, unit)
+            value_class.format(v, v, nil, unit, :verbose => true)
           when "text"
             nil
             # add defintion

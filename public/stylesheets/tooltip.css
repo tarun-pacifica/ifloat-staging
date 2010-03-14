@@ -1,5 +1,6 @@
 #tooltip {
 	display: none;
+	max-width: 250px;
 	position: absolute;
 	z-index: 2000;
 }

@@ -94,7 +94,10 @@ class CachedFind
     prop_info = Indexer.property_display_cache[property_id]
     return nil if prop_info.nil?
     
+    definitions = PropertyValueDefinition.definitions_for_property_id(property_id, language_code)
     filter = (filters[property_id] || {:include_unknown => (property_id == Indexer.class_property_id ? nil : true)})
+    type = prop_info[:type]
+    value_class = PropertyType.value_class(type)
     
     apids, fpids = all_product_ids, filtered_product_ids(true)
     values_by_unit = {}
@@ -102,8 +105,6 @@ class CachedFind
       all_values, relevant_values = values
       relevant = Set.new(relevant_values)
       selected = Set.new(filter[:data].nil? ? all_values : filter[:data])
-      type = prop_info[:type]
-      value_class = PropertyType.value_class(type)
       
       values_by_unit[unit] = all_values.map do |v|
         [v, relevant.include?(v), selected.include?(v)] <<
@@ -111,8 +112,7 @@ class CachedFind
           when "currency", "date", "numeric"
             value_class.format(v, v, nil, unit, :verbose => true)
           when "text"
-            nil
-            # add defintion
+            definitions[v]
           end
       end
     end

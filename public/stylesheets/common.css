@@ -21,3 +21,11 @@ img.property_icon {
 	height: 36px;
 	width: 58px;
 }
+
+span.defined {
+	border-bottom: 1px dashed gray;
+}
+
+span.defined:hover {
+	border-bottom: 1px solid gray;
+}

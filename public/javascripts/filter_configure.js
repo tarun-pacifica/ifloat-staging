@@ -178,9 +178,19 @@ function filter_configure_values_text(values_by_unit, html) {
 		for (c in columns) {
 			var v = columns[c][i];
 			if(v == undefined) continue;
+			
+			var value = v[0];
 			var checked = (v[1] ? 'checked="checked"' : '');
-			var klass = (v[2] ? '' : 'class="irrelevant"');
-			html.push('<td> <input ' + klass +  ' type="checkbox" ' + checked + ' /> ' + v[0] + '</td>');
+			var klass = (v[2] ? '' : 'class="irrelevant"');			
+			var definition = v[3];
+			
+			if(definition) {
+				definition = "'" + definition.replace("'", "\\'").replace('"', '\\"') + "'";
+				var position = (c >= columns.length / 2 ? "'left'" : "'right'");
+				value = '<span class="defined" onmouseover="tooltip_show(event, ' + definition + ', ' + position + ')" onmouseout="tooltip_hide()">' + value + '</span>';
+			}
+			
+			html.push('<td> <input ' + klass + ' type="checkbox" ' + checked + ' /> ' + value + '</td>');
 		}
 		
 		html.push('</tr>');

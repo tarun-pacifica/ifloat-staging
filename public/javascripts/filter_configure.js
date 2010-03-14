@@ -148,9 +148,7 @@ function filter_configure_values_numeric_update_minmax(unit) {
 	var extremes = {min: null, max: null};
 	for (extreme in extremes) {
 		var i = slider_set.find('div.' + extreme).slider('value');
-		var value = values[i][0]; // TODO: format - or perhaps this is all handled server side now?
-		if(unit != null) value += ' ' + unit;
-		slider_set.find('p.' + extreme).text(extreme + ': ' + value);
+		slider_set.find('p.' + extreme).text(extreme + ': ' + values[i][3]);
 	}
 }
 

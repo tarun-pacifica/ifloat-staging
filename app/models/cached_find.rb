@@ -102,7 +102,19 @@ class CachedFind
       all_values, relevant_values = values
       relevant = Set.new(relevant_values)
       selected = Set.new(filter[:data].nil? ? all_values : filter[:data])
-      values_by_unit[unit] = all_values.map { |v| [v, relevant.include?(v), selected.include?(v)] }
+      type = prop_info[:type]
+      value_class = PropertyType.value_class(type)
+      
+      values_by_unit[unit] = all_values.map do |v|
+        [v, relevant.include?(v), selected.include?(v)] <<
+          case type
+          when "currency", "date", "numeric"
+            value_class.format(v, v, nil, unit)
+          when "text"
+            nil
+            # add defintion
+          end
+      end
     end
     
     prop_info.merge(:include_unknown => filter[:include_unknown], :values_by_unit => values_by_unit)

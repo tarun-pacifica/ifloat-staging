@@ -38,6 +38,7 @@ class NumericPropertyValue < PropertyValue
     (unit.nil? ? "" : " #{unit}")
   end
   
+  # TODO: add fractional support for nominated units, need to pass in unit to make this abstract
   def self.format_value(value)
     return value.to_s if value.is_a?(Integer)
     f = value.to_f

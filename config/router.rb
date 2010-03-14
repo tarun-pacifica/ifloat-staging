@@ -10,8 +10,8 @@ Merb::Router.prepare do
   
   match('/blogs/:name').to(:controller => 'blogs', :action => 'show').name(:blogs)
   
-  match('/cached_finds/:id/filter/:property_id').to(:method => 'get', :controller => 'cached_finds', :action => 'filter_get')
-  match('/cached_finds/:id/filter/:property_id').to(:method => 'post', :controller => 'cached_finds', :action => 'filter_set')
+  match('/cached_finds/:id/filter/:property_id', :method => 'get').to(:controller => 'cached_finds', :action => 'filter_get')
+  match('/cached_finds/:id/filter/:property_id', :method => 'post').to(:controller => 'cached_finds', :action => 'filter_set')
   match('/cached_finds/:id/filters/:list').to(:controller => 'cached_finds', :action => 'filters', :format => 'js')
   match('/cached_finds/:id/found_images/:limit').to(:controller => 'cached_finds', :action => 'found_images', :format => 'js')
   match('/cached_finds/:id/found_products_for_checksum/:image_checksum').to(:controller => 'cached_finds', :action => 'found_products_for_checksum')

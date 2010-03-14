@@ -135,10 +135,11 @@ class CachedFind
     data = filter_data(property_id, type, data_in)
     return nil if data.nil?
     
-    self.filters = Marshal.load(Marshal.dump(filters))
-    filter = (filters[property_id] ||= {})
+    new_filters = Marshal.load(Marshal.dump(filters))
+    filter = (new_filters[property_id] ||= {})
     filter[:data] = data
     filter[:include_unknown] = (property_id == Indexer.class_property_id ? nil : params["include_unknown"] == "true")
+    self.filters = new_filters
     save
   end
   

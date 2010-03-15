@@ -1,4 +1,6 @@
-class CachedFinds < Application  
+class CachedFinds < Application
+  RANGE_SEPARATOR = " <em>to</em> "
+  
   def create(language_code, specification)
     find = session.add_cached_find(CachedFind.new(:language_code => language_code, :specification => specification))
     
@@ -22,7 +24,7 @@ class CachedFinds < Application
     find = session.ensure_cached_find(id.to_i)
     result = (params["method"] == "delete" ? find.unfilter!(property_id.to_i) : find.filter!(property_id.to_i, params))
     return nil.to_json unless result
-    result = [find.filters_used("&ndash;"), find.filters_unused, found_images(id, 36, true)]
+    result = [find.filters_used(RANGE_SEPARATOR), find.filters_unused, found_images(id, 36, true)]
     (find.ensure_valid.empty? ? result : nil).to_json
   end
   
@@ -30,7 +32,7 @@ class CachedFinds < Application
     provides :js
     raise NotFound unless %w(unused used).include?(list)
     find = session.ensure_cached_find(id.to_i)
-    result = (list == "used" ? find.filters_used("&ndash;") : find.filters_unused)
+    result = (list == "used" ? find.filters_used(RANGE_SEPARATOR) : find.filters_unused)
     (find.ensure_valid.empty? ? result : nil).to_json
   end
   
@@ -116,7 +118,7 @@ class CachedFinds < Application
   def reset(id)
     find = session.ensure_cached_find(id.to_i)
     return nil.to_json unless find.unfilter_all!
-    result = [find.filters_used("&ndash;"), find.filters_unused, found_images(id, 36, true)]
+    result = [find.filters_used(RANGE_SEPARATOR), find.filters_unused, found_images(id, 36, true)]
     (find.ensure_valid.empty? ? result : nil).to_json
   end
   

@@ -18,7 +18,7 @@ class DatePropertyValue < NumericPropertyValue
   def self.format_value(value, params = {})
     v = value.to_i
     ymd = [v / 10000, (v / 100) % 100, v % 100].select { |n| n > 0 }    
-    format = FORMATS[params[:verbose] ? :verbose : compact][ymd.size - 1]
+    format = FORMATS[params[:verbose] ? :verbose : :compact][ymd.size - 1]
     Date.new(*ymd).strftime(format)
   end
   

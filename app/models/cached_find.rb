@@ -76,7 +76,15 @@ class CachedFind
     filters.each do |property_id, filter|
       prop_info = pdc[property_id]
       next if prop_info.nil?
-      data = filter_data(property_id, prop_info[:type], filter[:data])      
+      
+      type = prop_info[:type]
+      choices, unit =
+        if type == "text" then [filter[:data], language_code]
+        else [filter[:data][0..1], filter[:data][2]]
+        end
+      data = filter_sanitize_choice(property_id, type, choices, unit)
+      next if data.nil?
+      
       new_filters[property_id] = {:data => data, :include_unknown => filter[:include_unknown]} unless data.nil?
     end
     
@@ -95,21 +103,30 @@ class CachedFind
     type = prop_info[:type]
     value_class = PropertyType.value_class(type)
     
-    apids, fpids = all_product_ids, filtered_product_ids(true)
+    apids, fpids = all_product_ids, filtered_product_ids
     values_by_unit = {}
     Indexer.filterable_values_for_property_id(property_id, apids, fpids, language_code).each do |unit, values|
       all_values, relevant_values = values
       relevant = Set.new(relevant_values)
-      selected = Set.new(filter[:data].nil? ? all_values : filter[:data])
       
-      values_by_unit[unit] = all_values.map do |v|
-        [v, selected.include?(v), relevant.include?(v)] <<
-          case type
-          when "currency", "date", "numeric"
-            value_class.format(v, v, nil, unit, :verbose => true)
-          when "text"
-            definitions[v]
+      selected_values = 
+        if filter[:data].nil? then all_values
+        elsif type == "text" then filter[:data]
+        else
+          min, max, filter_unit = filter[:data]
+          if filter_unit != unit then all_values
+          else all_values.select { |v| min <= v && max >= v }
           end
+        end
+      selected = Set.new(selected_values)
+        
+      extra_values =
+        if type == "text" then all_values.map { |v| definitions[v] }
+        else all_values.map { |v| value_class.format(v, v, nil, unit, :verbose => true) }
+        end
+      
+      values_by_unit[unit] = all_values.each_with_index.map do |v, i|
+        [v, selected.include?(v), relevant.include?(v), extra_values[i]]
       end
     end
     
@@ -123,16 +140,8 @@ class CachedFind
     return nil unless filters.has_key?(property_id) or property_ids_unused.include?(property_id)
     
     type = prop_info[:type]
-    data_in =
-      case type
-      when "currency", "date", "numeric"
-        min, max = params.values_at("min", "max").map { |v| v.to_f }
-        unit = params["unit"]; unit = nil if unit.blank?
-        [min, max, unit]
-      when "text"
-        params["value"].split("::")
-      end
-    data = filter_data(property_id, type, data_in)
+    unit = (params["unit"].blank? ? nil : params["unit"])
+    data = filter_sanitize_choice(property_id, type, params["value"].split("::"), unit)
     return nil if data.nil?
     
     new_filters = Marshal.load(Marshal.dump(filters))
@@ -143,33 +152,10 @@ class CachedFind
     save
   end
   
-  # TODO: spec
-  def filter_values_relevant(text_values_by_property_id, numeric_limits_by_property_id)
-    relevant_values_by_property_id = {}
-    
-    filters.each do |filter|
-      property_id, type = filter.values_at(:id, :type)
-      relevant_values = (type == "text" ? text_values_by_property_id[property_id].last : nil)
-      
-      if filter_fresh?(filter)
-        case type
-        when "currency", "date", "numeric" then next unless numeric_limits_by_property_id.has_key?(property_id)
-        when "text" then next if relevant_values.empty?
-        end
-      end
-      
-      relevant_values_by_property_id[property_id] = relevant_values
-    end
-    
-    relevant_values_by_property_id
-  end
-  
-  # TODO: spec for class_only filtering
-  def filtered_product_ids(class_only = false)
+  def filtered_product_ids
     return [] if all_product_ids.empty?
     
     property_ids = filters.keys
-    # property_ids &= [Indexer.class_property_id] if class_only    
     return all_product_ids if property_ids.empty?
     
     # TODO: spec examples where this kicks in
@@ -177,8 +163,8 @@ class CachedFind
     # - since we use exclusion based filtering, any product without a value will not be excluded normally
     # - thus if we mark a filter as not including unknown, we specifically limit the products to the set with that filter's property_id
     relevant_product_ids = all_product_ids
-    focussed_property_ids = property_ids.select { |id| filters[id][:include_unknown] == false }
-    relevant_product_ids &= Indexer.product_ids_for_property_ids(focussed_property_ids, language_code) unless focussed_property_ids.empty?
+    required_property_ids = property_ids.select { |id| filters[id][:include_unknown] == false }
+    relevant_product_ids &= Indexer.product_ids_for_property_ids(required_property_ids, language_code) unless required_property_ids.empty?
     relevant_product_ids - Indexer.excluded_product_ids_for_filters(filters, language_code)
   end
   
@@ -219,18 +205,17 @@ class CachedFind
   
   private
   
-  def filter_data(property_id, type, data_in = nil)
+  def filter_sanitize_choice(property_id, type, choices, unit)
     values_by_unit = Indexer.filterable_values_for_property_id(property_id, all_product_ids, [], language_code)
     return nil if values_by_unit.nil?
     
-    case type
-    when "currency", "date", "numeric"
-      data_in = [] if data_in.nil? 
-      numeric_filter_choose(data_in[0], data_in[1], data_in[2], values_by_unit)
-    when "text"
-      all_values, relevant_values = values_by_unit[language_code]
-      data_in.nil? ? all_values : (data_in & all_values)
-    end
+    unit = values_by_unit.keys.sort_by { |unit| unit.to_s }.first unless values_by_unit.has_key?(unit)
+    all_values, relevant_values = values_by_unit[unit]
+    
+    return choices.nil? ? all_values : (choices & all_values) if type == "text"
+      
+    min_limit, max_limit = all_values.first, all_values.last
+    (choices || [min_limit, max_limit]).map { |m| [[m.to_f, min_limit].max, max_limit].min }.sort + [unit]
   end
     
   def filter_summarize(type, data, range_sep)
@@ -245,21 +230,6 @@ class CachedFind
     rescue
       "unknown type #{type.inspect}"
     end
-  end
-  
-  def numeric_filter_choose(min, max, unit, values_by_unit)
-    unless limits.has_key?(unit)
-      unit = limits.keys.sort_by { |unit| unit.to_s }.first
-      min, max = nil, nil
-    end
-    
-    min_limit, max_limit = limits[unit]
-    
-    min = min_limit if min.nil?
-    max = max_limit if max.nil?    
-    min, max = [min, max].map { |m| [[m, min_limit].max, max_limit].min }.sort
-    
-    [min, max, unit]
   end
   
   def property_ids_unused

@@ -52,16 +52,15 @@ module Indexer
       
       type = prop_info[:type]
       
-      case prop_info[:type]
-      when "currency", "date", "numeric"
-        min, max, unit = filter[:data]
-        ((@@numeric_filtering_index[unit] || {})[property_id] || {}).each do |product_id, values|
-          product_ids << product_id if min > values.last or max < values.first
-        end
-      when "text"
+      if type == "text"
         inclusions = filter[:data]
         (text_index[property_id] || {}).each do |product_id, values|
           product_ids << product_id if (values & inclusions).empty?
+        end
+      else
+        min, max, unit = filter[:data]
+        ((@@numeric_filtering_index[unit] || {})[property_id] || {}).each do |product_id, values|
+          product_ids << product_id if min > values.last or max < values.first
         end
       end
     end

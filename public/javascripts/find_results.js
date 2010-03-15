@@ -22,7 +22,6 @@ function find_results_update_handle(data) {
 	
 	var frps = $('#find_results_products');
 	var insertion_point = frps.find('.terminator');
-	frps.find('.product').remove();
 	
 	var products = [];
 	for(i in data) {
@@ -31,11 +30,13 @@ function find_results_update_handle(data) {
 		products.push(find_results_make(d[0], d[1], d[2], d[3]));
 	}
 	
+	frps.find('p').remove();
 	frps.find('.product').remove();
 	frps.find('.terminator').before(products.join(' '));
 		
 	$('#find_results_count').text(image_prod_count + ' / ' + total_prod_count);
 	
-	$ifloat_body.filter_queue_active = -1;
-	// filter_queue_execute();
+	if(data.length == 0) {
+		frps.find('.terminator').before('<p>You have filtered out all possible products. To fix this, <strong>relax or remove some of your filters</strong>.</p>');
+	}
 }

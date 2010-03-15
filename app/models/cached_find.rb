@@ -202,11 +202,6 @@ class CachedFind
   end
   
   # TODO: spec
-  def spec_count
-    "#{specification} (#{filtered_product_ids.size} / #{all_product_ids.size})"
-  end
-  
-  # TODO: spec
   def unfilter!(property_id)
     return nil unless filters.has_key?(property_id)
     new_filters = Marshal.load(Marshal.dump(filters))

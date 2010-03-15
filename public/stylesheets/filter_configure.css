@@ -54,9 +54,12 @@
 	margin: 10px 0;
 }
 
-#filter_configure p.include_unknown {
-	color: #17A1FF;
+#filter_configure p.include_unknown {	
 	text-align: center;
+}
+
+#filter_configure p.include_unknown strong {
+	color: #17A1FF;
 }
 
 #filter_configure p.units {

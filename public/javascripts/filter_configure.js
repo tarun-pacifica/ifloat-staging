@@ -226,7 +226,7 @@ function filter_configure_values_text(values_by_unit, html) {
 
 function filter_configure_values_text_handle_click(value) {
 	var filter_configure = $('#filter_configure');
-	filter_configure.find("table input").each(function() {
+	filter_configure.find('table input').each(function() {
 		var checkbox = $(this);
 		checkbox.attr('checked', checkbox.val() == value);
 	});

@@ -50,7 +50,7 @@ function filter_choose_load_handle(filters) {
 	var html = [];	
 	for(i in rows) {
 		var row = rows[i];
-		html.push('<div class="row ' + (i % 2 ? "even" : "odd") + '">');
+		html.push('<div class="row ' + (i % 2 ? 'even' : 'odd') + '">');
 		
 		for(j in row) {
 			var section = row[j];

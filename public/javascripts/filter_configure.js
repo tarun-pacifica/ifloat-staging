@@ -196,7 +196,7 @@ function filter_configure_values_text(values_by_unit, html) {
 	}
 	
 	html.push('<table summary="values">');
-	for (i in columns[0]) {
+	for (var i in columns[0]) {
 		html.push('<tr>');
 		
 		for (c in columns) {
@@ -205,20 +205,29 @@ function filter_configure_values_text(values_by_unit, html) {
 			
 			var value = v[0];
 			var checked = (v[1] ? 'checked="checked"' : '');
-			var klass = (v[2] ? '' : 'class="irrelevant"');			
-			var definition = v[3];
+			var escaped_value = util_escape(v[0], ['"']);
+			html.push('<td class="check"> <input value="' + escaped_value + '" type="checkbox" ' + checked + ' /> </td>');
 			
+			var klass = ((v[1] && !v[2]) ? 'class="value irrelevant"' : 'class="value"');
+			var definition = v[3];
 			if(definition) {
-				definition = "'" + definition.replace("'", "\\'").replace('"', '\\"') + "'";
+				definition = "'" + util_escape(definition, ['"', "'"]) + "'";
 				var position = (c >= columns.length / 2 ? "'left'" : "'right'");
 				value = '<span class="defined" onmouseover="tooltip_show(event, ' + definition + ', ' + position + ')" onmouseout="tooltip_hide()">' + value + '</span>';
 			}
-			
-			html.push('<td class="check"> <input value="' + v[0] + '" type="checkbox" ' + checked + ' /> </td>');
-			html.push('<td ' + klass + '> ' + value + ' </td>');
+			escaped_value = "'" + util_escape(v[0], ['"', "'"]) + "'";
+			html.push('<td ' + klass + ' onclick="filter_configure_values_text_handle_click(' + escaped_value + ')"> ' + value + ' </td>');
 		}
 		
 		html.push('</tr>');
 	}
 	html.push('</table>');
+}
+
+function filter_configure_values_text_handle_click(value) {
+	var filter_configure = $('#filter_configure');
+	filter_configure.find("table input").each(function() {
+		var checkbox = $(this);
+		checkbox.attr('checked', checkbox.val() == value);
+	});
 }

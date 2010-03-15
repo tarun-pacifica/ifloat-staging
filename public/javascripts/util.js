@@ -18,3 +18,12 @@ function util_hash_from_array(keys, value) {
 function util_preload_image(url) {
 	(new Image()).src = url;
 }
+
+function util_escape(string, characters) {
+	var s = string;
+	for(i in characters) {
+		var c = characters[i];
+		s = s.replace(c, "\\" + c);
+	}
+	return s;
+}

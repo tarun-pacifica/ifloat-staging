@@ -22,15 +22,7 @@ function filter_configure_apply() {
 }
 
 function filter_configure_apply_handle(data) {
-	if(data == null) {
-		alert('The product catalogue has been updated so we need to refresh the page. Please click OK to proceed.');
-		window.location.reload();
-		return;
-	}
-	
-	filter_panel_load_handle(data[0]);
-	filter_choose_load_handle(data[1]);
-	find_results_update_handle(data[2]);
+	filter_panel_reload(data);
 	$('#filter_configure').dialog('close');
 }
 

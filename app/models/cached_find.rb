@@ -213,19 +213,25 @@ class CachedFind
     save
   end
   
+  # TODO: spec
+  def unfilter_all!
+    self.filters = {}
+    save
+  end
+  
   
   private
   
   def filter_data(property_id, type, data_in = nil)
+    values_by_unit = Indexer.filterable_values_for_property_id(property_id, all_product_ids, [], language_code)
+    return nil if values_by_unit.nil?
+    
     case type
     when "currency", "date", "numeric"
-      limits = Indexer.numeric_limits_for_product_ids(all_product_ids, property_id)[property_id]
-      return nil if limits.nil?
       data_in = [] if data_in.nil? 
-      numeric_filter_choose(data_in[0], data_in[1], data_in[2], limits)
+      numeric_filter_choose(data_in[0], data_in[1], data_in[2], values_by_unit)
     when "text"
-      all_values, relevant_values = Indexer.filterable_values_for_property_id(property_id, all_product_ids, [], language_code)[language_code]
-      return nil if all_values.nil?
+      all_values, relevant_values = values_by_unit[language_code]
       data_in.nil? ? all_values : (data_in & all_values)
     end
   end
@@ -244,7 +250,7 @@ class CachedFind
     end
   end
   
-  def numeric_filter_choose(min, max, unit, limits)
+  def numeric_filter_choose(min, max, unit, values_by_unit)
     unless limits.has_key?(unit)
       unit = limits.keys.sort_by { |unit| unit.to_s }.first
       min, max = nil, nil

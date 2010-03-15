@@ -106,10 +106,14 @@ module Indexer
   def self.product_ids_for_property_ids(property_ids, language_code)
     return [] if property_ids.empty? or not ensure_loaded
     
-    filtering_indexes(language_code).map do |root_key, products_by_property_id|
-      values_by_products = products_by_property_id.values_at(*property_ids).compact
-      values_by_products.map { |values_by_product| values_by_product.keys }
-    end.flatten.uniq
+    product_id_sets = []
+    filtering_indexes(language_code).each do |root_key, products_by_property_id|
+      property_ids.each do |property_id|
+        values_by_product_id = products_by_property_id[property_id]
+        product_id_sets << values_by_product_id.keys unless values_by_product_id.nil?
+      end
+    end
+    product_id_sets.inject { |ids, all_ids| ids & all_ids }
   end
   
   def self.product_ids_for_phrase(phrase, language_code)

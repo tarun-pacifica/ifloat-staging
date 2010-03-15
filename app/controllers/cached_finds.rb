@@ -20,7 +20,7 @@ class CachedFinds < Application
   def filter_set(id, property_id)
     provides :js
     find = session.ensure_cached_find(id.to_i)
-    return nil.to_json unless find.filter!(property_id.to_i, params)    
+    return nil.to_json unless find.filter!(property_id.to_i, params)
     result = [find.filters_used("&ndash;"), find.filters_unused, found_images(id, 36, true)]
     (find.ensure_valid.empty? ? result : nil).to_json
   end
@@ -114,9 +114,9 @@ class CachedFinds < Application
   
   def reset(id)
     find = session.ensure_cached_find(id.to_i)
-    find.invalidated = true
-    find.save
-    redirect(resource(find))
+    return nil.to_json unless find.unfilter_all!
+    result = [find.filters_used("&ndash;"), find.filters_unused, found_images(id, 36, true)]
+    (find.ensure_valid.empty? ? result : nil).to_json
   end
   
   def show(id)

@@ -69,6 +69,21 @@ module Indexer
     product_ids.uniq
   end
   
+  def self.filterable_values_for_property_id(property_id, all_prod_ids, relevant_prod_ids, language_code = nil)
+    return {} if all_prod_ids.empty? or not ensure_loaded
+    
+    values_by_root_key = {}
+    filtering_indexes(language_code).each do |root_key, products_by_property_id|
+      values_by_product_id = products_by_property_id[property_id]
+      next if values_by_product_id.nil?      
+      
+      all_values = values_by_product_id.values_at(*all_prod_ids).flatten.compact.uniq.sort
+      relevant_values = values_by_product_id.values_at(*relevant_prod_ids).flatten.compact.uniq
+      values_by_root_key[root_key] = [all_values, relevant_values] unless all_values.empty?
+    end
+    values_by_root_key
+  end
+  
   # TODO: get rid of extended logic here and revert to simple group_by once all ingested products are guaranteed to have a primary image - also should be able to get rid of 'no image' image in this case
   def self.image_checksums_for_product_ids(product_ids)
     return {} if product_ids.empty? or not ensure_loaded
@@ -113,15 +128,16 @@ module Indexer
         product_id_sets << values_by_product_id.keys unless values_by_product_id.nil?
       end
     end
-    product_id_sets.inject { |ids, all_ids| ids & all_ids }
+    product_id_sets.inject { |union, product_ids| union & product_ids }
   end
   
+  # TODO: remove use of @@image_checksum_index once all products are guaranteed to have a primary image
   def self.product_ids_for_phrase(phrase, language_code)
     return [] if phrase.blank? or not ensure_loaded
 
     phrase.downcase.split(/\W+/).map do |word|
        (@@text_finding_index[language_code] || {})[word] || []
-    end.inject { |union, product_ids| union & product_ids }
+    end.inject { |union, product_ids| union & product_ids } & @@image_checksum_index.keys
   end
   
   # TODO: extend to support multiple languages
@@ -140,20 +156,6 @@ module Indexer
     end.flatten.uniq
   end
   
-  def self.filterable_values_for_property_id(property_id, all_prod_ids, relevant_prod_ids, language_code = nil)
-    return {} if all_prod_ids.empty? or not ensure_loaded
-    
-    values_by_root_key = {}
-    filtering_indexes(language_code).each do |root_key, products_by_property_id|
-      values_by_product_id = products_by_property_id[property_id]
-      next if values_by_product_id.nil?      
-      
-      all_values = values_by_product_id.values_at(*all_prod_ids).flatten.compact.uniq.sort
-      relevant_values = values_by_product_id.values_at(*relevant_prod_ids).flatten.compact.uniq
-      values_by_root_key[root_key] = [all_values, relevant_values] unless all_values.empty?
-    end
-    values_by_root_key
-  end
   
   private
   

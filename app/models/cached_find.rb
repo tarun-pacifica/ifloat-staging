@@ -62,7 +62,7 @@ class CachedFind
   end
   
   def all_product_ids
-    @all_product_ids ||= Indexer.image_checksums_for_product_ids(Indexer.product_ids_for_phrase(specification, language_code)).values.flatten # TODO: remove outer call once all products are guaranteed to have a primary image
+    @all_product_ids ||= Indexer.product_ids_for_phrase(specification, language_code)
   end
   
   # TODO: spec

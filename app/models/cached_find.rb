@@ -103,7 +103,7 @@ class CachedFind
       selected = Set.new(filter[:data].nil? ? all_values : filter[:data])
       
       values_by_unit[unit] = all_values.map do |v|
-        [v, relevant.include?(v), selected.include?(v)] <<
+        [v, selected.include?(v), relevant.include?(v)] <<
           case type
           when "currency", "date", "numeric"
             value_class.format(v, v, nil, unit, :verbose => true)

@@ -68,3 +68,8 @@
 	padding: 10px;
 	width: 700px;
 }
+
+#filter_configure table .irrelevant {
+	color: #404040;
+	text-decoration: line-through;
+}

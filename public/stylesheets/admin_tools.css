@@ -20,7 +20,7 @@
 }
 
 #property_icons table td.not_needed {
-	color: gray;
+	color: #404040;
 	font-style: italic;
 }
 

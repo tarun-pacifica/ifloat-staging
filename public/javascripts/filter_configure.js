@@ -4,9 +4,9 @@ function filter_configure(filter_id) {
 }
 
 function filter_configure_apply() {
-	var filter_configure = $("#filter_configure");
+	var filter_configure = $('#filter_configure');
 	
-	var data = {include_unknown: filter_configure.find(".include_unknown input:checked").length == 1}
+	var data = {include_unknown: filter_configure.find('.include_unknown input:checked').length == 1}
 	
 	if(filter_configure.data('type') == 'text') {
 		data['unit'] = $ifloat_body.language;
@@ -178,7 +178,7 @@ function filter_configure_values_numeric_update_minmax(unit) {
 
 function filter_configure_values_text(values_by_unit, html) {
 	var values = values_by_unit[$ifloat_body.language];
-	
+
 	var column_count = 0;
 	var column_length = 11;
 	while(column_count < 4 && column_length > 10) {
@@ -214,7 +214,7 @@ function filter_configure_values_text(values_by_unit, html) {
 				value = '<span class="defined" onmouseover="tooltip_show(event, ' + definition + ', ' + position + ')" onmouseout="tooltip_hide()">' + value + '</span>';
 			}
 			
-			html.push('<td> <input ' + klass + ' value="' + v[0] + '" type="checkbox" ' + checked + ' /> ' + value + '</td>');
+			html.push('<td ' + klass + '> <input value="' + v[0] + '" type="checkbox" ' + checked + ' /> ' + value + '</td>');
 		}
 		
 		html.push('</tr>');

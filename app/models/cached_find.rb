@@ -177,7 +177,7 @@ class CachedFind
     # - since we use exclusion based filtering, any product without a value will not be excluded normally
     # - thus if we mark a filter as not including unknown, we specifically limit the products to the set with that filter's property_id
     relevant_product_ids = all_product_ids
-    focussed_property_ids = property_ids.reject { |id| filters[id][:include_unknown] }
+    focussed_property_ids = property_ids.select { |id| filters[id][:include_unknown] == false }
     relevant_product_ids &= Indexer.product_ids_for_property_ids(focussed_property_ids, language_code) unless focussed_property_ids.empty?
     relevant_product_ids - Indexer.excluded_product_ids_for_filters(filters, language_code)
   end

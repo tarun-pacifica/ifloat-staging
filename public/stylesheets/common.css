@@ -23,9 +23,9 @@ img.property_icon {
 }
 
 span.defined {
-	border-bottom: 1px dashed gray;
+	color: blue;
 }
 
 span.defined:hover {
-	border-bottom: 1px solid gray;
+	color: #17A1FF;
 }

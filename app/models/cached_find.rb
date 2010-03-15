@@ -221,7 +221,7 @@ class CachedFind
   def filter_summarize(type, data, range_sep)
     if type == "text"
       values = data
-      return values.empty? ? "[none]" : values.sort.join(", ").truncate(40)
+      return values.empty? ? "[none]" : values.join(", ").truncate(40)
     end
     
     begin

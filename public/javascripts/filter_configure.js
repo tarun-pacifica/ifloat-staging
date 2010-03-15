@@ -42,7 +42,7 @@ function filter_configure_handle(filter) {
 	
 	var filter_configure = $('#filter_configure');
 	if(filter_configure.length == 0) {
-		$('body').append('<div id="filter_configure" title="Configure the filter..."> </div>');
+		$('body').append('<div id="filter_configure" title="Configure Filter"> </div>');
 		filter_configure = $('#filter_configure');
 		filter_configure.dialog({autoOpen: false, modal: true, resizable: false, buttons: {Apply: filter_configure_apply}});
 		filter_configure.data('width.dialog', 700);

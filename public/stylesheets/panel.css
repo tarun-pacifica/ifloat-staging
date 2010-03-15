@@ -4,8 +4,9 @@
 }
 
 .major .body {
-		border: 1px solid silver;
-		border-top: none;
+	background: white;
+	border: 1px solid silver;
+	border-top: none;
 }
 
 .major .title {

@@ -1,11 +1,11 @@
 function finder_recall(s) {
-	var specification = $("#cached_find_specification");
+	var specification = $("#finder_specification");
 	specification.val(s.value);
 	specification.siblings("#submit").click();
 }
 
 function finder_validate() {
-	var specification = $("#cached_find_specification").val();
+	var specification = $("#finder_specification").val();
 
 	if(specification == "") {
 		alert("Please supply one or more words to find.")

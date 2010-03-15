@@ -1,0 +1,120 @@
+#header {
+	background: url(/images/common/backgrounds/sky_find_bar.png) repeat-x;
+}
+
+#header_body {
+	height: 182px;
+	margin: 0 auto;
+	width: 906px;
+}
+
+#header .find_bar {
+	height: 26px;
+	padding-top: 10px;
+	position: absolute;
+	top: 146px;
+	width: 906px;
+}
+
+#header .find_bar #finder_specification {
+	width: 180px;
+}
+
+#header .find_bar .finder {
+	float: left;
+}
+
+#header .find_bar .finder p {
+	margin: 0;
+}
+
+#header .find_bar .finder select {
+	margin: 0 0 0 2px;
+	width: 15px;
+}
+
+#header .find_bar .pick_list {
+	background: black;
+	border-left: 1px solid #4263A0;
+	border-right: 1px solid #4263A0;
+	color: white;
+	cursor: default;
+	float: right;
+	height: 23px;
+	margin-left: 5px;
+	position: relative;
+	width: 150px;
+	z-index: 10;
+}
+
+#header .find_bar .pick_list a {
+	background: url(/images/pick_lists/buttons/item.png) no-repeat;
+	border-left: 1px solid #4263A0;
+	border-right: 1px solid #4263A0;
+	color: white;
+	clear: both;
+	display: block;
+	height: 28px;
+	margin-left: -1px;
+	overflow: hidden;
+	padding: 7px 0 7px 0;
+	text-decoration: none;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	width: 150px;
+}
+
+#header .find_bar .pick_list a:hover {
+	background-position: 0 -43px;
+}
+
+#header .find_bar .pick_list a.buy {
+	background: url(/images/pick_lists/backgrounds/enabled.png) repeat-x;
+	padding: 4px 0 0 0;
+	height: 19px;
+	text-align: center;
+	width: 150px;
+}
+
+#header .find_bar .pick_list a.buy:hover {
+	text-decoration: underline;
+}
+
+#header .find_bar .pick_list img {
+	border: 1px solid gray;
+	float: left;
+	height: 25px;
+	margin: 0 7px;
+	width: 25px;
+}
+
+#header .find_bar .pick_list .name {
+	float: left;
+	padding: 4px;
+}
+
+#header .find_bar .pick_list .total {
+	float: right;
+	padding: 4px;
+}
+
+#header .global_links {
+	color: #404040;
+	float: right;
+	margin-top: 20px;
+}
+
+#header .global_links a {
+	color: #404040;
+	margin: 5px;
+	text-decoration: none;
+}
+
+#header .global_links a:hover {
+	color: black;
+	text-decoration: underline;
+}
+
+#header img {
+	margin-top: 24px;
+}

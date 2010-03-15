@@ -9,7 +9,7 @@
 			<%= select :prompt => "Previous finds...", :onchange => "finder_recall(this)", :collection => session.cached_finds, :text_method => :specification, :value_method => :specification %>
 			<% end %>
 			
-			<%= text_field :specification, :id => "cached_find_specification" %>
+			<%= text_field :specification, :id => "finder_specification" %>
 			<%= submit "Find", :id => "submit" %>
 		</p>
 	<% end =%>
@@ -17,7 +17,7 @@
 </div>
 
 <script type="text/javascript">
-	var spec_field = $("#cached_find_specification");
+	var spec_field = $("#finder_specification");
 	var tempter = "What can we find for you?";
 
 	function tempt() {

@@ -208,8 +208,10 @@ class CachedFind
   
   # TODO: spec
   def unfilter!(property_id)
-    return unless filters.has_key?(property_id)
-    self.filters = Marshal.load(Marshal.dump(filters)).delete(property_id)
+    return nil unless filters.has_key?(property_id)
+    new_filters = Marshal.load(Marshal.dump(filters))
+    new_filters.delete(property_id)
+    self.filters = new_filters
     save
   end
   
@@ -239,7 +241,7 @@ class CachedFind
   def filter_summarize(type, data, range_sep)
     if type == "text"
       values = data
-      return values.empty? ? "[none]" : values.sort.join(", ").truncate(50)
+      return values.empty? ? "[none]" : values.sort.join(", ").truncate(40)
     end
     
     begin

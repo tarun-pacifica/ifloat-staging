@@ -17,7 +17,7 @@ function filter_configure_apply() {
 		data['value'] = slider_set.data('min') + '::' + slider_set.data('max');
 	}
 		
-	$.post(filter_configure_url(filter_configure.data('id')), data, filter_configure_apply_handle, "json");
+	$.post(filter_configure_url(filter_configure.data('id')), data, filter_configure_apply_handle, 'json');
 	// TODO: spinner
 }
 

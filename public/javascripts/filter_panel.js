@@ -53,6 +53,11 @@ function filter_panel_reload(data) {
 	find_results_update_handle(data[2]);
 }
 
+function filter_panel_remove(filter_id) {
+	$.post(filter_configure_url(filter_id), {method:'delete'}, filter_panel_reload, 'json');
+	// TODO: spinner
+}
+
 // TODO: introduce confirmation step
 function filter_panel_remove_all() {
 	$.getJSON('/cached_finds/' + $ifloat_body.find_id + '/reset/', filter_panel_reload);

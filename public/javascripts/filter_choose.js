@@ -30,14 +30,14 @@ function filter_choose_load_handle(filters) {
 	var sections = [];
 	for(i in filters) {
 		var section = filters[i].section;
-		if(sections.length == 0 || (sections[sections.length -1] != section)) sections.push(section);
+		if(sections.length == 0 || (sections[sections.length - 1] != section)) sections.push(section);
 	}
 	
 	var row_count = 0;
 	var rows = [[]];
 	for(i in sections) {
 		var section = sections[i];
-		var section_count = filters_by_section[section].length;
+		var section_count = Math.max(filters_by_section[section].length, 2);
 		if(row_count + section_count < section_count_max) {
 			rows[rows.length - 1].push(section);
 			row_count += section_count;

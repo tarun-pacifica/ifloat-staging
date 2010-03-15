@@ -69,7 +69,15 @@
 	width: 700px;
 }
 
-#filter_configure table .irrelevant {
+#filter_configure table td {
+	vertical-align: top;
+}
+
+#filter_configure table td.check {
+	width: 1%;
+}
+
+#filter_configure table td.irrelevant {
 	color: #404040;
 	text-decoration: line-through;
 }

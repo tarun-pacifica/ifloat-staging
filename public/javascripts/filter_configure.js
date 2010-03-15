@@ -214,7 +214,8 @@ function filter_configure_values_text(values_by_unit, html) {
 				value = '<span class="defined" onmouseover="tooltip_show(event, ' + definition + ', ' + position + ')" onmouseout="tooltip_hide()">' + value + '</span>';
 			}
 			
-			html.push('<td ' + klass + '> <input value="' + v[0] + '" type="checkbox" ' + checked + ' /> ' + value + '</td>');
+			html.push('<td class="check"> <input value="' + v[0] + '" type="checkbox" ' + checked + ' /> </td>');
+			html.push('<td ' + klass + '> ' + value + ' </td>');
 		}
 		
 		html.push('</tr>');

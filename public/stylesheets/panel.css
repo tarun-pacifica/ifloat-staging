@@ -30,16 +30,16 @@
 	border-left: 1px solid silver;
 	height: 37px;
 	margin-bottom: -5px;
-	padding-left: 1px;
+	padding-left: 2px;
 }
 
 .minor .controls .button {
 	cursor: pointer;
 	float: left;
 	height: 18px;
-	margin: 7px 0 0 1px;
-	padding: 5px 0 0 22px;
-	width: 100px;
+	margin: 7px 0 0 3px;
+	padding: 5px 0 0 25px;
+	width: 93px;
 }
 
 .minor h3 {

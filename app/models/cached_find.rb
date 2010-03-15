@@ -169,7 +169,7 @@ class CachedFind
     return [] if all_product_ids.empty?
     
     property_ids = filters.keys
-    property_ids &= [Indexer.class_property_id] if class_only    
+    # property_ids &= [Indexer.class_property_id] if class_only    
     return all_product_ids if property_ids.empty?
     
     # TODO: spec examples where this kicks in
@@ -263,6 +263,6 @@ class CachedFind
   end
   
   def property_ids_unused
-    Indexer.property_ids_for_product_ids(all_product_ids, language_code).reject { |id| filters.has_key?(id) }
+    Indexer.property_ids_for_product_ids(filtered_product_ids, language_code).reject { |id| filters.has_key?(id) }
   end
 end

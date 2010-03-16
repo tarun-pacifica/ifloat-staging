@@ -57,7 +57,7 @@ function filter_configure_handle(filter) {
 	}
 	html.push('<h3>' + filter.section + '</h3>');
 	html.push('<img src="/images/filter_configure/backgrounds/location_sep.png" />');
-	html.push('<p> <img class="property_icon" src="' + filter.icon_url + '" /> ' + filter.name + '</p>');
+	html.push('<p> <img class="property_icon" src="' + filter.icon_url + '" /> <strong>' + filter.name + '</strong> values </p>');
 	html.push('</div>');
 	
 	if(filter.include_unknown != null) {

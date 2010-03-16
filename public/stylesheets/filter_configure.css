@@ -22,6 +22,7 @@
 	border-top: 1px solid #969696;
 	border-bottom: 1px solid white;
 	float: left;
+	font-size: 14px;
 	font-weight: normal;
 	height: 39px;
 	margin: 0px;
@@ -39,10 +40,15 @@
 	background: #B9B9B9;
 	border-top: 1px solid #969696;
 	border-bottom: 1px solid white;
-	color: #2478BD;
+	font-size: 14px;
 	height: 39px;
 	margin: 0;
 	padding: 12px 0 8px 0;
+}
+
+#filter_configure .location p strong {
+	color: #2478BD;
+	font-weight: normal;
 }
 
 #filter_configure .slider_set {

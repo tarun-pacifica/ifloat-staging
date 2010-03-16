@@ -105,7 +105,7 @@ class CachedFinds < Application
       values_by_property.values_at(*title_properties).compact.map do |values_for_property|
         values_for_property.map { |value| value.to_s }
       end
-    end.transpose.map { |set| set.flatten.uniq! }
+    end.transpose.map { |set| set.flatten.uniq }
     
     render
   end

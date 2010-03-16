@@ -27,7 +27,7 @@
 <script type="text/javascript">
 $(document).ready(function() {
 	var partner_panel = $("#partner_panel");
-	partner_panel[0].urls_by_product_id = <%= @partner_product_urls.to_json %>;
+	partner_panel.data('partner_urls', <%= @partner_product_urls.to_json %>);
 	pick_lists_update();
 	
 	var partner_store = $("#partner_store");

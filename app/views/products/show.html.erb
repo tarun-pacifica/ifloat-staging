@@ -103,6 +103,6 @@
 	$("#product_detail_relations div").each(function() { $(this).children(".product:gt(2)").hide(); });
 	<% end %>
 	
-	$("#pick_buttons")[0].product_id = <%= @product.id %>;
-	prod_detail_update_pick_buttons(<%= @product.id %>);
+	$ifloat_body = {product_id: <%= @product.id %>};
+	prod_detail_update_pick_buttons();
 </script>

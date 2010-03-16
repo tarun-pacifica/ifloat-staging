@@ -17,8 +17,8 @@ function prod_detail_select_image(event) {
 	$("#product_detail_assets").find("img.main")[0].src = event.target.src;
 }
 
-function prod_detail_update_pick_buttons(product_id) {
-	$.getJSON("/products/" + product_id + "/picked_group", prod_detail_update_pick_buttons_handle);
+function prod_detail_update_pick_buttons() {
+	$.getJSON("/products/" + $ifloat_body.product_id + "/picked_group", prod_detail_update_pick_buttons_handle);
 }
 
 function prod_detail_update_pick_buttons_handle(data) {

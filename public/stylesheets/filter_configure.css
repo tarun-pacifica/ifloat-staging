@@ -54,8 +54,9 @@
 	margin: 10px 0;
 }
 
-#filter_configure p.include_unknown {	
-	text-align: center;
+#filter_configure p.include_unknown {
+	padding-left: 13px;
+	text-align: left;
 }
 
 #filter_configure p.include_unknown strong {
@@ -63,7 +64,8 @@
 }
 
 #filter_configure p.units {
-	text-align: center;
+	padding-left: 35px;
+	text-align: left;
 }
 
 #filter_configure table {

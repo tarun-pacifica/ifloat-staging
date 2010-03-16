@@ -87,7 +87,7 @@
 }
 
 #partner_panel .pick_list a.unavailable {
-	background: url/images/pick_lists/buttons/item_unavailable.png) no-repeat;
+	background: url(/images/pick_lists/buttons/item_unavailable.png) no-repeat;
 	color: #404040;
 }
 

@@ -58,6 +58,7 @@
 
 #filter_configure .slider_set p {
 	margin: 10px 0;
+	padding-left: 15px;
 }
 
 #filter_configure p.include_unknown {

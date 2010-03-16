@@ -1,11 +1,7 @@
-// Public
-
 function product_image_make(url, popup_url) {
 	if(popup_url) return '<img class="product" src="' + url + '" onmouseover="product_image_popup(event, \'' + popup_url + '\')" onmouseout="prod_image_unpopup(this)" />';
 	return '<img class="product" src="' + url + '" />';
 }
-
-// Private
 
 function product_image_popup(event, image_url) {
 	var zoom = $("#image_popup");

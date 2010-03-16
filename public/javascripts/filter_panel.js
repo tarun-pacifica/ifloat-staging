@@ -43,7 +43,7 @@ function filter_panel_property_icon(filter, onclick, tooltip_position) {
 
 function filter_panel_reload(data) {
 	if(data == null) {
-		alert('The product catalogue has been updated so we need to refresh the page. Please click OK to proceed.');
+		alert('The product catalogue has been updated so we need to refresh the page.');
 		window.location.reload();
 		return;
 	}

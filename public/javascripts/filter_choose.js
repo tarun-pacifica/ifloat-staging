@@ -11,7 +11,7 @@ function filter_choose_load() {
 
 function filter_choose_load_handle(filters) {
 	if(filters == null) {
-		alert('The product catalogue has been updated so we need to refresh the page. Please click OK to proceed.');
+		alert('The product catalogue has been updated so we need to refresh the page.');
 		window.location.reload();
 		return;
 	}
@@ -74,9 +74,9 @@ function filter_choose_load_handle(filters) {
 	
 	var filter_choose = $('#filter_choose');
 	if(filter_choose.length == 0) {
-		$('body').append('<div id="filter_choose" title="Choose Filter"> </div>');
+		$('body').append('<div id="filter_choose"> </div>');
 		filter_choose = $('#filter_choose');
-		filter_choose.dialog({autoOpen: false, modal: true, resizable: false});
+		filter_choose.dialog({autoOpen: false, modal: true, resizable: false, title: filter_choose_title()});
 	}
 	filter_choose.data('width.dialog', section_count_max * 78);
 	filter_choose.html(html.join(' '));
@@ -85,4 +85,8 @@ function filter_choose_load_handle(filters) {
 
 function filter_choose_open() {
 	if($ifloat_body.filter_unused_count > 0) $('#filter_choose').dialog('open');
+}
+
+function filter_choose_title() {
+	return 'Filter your "' + $ifloat_body.find_spec + '" results by...';
 }

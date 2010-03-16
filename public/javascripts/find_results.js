@@ -11,7 +11,7 @@ function find_results_update() {
 
 function find_results_update_handle(data) {
 	if(data == null) {
-		alert('The product catalogue has been updated so we need to refresh the page. Please click OK to proceed.');
+		alert('The product catalogue has been updated so we need to refresh the page.');
 		window.location.reload();
 		return;
 	}

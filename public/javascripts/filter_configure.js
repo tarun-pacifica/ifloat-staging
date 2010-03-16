@@ -33,7 +33,7 @@ function filter_configure_back() {
 
 function filter_configure_handle(filter) {
 	if(filter == null) {
-		alert('The product catalogue has been updated so we need to refresh the page. Please click OK to proceed.');
+		alert('The product catalogue has been updated so we need to refresh the page.');
 		window.location.reload();
 		return;
 	}
@@ -42,9 +42,10 @@ function filter_configure_handle(filter) {
 	
 	var filter_configure = $('#filter_configure');
 	if(filter_configure.length == 0) {
-		$('body').append('<div id="filter_configure" title="Configure Filter"> </div>');
+		$('body').append('<div id="filter_configure"> </div>');
 		filter_configure = $('#filter_configure');
-		filter_configure.dialog({autoOpen: false, modal: true, resizable: false, buttons: {Apply: filter_configure_apply}});
+		filter_configure.dialog({autoOpen: false, modal: true, resizable: false, title: filter_choose_title()});
+		filter_configure.dialog('option', 'buttons', {Apply: filter_configure_apply});
 		filter_configure.data('width.dialog', 700);
 	}
 	

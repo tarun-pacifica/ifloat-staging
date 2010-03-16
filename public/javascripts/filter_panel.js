@@ -58,7 +58,6 @@ function filter_panel_remove(filter_id) {
 	// TODO: spinner
 }
 
-// TODO: introduce confirmation step
 function filter_panel_remove_all() {
 	$.getJSON('/cached_finds/' + $ifloat_body.find_id + '/reset/', filter_panel_reload);
 	// TODO: spinner

@@ -49,7 +49,6 @@ class NumericPropertyValue < PropertyValue
     
     # TODO: spec
     if FRACTIONAL_UNITS.include?(params[:unit])
-      puts "fraction helper kicking in for #{f} #{params[:unit]}"
       denominator = 2
       remainder = f - i
       while(denominator < 128) do

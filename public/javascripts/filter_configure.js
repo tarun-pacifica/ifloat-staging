@@ -22,10 +22,15 @@ function filter_configure_apply() {
 }
 
 function filter_configure_apply_handle(data) {
-	filter_panel_reload(data);
 	var filter_configure = $('#filter_configure');
+	var filter_dom_id = '#filter_' + filter_configure.data('id');
+	var update = $(filter_dom_id).length > 0;
+	
+	filter_panel_reload(data);
 	filter_configure.dialog('close');
-	$('#filter_' + filter_configure.data('id')).animate({color: 'yellow'}).animate({color: 'black'});
+	
+	if(update) $(filter_dom_id).animate({color: 'yellow'}).animate({color: 'black'});
+	else $(filter_dom_id).hide().fadeIn('slow');
 }
 
 function filter_configure_back() {

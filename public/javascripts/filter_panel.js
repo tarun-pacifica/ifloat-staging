@@ -19,6 +19,7 @@ function filter_panel_load_handle(filters) {
 		var filter = filters[i];
 		
 		if(section != filter.section) {
+			if(i > 0) html.push('<hr class="terminator" />');
 			html.push('<h3>' + filter.section + '</h3>');
 			section = filter.section;
 		}
@@ -34,7 +35,9 @@ function filter_panel_load_handle(filters) {
 		html.push('</table>');
 	}
 	
-	$('#filter_panel .sections').html(html.length == 0 ? '&nbsp;' : html.join(' '));
+	if(html.length > 0) html.push('<hr class="terminator" />');
+	
+	$('#filter_panel .sections').html(html.join(' '));
 }
 
 function filter_panel_property_icon(filter, onclick, tooltip_position) {
@@ -55,7 +58,7 @@ function filter_panel_reload(data) {
 
 function filter_panel_remove(filter_id) {
 	$('#filter_' + filter_id).fadeOut('fast');
-	$.post(filter_configure_url(filter_id), {method:'delete'}, filter_panel_reload, 'json');
+	$.post(filter_configure_url(filter_id), {method: 'delete'}, filter_panel_reload, 'json');
 	// TODO: spinner
 }
 

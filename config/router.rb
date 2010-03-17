@@ -24,7 +24,6 @@ Merb::Router.prepare do
   resources :picked_products
   
   match('/products/batch/:ids').to(:controller => 'products', :action => 'batch')
-  match('/products/:id/picked_group').to(:controller => 'products', :action => 'picked_group')
   resources :products
   
   match('/purchases/track').to(:controller => 'purchases', :action => 'track')

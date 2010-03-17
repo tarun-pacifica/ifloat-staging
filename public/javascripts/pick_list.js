@@ -4,23 +4,25 @@ function pick_list_add(group, product_id) {
 }
 
 function pick_list_add_move(group, product_id, pick_id) {
-	var options = {type: 'POST', success: pick_lists_update, error: pick_list_add_move_error};
-	if($('#picked_product_options').length > 0) options.success = function() { window.location.reload(); };
-	
-	options.data = {group: group}
-	if(pick_id) {
-		options.url = '/picked_products/' + pick_id;
-		options.data._method = 'PUT';
-	} else {
-		options.url = '/picked_products';
-		options.data.product_id = product_id;
+	if(group == "buy_later" && ! $ifloat_header.authenticated) {
+		login_open('Please login / register to add items to your wish list...');
+		return;
 	}
 	
-	$.ajax(options);
-}
-
-function pick_list_add_move_error(request) {
-	if(request.status == 401) login_open('Please login / register to add items to that list...');
+	// TODO: attempt to build ppo page dynamically using the data from this call + an extra call to retrieve prod _&_ pricing data
+	// if($('#picked_product_options').length > 0) options.success = function() { window.location.reload(); };
+	
+	var data = {group: group};
+	var url = "/picked_products";
+	
+	if(pick_id) {
+		url += '/' + pick_id;
+		data._method = 'PUT';
+	} else {
+		data.product_id = product_id;
+	}
+	
+	$.post(url, data, pick_lists_update_handle, 'json');
 }
 
 function pick_list_blink(group) {
@@ -42,19 +44,15 @@ function pick_list_hide() {
 
 function pick_list_make_link(info, partner_urls) {
 	var partner = (partner_urls != undefined);
-	var product_id = info[0];
 	
-	var image_urls = info[1];
-	var image = product_image_make(image_urls[0], partner ? undefined : image_urls[1]);
-	
-	var title_parts = info[2];
-	
-	var link_url = (partner ? partner_urls[product_id] : info[3]);
+	var link_url = (partner ? partner_urls[info.product_id] : info.url);
 	var klass = (link_url ? 'available' : 'unavailable');
 	var target = (partner ? 'partner_store' : '');
 	if(!link_url) link_url = '#';
 	
-	return '<a class="' + klass + '" target="' + target + '" href="' + link_url + '">' + image + title_parts.join('<br/>') + '</a>';
+	var image = product_image_make(info.image_urls[0], partner ? undefined : info.image_urls[1]);
+	
+	return '<a class="' + klass + '" target="' + target + '" href="' + link_url + '">' + image + info.title_parts.join('<br/>') + '</a>';
 }
 
 function pick_list_move(from_group, to_group, pick_id) {
@@ -114,6 +112,9 @@ function pick_lists_update_handle(data) {
 	var pick_lists = $('.pick_list');
 	if (!partner) pick_lists_clear(pick_lists);
 	
+	var product_id = $ifloat_body.product_id;
+	var product_group, product_pick_id;
+	
 	for(group in data) {
 		var links = [];
 		
@@ -122,7 +123,21 @@ function pick_lists_update_handle(data) {
 		for(i in list) {
 			var info = list[i];
 			links.push(pick_list_make_link(info, partner_urls));
-			if(group == 'compare') total_products += info[2][1];
+			
+			if(group == 'compare') {
+				total_products += info.title_parts[1];
+				
+				var product_ids = info.product_ids;
+				for(i in product_ids) {
+					if(product_ids[i] == product_id) {
+						product_group = group;
+						product_pick_id = info.ids[i];
+					}
+				}
+			} else if(info.product_id == product_id) {
+				product_group = group;
+				product_pick_id = info.id;
+			}
 		}
 		
 		if(!partner && group == 'buy_now') links.push('<a class="buy" href="/picked_products/options">Buy from...</a>');
@@ -138,6 +153,6 @@ function pick_lists_update_handle(data) {
 		pick_lists_bind_unavailable(partner_panel);
 	} else {
 		pick_lists.mouseleave();
-		if ($('#pick_buttons').length > 0) prod_detail_update_pick_buttons();
+		prod_detail_pick_buttons_update(product_group, product_pick_id);
 	}
 }

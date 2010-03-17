@@ -109,10 +109,6 @@ module Merb
       self[:most_recent_find_id] = cached_find.id
     end
     
-    def picked_product_title_changes
-      self[:picked_product_title_changes] || []
-    end
-    
     def picked_products
       return [] if picked_product_ids.empty?
       picks = PickedProduct.all(:id => picked_product_ids, :order => [:cached_class, :cached_brand, :created_at])
@@ -159,11 +155,10 @@ module Merb
       self[:purchase_ids] || []
     end
     
-    def update_picked_product_title_values(picks, save_and_track_changes = false)
+    def update_picked_product_title_values(picks, commit = false)
       picks_by_product_id = picks.hash_by(:product_id)
       property_names = %w(marketing:brand reference:class)
       
-      changes = []
       Product.display_values(picks_by_product_id.keys, language, property_names).each do |product_id, values_by_property|
         pick = picks_by_product_id[product_id]
         old_title = pick.title_parts
@@ -173,13 +168,8 @@ module Merb
           pick.attribute_set(attribute, values.first.to_s)
         end
         pick.invalidated = false
-        next unless save_and_track_changes and pick.save
-        
-        new_title = pick.title_parts
-        changes << [old_title, new_title] unless new_title == old_title
+        pick.save if commit
       end
-      
-      self[:picked_product_title_changes] = changes
     end
   end
 end

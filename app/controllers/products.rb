@@ -19,16 +19,6 @@ class Products < Application
     end.to_json
   end
   
-  def picked_group(id)
-    provides :js
-    
-    product_id = id.to_i
-    pick = session.picked_products.find { |pick| pick.product_id == product_id }
-    response = (pick.nil? ? [nil, nil] : [pick.id, pick.group])
-    response << product_id
-    response.to_json
-  end
-  
   def show(id)
     product_id = id.to_i
     @product = Product.get(product_id)

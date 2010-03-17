@@ -20,7 +20,7 @@
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js"></script>
 	<!-- <script src="/javascripts/compiled.js" type="text/javascript" charset="utf-8"></script> -->
 	<% Dir["public/javascripts/*.js"].each do |path| %>
-		<script src="/javascripts/<%= File.basename(path) %>" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript" src="/javascripts/<%= File.basename(path) %>"></script>
 	<% end %>
 	<% end %>
   </head>

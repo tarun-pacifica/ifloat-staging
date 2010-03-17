@@ -34,7 +34,7 @@ class PickedProducts < Application
     raise Unauthenticated unless group != "buy_later" or session.authenticated?
     raise NotFound unless Product.get(product_id)
     session.add_picked_product(PickedProduct.new(:product_id => product_id, :group => group))
-    ""
+    index
   end
   
   def compare(klass)
@@ -66,7 +66,7 @@ class PickedProducts < Application
   def delete(id)
     pick = session.ensure_picked_product(id.to_i)
     session.remove_picked_products([pick])
-    ""
+    index
   end
   
   def index
@@ -79,22 +79,27 @@ class PickedProducts < Application
     picks_by_group = {}
     picks.each do |pick|
       product_id = pick.product_id
-      image_urls = product_image_urls(images_by_product_id[product_id])
-      (picks_by_group[pick.group] ||= []) << [product_id, image_urls, pick.title_parts, url(:product, :id => product_id)]
+      (picks_by_group[pick.group] ||= []) << {
+        :id          => pick.id,
+        :product_id  => product_id,
+        :image_urls  => product_image_urls(images_by_product_id[product_id]),
+        :title_parts => pick.title_parts,
+        :url         => url(:product, :id => product_id)
+      }
     end
     
     compare_picks = picks_by_group["compare"]
     unless compare_picks.nil?
-      compare_picks_by_class = compare_picks.group_by { |product_id, image_urls, title_parts, link_url| title_parts.last }
+      compare_picks_by_class = compare_picks.group_by { |info| info[:title_parts].last }
       picks_by_group["compare"] = compare_picks_by_class.map do |klass, info_for_picks|
-        info = info_for_picks.find { |product_id, image_urls, title_parts, link_url| not image_urls.nil? }
-        image_urls = (info.nil? ? nil : info[1])
-        link_url = "/picked_products/compare/#{Merb::Parse.escape(klass)}"
-        [nil, image_urls, [klass, info_for_picks.size], link_url]
+        { :ids         => info_for_picks.map { |info| info[:id] },
+          :product_ids => info_for_picks.map { |info| info[:product_id] },
+          :image_urls  => info_for_picks.map { |info| info[:image_urls] }.compact.first,
+          :title_parts => [klass, info_for_picks.size],
+          :url         => "/picked_products/compare/#{Merb::Parse.escape(klass)}" }
       end
     end
     
-    # TODO: do something with session.picked_product_title_changes
     picks_by_group.to_json
   end
   
@@ -131,7 +136,7 @@ class PickedProducts < Application
     pick = session.ensure_picked_product(id.to_i)
     pick.group = group
     pick.save
-    ""
+    index
   end
   
   

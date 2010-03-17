@@ -66,6 +66,7 @@
 <img id="image_popup" src="" />
 
 <script type="text/javascript" charset="utf-8">
+	// TODO: factor out
 	var vert = ["top", "middle", "bottom"];
 	var horiz = ["left", "center", "right"];
 	for(v in vert) {
@@ -73,7 +74,8 @@
 			util_preload_image("/images/tooltip/backgrounds/" + vert[v] + "_" + horiz[h] + ".png");
 		}
 	}
-		
-	pick_lists_update();
+	
+	var $ifloat_header = {authenticated: <%= session.authenticated? %>};
+	pick_lists_update(); // TODO: make this on document ready
 </script>
 	

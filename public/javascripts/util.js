@@ -23,7 +23,7 @@ function util_escape(string, characters) {
 	var s = string;
 	for(i in characters) {
 		var c = characters[i];
-		s = s.replace(c, "\\" + c);
+		s = s.replace(c, '\\' + c);
 	}
 	return s;
 }

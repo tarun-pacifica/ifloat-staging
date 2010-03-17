@@ -34,53 +34,47 @@
 }
 
 #header .find_bar .pick_list {
-	background: black;
-	border-left: 1px solid #4263A0;
-	border-right: 1px solid #4263A0;
-	color: white;
 	cursor: default;
 	float: right;
-	height: 23px;
+	height: 21px;
 	margin-left: 5px;
 	position: relative;
-	width: 150px;
+	width: 202px;
 	z-index: 10;
 }
 
-#header .find_bar .pick_list a {
-	background: url(/images/pick_lists/buttons/item.png) no-repeat;
-	border-left: 1px solid #4263A0;
-	border-right: 1px solid #4263A0;
-	color: white;
+#header .find_bar .pick_list .items {
+	background: white;
+	float: right;
+	margin-right: 13px;
+	width: 166px;
+}
+
+#header .find_bar .pick_list .items a {
+	border-left: 1px solid #404040;
+	border-right: 1px solid #404040;
+	color: black;
 	clear: both;
 	display: block;
-	height: 28px;
-	margin-left: -1px;
+	height: 27px;
 	overflow: hidden;
-	padding: 7px 0 7px 0;
+	padding: 2px 0;
 	text-decoration: none;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	width: 150px;
 }
 
-#header .find_bar .pick_list a:hover {
-	background-position: 0 -43px;
+#header .find_bar .pick_list .items a:hover {
+	background: url(/images/pick_lists/backgrounds/item_hover.png) repeat-x;
 }
 
-#header .find_bar .pick_list a.buy {
-	background: url(/images/pick_lists/backgrounds/enabled.png) repeat-x;
-	padding: 4px 0 0 0;
-	height: 19px;
-	text-align: center;
-	width: 150px;
+#header .find_bar .pick_list .items a.buy {
+	font-weight: bold;
+	height: 23px;
+	padding: 8px 0 0 41px;
 }
 
-#header .find_bar .pick_list a.buy:hover {
-	text-decoration: underline;
-}
-
-#header .find_bar .pick_list img {
+#header .find_bar .pick_list .items a img {
 	border: 1px solid gray;
 	float: left;
 	height: 25px;
@@ -88,14 +82,33 @@
 	width: 25px;
 }
 
+#header .find_bar .pick_list .menu {
+	background: url(/images/pick_lists/buttons/list.png) no-repeat;
+	float: right;
+	height: 21px;
+	width: 178px;
+}
+
 #header .find_bar .pick_list .name {
 	float: left;
-	padding: 4px;
+	padding: 4px 0 0 4px;
 }
 
 #header .find_bar .pick_list .total {
 	float: right;
-	padding: 4px;
+	padding: 4px 20px 0 0;
+}
+
+#header .find_bar #pl_buy_later {
+	background: url(/images/pick_lists/backgrounds/buy_later.png) no-repeat;
+}
+
+#header .find_bar #pl_buy_now {
+	background: url(/images/pick_lists/backgrounds/buy_now.png) no-repeat;
+}
+
+#header .find_bar #pl_compare {
+	background: url(/images/pick_lists/backgrounds/compare.png) no-repeat;
 }
 
 #header .global_links {

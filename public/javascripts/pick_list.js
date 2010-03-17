@@ -23,24 +23,21 @@ function pick_list_add_move_error(request) {
 	if(request.status == 401) login_open('Please login / register to add items to that list...');
 }
 
-// TODO: revise to flash companion icon instead of text
 function pick_list_blink(group) {
-	var total = $('#pl_' + group).children('.name,.total');
-	total.animate({color:'#FCBB1A'}).animate({color:'white'});
-	total.animate({color:'#FCBB1A'}).animate({color:'white'});
+	$('#pl_' + group + ' .menu').animate({color: 'yellow'}).animate({color: 'black'});
 }
 
 function pick_list_enable(pick_list) {
 	pick_list.click(pick_list_show);
 	pick_list.mouseenter(pick_list_show);
 	pick_list.mouseleave(pick_list_hide);
-	pick_list.css('background', 'url(/images/pick_lists/backgrounds/enabled.png) repeat-x');
 }
 
 function pick_list_hide() {
 	var list = $(this);
-	list.css('background-image', 'url(/images/pick_lists/backgrounds/enabled.png)');
 	list.find('a').hide();
+	list.children('.menu').css('background-position', '0 0');
+	list.children('.items').css('border-bottom', 'none');
 }
 
 function pick_list_make_link(info, partner_urls) {
@@ -74,8 +71,9 @@ function pick_list_remove(group, pick_id) {
 function pick_list_show() {
 	var list = $(this);
 	if(list.find('.total').text() == '') return;
-	list.css('background-image', 'url(/images/pick_lists/backgrounds/active.png)');
 	list.find('a').show();
+	list.children('.menu').css('background-position', '0 -21px');
+	list.children('.items').css('border-bottom', '1px solid #404040');
 }
 
 function pick_lists_bind_unavailable(partner_panel) {
@@ -99,9 +97,9 @@ function pick_lists_bind_unavailable(partner_panel) {
 
 function pick_lists_clear(pick_lists) {
 	pick_lists.unbind();
-	pick_lists.css('background', 'black');
 	pick_lists.children('.items').empty();
-	pick_lists.children('.total').empty();
+	pick_lists.find('.total').empty();
+	pick_lists.css('background-position', '0 0');
 }
 
 function pick_lists_update() {
@@ -119,8 +117,6 @@ function pick_lists_update_handle(data) {
 	for(group in data) {
 		var links = [];
 		
-		if(!partner && group == 'buy_now') links.push('<a class="buy" href="/picked_products/options">Buy from...</a>');
-		
 		var list = data[group];
 		var total_products = (group == 'compare' ? 0 : list.length);
 		for(i in list) {
@@ -129,9 +125,12 @@ function pick_lists_update_handle(data) {
 			if(group == 'compare') total_products += info[2][1];
 		}
 		
+		if(!partner && group == 'buy_now') links.push('<a class="buy" href="/picked_products/options">Buy from...</a>');
+		
 		var pick_list = $('#pl_' + group);
 		pick_list.children('.items').html(links.join(' '));
-		pick_list.children('.total').text(total_products);
+		pick_list.find('.total').text(total_products);
+		pick_list.css('background-position', '0 -21px');
 		if(!partner) pick_list_enable(pick_list);
 	}
 	

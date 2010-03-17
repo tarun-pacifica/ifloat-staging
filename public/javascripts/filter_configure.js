@@ -23,7 +23,9 @@ function filter_configure_apply() {
 
 function filter_configure_apply_handle(data) {
 	filter_panel_reload(data);
-	$('#filter_configure').dialog('close');
+	var filter_configure = $('#filter_configure');
+	filter_configure.dialog('close');
+	$('#filter_' + filter_configure.data('id')).animate({color: 'yellow'}).animate({color: 'black'});
 }
 
 function filter_configure_back() {

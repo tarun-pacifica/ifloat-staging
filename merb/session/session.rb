@@ -20,6 +20,7 @@ module Merb
       
       pick.user = user
       update_picked_product_title_values([pick])
+      p pick
       self[:picked_product_ids] = (picked_product_ids << pick.id) if pick.save
     end
     
@@ -167,6 +168,7 @@ module Merb
           attribute = "cached_#{property.name.split(':').last}"
           pick.attribute_set(attribute, values.first.to_s)
         end
+        pick.cached_brand ||= "Miscellaneous"
         pick.invalidated = false
         pick.save if commit
       end

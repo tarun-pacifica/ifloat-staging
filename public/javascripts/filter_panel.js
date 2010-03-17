@@ -63,7 +63,7 @@ function filter_panel_remove(filter_id) {
 }
 
 function filter_panel_remove_all() {
-	$('#filter_panel h3,.filter,hr').fadeOut('fast');
+	$('#filter_panel').find('h3,.filter,hr').fadeOut('fast');
 	$.getJSON('/cached_finds/' + $ifloat_body.find_id + '/reset/', filter_panel_reload);
 	// TODO: spinner
 }

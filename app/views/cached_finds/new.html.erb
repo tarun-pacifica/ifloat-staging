@@ -22,9 +22,9 @@
 </div>
 
 <script type="text/javascript" charset="utf-8">
-	$("body").css("background", "url(/images/marquee/backgrounds/sky.png) repeat-x");
+	$('body').css('background', 'url(/images/marquee/backgrounds/sky.png) repeat-x');
 	
 	<% Dir[Merb.root / "public" / "images" / "marquee" / "buttons" / "*.png"].each do |path| %>
-	util_preload_image("/images/marquee/buttons/<%= File.basename(path) %>");
+	util_preload_image('/images/marquee/buttons/<%= File.basename(path) %>');
 	<% end %>
 </script>

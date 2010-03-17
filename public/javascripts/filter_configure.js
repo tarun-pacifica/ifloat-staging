@@ -53,7 +53,7 @@ function filter_configure_handle(filter) {
 		filter_configure = $('#filter_configure');
 		filter_configure.dialog({autoOpen: false, modal: true, resizable: false, title: filter_choose_title()});
 		filter_configure.dialog('option', 'buttons', {Apply: filter_configure_apply});
-		filter_configure.data('width.dialog', 700);
+		filter_configure.data('width.dialog', 700 + 'px');
 	}
 	
 	var html = [];
@@ -176,7 +176,7 @@ function filter_configure_values_numeric_update_minmax(unit) {
 	var values = filter_configure.data('values_by_unit')[unit];
 	
 	var extremes = {min: null, max: null};
-	for (extreme in extremes) {
+	for(extreme in extremes) {
 		var i = slider_set.find('div.' + extreme).slider('value');
 		var value = values[i];
 		slider_set.data(extreme, value[0]);
@@ -204,10 +204,10 @@ function filter_configure_values_text(values_by_unit, html) {
 	}
 	
 	html.push('<table summary="values">');
-	for (var i in columns[0]) {
+	for(var i in columns[0]) {
 		html.push('<tr>');
 		
-		for (c in columns) {
+		for(c in columns) {
 			var v = columns[c][i];
 			if(v == undefined) continue;
 			

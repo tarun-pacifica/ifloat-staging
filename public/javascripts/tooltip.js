@@ -1,3 +1,17 @@
+function tooltip_hide() {
+	$('#tooltip').css('display', 'none');
+}
+
+function tooltip_preload_backgrounds() {
+	var vert = ["top", "middle", "bottom"];
+	var horiz = ["left", "center", "right"];
+	for(v in vert) {
+		for(h in horiz) {
+			util_preload_image("/images/tooltip/backgrounds/" + vert[v] + "_" + horiz[h] + ".png");
+		}
+	}
+}
+
 function tooltip_show(event, text, relative_position) {
 	var bubble = $('#tooltip');
 	bubble.find('p').text(text);
@@ -9,10 +23,10 @@ function tooltip_show(event, text, relative_position) {
 	if(relative_position == 'above') {
 		left = position.left + ((target.width() - bubble.width()) / 2);
 		top = position.top - bubble.height() - 3;
-	} else if (relative_position == 'bottom') {
+	} else if(relative_position == 'bottom') {
 		left = position.left + ((target.width() - bubble.width()) / 2);
 		top = position.bottom + 3;
-	} else if (relative_position == 'left') {
+	} else if(relative_position == 'left') {
 		left = position.left - bubble.width() - 3;
 		top = position.top + ((target.height() - bubble.height()) / 2) + 2;
 	} else { // right
@@ -23,8 +37,4 @@ function tooltip_show(event, text, relative_position) {
 	bubble.css('left', left + 'px');
 	bubble.css('top', top + 'px');
 	bubble.css('display', 'block');
-}	
-
-function tooltip_hide() {
-	$('#tooltip').css('display', 'none');
 }

@@ -110,7 +110,7 @@ function pick_lists_update_handle(data) {
 	var partner_urls = partner_panel.data('partner_urls');
 	
 	var pick_lists = $('.pick_list');
-	if (!partner) pick_lists_clear(pick_lists);
+	if(!partner) pick_lists_clear(pick_lists);
 	
 	var product_id = $ifloat_body.product_id;
 	var product_group, product_pick_id;

@@ -26,17 +26,17 @@
 
 <script type="text/javascript">
 $(document).ready(function() {
-	var partner_panel = $("#partner_panel");
+	var partner_panel = $('#partner_panel');
 	partner_panel.data('partner_urls', <%= @partner_product_urls.to_json %>);
 	pick_lists_update();
 	
-	var partner_store = $("#partner_store");
+	var partner_store = $('#partner_store');
 	var find_bar_width = partner_panel.width() + 5;
-	function auto_size_partner_store() { partner_store.width($(window).width() - find_bar_width); }
+	function auto_size_partner_store() { partner_store.width($(window).width() - find_bar_width + 'px'); }
 	auto_size_partner_store();
 	$(window).resize(auto_size_partner_store);
-	partner_store.css("left", find_bar_width);
-	partner_store.attr("src", <%= @partner_url.inspect %>);
+	partner_store.css('left', find_bar_width + 'px');
+	partner_store.attr('src', <%= @partner_url.inspect %>);
 });
 </script>
 

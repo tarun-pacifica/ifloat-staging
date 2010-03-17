@@ -97,11 +97,11 @@
 </div>
 
 <script type="text/javascript" charset="utf-8">
+	$ifloat_body = {product_id: <%= @product.id %>};
+	
 	<% unless @related_products_by_rel_name.empty? %>
 	<% product_ids = @related_products_by_rel_name.values.map { |products| products.map { |product| product.id } }.flatten.uniq %>
 	prod_links_load(<%= product_ids.to_json %>);
-	$("#product_detail_relations div").each(function() { $(this).children(".product:gt(2)").hide(); });
+	$('#product_detail_relations div').each(function() { $(this).children('.product:gt(2)').hide(); });
 	<% end %>
-	
-	$ifloat_body = {product_id: <%= @product.id %>};
 </script>

@@ -2,7 +2,7 @@ function login_error(request) {
 	var login_register = $('#login_register');
 	login_register.find('form .errors').remove();
 	
-	var operation = login_register[0].operation;
+	var operation = login_register.data('operation');
 	var form = login_register.find(operation == 'register' ? 'form.register' : 'form.login');
 	form.append(request.responseText);
 }
@@ -19,7 +19,7 @@ function login_open(message) {
 }
 
 function login_operation(operation) {
-	$('#login_register')[0].operation = operation;
+	$('#login_register').data('operation', operation);
 }
 
 function login_reset() {
@@ -36,7 +36,7 @@ function login_submit(f) {
 		var input = inputs[i];
 		options.data[input.name] = input.value;
 	}
-	options.data.submit = ($('#login_register')[0].operation == 'reset' ? 'Reset Password' : '');
+	options.data.submit = ($('#login_register').data('operation') == 'reset' ? 'Reset Password' : '');
 	
 	$.ajax(options);
 	

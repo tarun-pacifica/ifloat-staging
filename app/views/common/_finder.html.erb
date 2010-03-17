@@ -16,18 +16,18 @@
 	<div class="right"></div>
 </div>
 
-<script type="text/javascript">
-	var spec_field = $("#finder_specification");
-	var tempter = "What can we find for you?";
+<script type="text/javascript" charset="utf-8">
+	var spec_field = $('#finder_specification');
+	var tempter = 'What can we find for you?';
 
 	function tempt() {
-		if (spec_field.val() == "") { spec_field.val(tempter); }
-		if (spec_field.val() == tempter) { spec_field.css("color", "grey"); }
+		if(spec_field.val() == '') { spec_field.val(tempter); }
+		if(spec_field.val() == tempter) { spec_field.css('color', 'grey'); }
 	}
   
 	function untempt() {
-		spec_field.css("color", "black");
-		if (spec_field.val() == tempter) { spec_field.val(""); }
+		spec_field.css('color', 'black');
+		if(spec_field.val() == tempter) { spec_field.val(''); }
 	}
 	
 	tempt();

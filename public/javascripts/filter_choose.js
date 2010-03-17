@@ -78,7 +78,7 @@ function filter_choose_load_handle(filters) {
 		filter_choose = $('#filter_choose');
 		filter_choose.dialog({autoOpen: false, modal: true, resizable: false, title: filter_choose_title()});
 	}
-	filter_choose.data('width.dialog', section_count_max * 78);
+	filter_choose.data('width.dialog', section_count_max * 78 + 'px');
 	filter_choose.html(html.join(' '));
 	filter_choose.find('.row:last').css("border-bottom", "none");
 }

@@ -50,7 +50,7 @@ class Product
       values_by_product_id.each do |product_id, values|
         value_info = prop_info.merge(:product_id => product_id)
         value_info[:comp_key] = comp_keys_by_value.values_at(*values).min
-        value_info[:values] = values.sort_by { |value| value.sequence_number }.map { |value| value.to_s }
+        value_info[:values] = values.sort_by { |value| value.sequence_number }.map { |value| value.to_s(range_sep) }
         value_info[:definitions] = value_info[:values].map { |v| definitions[v] } unless definitions.nil?
         
         (common ? common_values : diff_values) << value_info

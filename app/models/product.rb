@@ -39,13 +39,15 @@ class Product
     common_values, diff_values = [], []
     
     db_values.group_by { |value| value.property_definition_id }.each do |property_id, values|
-      comp_keys = comp_keys_by_value.values_at(*values)
+      values_by_product_id = values.group_by { |value| value.product_id }
+      
+      comp_keys = values_by_product_id.map { |product_id, values| comp_keys_by_value.values_at(*values).sort }
       common = (comp_keys.size == product_ids.size and comp_keys.uniq.size == 1)
       
       definitions = definitions_by_property_id[property_id]
       prop_info = Indexer.property_display_cache[property_id]
       
-      values.group_by { |value| value.product_id }.each do |product_id, values|
+      values_by_product_id.each do |product_id, values|
         value_info = prop_info.merge(:product_id => product_id)
         value_info[:comp_key] = comp_keys_by_value.values_at(*values).min
         value_info[:values] = values.sort_by { |value| value.sequence_number }.map { |value| value.to_s }

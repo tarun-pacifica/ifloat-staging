@@ -78,15 +78,17 @@ class CachedFinds < Application
     @common_values.map! { |info| info.keep(:section, :name, :icon_url, :values, :definitions) }
     
     diff_dad_values = diff_values.select { |info| info[:dad] }
-    @diff_property_ids = diff_dad_values.map { |info| info[:id] }.sort_by do |property_id|
+    @diff_property_ids = diff_dad_values.map { |info| info[:id] }.uniq.sort_by do |property_id|
       Indexer.property_display_cache[property_id][:seq_num]
     end
     
     diff_prop_ids_in_comp_order = @diff_property_ids.dup
-    primary_property_id = params[:sort_by].to_i
-    if diff_prop_ids_in_comp_order.include?(primary_property_id)
-      diff_prop_ids_in_comp_order.delete(primary_property_id)
-      diff_prop_ids_in_comp_order.unshift(primary_property_id)
+    @primary_property_id = params[:sort_by].to_i
+    if diff_prop_ids_in_comp_order.include?(@primary_property_id)
+      diff_prop_ids_in_comp_order.delete(@primary_property_id)
+      diff_prop_ids_in_comp_order.unshift(@primary_property_id)
+    else
+      @primary_property_id = diff_prop_ids_in_comp_order.first
     end
     
     @diff_values = diff_dad_values.group_by { |info| info[:product_id] }.sort_by do |product_id, values|

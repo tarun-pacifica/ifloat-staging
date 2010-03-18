@@ -8,13 +8,37 @@
 	<div class="sections"> </div>
 </div>
 
-<div id="compare_by_image_panel" class="panel major">
+<div id="compare_by_image" class="panel major">
 	<div class="title">
 		<h2> <a href="<%= resource(@find) %>">Back to <strong><%= @find.specification.inspect %></strong> results</a> </h2>
 	</div>
 	
 	<div class="body">
-		BODY
+		<div class="summary">
+			<%= product_image(@image) %>
+			<%= @title_parts.map { |part| "<h3>#{part.sort.join(" / ")}</h3>" } %>
+			<hr class="terminator"/>
+		</div>
+		
+		<table>
+			<tr class="icons">
+				<td class="empty"></td>
+				<% @diff_property_ids.each do |property_id| %>
+				<% prop_info = Indexer.property_display_cache[property_id] %>
+				<% primary = (property_id == @primary_property_id) %>
+				<% dom_class = ((primary and @diff_property_ids.size > 1) ? 'class="primary"' : '') %>
+				<% chevron = (primary ? "selected" : "unselected") %>
+				<td <%= dom_class %>>
+					<% unless primary %> <a href="?sort_by=<%= property_id %>"> <% end %>
+					<%= property_icon(prop_info[:icon_url], prop_info[:name], :above) %><br />
+					<img src="/images/compare_by_image/backgrounds/chevron_<%= chevron %>.png" />
+					<% unless primary %> </a> <% end %>
+				</td>
+				<% end %>
+			</tr>
+			
+
+		</table>
 	</div>
 </div>
 

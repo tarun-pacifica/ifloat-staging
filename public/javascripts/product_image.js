@@ -1,5 +1,5 @@
 function product_image_make(url, popup_url) {
-	if(popup_url) return '<img class="product" src="' + url + '" onmouseover="product_image_popup(event, \'' + popup_url + '\')" onmouseout="prod_image_unpopup(this)" />';
+	if(popup_url) return '<img class="product" src="' + url + '" onmouseover="product_image_popup(event, \'' + popup_url + '\')" onmouseout="product_image_unpopup()" />';
 	return '<img class="product" src="' + url + '" />';
 }
 
@@ -15,7 +15,7 @@ function product_image_popup(event, image_url) {
 	zoom.css('display', 'block');
 }
 
-function prod_image_unpopup(i) {
-	$(i).css('border-color', 'gray');
+function product_image_unpopup() {
+	$(this).css('border-color', 'gray');
 	$('#image_popup').css('display', 'none');
 }

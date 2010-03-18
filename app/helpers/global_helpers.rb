@@ -29,7 +29,7 @@ module Merb
     
     def product_image(image)
       url, popup_url = product_image_urls(image)
-      "<img class=\"product\" src=#{url.inspect} onmouseover=\"product_image_popup(event, '#{popup_url}')\" onmouseout=\"product_image_unpopup(this)\" />"
+      "<img class=\"product\" src=#{url.inspect} onmouseover=\"product_image_popup(event, '#{popup_url}')\" onmouseout=\"product_image_unpopup()\" />"
     end
     
     def product_image_urls(image)

@@ -1,0 +1,36 @@
+#compare_by_image .summary {
+	clear: both;
+	padding: 5px;
+}
+
+#compare_by_image .summary h3 {
+	font-size: 16px;
+	font-weight: normal;
+	margin: 0 0 10px 0;
+}
+
+#compare_by_image .summary img.product {
+	border: 1px solid gray;
+	float: left;
+	height: 100px;
+	margin-right: 10px;
+	width: 100px;
+}
+
+#compare_by_image table {
+	width: 100%;
+}
+
+#compare_by_image table tr.icons td {
+	background: #B9B9B9;
+	padding: 6px 0 3px 0;
+	text-align: center;
+}
+
+#compare_by_image table tr.icons td.empty {
+	background: white;
+}
+
+#compare_by_image table tr.icons td.primary {
+	background: #959494;
+}

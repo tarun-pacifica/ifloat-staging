@@ -67,7 +67,6 @@ class Products < Application
     common_values, diff_values = product.marshal_values(session.language, RANGE_SEPARATOR)
     
     @data_values = common_values.select { |info| info[:dad] }.sort_by { |info| info[:seq_num] }
-    p @data_values
     
     names = Set.new(%w(auto:title marketing:description marketing:feature_list marketing:summary reference:wikipedia))
     @body_values_by_name = {}

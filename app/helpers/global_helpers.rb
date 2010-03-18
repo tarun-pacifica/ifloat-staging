@@ -75,4 +75,5 @@ module Merb
         <img class="icon" src=#{url.inspect} onmouseover="tooltip_show(event, '#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
       HTML
     end
+  end
 end

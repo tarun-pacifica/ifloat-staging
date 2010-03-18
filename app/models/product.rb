@@ -126,7 +126,7 @@ class Product
   
   # TODO: spec
   def marshal_values(language_code, range_sep)
-    Product.marshal_values([id], language_code, range_sep)[id] || [[], []]
+    Product.marshal_values([id], language_code, range_sep)
   end
   
   # TODO: spec

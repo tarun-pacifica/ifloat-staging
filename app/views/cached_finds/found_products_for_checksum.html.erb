@@ -5,7 +5,9 @@
 <div id="prod_data_panel" class="panel minor">
 	<div class="title"> <h2>Common Product Data</h2> </div>
 	<div class="advert">Manufacturer Logo Here</div>
-	<div class="sections"> </div>
+	<div class="sections">
+		<%= product_data_panel(@common_values) %>
+	</div>
 </div>
 
 <div id="compare_by_image" class="panel major">
@@ -43,7 +45,7 @@
 				onclick="window.location = '<%= url(:product, :id => product_id) %>'"
 				onmouseover="util_highlight_row('on')" onmouseout="util_highlight_row('off')">
 				<% @diff_property_ids.each_with_index do |property_id, i| %>
-				<% tooltip_position = (i >= @diff_count / 2 ? "left" : "right") %>
+				<% tooltip_position = (i >= @diff_count / 2 ? :left : :right) %>
 				<td class="summary">
 					<%= product_value_summary(infos_by_property_id[property_id], tooltip_position) %>
 				</td>
@@ -55,7 +57,3 @@
 </div>
 
 </div>
-
-<script type="text/javascript" charset="utf-8">
-	prod_data_panel_load(<%= @common_values.to_json %>);
-</script>

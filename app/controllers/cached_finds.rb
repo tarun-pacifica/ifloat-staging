@@ -75,7 +75,6 @@ class CachedFinds < Application
     common_values, diff_values = Product.marshal_values(product_ids, session.language, RANGE_SEPARATOR)
     
     @common_values = common_values.select { |info| info[:dad] }.sort_by { |info| info[:seq_num] }
-    @common_values.map! { |info| info.keep(:section, :name, :icon_url, :values, :definitions) }
     
     diff_dad_values = diff_values.select { |info| info[:dad] }
     @diff_property_ids = diff_dad_values.map { |info| info[:id] }.uniq.sort_by do |property_id|

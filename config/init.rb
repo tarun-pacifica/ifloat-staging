@@ -27,6 +27,7 @@ end
 Merb::BootLoader.before_app_loads do
     
   # These methods are handy to have available in general
+  
   class Array
     def hash_by(method = nil) # TODO: check for opportunities to use this
       hash = {}
@@ -41,6 +42,14 @@ Merb::BootLoader.before_app_loads do
       counts = Hash.new(0)
       each { |item| counts[item] += 1 }
       counts.reject { |item, count| count < 2 }.keys
+    end
+  end
+  
+  class Hash
+    def keep(*keys)
+      hash = {}
+      keys.each { |key| hash[key] = self[key] if self.has_key?(key) }
+      hash
     end
   end
   

@@ -160,12 +160,12 @@ module Merb
       picks_by_product_id = picks.hash_by(:product_id)
       property_names = %w(marketing:brand reference:class)
       
-      Product.display_values(picks_by_product_id.keys, language, property_names).each do |product_id, values_by_property|
+      Product.values_by_property_name_by_product_id(picks_by_product_id.keys, language, property_names).each do |product_id, values_by_name|
         pick = picks_by_product_id[product_id]
         old_title = pick.title_parts
         
-        values_by_property.each do |property, values|
-          attribute = "cached_#{property.name.split(':').last}"
+        values_by_name.each do |name, values|
+          attribute = "cached_#{name.split(':').last}"
           pick.attribute_set(attribute, values.first.to_s)
         end
         pick.cached_brand ||= "Miscellaneous"

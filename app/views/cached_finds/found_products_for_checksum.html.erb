@@ -1,61 +1,25 @@
 <%= partial "common/header" %>
 
-<div id="product_detail">
+<div id="body">
 
-<div id="product_detail_data">
-	<div class="title">Common Product Data</div>
-	<table> <%= partial "products/property", :with => @common_properties %> </table>
+<div id="prod_data_panel" class="panel minor">
+	<div class="title"> <h2>Common Product Data</h2> </div>
+	<div class="advert">Manufacturer Logo Here</div>
+	<div class="sections"> </div>
 </div>
 
-<div id="product_detail_main">
-	<% unless @recent_find.nil? %>
-	<a href=<%= resource(@recent_find).inspect %>>
-		<div id="cached_find_report">		
-			Go back to all the products found for <span class="spec"><%= @recent_find.specification %></span>...
-		</div>
-	</a>
-	<% end %>
-	
-	<div id="product_detail_diff_summary">
-		<%= product_image(@image) %>
-		<% @title_parts.each do |part| %>
-		<h1><%= part.join(" / ") %></h1>
-		<% end %>
-		<hr />
+<div id="compare_by_image_panel" class="panel major">
+	<div class="title">
+		<h2> <a href="<%= resource(@find) %>">Back to <strong><%= @find.specification.inspect %></strong> results</a> </h2>
 	</div>
 	
-	<div id="product_detail_diff_products">
-		<table>
-			<tr>
-				<td></td>
-				<% @diff_properties.each do |property| %>
-				<% primary = (property == @primary_property) %>
-				<% dom_class = ((primary and @diff_properties.size > 1) ? 'class="primary"' : '') %>
-				<td <%= dom_class %>>
-					<% unless primary %> <a href="?sort_by=<%= property.id %>"> <% end %>
-					<%= property_icon(@icon_urls_by_property_id[property.id], @friendly_name_sections[property.id].last, :above) %>
-					<% unless primary %> </a> <% end %>
-				</td>
-				<% end %>
-			</tr>
-			
-			<% parity = :even %>
-			<% @sorted_product_ids.each do |product_id| %>
-			<% values_by_property = @values_by_property_by_product_id[product_id] %>
-			<tr class="<%= parity = (parity == :even ? :odd : :even) %>">
-				<td class="choose"><a href=<%= url(:product, :id => product_id).inspect %>>choose</a></td>
-				<% @diff_properties.each do |property| %>
-				<% dom_id = "product_#{product_id}_property_#{property.id}" %>
-				<td id=<%= dom_id.inspect %>>
-					<div class="summary">
-						<%= property_summary(dom_id, property.text?, values_by_property[property], @text_value_definitions[property.id]) %>
-					</div>
-				</td>
-				<% end %>
-			</tr>
-			<% end %>
-		</table>
+	<div class="body">
+		BODY
 	</div>
 </div>
 
 </div>
+
+<script type="text/javascript" charset="utf-8">
+	prod_data_panel_load(<%= @common_values.to_json %>);
+</script>

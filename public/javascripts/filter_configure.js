@@ -218,11 +218,7 @@ function filter_configure_values_text(values_by_unit, html) {
 			
 			var klass = ((v[1] && !v[2]) ? 'class="value irrelevant"' : 'class="value"');
 			var definition = v[3];
-			if(definition) {
-				definition = "'" + util_escape(definition, ['"', "'"]) + "'";
-				var position = (c >= columns.length / 2 ? "'left'" : "'right'");
-				value = '<span class="defined" onmouseover="tooltip_show(event, ' + definition + ', ' + position + ')" onmouseout="tooltip_hide()">' + value + '</span>';
-			}
+			value = util_defined(value, definition, c >= columns.length / 2 ? 'left' : 'right');
 			escaped_value = "'" + util_escape(v[0], ['"', "'"]) + "'";
 			html.push('<td ' + klass + ' onclick="filter_configure_values_text_handle_click(' + escaped_value + ')"> ' + value + ' </td>');
 		}

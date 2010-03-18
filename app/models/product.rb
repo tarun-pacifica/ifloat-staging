@@ -21,53 +21,47 @@ class Product
   has n, :values, :model => "PropertyValue"
   
   # TODO: spec
-  def self.display_values(product_ids, language_code, property_names = nil)
+  def self.marshal_values(product_ids, language_code, range_sep)  
     attributes = {:product_id => product_ids}
-    attributes[:property_definition_id] = PropertyDefinition.all(:name => property_names).map { |pd| pd.id } unless property_names.nil?
-    
     db_values = NumericPropertyValue.all(attributes).map
     db_values += TextPropertyValue.all(attributes.merge(:language_code => language_code))
     
-    if property_names.nil?
-      property_ids = db_values.map { |value| value.property_definition_id }
-      PropertyDefinition.all(:id => property_ids.uniq).map
+    product_ids = db_values.map { |value| value.product_id }.uniq
+    property_ids = db_values.map { |value| value.property_definition_id }.uniq
+    
+    definitions_by_property_id = PropertyValueDefinition.by_property_id(property_ids, language_code)
+    
+    comp_keys_by_value = {}
+    db_values.each do |value|
+      comp_keys_by_value[value] = value.comparison_key
     end
     
-    values_by_property_by_product_id = {}
-    db_values.sort_by { |value| value.sequence_number }.each do |value|
-      values_by_property = (values_by_property_by_product_id[value.product_id] ||= {})
-      # TODO: swap simpler code back in when SEL is working in DM again ()
-      # http://datamapper.lighthouseapp.com/projects/20609-datamapper/tickets/965
-      # values = (values_by_property[value.definition] ||= [])
-      values = (values_by_property[PropertyDefinition.get(value.property_definition_id)] ||= [])
-      values << value
-    end
-    values_by_property_by_product_id
-  end
-  
-  # TODO: spec
-  def self.partition_data_properties(values_by_property_by_product_id)
-    value_identities_by_property = {}
-    values_by_property_by_product_id.each do |product_id, values_by_property|
-      values_by_property.each do |property, values|
-        next unless property.display_as_data?
-        value_identity = values.map { |v| v.comparison_key }.sort
-        (value_identities_by_property[property] ||= []).push(value_identity)
+    common_values, diff_values = [], []
+    
+    db_values.group_by { |value| value.property_definition_id }.each do |property_id, values|
+      comp_keys = comp_keys_by_value.values_at(*values)
+      common = (comp_keys.size == product_ids.size and comp_keys.uniq.size == 1)
+      
+      definitions = definitions_by_property_id[property_id]
+      prop_info = Indexer.property_display_cache[property_id]
+      
+      values.group_by { |value| value.product_id }.each do |product_id, values|
+        value_info = prop_info.merge(:product_id => product_id)
+        value_info[:comp_key] = comp_keys_by_value.values_at(*values).min
+        value_info[:values] = values.sort_by { |value| value.sequence_number }.map { |value| value.to_s }
+        value_info[:definitions] = value_info[:values].map { |v| definitions[v] } unless definitions.nil?
+        
+        (common ? common_values : diff_values) << value_info
+        break if common
       end
     end
     
-    product_count = values_by_property_by_product_id.size
-    value_identities_by_property.keys.partition do |property|
-      identities = value_identities_by_property[property]
-      identities.size == product_count and identities.uniq.size == 1
-    end.map do |prop_segment|
-      prop_segment.sort_by { |p| p.sequence_number }
-    end
+    [common_values, diff_values]
   end
   
   # TODO: spec, implement supply country filtering support when required (retail:country)
   # TODO: may be able to factor out the mapping bit to ProductMapping
-  def self.prices(product_ids, currency)
+  def self.prices_by_url_by_product_id(product_ids, currency)
     query =<<-EOS
       SELECT DISTINCT pm.product_id, f.primary_url, fp.price
       FROM product_mappings pm
@@ -77,16 +71,16 @@ class Product
       WHERE pm.product_id IN ?
     EOS
     
-    prices_by_url_by_product_id = {}
+    prices_by_url_by_prod_id = {}
     repository(:default).adapter.select(query, product_ids).each do |record|
-      prices_by_url = (prices_by_url_by_product_id[record.product_id] ||= {})
+      prices_by_url = (prices_by_url_by_prod_id[record.product_id] ||= {})
       prices_by_url[record.primary_url] = record.price
     end
-    prices_by_url_by_product_id
+    prices_by_url_by_prod_id
   end
   
   # TODO: spec
-  def self.primary_images(product_ids)
+  def self.primary_images_by_product_id(product_ids)
     checksums_by_product_id = {}
     Indexer.image_checksums_for_product_ids(product_ids).each do |checksum, prod_ids|
       prod_ids.each do |prod_id|
@@ -96,25 +90,50 @@ class Product
     
     assets_by_checksum = Asset.all(:checksum => checksums_by_product_id.values).hash_by(:checksum)
     
-    assets_by_product_id = {}
+    assets_by_prod_id = {}
     checksums_by_product_id.each do |prod_id, checksum|
-      assets_by_product_id[prod_id] = assets_by_checksum[checksum]
+      assets_by_prod_id[prod_id] = assets_by_checksum[checksum]
     end
-    assets_by_product_id
+    assets_by_prod_id
   end
   
   # TODO: spec
-  def display_values(language_code, property_names = nil)
-    Product.display_values([id], language_code, property_names)[id]
+  def self.values_by_property_name_by_product_id(product_ids, language_code, names)
+    names_by_property_id = {}
+    Indexer.property_display_cache.each do |property_id, info|
+      name = info[:raw_name]
+      names_by_property_id[property_id] = name if names.include?(name)
+    end
+    
+    attributes = {:product_id => product_ids, :property_definition_id => names_by_property_id.keys }
+    db_values = NumericPropertyValue.all(attributes).map
+    db_values += TextPropertyValue.all(attributes.merge(:language_code => language_code))
+    
+    values_by_prop_name_by_prod_id = {}
+    db_values.group_by { |value| value.product.id }.each do |product_id, values|
+      values_by_prop_name_by_prod_id[product_id] =
+        values.group_by { |value| names_by_property_id[value.property_definition_id] }
+    end
+    values_by_prop_name_by_prod_id
   end
   
   # TODO: spec
-  def prices(currency)
-    Product.prices([id], currency)[id] || {}
+  def assets_by_role 
+    Attachment.product_role_assets([id])[id] || {}
   end
   
   # TODO: spec
-  def role_assets
-    Attachment.product_role_assets([id])[id]
+  def marshal_values(language_code)
+    Product.marshal_values([id], language_code)[id] || {}
+  end
+  
+  # TODO: spec
+  def prices_by_url(currency)
+    Product.prices_by_url_by_product_id([id], currency)[id] || {}
+  end
+  
+  # TODO: spec
+  def values_by_property_name(language_code, names)
+    Product.values_by_property_name_by_product_id([id], language_code, property_names)[id] || {}
   end
 end

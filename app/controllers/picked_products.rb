@@ -58,7 +58,7 @@ class PickedProducts < Application
     @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)
     @text_value_definitions = PropertyDefinition.definitions_by_property_id(properties, session.language)
     
-    @images_by_product_id = Product.primary_images(@product_ids)
+    @images_by_product_id = Product.primary_images_by_product_id(@product_ids)
     
     render
   end
@@ -74,7 +74,7 @@ class PickedProducts < Application
     
     picks = session.picked_products
     product_ids = picks.map { |pick| pick.product_id }
-    images_by_product_id = Product.primary_images(product_ids)    
+    images_by_product_id = Product.primary_images_by_product_id(product_ids)    
     
     picks_by_group = {}
     picks.each do |pick|

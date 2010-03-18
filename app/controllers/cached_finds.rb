@@ -62,50 +62,45 @@ class CachedFinds < Application
   end
   
   def found_products_for_checksum(id, image_checksum)
-    find = session.ensure_cached_find(id.to_i)
-    find.ensure_valid
+    @find = session.ensure_cached_find(id.to_i)
+    @find.ensure_valid
     
-    product_ids = find.filtered_product_ids_by_image_checksum[image_checksum]
+    product_ids = @find.filtered_product_ids_by_image_checksum[image_checksum]
     return redirect(resource(find)) if product_ids.nil? or product_ids.empty?
     return redirect(url(:product, :id => product_ids.first)) if product_ids.size == 1
     
     @image = Asset.first(:checksum => image_checksum)
     return redirect(resource(find)) if @image.nil?
     
-    @values_by_property_by_product_id = Product.display_values(product_ids, session.language)    
-    @common_properties, @diff_properties = Product.partition_data_properties(@values_by_property_by_product_id)
+    common_values, diff_values = Product.marshal_values(product_ids, session.language, RANGE_SEPARATOR)
     
+    @common_values = common_values.select { |info| info[:dad] }.sort_by { |info| info[:seq_num] }
+    @common_values.map! { |info| info.keep(:section, :name, :icon_url, :values, :definitions) }
+    
+    diff_dad_values = diff_values.select { |info| info[:dad] }
+    @diff_property_ids = diff_dad_values.map { |info| info[:id] }.sort_by do |property_id|
+      Indexer.property_display_cache[property_id][:seq_num]
+    end
+    
+    diff_prop_ids_in_comp_order = @diff_property_ids.dup
     primary_property_id = params[:sort_by].to_i
-    properties_in_comparison_order = @diff_properties.sort_by do |p|
-      p.id == primary_property_id ? -1 : p.sequence_number
+    if diff_prop_ids_in_comp_order.include?(primary_property_id)
+      diff_prop_ids_in_comp_order.delete(primary_property_id)
+      diff_prop_ids_in_comp_order.unshift(primary_property_id)
     end
-    @primary_property = properties_in_comparison_order.first
     
-    @sorted_product_ids = product_ids.sort_by do |product_id|
-      values_by_property = @values_by_property_by_product_id[product_id]
-      properties_in_comparison_order.map do |property|
-        values = values_by_property[property]
-        values.nil? ? [] : values.map { |v| v.comparison_key }.min
+    @diff_values = diff_dad_values.group_by { |info| info[:product_id] }.sort_by do |product_id, values|
+      values.group_by { |info| info[:id] }.values_at(*diff_prop_ids_in_comp_order).flatten.map do |info|
+        info.nil? ? [] : info[:comp_key]
       end
     end
     
-    @values_by_property = {}
-    @values_by_property_by_product_id.values.first.each do |property, values|
-      @values_by_property[property] = values if @common_properties.include?(property)
+    title_property_names = %w(marketing:brand marketing:range marketing:model)
+    @title_parts = Array.new(title_property_names.size) { Set.new }
+    (common_values + diff_values).each do |info|
+      i = title_property_names.index(info[:raw_name])
+      @title_parts[i] += info[:values] unless i.nil?
     end
-    
-    properties = (@common_properties + @diff_properties)
-    @friendly_name_sections = PropertyDefinition.friendly_name_sections(properties, session.language)
-    @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)
-    @text_value_definitions = PropertyDefinition.definitions_by_property_id(properties, session.language)
-    
-    properties_by_name = properties.hash_by(:name)
-    title_properties = properties_by_name.values_at("marketing:brand", "marketing:range", "marketing:model")
-    @title_parts = @values_by_property_by_product_id.map do |product_id, values_by_property|
-      values_by_property.values_at(*title_properties).compact.map do |values_for_property|
-        values_for_property.map { |value| value.to_s }
-      end
-    end.transpose.map { |set| set.flatten.uniq }
     
     render
   end

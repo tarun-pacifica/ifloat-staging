@@ -40,25 +40,6 @@ class PropertyDefinition
   has n, :translations
   
   # TODO: spec
-  def self.definitions_by_property_id(properties, language_code)
-    return {} if properties.empty?
-    
-    query =<<-EOS
-      SELECT pd.id, pvd.value, pvd.definition
-      FROM property_value_definitions pvd
-        INNER JOIN property_types pt ON pvd.property_type_id = pt.id
-        INNER JOIN property_definitions pd ON pt.id = pd.property_type_id
-      WHERE pvd.language_code = ?
-        AND pd.id IN ?
-    EOS
-    
-    dbpi = {}
-    repository.adapter.select(query, language_code, properties.map { |p| p.id }).each do |record|
-      (dbpi[record.id] ||= {})[record.value] = record.definition
-    end
-    dbpi
-  end
-  
   def self.friendly_name_sections(properties, language_code)
     property_ids = properties.map { |property| property.id }
     

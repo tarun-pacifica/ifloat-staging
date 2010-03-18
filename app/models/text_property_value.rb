@@ -27,8 +27,4 @@ class TextPropertyValue < PropertyValue
   def to_s # TODO: spec
     text_value
   end
-  
-  def value
-    text_value
-  end
 end

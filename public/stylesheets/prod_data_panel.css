@@ -1,0 +1,26 @@
+#prod_data_panel .advert {
+	border-left: 1px solid silver;
+	text-align: center;
+}
+
+#prod_data_panel .sections .property {
+	margin-left: 5px;
+	width: 240px;
+}
+
+#prod_data_panel .sections .property img.property_icon {
+	margin-top: 2px;
+}
+
+#prod_data_panel .sections .property td {
+	padding: 0;
+}
+
+#prod_data_panel .sections .property td.summary {
+	padding: 0 5px;
+	width: 100%;
+}
+
+#prod_data_panel .sections hr.terminator {
+	height: 5px;
+}

@@ -98,7 +98,7 @@ class CachedFind
     prop_info = Indexer.property_display_cache[property_id]
     return nil if prop_info.nil?
     
-    definitions = PropertyValueDefinition.definitions_for_property_id(property_id, language_code)
+    definitions = (PropertyValueDefinition.by_property_id([property_id], language_code)[property_id] || {})
     filter = (filters[property_id] || {:include_unknown => (property_id == Indexer.class_property_id ? nil : false)})
     type = prop_info[:type]
     value_class = PropertyType.value_class(type)

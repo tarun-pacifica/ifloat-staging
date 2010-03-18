@@ -1,3 +1,19 @@
+function util_defined(value, definition, position) {
+	if(definition == undefined) return value;
+	if(position == undefined) position = 'right';
+	
+	return '<span class="defined" onmouseover="tooltip_show(event, \'' + util_escape(definition, ['"', "'"]) + '\', \'' + position + '\')" onmouseout="tooltip_hide()">' + value + '</span>';
+}
+
+function util_escape(string, characters) {
+	var s = string;
+	for(i in characters) {
+		var c = characters[i];
+		s = s.replace(c, '\\' + c);
+	}
+	return s;
+}
+
 function util_group_by(array, property) {
 	var grouped = {};
 	for(i in array) {
@@ -17,13 +33,4 @@ function util_hash_from_array(keys, value) {
 
 function util_preload_image(url) {
 	(new Image()).src = url;
-}
-
-function util_escape(string, characters) {
-	var s = string;
-	for(i in characters) {
-		var c = characters[i];
-		s = s.replace(c, '\\' + c);
-	}
-	return s;
 }

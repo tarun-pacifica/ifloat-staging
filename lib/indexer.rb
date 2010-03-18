@@ -233,11 +233,14 @@ module Indexer
       section, name = friendly_names[property.id]
       cache[property.id] = {
         :id       => property.id,
-        :seq_num  => property.sequence_number,
         :section  => section,
         :name     => name,
         :icon_url => icon_urls[property.id],
         :type     => property.property_type.core_type,
+        # internal
+        :seq_num  => property.sequence_number,
+        :dad      => property.display_as_data?,
+        :raw_name => property.name
       }
     end
     cache

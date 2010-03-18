@@ -90,7 +90,7 @@
 }
 
 #filter_configure table td.irrelevant {
-	color: #404040;
+	color: silver;
 	text-decoration: line-through;
 }
 

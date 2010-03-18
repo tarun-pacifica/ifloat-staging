@@ -14,13 +14,22 @@ module Merb
       [prefix, "%0.2f" % amount, postfix].join
     end
     
-    def product_data_panel(properties)
+    def product_data_panel(values)
       html = []
       
-      properties.group_by { |info| info[:section] }.each do |section, infos|
+      seq_nums_by_section = {}
+      values_by_section = {}
+      values.each do |info|
+        next unless info[:dad]
+        section = info[:section]
+        seq_nums_by_section[section] = info[:seq_num]
+        (values_by_section[section] ||= []).push(info)
+      end
+      
+      seq_nums_by_section.keys.sort_by { |section| seq_nums_by_section[section] }.each do |section|
         html << "<h3>#{section}</h3>"
 
-        infos.each do |info|
+        values_by_section[section].each do |info|
           html << <<-HTML
             <table class="property">
               <tr>

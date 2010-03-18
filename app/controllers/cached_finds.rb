@@ -70,9 +70,7 @@ class CachedFinds < Application
     @image = Asset.first(:checksum => image_checksum)
     return redirect(resource(find)) if @image.nil?
     
-    common_values, diff_values = Product.marshal_values(product_ids, session.language, RANGE_SEPARATOR)
-    
-    @common_values = common_values.select { |info| info[:dad] }.sort_by { |info| info[:seq_num] }
+    @common_values, diff_values = Product.marshal_values(product_ids, session.language, RANGE_SEPARATOR)
     
     diff_dad_values = diff_values.select { |info| info[:dad] }
     @diff_property_ids = diff_dad_values.map { |info| info[:id] }.uniq.sort_by do |property_id|
@@ -97,7 +95,7 @@ class CachedFinds < Application
     
     title_property_names = %w(marketing:brand marketing:range marketing:model)
     @title_parts = Array.new(title_property_names.size) { Set.new }
-    (common_values + diff_values).each do |info|
+    (@common_values + diff_values).each do |info|
       i = title_property_names.index(info[:raw_name])
       @title_parts[i] += info[:values] unless i.nil?
     end

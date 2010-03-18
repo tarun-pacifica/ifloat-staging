@@ -64,13 +64,11 @@ class Products < Application
   end
   
   def gather_property_values(product)
-    common_values, diff_values = product.marshal_values(session.language, RANGE_SEPARATOR)
-    
-    @data_values = common_values.select { |info| info[:dad] }.sort_by { |info| info[:seq_num] }
+    @common_values, diff_values = product.marshal_values(session.language, RANGE_SEPARATOR)
     
     names = Set.new(%w(auto:title marketing:description marketing:feature_list marketing:summary reference:wikipedia))
     @body_values_by_name = {}
-    common_values.each do |info|
+    @common_values.each do |info|
       raw_name = info[:raw_name]
       @body_values_by_name[raw_name] = info[:values] if names.include?(raw_name)
     end

@@ -47,6 +47,29 @@ module Merb
       EOS
     end
     
+    def product_value_summary(info, tooltip_position = "right")
+      return nil if info.nil?
+      
+      definitions = (info[:defintions] || [])
+      
+      values = []
+      info[:values].each_with_index do |value, i|
+        definition = definitions[i]
+        
+        if definition.nil?
+          values << value
+          next
+        end
+        
+        definition.gsub!(/(['"])/) { '\\' + $1 }
+        values << <<-HTML
+    	  <span class="defined" onmouseover="tooltip_show(event, '#{definition}', '#{position}')" onmouseout="tooltip_hide()">#{value}</span>
+    	  HTML
+      end
+      
+      values.join("<br />")
+    end
+    
     def property_icon(url, tooltip, position)
       "<img class=\"icon\" src=#{url.inspect} onmouseover=\"tooltip_show(event, '#{tooltip}', '#{position}')\" onmouseout=\"tooltip_hide()\" />"
     end
@@ -60,25 +83,6 @@ module Merb
       lines.join("\n")
     end
     
-    def property_summary(dom_id, text, values, definitions)
-      return nil if values.nil?
-      
-      return values.map { |v| defined_value(v, definitions[v.to_s]) }.join("<br />") if text
-			
-		  script_lines = ['<script type="text/javascript" charset="utf-8">']
-		  script_lines << "var summaries = [];"
-		  
-		  values_by_unit = values.group_by { |value| value.unit }
-      values_by_unit.keys.sort_by { |unit| unit.to_s }.each do |unit|
-        script_lines += values_by_unit[unit].map { |value| "summaries.push(#{number_format_js(value)});" }
-      end
-		  
-		  script_lines << "$(\"##{dom_id}\").find(\".summary\").html(summaries.join(\" <br /> \"));"
-			script_lines << "</script>"
-			
-      script_lines.join("\n")
-    end
-
     def title_js(dom_id, parts)
       js_parts = []
       

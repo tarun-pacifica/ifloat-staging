@@ -81,6 +81,7 @@ class CachedFinds < Application
     @diff_property_ids = diff_dad_values.map { |info| info[:id] }.uniq.sort_by do |property_id|
       Indexer.property_display_cache[property_id][:seq_num]
     end
+    @diff_count = @diff_property_ids.size
     
     diff_prop_ids_in_comp_order = @diff_property_ids.dup
     @primary_property_id = params[:sort_by].to_i

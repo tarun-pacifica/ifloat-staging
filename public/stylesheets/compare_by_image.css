@@ -21,6 +21,10 @@
 	width: 100%;
 }
 
+#compare_by_image table tr.even td {
+	background: #F3F3F3;
+}
+
 #compare_by_image table tr.icons td {
 	background: #B9B9B9;
 	padding: 6px 0 3px 0;
@@ -33,4 +37,13 @@
 
 #compare_by_image table tr.icons td.primary {
 	background: #959494;
+}
+
+#compare_by_image table tr.odd td {
+	background:  #DCE9F7;
+}
+
+#compare_by_image table tr.values td {
+	cursor: pointer;
+	vertical-align: top;
 }

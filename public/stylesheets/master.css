@@ -241,41 +241,6 @@
 	border-bottom: 1px solid gray;
 }
 
-/* Product Detail Diff */
-
-#product_detail_diff_products a {
-	color: white;
-	text-decoration: none;
-}
-
-#product_detail_diff_products table {
-	margin-top: 10px;
-	width: 100%;
-}
-
-#product_detail_diff_products td {
-	padding: 5px;
-	vertical-align: top;
-}
-
-#product_detail_diff_products .even td {
-	background: #F3F3F3;
-}
-
-#product_detail_diff_products .odd td {
-	background: #D2EFFF;
-}
-
-#product_detail_diff_products td.choose {
-	background: url(/images/product_differentiate/backgrounds/panel_header.png) repeat-x;
-	width: 50px;
-	text-align: center;
-}
-
-#product_detail_diff_products td.primary {
-	border-bottom: 5px #FCBB1A solid;
-}
-
 /* Product Detail Main */
 
 #product_detail_main {

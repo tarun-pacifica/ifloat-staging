@@ -22,7 +22,6 @@
 		
 		<table>
 			<tr class="icons">
-				<td class="empty"></td>
 				<% @diff_property_ids.each do |property_id| %>
 				<% prop_info = Indexer.property_display_cache[property_id] %>
 				<% primary = (property_id == @primary_property_id) %>
@@ -37,7 +36,20 @@
 				<% end %>
 			</tr>
 			
-
+			<% parity = :even %>
+			<% @diff_values.each do |product_id, infos| %>
+			<% infos_by_property_id = infos.hash_by { |info| info[:id] } %>
+			<tr class="values <%= parity = (parity == :even ? :odd : :even) %>"
+				onclick="window.location = '<%= url(:product, :id => product_id) %>'"
+				onmouseover="util_highlight_row('on')" onmouseout="util_highlight_row('off')">
+				<% @diff_property_ids.each_with_index do |property_id, i| %>
+				<% tooltip_position = (i >= @diff_count / 2 ? "left" : "right") %>
+				<td class="summary">
+					<%= product_value_summary(infos_by_property_id[property_id], tooltip_position) %>
+				</td>
+				<% end %>
+			</tr>
+			<% end %>
 		</table>
 	</div>
 </div>

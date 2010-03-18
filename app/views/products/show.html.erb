@@ -1,107 +1,29 @@
 <%= partial "common/header" %>
 
-<div id="product_detail">
+<div id="body">
 
-<div id="product_detail_data">
-	<div class="title">Product Data</div>
-	<table> <%= partial :property, :with => @data_properties %> </table>
+<div id="prod_data_panel" class="panel minor">
+	<div class="title"> <h2>Product Data</h2> </div>
+	<div class="advert">Manufacturer Logo Here</div>
+	<div class="sections">
+		<%= product_data_panel(@data_values) %>
+	</div>
 </div>
 
-<div id="product_detail_main">
-	<% unless @recent_find.nil? %>
-	<a href=<%= resource(@recent_find).inspect %>>
-		<div id="cached_find_report">		
-			Go back to the products found for <span class="spec"><%= @recent_find.specification %></span>...
-		</div>
-	</a>
-	<% end %>
-	
-	<div id="product_detail_assets">
-		<img class="main" src=<%= @image_urls.first.inspect %> />
-		
-		<div class="thumbs">
-			<% @image_urls.each do |url|%>
-			<img src=<%= url.inspect %> onmouseover="prod_detail_select_image(event)" />
-			<% end %>
-		</div>
-		
-		<div class="asset_links">
-			<% @asset_urls_with_names.each do |url, name| %>
-			<a href=<%= url.inspect %>><%= name %></a>
-			<% end %>
-			<% unless @asset_urls_with_names.empty? %> <hr /> <% end %>
-			
-			<table class="prices">
-				<% @prices_by_url.each do |url, amount| %>
-					<tr>
-						<td> <img src="/images/partner/facilities/<%= url %>.png" alt=<%= url.inspect %> /> </td>
-						<td class="price"> <%= money(amount) %> </td>
-					</tr>
-				<% end %>
-				
-				<% if @prices_by_url.empty? %>
-					<tr> <td>None of our partners currently have this item in stock</td> </tr>
-				<% end %>
-			</table>
-			
-			<div id="pick_buttons"> </div>
-		</div>
-		
-		<hr />
-	</div>
-	
-	<div id="product_detail_words">
-		<%= product_titles(@non_data_values["auto:title"]) %>
-		<hr />
-		
-		<% summary, features, description = @non_data_values.values_at("marketing:summary", "marketing:feature_list", "marketing:description").map { |values| (values || []).first.to_s } %>
-		
-		<% unless summary.blank? %>
-		<h3>Summary</h3>
-		<p><%= summary %></p>
-		<% end %>
-		
-		<% unless features.blank? %>
-		<h3>Features</h3>
-		<ul>
-			<% features.split("\n").each do |feature| %>
-			<li><%= feature %></li>
-			<% end %>
-		</ul>
-		<% end %>
-	
-		<% unless description.blank? %>
-		<h3>Description</h3>
-		<% description.split("\n").each do |paragraph| %>
-		<p><%= paragraph %></p>
-		<% end %>
+<div id="product_detail" class="panel major">
+	<div class="title">
+		<% if @recent_find.nil? %>
+		<h2></h2>
+		<% else %>
+		<h2 class="button">
+			<a href="<%= resource(@recent_find) %>">Back to <strong><%= @recent_find.specification.inspect %></strong> results</a>
+		</h2>
 		<% end %>
 	</div>
 	
-	<% unless @related_products_by_rel_name.empty? %>
-	<div id="product_detail_relations">
-		<h1>This product...</h1>
-		<% @related_products_by_rel_name.each do |name, products| %>
-		<div>
-			<h2><%= name.tr("_", " ") %>...</h2>
-			<%= products.map { |prod| "<div class=\"product\" id=\"prod_#{prod.id}\"></div>" }.join %>
-			<% if products.size > 3 %>
-			<div class="more">
-				<div onclick="prod_detail_more_relations(this)"><%= products.size - 3 %> More Results</div>
-			</div>
-			<% end %>
-		</div>
-		<% end %>
-	</div>	
-	<% end %>
+	<div class="body">
+
+	</div>
 </div>
 
-<script type="text/javascript" charset="utf-8">
-	$ifloat_body = {product_id: <%= @product.id %>};
-	
-	<% unless @related_products_by_rel_name.empty? %>
-	<% product_ids = @related_products_by_rel_name.values.map { |products| products.map { |product| product.id } }.flatten.uniq %>
-	prod_links_load(<%= product_ids.to_json %>);
-	$('#product_detail_relations div').each(function() { $(this).children('.product:gt(2)').hide(); });
-	<% end %>
-</script>
+</div>

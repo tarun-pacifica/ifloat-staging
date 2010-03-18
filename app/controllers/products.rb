@@ -27,8 +27,7 @@ class Products < Application
     gather_property_values(@product)
     gather_assets(@product)
     
-    @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(@data_properties)
-    @prices_by_url = @product.prices(session.currency)
+    @prices_by_url = @product.prices_by_url(session.currency)
     
     @related_products_by_rel_name = ProductRelationship.related_products(@product)
     @related_products_by_rel_name.delete_if { |name, products| products.empty? }
@@ -40,7 +39,7 @@ class Products < Application
   private
   
   def gather_assets(product)
-    assets_by_role = product.role_assets
+    assets_by_role = product.assets_by_role
     
     @image_urls = (assets_by_role.delete("image") || []).map { |asset| asset.url }
     @image_urls << "/images/products/no_image.png" if @image_urls.empty?
@@ -65,22 +64,16 @@ class Products < Application
   end
   
   def gather_property_values(product)
-    @values_by_property = product.display_values(session.language)
+    common_values, diff_values = product.marshal_values(session.language, RANGE_SEPARATOR)
     
-    @data_properties = []
-    @non_data_values = {}
-    non_data_property_names = ["auto:title", "marketing:description", "marketing:feature_list", "marketing:summary", "reference:wikipedia"]
+    @data_values = common_values.select { |info| info[:dad] }.sort_by { |info| info[:seq_num] }
+    p @data_values
     
-    @values_by_property.each do |property, values|
-      if non_data_property_names.include?(property.name)
-        @non_data_values[property.name] = values
-      elsif property.display_as_data?
-        @data_properties << property
-      end
+    names = Set.new(%w(auto:title marketing:description marketing:feature_list marketing:summary reference:wikipedia))
+    @body_values_by_name = {}
+    common_values.each do |info|
+      raw_name = info[:raw_name]
+      @body_values_by_name[raw_name] = info[:values] if names.include?(raw_name)
     end
-    
-    @data_properties = @data_properties.sort_by { |property| property.sequence_number }
-    @friendly_name_sections = PropertyDefinition.friendly_name_sections(@data_properties, session.language)
-    @text_value_definitions = PropertyDefinition.definitions_by_property_id(@data_properties, session.language)
   end
 end

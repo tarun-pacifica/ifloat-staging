@@ -1,6 +1,4 @@
-class CachedFinds < Application
-  RANGE_SEPARATOR = " <em>to</em> "
-  
+class CachedFinds < Application  
   def create(language_code, specification)
     find = session.add_cached_find(CachedFind.new(:language_code => language_code, :specification => specification))
     

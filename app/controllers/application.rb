@@ -1,4 +1,6 @@
 class Application < Merb::Controller
+  RANGE_SEPARATOR = " <em>to</em> "
+  
   before :ensure_authenticated, :exclude => [:login]
   
   def self._filter_params(params)

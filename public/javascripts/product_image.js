@@ -16,6 +16,6 @@ function product_image_popup(event, image_url) {
 }
 
 function product_image_unpopup() {
-	$(this).css('border-color', 'gray');
+	$(event.target).css('border-color', 'gray');
 	$('#image_popup').css('display', 'none');
 }

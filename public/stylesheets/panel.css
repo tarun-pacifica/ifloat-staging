@@ -15,7 +15,22 @@
 
 .major .title h2 {
 	background: url(/images/panel/backgrounds/title_right.png) top right no-repeat;
-	/* TODO: set width */
+}
+
+.major .title h2.button {
+/*	padding: 0;*/
+}
+
+.major .title h2.button a {
+	background: silver;
+/*	background: url(/images/panel/backgrounds/title_button.png) repeat-x;*/
+	color: #404040;
+/*	display: block;*/
+/*	float: left;*/
+/*	height: 27px;*/
+/*	padding: 8px 0 0 10px;*/
+	padding: 2px;
+	text-decoration: none;
 }
 
 .minor {

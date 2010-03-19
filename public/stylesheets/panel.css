@@ -22,8 +22,8 @@
 }
 
 .major .title h2.button a {
-	background: silver;
 /*	background: url(/images/panel/backgrounds/title_button.png) repeat-x;*/
+	border-bottom: 1px dashed #404040;
 	color: #404040;
 /*	display: block;*/
 /*	float: left;*/
@@ -31,6 +31,10 @@
 /*	padding: 8px 0 0 10px;*/
 	padding: 2px;
 	text-decoration: none;
+}
+
+.major .title h2.button a:hover {
+	border-bottom: 1px solid #404040;
 }
 
 .minor {

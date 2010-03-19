@@ -43,7 +43,6 @@ class CachedFinds < Application
     render
   end
   
-  
   def create(language_code, specification)
     find = session.add_cached_find(CachedFind.new(:language_code => language_code, :specification => specification))
     
@@ -67,7 +66,7 @@ class CachedFinds < Application
     find = session.ensure_cached_find(id.to_i)
     result = (params["method"] == "delete" ? find.unfilter!(property_id.to_i) : find.filter!(property_id.to_i, params))
     return nil.to_json unless result
-    result = [find.filters_used(RANGE_SEPARATOR), find.filters_unused, images(id, 36, true)]
+    result = [find.filters_used(RANGE_SEPARATOR), find.filters_unused, gather_images(find)]
     (find.ensure_valid.empty? ? result : nil).to_json
   end
   
@@ -79,29 +78,11 @@ class CachedFinds < Application
     (find.ensure_valid.empty? ? result : nil).to_json
   end
   
-  # TODO: get rid of 'raw' hack and do a proper refactoring and ensure this method runs the ensure_valid logic
-  def images(id, limit, raw = false)
+  def images(id)
     provides :js
-    
     find = session.ensure_cached_find(id.to_i)
-    
-    total = 0
-    totals_by_checksum = {}
-    find.filtered_product_ids_by_image_checksum.each do |checksum, product_ids|
-      total += (totals_by_checksum[checksum] = product_ids.size)
-    end
-    
-    limit = [limit.to_i, 1].max
-    checksums = totals_by_checksum.keys[0, limit]
-    assets_by_checksum = {}
-    Asset.all(:checksum => checksums).each { |a| assets_by_checksum[a.checksum] = a }
-    
-    results = checksums.map do |checksum|
-      asset = assets_by_checksum[checksum]
-      [checksum, totals_by_checksum[checksum], asset.url(:tiny), asset.url(:small)]
-    end.unshift(total)
-    
-    (raw ? results : results.to_json)
+    result = gather_images(find)
+    (find.ensure_valid.empty? ? result : nil).to_json # TODO: react to nil in JS
   end
   
   def new
@@ -112,7 +93,7 @@ class CachedFinds < Application
   def reset(id)
     find = session.ensure_cached_find(id.to_i)
     return nil.to_json unless find.unfilter_all!
-    result = [find.filters_used(RANGE_SEPARATOR), find.filters_unused, images(id, 36, true)]
+    result = [find.filters_used(RANGE_SEPARATOR), find.filters_unused, gather_images(find)]
     (find.ensure_valid.empty? ? result : nil).to_json
   end
   
@@ -132,5 +113,25 @@ class CachedFinds < Application
     @find.save
     
     render
+  end
+  
+  
+  private
+  
+  def gather_images(find)
+    total = 0
+    totals_by_checksum = {}
+    find.filtered_product_ids_by_image_checksum.each do |checksum, product_ids|
+      total += (totals_by_checksum[checksum] = product_ids.size)
+    end
+    
+    checksums = totals_by_checksum.keys[0, 36]
+    assets_by_checksum = {}
+    Asset.all(:checksum => checksums).each { |a| assets_by_checksum[a.checksum] = a }
+    
+    checksums.map do |checksum|
+      asset = assets_by_checksum[checksum]
+      [checksum, totals_by_checksum[checksum], asset.url(:tiny), asset.url(:small)]
+    end.unshift(total)
   end
 end

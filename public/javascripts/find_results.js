@@ -5,7 +5,7 @@ function find_results_make(checksum, count, image_url, popup_image_url) {
 }
 
 function find_results_update() {
-	var url = '/cached_finds/' + $ifloat_body.find_id + '/images/36'
+	var url = '/cached_finds/' + $ifloat_body.find_id + '/images'
 	$.getJSON(url, find_results_update_handle);
 }
 

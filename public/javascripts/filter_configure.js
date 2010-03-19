@@ -61,7 +61,7 @@ function filter_configure_handle(filter) {
 	html.push('<div class="location">');
 	if(from_filter_choose) {
 		html.push('<h3 class="back" onclick="filter_configure_back()">Back to all filters</h3>');
-		html.push('<img src="/images/filter_configure/backgrounds/location_sep_button.png" />');
+		html.push('<img src="/images/filter_configure/backgrounds/location_button_sep.png" />');
 	}
 	html.push('<h3>' + filter.section + '</h3>');
 	html.push('<img src="/images/filter_configure/backgrounds/location_sep.png" />');

@@ -12,9 +12,7 @@
 
 <div id="compare_by_image" class="panel major">
 	<div class="title">
-		<h2 class="button">
-			<a href="<%= resource(@find) %>">Back to <strong><%= @find.specification.inspect %></strong> results</a>
-		</h2>
+		<h2><%= panel_title_back_to_find(@find) %></h2>
 	</div>
 	
 	<div class="body">

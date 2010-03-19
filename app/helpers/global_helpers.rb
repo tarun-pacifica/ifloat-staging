@@ -14,6 +14,16 @@ module Merb
       [prefix, "%0.2f" % amount, postfix].join
     end
     
+    def panel_title_back_to_find(find)
+      return "&nbsp;" if find.nil?
+      
+      <<-HTML
+        <a href="#{resource(find)}">Back to <strong>#{find.specification.inspect}</strong> results</a>
+  			<img src="/images/panel/backgrounds/title_button_sep.png">
+  			<hr class="terminator" />
+			HTML
+    end
+    
     def product_data_panel(values)
       html = []
       

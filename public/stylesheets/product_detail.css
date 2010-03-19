@@ -37,6 +37,38 @@
 	text-align: center;
 }
 
+#product_detail .assets .price_actions div.button {
+	cursor: pointer;
+	height: 18px;
+	margin: 5px 0 0 4px;
+	padding: 5px 0 0 25px;
+	width: 162px;
+}
+
+#product_detail .assets .price_actions div.add {
+	background: url(/images/product_detail/buttons/add.png) no-repeat;
+}
+
+#product_detail .assets .price_actions div.media {
+	background: url(/images/product_detail/buttons/move.png) no-repeat;
+}
+
+#product_detail .assets .price_actions div.move {
+	background: url(/images/product_detail/buttons/move.png) no-repeat;
+}
+
+#product_detail .assets .price_actions div.remove {
+	background: url(/images/product_detail/buttons/remove.png) no-repeat;
+}
+
+#product_detail .assets .price_actions div.button:hover {
+	background-position: 0 -23px;
+}
+
+#product_detail .assets .price_actions div.button:active {
+	background-position: 0 -46px;
+}
+
 #product_detail .assets .thumbs {
 	float: left;
 	margin-left: 5px;

@@ -12,13 +12,7 @@
 
 <div id="product_detail" class="panel major">
 	<div class="title">
-		<% if @recent_find.nil? %>
-		<h2></h2>
-		<% else %>
-		<h2 class="button">
-			<a href="<%= resource(@recent_find) %>">Back to <strong><%= @recent_find.specification.inspect %></strong> results</a>
-		</h2>
-		<% end %>
+		<h2><%= panel_title_back_to_find(@recent_find) %></h2>
 	</div>
 	
 	<div class="body">
@@ -32,9 +26,6 @@
 			</div>
 			
 			<div class="price_actions">
-				<div class="button">Related Media</div>
-				<hr />
-				
 				<table class="prices">
 					<% @prices_by_url.each do |url, amount| %>
 						<tr>
@@ -48,6 +39,11 @@
 					<% end %>
 				</table>
 				<hr />
+				
+				<% unless @related_media.empty? %>
+				<div class="button media">Related Media</div>
+				<hr />
+				<% end %>
 				
 				<div id="pick_buttons"> </div>
 			</div>

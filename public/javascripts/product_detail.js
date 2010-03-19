@@ -15,7 +15,6 @@ function product_detail_pick_buttons_update(group, pick_id) {
 	
 	if(pick_buttons.length == 0) return;
 	
-	var actions = {add: 'Add to', move: 'Move to', remove: 'Remove from'};
 	var groups = ['compare', 'buy_later', 'buy_now'];
 	var lists = {compare: 'Compare List', buy_later: 'Wish List', buy_now: 'Shopping List'};
 	
@@ -24,10 +23,8 @@ function product_detail_pick_buttons_update(group, pick_id) {
 	for(i in groups) {
 		var g = groups[i];
 		var action = (group ? (group == g ? 'remove' : 'move') : 'add');
-		
 		var click = "product_detail_pick_button_click('" + action + "', '" + group + "', '" + g + "', " + pick_id + ")";
-		
-		pick_buttons.append('<div class="' + [action, g].join(' ') + '" onclick="' + click + '">' + actions[action] + ' ' + lists[g] + '</div>');
+		pick_buttons.append('<div class="button ' + action + '" onclick="' + click + '">' + lists[g] + '</div>');
 	}
 }
 

@@ -17,24 +17,19 @@
 	background: url(/images/panel/backgrounds/title_right.png) top right no-repeat;
 }
 
-.major .title h2.button {
-/*	padding: 0;*/
-}
-
-.major .title h2.button a {
-/*	background: url(/images/panel/backgrounds/title_button.png) repeat-x;*/
-	border-bottom: 1px dashed #404040;
+.major .title h2 a {
+	background: url(/images/panel/backgrounds/title_button.png) repeat-x;
 	color: #404040;
-/*	display: block;*/
-/*	float: left;*/
-/*	height: 27px;*/
-/*	padding: 8px 0 0 10px;*/
-	padding: 2px;
+	display: block;
+	float: left;
+	height: 27px;
+	margin: -8px 0 0 -10px;
+	padding: 8px 10px 0 10px;
 	text-decoration: none;
 }
 
-.major .title h2.button a:hover {
-	border-bottom: 1px solid #404040;
+.major .title h2 img {
+	margin-top: -8px;
 }
 
 .minor {

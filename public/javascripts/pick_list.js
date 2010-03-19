@@ -153,6 +153,6 @@ function pick_lists_update_handle(data) {
 		pick_lists_bind_unavailable(partner_panel);
 	} else {
 		pick_lists.mouseleave();
-		prod_detail_pick_buttons_update(product_group, product_pick_id);
+		product_detail_pick_buttons_update(product_group, product_pick_id);
 	}
 }

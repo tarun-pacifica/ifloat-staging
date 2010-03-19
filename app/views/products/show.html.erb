@@ -22,8 +22,49 @@
 	</div>
 	
 	<div class="body">
-		IMPLEMENT PRODUCT DETAIL BODY
+		<div class="assets">
+			<img class="main" src=<%= @image_urls.first.inspect %> />
+			
+			<div class="thumbs">
+				<% @image_urls.each do |url|%>
+				<img src=<%= url.inspect %> onmouseover="product_detail_select_image(event)" />
+				<% end %>
+			</div>
+			
+			<div class="price_actions">
+				<div class="button">Related Media</div>
+				<hr />
+				
+				<table class="prices">
+					<% @prices_by_url.each do |url, amount| %>
+						<tr>
+							<td> <img src="/images/partner/facilities/<%= url %>.png" alt=<%= url.inspect %> /> </td>
+							<td class="price"> <%= money(amount) %> </td>
+						</tr>
+					<% end %>
+
+					<% if @prices_by_url.empty? %>
+						<tr> <td>None of our partners currently have this item in stock</td> </tr>
+					<% end %>
+				</table>
+				<hr />
+				
+				<div id="pick_buttons"> </div>
+			</div>
+			
+			<hr class="terminator" />
+		</div>
 	</div>
 </div>
 
 </div>
+
+<script type="text/javascript" charset="utf-8">
+	$ifloat_body = {product_id: <%= @product.id %>};
+	
+	<% unless @related_products_by_rel_name.empty? %>
+	<% product_ids = @related_products_by_rel_name.values.map { |products| products.map { |product| product.id } }.flatten.uniq %>
+	prod_links_load(<%= product_ids.to_json %>);
+	$('#product_detail_relations div').each(function() { $(this).children('.product:gt(2)').hide(); });
+	<% end %>
+</script>

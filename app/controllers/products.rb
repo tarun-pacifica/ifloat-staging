@@ -24,7 +24,15 @@ class Products < Application
     @product = Product.get(product_id)
     return redirect("/") if @product.nil?
     
-    gather_property_values(@product)
+    @common_values, diff_values = @product.marshal_values(session.language, RANGE_SEPARATOR)
+    
+    names = Set.new(%w(auto:title marketing:description marketing:feature_list marketing:summary reference:wikipedia))
+    @body_values_by_name = {}
+    @common_values.each do |info|
+      raw_name = info[:raw_name]
+      @body_values_by_name[raw_name] = info[:values] if names.include?(raw_name)
+    end
+    
     gather_assets(@product)
     
     @prices_by_url = @product.prices_by_url(session.currency)
@@ -36,6 +44,7 @@ class Products < Application
     render
   end
   
+  
   private
   
   def gather_assets(product)
@@ -44,33 +53,23 @@ class Products < Application
     @image_urls = (assets_by_role.delete("image") || []).map { |asset| asset.url }
     @image_urls << "/images/products/no_image.png" if @image_urls.empty?
     
-    @asset_urls_with_names = []
+    # TODO: consider how everything below here will be marshalled into the related_media panel
+    @related_media = []
     assets_by_role.sort.each do |role, assets|
       next if role == "source_notes"
       
       name = role.tr("_", " ").downcase.gsub(/\b\w/) { |s| s.upcase }
 
       if assets.size == 1
-        @asset_urls_with_names << [assets.first.url, name]
+        @related_media << [name, assets.first.url]
       else
         assets.each_with_index do |asset, i|
-          @asset_urls_with_names << [asset.url, "#{name} #{i}"]
+          @related_media << ["#{name} #{i}", asset.url]
         end
       end
     end
         
-    wikipedia_stub = (@non_data_values["reference:wikipedia"].first rescue nil)
-    @asset_urls_with_names << ["http://en.wikipedia.org/wiki/#{wikipedia_stub}", "Wikipedia Article"] unless wikipedia_stub.nil?
-  end
-  
-  def gather_property_values(product)
-    @common_values, diff_values = product.marshal_values(session.language, RANGE_SEPARATOR)
-    
-    names = Set.new(%w(auto:title marketing:description marketing:feature_list marketing:summary reference:wikipedia))
-    @body_values_by_name = {}
-    @common_values.each do |info|
-      raw_name = info[:raw_name]
-      @body_values_by_name[raw_name] = info[:values] if names.include?(raw_name)
-    end
+    stub = (@body_values_by_name["reference:wikipedia"].first rescue nil)
+    @related_media << ["Wikipedia Article", "http://en.wikipedia.org/wiki/#{stub}"] unless stub.nil?
   end
 end

@@ -1,0 +1,73 @@
+#product_detail .assets {
+/*	clear: both;*/
+	padding: 5px;
+}
+
+#product_detail .assets img.main {
+	border: 1px solid gray;
+	float: left;
+	height: 400px;
+	width: 400px;
+}
+
+#product_detail .assets .price_actions {
+	float: left;
+	margin-left: 10px;
+	width: 169px;
+}
+
+#product_detail .assets .price_actions hr {
+	background: silver;
+	border: none;
+	height: 1px;
+	margin: 5px 0;
+}
+
+#product_detail .assets .price_actions table.prices {
+	background: #F3F3F3;
+	width: 100%;
+}
+
+#product_detail .assets .price_actions table.prices img {
+	height: 19px;
+}
+
+#product_detail .assets .price_actions table.prices td {
+	height: 22px;
+	padding: 5px;
+	text-align: center;
+}
+
+#product_detail .assets .thumbs {
+	float: left;
+	margin-left: 5px;
+	width: 50px;
+}
+
+#product_detail .assets .thumbs img {
+	border: 1px solid gray;
+	height: 50px;
+	width: 50px;
+}
+
+
+
+
+#product_detail_main a {
+	text-decoration: none;
+}
+
+#product_detail_assets .asset_links #pick_buttons div {
+	background: url(/images/pick_lists/backgrounds/enabled.png) repeat-x;
+	border-left: 1px solid #4263A0;
+	border-right: 1px solid #4263A0;
+	color: white;
+	cursor: pointer;
+	height: 19px;
+	margin-top: 7px;
+	padding-top: 4px;
+	text-align: center;
+	width: 177px;
+}
+
+

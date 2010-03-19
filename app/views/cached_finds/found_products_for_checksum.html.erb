@@ -28,8 +28,8 @@
 			<tr class="icons">
 				<% @diff_property_ids.each do |property_id| %>
 				<% prop_info = Indexer.property_display_cache[property_id] %>
-				<% primary = (property_id == @primary_property_id) %>
-				<% dom_class = ((primary and @diff_property_ids.size > 1) ? 'class="primary"' : '') %>
+				<% primary = (property_id == @primary_property_id and @diff_property_ids.size > 1) %>
+				<% dom_class = (primary ? 'class="primary"' : '') %>
 				<% chevron = (primary ? "selected" : "unselected") %>
 				<td <%= dom_class %>>
 					<% unless primary %> <a href="?sort_by=<%= property_id %>"> <% end %>

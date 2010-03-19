@@ -1,5 +1,5 @@
 function find_results_make(checksum, count, image_url, popup_image_url) {
-	var url = '/cached_finds/' + $ifloat_body.find_id + '/found_products_for_checksum/' + checksum;
+	var url = '/cached_finds/' + $ifloat_body.find_id + '/compare_by_image/' + checksum;
 	var tally = '<div class="tally">' + count + ' item' + (count > 1 ? 's' : '') + '</div>';
 	return '<a class="product" href="' + url + '"> ' + tally + product_image_make(image_url, popup_image_url) + ' </a>';
 }

@@ -67,7 +67,7 @@ class CachedFinds < Application
     find = session.ensure_cached_find(id.to_i)
     result = (params["method"] == "delete" ? find.unfilter!(property_id.to_i) : find.filter!(property_id.to_i, params))
     return nil.to_json unless result
-    result = [find.filters_used(RANGE_SEPARATOR), find.filters_unused, found_images(id, 36, true)]
+    result = [find.filters_used(RANGE_SEPARATOR), find.filters_unused, images(id, 36, true)]
     (find.ensure_valid.empty? ? result : nil).to_json
   end
   
@@ -80,7 +80,7 @@ class CachedFinds < Application
   end
   
   # TODO: get rid of 'raw' hack and do a proper refactoring and ensure this method runs the ensure_valid logic
-  def found_images(id, limit, raw = false)
+  def images(id, limit, raw = false)
     provides :js
     
     find = session.ensure_cached_find(id.to_i)
@@ -112,7 +112,7 @@ class CachedFinds < Application
   def reset(id)
     find = session.ensure_cached_find(id.to_i)
     return nil.to_json unless find.unfilter_all!
-    result = [find.filters_used(RANGE_SEPARATOR), find.filters_unused, found_images(id, 36, true)]
+    result = [find.filters_used(RANGE_SEPARATOR), find.filters_unused, images(id, 36, true)]
     (find.ensure_valid.empty? ? result : nil).to_json
   end
   

@@ -38,7 +38,7 @@ class Products < Application
     @prices_by_url = @product.prices_by_url(session.currency)
     
     @related_products_by_rel_name = ProductRelationship.related_products(@product)
-    @related_products_by_rel_name.delete_if { |name, products| products.empty? }
+    @related_products_by_rel_name.delete_if { |name, products| products.empty? } # TODO: work out why we have to do this
     
     @recent_find = session.most_recent_cached_find
     render

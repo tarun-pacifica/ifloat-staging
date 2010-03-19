@@ -184,43 +184,6 @@
 	text-align: center;
 }
 
-/* Product Detail Main */
-
-#product_detail_words {
-	border: 1px solid silver;
-	padding: 10px;
-}
-
-#product_detail_words h1 {
-	color: #17A1FF;
-	font-size: 14px;
-	margin: 0 0 4px 0;
-}
-
-#product_detail_words h2 {
-	color: #404040;
-	font-size: 14px;
-	margin: 0 0 4px 0;
-}
-
-#product_detail_words h3 {
-	margin: 15px 0 0 0;
-}
-
-#product_detail_words hr {
-	background: silver;
-	border: none;
-	height: 1px;
-}
-
-#product_detail_words p {
-	margin: 5px 0 0 0;
-}
-
-#product_detail_words ul {
-	margin: 5px 0 0 0;
-}
-
 #product_detail_relations {
 	background: #F3F3F3;
 	border: 1px solid silver;

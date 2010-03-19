@@ -54,6 +54,39 @@
 			
 			<hr class="terminator" />
 		</div>
+	
+		<div class="description">
+			<% (@body_values_by_name["auto:title"] || []).each do |title| %>
+			<h2><%= title %></h2>
+			<% end %>
+			
+			<% unless @related_products_by_rel_name.empty? %>
+			<a href="#related">View Related Products</a>
+			<% end %>
+
+			<% summary, features, description = @body_values_by_name.values_at("marketing:summary", "marketing:feature_list", "marketing:description").map { |values| (values || []).first.to_s } %>
+
+			<% unless summary.blank? %>
+			<h3>Summary</h3>
+			<p><%= summary %></p>
+			<% end %>
+
+			<% unless features.blank? %>
+			<h3>Features</h3>
+			<ul>
+				<% features.split("\n").each do |feature| %>
+				<li><%= feature %></li>
+				<% end %>
+			</ul>
+			<% end %>
+
+			<% unless description.blank? %>
+			<h3>Description</h3>
+			<% description.split("\n").each do |paragraph| %>
+			<p><%= paragraph %></p>
+			<% end %>
+			<% end %>
+		</div>
 	</div>
 </div>
 

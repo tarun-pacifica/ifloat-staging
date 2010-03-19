@@ -24,7 +24,7 @@ class TextPropertyValue < PropertyValue
     [text_value]
   end
   
-  def to_s(range_sep) # TODO: spec
+  def to_s(range_sep = nil) # TODO: spec
     text_value
   end
 end

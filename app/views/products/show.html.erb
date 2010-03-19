@@ -61,7 +61,7 @@
 			<% end %>
 			
 			<% unless @related_products_by_rel_name.empty? %>
-			<a href="#related">View Related Products</a>
+			<a href="#relations">View Related Products</a>
 			<% end %>
 
 			<% summary, features, description = @body_values_by_name.values_at("marketing:summary", "marketing:feature_list", "marketing:description").map { |values| (values || []).first.to_s } %>
@@ -87,6 +87,23 @@
 			<% end %>
 			<% end %>
 		</div>
+
+		<% unless @related_products_by_rel_name.empty? %>
+		<div class="relations">
+			<a name="relations"> </a>
+			<% @related_products_by_rel_name.each do |name, products| %>
+			<div>
+				<h3>This product <%= name.tr("_", " ") %>...</h3>
+				<%= products.map { |prod| "<div class=\"product\" id=\"prod_#{prod.id}\"></div>" }.join %>
+				<% if products.size > 3 %>
+				<div class="more" onclick="product_detail_more_relations()">
+					(show <%= products.size - 3 %> more results)
+				</div>
+				<% end %>
+			</div>
+			<% end %>
+		</div>	
+		<% end %>
 	</div>
 </div>
 
@@ -97,7 +114,7 @@
 	
 	<% unless @related_products_by_rel_name.empty? %>
 	<% product_ids = @related_products_by_rel_name.values.map { |products| products.map { |product| product.id } }.flatten.uniq %>
-	prod_links_load(<%= product_ids.to_json %>);
-	$('#product_detail_relations div').each(function() { $(this).children('.product:gt(2)').hide(); });
+	product_links_load(<%= product_ids.to_json %>);
+	$('#product_detail .relations div').each(function() { $(this).children('.product:gt(2)').hide(); });
 	<% end %>
 </script>

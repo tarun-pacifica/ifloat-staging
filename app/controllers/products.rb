@@ -1,21 +1,15 @@
 class Products < Application
   def batch(ids)
-    product_ids = ids.split("_").map { |id| id.to_i }.uniq[0..99]
+    product_ids = ids.split("_").map { |id| id.to_i }.uniq[0, 100]
     
-    images_by_product_id = Product.primary_images(product_ids)
-    property_names = %w(auto:title marketing:summary)
-    values_by_property_by_product_id = Product.display_values(product_ids, session.language, property_names)
+    images_by_product_id = Product.primary_images_by_product_id(product_ids)
     
-    properties = values_by_property_by_product_id.values.map { |vbp| vbp.keys }.flatten.uniq
-    title_property, summary_property = properties.hash_by(:name).values_at(*property_names)
-    
-    product_ids.map do |product_id|
-      values_by_property = values_by_property_by_product_id[product_id]
-      
+    names = %w(auto:title marketing:summary)
+    Product.values_by_property_name_by_product_id(product_ids, session.language, names).map do |product_id, values_by_property_name|
       { :id         => product_id,
         :image_urls => product_image_urls(images_by_product_id[product_id]),
-        :titles     => (values_by_property[title_property] || []).map { |t| t.to_s },
-        :summary    => (values_by_property[summary_property] || []).first.to_s }
+        :titles     => (values_by_property_name["auto:title"] || []).map { |t| t.to_s },
+        :summary    => (values_by_property_name["marketing:summary"] || []).first.to_s }
     end.to_json
   end
   

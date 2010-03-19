@@ -92,18 +92,60 @@
 	margin: 5px 0 0 0;
 }
 
+#product_detail .relations {
+	background: #F3F3F3;
+	border-top: 1px dotted gray;
+	padding: 0 10px 10px 10px;
+}
 
-#product_detail_assets .asset_links #pick_buttons div {
-	background: url(/images/pick_lists/backgrounds/enabled.png) repeat-x;
-	border-left: 1px solid #4263A0;
-	border-right: 1px solid #4263A0;
-	color: white;
-	cursor: pointer;
-	height: 19px;
-	margin-top: 7px;
-	padding-top: 4px;
-	text-align: center;
-	width: 177px;
+#product_detail .relations h3 {
+	color: #404040;
+	margin: 15px 0 0 0;
 }
 
 
+#product_detail .relations .more {
+	color: #404040;
+	cursor: pointer;
+	text-align: center;
+}
+
+#product_detail .relations .more:hover {
+	text-decoration: underline;
+}
+
+#product_detail .relations a.product {
+	border-top: 1px dotted silver;
+	display: block;
+	margin-top: 5px;
+	padding: 5px 0;
+	text-decoration: none;
+}
+
+#product_detail .relations a.product:hover {
+	background: yellow;
+}
+
+#product_detail .relations a.product > * {
+	color: black;
+	font-size: 10px;
+	font-weight: normal;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* Verify needed by Firefox */
+#product_detail .relations a.product h2 {
+	border: none;
+}
+
+#product_detail .relations a.product img {
+	border: 1px solid gray;
+	float: left;
+	height: 50px;
+	margin: 0 10px 0 5px;
+	width: 50px;
+}

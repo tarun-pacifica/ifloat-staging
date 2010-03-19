@@ -1,7 +1,7 @@
-function product_detail_more_relations(d) {
-	var more_bar = $(d).parent();
-	more_bar.prevAll().show();
-	more_bar.hide();
+function product_detail_more_relations() {
+	var more = $(event.target);
+	more.prevAll().show();
+	more.hide();
 }
 
 function product_detail_pick_button_click(action, from_group, to_group, pick_id) {

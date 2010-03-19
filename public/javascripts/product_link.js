@@ -1,24 +1,21 @@
-function prod_link_detailed(product) {
+function product_link(product) {
 	var image_urls = product.image_urls;
 	var titles = product.titles;
 	
 	title_lines = [];
-	for(i in titles) {
-		var tag = (i == 4 ? 'h2' : 'h1');
-		title_lines.push('<' + tag + '>' + titles[i] + '</' + tag + '>');
-	}
+	for(i in titles) title_lines.push('<h2>' + titles[i] + '</h2>');
 	
-	return '<a class="product" href="/products/' + product.id + '">' + product_image_make(image_urls[0], image_urls[1]) + title_lines.join(" ") + '<p>' + product.summary + '</p> <hr /> </a>';
+	return '<a class="product" href="/products/' + product.id + '">' + product_image_make(image_urls[0], image_urls[1]) + title_lines.join(" ") + '<p>' + product.summary + '</p> <hr class="terminator" /> </a>';
 }
 
-function prod_links_load(product_ids) {
+function product_links_load(product_ids) {
 	var url = '/products/batch/' + product_ids.join('_');
-	$.getJSON(url, prod_links_load_handle);	
+	$.getJSON(url, product_links_load_handle);	
 }
 
-function prod_links_load_handle(products) {
+function product_links_load_handle(products) {
 	for(i in products) {
 		var product = products[i];
-		$('#prod_' + product.id).html(prod_link_detailed(product));
+		$('#prod_' + product.id).html(product_link(product));
 	}
 }

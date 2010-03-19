@@ -15,26 +15,28 @@
 	width: 169px;
 }
 
-#product_detail .assets .price_actions hr {
-	background: silver;
-	border: none;
-	height: 1px;
-	margin: 5px 0;
-}
-
 #product_detail .assets .price_actions table.prices {
-	background: #F3F3F3;
+	border: 1px solid silver;
+	border-collapse: collapse;
+	margin-bottom: 10px;
 	width: 100%;
 }
 
 #product_detail .assets .price_actions table.prices img {
-	height: 19px;
+	width: 100px;
 }
 
 #product_detail .assets .price_actions table.prices td {
-	height: 22px;
 	padding: 5px;
 	text-align: center;
+}
+
+#product_detail .assets .price_actions table.prices td.no_stock {
+	background: #F3F3F3;
+}
+
+#product_detail .assets .price_actions table.prices td.price {
+	background: #DCE9F7;
 }
 
 #product_detail .assets .price_actions div.button {
@@ -42,7 +44,7 @@
 	height: 18px;
 	margin: 5px 0 0 4px;
 	padding: 5px 0 0 25px;
-	width: 162px;
+	width: 137px;
 }
 
 #product_detail .assets .price_actions div.add {
@@ -51,6 +53,7 @@
 
 #product_detail .assets .price_actions div.media {
 	background: url(/images/product_detail/buttons/move.png) no-repeat;
+	margin-bottom: 10px;
 }
 
 #product_detail .assets .price_actions div.move {

@@ -35,14 +35,12 @@
 					<% end %>
 
 					<% if @prices_by_url.empty? %>
-						<tr> <td>None of our partners currently have this item in stock</td> </tr>
+						<tr> <td class="no_stock">None of our partners have this item in stock</td> </tr>
 					<% end %>
 				</table>
-				<hr />
 				
 				<% unless @related_media.empty? %>
 				<div class="button media">Related Media</div>
-				<hr />
 				<% end %>
 				
 				<div id="pick_buttons"> </div>

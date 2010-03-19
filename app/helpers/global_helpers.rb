@@ -29,10 +29,10 @@ module Merb
       
       seq_nums_by_section = {}
       values_by_section = {}
-      values.each do |info|
+      values.sort_by { |info| info[:seq_num] }.each do |info|
         next unless info[:dad]
         section = info[:section]
-        seq_nums_by_section[section] = info[:seq_num]
+        seq_nums_by_section[section] ||= info[:seq_num]
         (values_by_section[section] ||= []).push(info)
       end
       

@@ -23,7 +23,7 @@ class CachedFind
   
   property :id,            Serial
   property :language_code, String,  :required => true, :format => /^[A-Z]{3}$/
-  property :specification, String,  :length => 255
+  property :specification, String,  :required => true, :length => 255
   property :description,   String,  :length => 255
   property :filters,       Object,  :accessor => :protected, :lazy => false
   property :accessed_at,   DateTime
@@ -37,14 +37,6 @@ class CachedFind
   
   validates_with_block :specification, :unless => :new? do
     attribute_dirty?(:specification) ? [false, "cannot be updated"] : true
-  end
-  
-  validates_with_block :specification do
-    words = specification.split
-    if words.empty? or words.any? { |word| word.size < 3 }
-      [false, "should be one or more words, each at least 3 characters long"]
-    else true
-    end
   end
   
   before :valid? do

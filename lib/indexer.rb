@@ -251,9 +251,9 @@ module Indexer
     records.each do |record|
       next unless record.findable
       
-      record.text_value.downcase.split(/\W+/).select { |word| word.size > 2 }.uniq.each do |word|
+      record.text_value.downcase.split(/\s+/).uniq.each do |word|
         language = (index[record.language_code] ||= {})
-        (language[word.gsub(/[^a-zA-Z0-9]+/, "")] ||= []) << record.product_id        
+        (language[word.gsub(/[^a-z0-9']+/, "")] ||= []) << record.product_id        
       end
     end
     

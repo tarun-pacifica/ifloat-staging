@@ -62,7 +62,7 @@ module Merb
     end
     
     def product_image_urls(image)
-      image.nil? ? Array.new(2) { "/images/products/no_image.png" } : [image.url(:tiny), image.url(:small)]
+      image.nil? ? Array.new(2) { "/images/common/no_image.png" } : [image.url(:tiny), image.url(:small)]
     end
     
     def product_value_summary(info, tooltip_position = :right)

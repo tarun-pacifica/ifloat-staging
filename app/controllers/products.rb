@@ -45,7 +45,7 @@ class Products < Application
     assets_by_role = product.assets_by_role
     
     @image_urls = (assets_by_role.delete("image") || []).map { |asset| asset.url }
-    @image_urls << "/images/products/no_image.png" if @image_urls.empty?
+    @image_urls << "/images/common/no_image.png" if @image_urls.empty?
     
     # TODO: consider how everything below here will be marshalled into the related_media panel
     @related_media = []

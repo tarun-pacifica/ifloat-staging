@@ -1,0 +1,54 @@
+<%= partial "common/header" %>
+
+<div id="body">
+
+<div id="prod_data_panel" class="panel minor">
+	<div class="title"> <h2>Common Product Data</h2> </div>
+	<div class="advert">Manufacturer Logo Here</div>
+	<div class="sections">
+		<%= product_data_panel(@common_values) %>
+	</div>
+</div>
+
+<div id="compare_by_class" class="panel major">
+	<div class="title">
+		<h2><%= panel_title_back_to_find(session.most_recent_cached_find) %></h2>
+	</div>
+	
+	<div class="body">
+		<table>
+			<tr>
+				<td></td>
+				<% @product_ids.each_with_index do |product_id, i| %>
+				<td class="product image"
+					onclick="window.location = '<%= url(:product, :id => product_id) %>'"
+					onmouseover="util_highlight_column('on', <%= i + 2 %>)"
+					onmouseout="util_highlight_column('off')">
+					<%= product_image(@images_by_product_id[product_id])%>
+				</td>
+				<% end %>
+			</tr>
+		
+			<% parity = :even %>
+			<% @diff_properties.each do |prop_info| %>
+			<% property_id = prop_info[:id] %>
+			<% infos_by_product_id = @diff_values_by_prop_id[property_id].hash_by { |info| info[:product_id] } %>
+			<tr class="<%= parity = (parity == :even ? :odd : :even) %>">
+				<td class="icon">
+					<%= property_icon(prop_info[:icon_url], prop_info[:name], :right) %>
+				</td>
+				<% @product_ids.each_with_index do |product_id, i| %>
+				<td class="product"
+					onclick="window.location = '<%= url(:product, :id => product_id) %>'"
+					onmouseover="util_highlight_column('on', <%= i + 2 %>)"
+					onmouseout="util_highlight_column('off')">
+					<%= product_value_summary(infos_by_product_id[product_id], :left) %>
+				</td>
+				<% end %>
+			</tr>
+			<% end %>
+		</table>
+	</div>
+</div>
+
+</div>

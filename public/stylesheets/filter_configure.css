@@ -4,6 +4,7 @@
 
 #filter_configure .location {
 	height: 61px;
+	margin-top: 1px;
 	width: 700px;
 }
 

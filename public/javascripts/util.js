@@ -31,16 +31,18 @@ function util_hash_from_array(keys, value) {
 	return hash;
 }
 
+function util_highlight_column(action, col_num) {
+	var table = $(event.target).parents("table");
+	
+	table.find('.hover').removeClass('hover');
+	if(action == 'on') table.find('td:nth-child(' + col_num + ')').addClass('hover');
+}
+
 function util_highlight_row(action) {
 	var row = $(event.target).parent();
-	var cells = row.children();
-		
-	if(action == 'on') {
-		row.data('original_bg_colour', cells.css('background-color'));
-		cells.css('background-color', 'yellow');
-	} else {
-		cells.css('background-color', row.data('original_bg_colour'));
-	}
+
+	if(action == 'on') row.addClass('hover');
+	else row.removeClass('hover');
 }
 
 function util_preload_image(url) {

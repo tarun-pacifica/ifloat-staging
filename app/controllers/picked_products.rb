@@ -37,26 +37,21 @@ class PickedProducts < Application
     index
   end
   
-  def compare(klass)
+  def compare_by_class(klass)
     klass = Merb::Parse.unescape(klass)
-    picks = session.picked_products.select { |pick| pick.group == "compare" and pick.cached_class = klass }
+    picks = session.picked_products.select { |pick| pick.group == "compare" and pick.cached_class == klass }
     @product_ids = picks.map { |pick| pick.product_id }
     
     return redirect("/") if @product_ids.empty?
     return redirect(url(:product, :id => @product_ids.first)) if @product_ids.size == 1
     
-    @values_by_property_by_product_id = Product.display_values(@product_ids, session.language)    
-    @common_properties, @diff_properties = Product.partition_data_properties(@values_by_property_by_product_id)
+    @common_values, diff_values = Product.marshal_values(@product_ids, session.language, RANGE_SEPARATOR)
     
-    @values_by_property = {}
-    @values_by_property_by_product_id.values.first.each do |property, values|
-      @values_by_property[property] = values if @common_properties.include?(property)
-    end
+    @diff_values_by_prop_id = diff_values.select { |info| info[:dad] }.group_by { |info| info[:id] }
     
-    properties = (@common_properties + @diff_properties)
-    @friendly_name_sections = PropertyDefinition.friendly_name_sections(properties, session.language)
-    @icon_urls_by_property_id = PropertyDefinition.icon_urls_by_property_id(properties)
-    @text_value_definitions = PropertyDefinition.definitions_by_property_id(properties, session.language)
+    @diff_properties = @diff_values_by_prop_id.keys.map do |property_id|
+      Indexer.property_display_cache[property_id]
+    end.sort_by { |info| info[:seq_num] }
     
     @images_by_product_id = Product.primary_images_by_product_id(@product_ids)
     
@@ -96,7 +91,7 @@ class PickedProducts < Application
           :product_ids => info_for_picks.map { |info| info[:product_id] },
           :image_urls  => info_for_picks.map { |info| info[:image_urls] }.compact.first,
           :title_parts => [klass, info_for_picks.size],
-          :url         => "/picked_products/compare/#{Merb::Parse.escape(klass)}" }
+          :url         => "/picked_products/compare_by_class/#{Merb::Parse.escape(klass)}" }
       end
     end
     

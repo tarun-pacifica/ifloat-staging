@@ -1,0 +1,38 @@
+#compare_by_class img.product {
+	border: 1px solid gray;
+	height: 100px;
+	width: 100px;
+}
+
+#compare_by_class table {
+	width: 100%;
+}
+
+#compare_by_class table td {
+	padding: 5px;
+	vertical-align: top;
+}
+
+#compare_by_class table td.icon {
+	text-align: center;
+}
+
+#compare_by_class table td.image {
+	text-align: center;
+}
+
+#compare_by_class table td.product {
+	cursor: pointer;
+}
+
+#compare_by_class table tr.even td {
+	background: #F3F3F3;
+}
+
+#compare_by_class table tr.odd td {
+	background: #DCE9F7;
+}
+
+#compare_by_class table tr td.hover {
+	background: yellow;
+}

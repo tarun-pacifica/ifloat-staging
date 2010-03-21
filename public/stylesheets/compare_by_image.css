@@ -40,7 +40,11 @@
 }
 
 #compare_by_image table tr.odd td {
-	background:  #DCE9F7;
+	background: #DCE9F7;
+}
+
+#compare_by_image table tr.hover td {
+	background: yellow;
 }
 
 #compare_by_image table tr.values td {

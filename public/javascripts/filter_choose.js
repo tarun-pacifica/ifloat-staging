@@ -25,7 +25,8 @@ function filter_choose_load_handle(filters) {
 		var count = filters_by_section[section].length;
 		if(count > section_count_max) section_count_max = count;
 	}
-	if(section_count_max > 9) section_count_max = 9;
+	if(section_count_max < 4) section_count_max = 4;
+	else if(section_count_max > 9) section_count_max = 9;
 	
 	var sections = [];
 	for(i in filters) {
@@ -38,7 +39,7 @@ function filter_choose_load_handle(filters) {
 	for(i in sections) {
 		var section = sections[i];
 		var section_count = Math.max(filters_by_section[section].length, 2);
-		if(row_count + section_count < section_count_max) {
+		if(row_count + section_count <= section_count_max) {
 			rows[rows.length - 1].push(section);
 			row_count += section_count;
 		} else {

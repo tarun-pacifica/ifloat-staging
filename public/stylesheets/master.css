@@ -147,39 +147,3 @@
 	padding: 0 5px 0 0;
 	text-align: right;
 }
-
-/* Product Detail Compare */
-
-#product_detail_compare a {
-	color: white;
-	text-decoration: none;
-}
-
-#product_detail_compare img.product {
-	border: 1px solid gray;
-	height: 100px;
-	width: 100px;
-}
-
-#product_detail_compare table {
-	margin-top: 10px;
-	width: 100%;
-}
-
-#product_detail_compare td {
-	padding: 5px;
-	vertical-align: top;
-}
-
-#product_detail_compare .even td {
-	background: #F3F3F3;
-}
-
-#product_detail_compare .odd td {
-	background: #D2EFFF;
-}
-
-#product_detail_compare td.choose {
-	background: url(/images/product_compare/backgrounds/panel_header.png) repeat-x;
-	text-align: center;
-}

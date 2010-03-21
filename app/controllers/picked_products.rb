@@ -69,7 +69,7 @@ class PickedProducts < Application
     
     picks = session.picked_products
     product_ids = picks.map { |pick| pick.product_id }
-    images_by_product_id = Product.primary_images_by_product_id(product_ids)    
+    images_by_product_id = Product.primary_images_by_product_id(product_ids)
     
     picks_by_group = {}
     picks.each do |pick|
@@ -99,29 +99,14 @@ class PickedProducts < Application
   end
   
   def options
-    @picks_by_group = session.picked_products.group_by { |pick| pick.group }
-    return redirect("/") if @picks_by_group["buy_later"].nil? and @picks_by_group["buy_now"].nil?
+    non_compare_picks = session.picked_products.reject { |pick| pick.group == "compare" }
+    return redirect("/") if non_compare_picks.empty?
     
-    prod_ids_by_group = {}
-    @picks_by_group.each do |group, picks|
-      prod_ids_by_group[group] = picks.map { |pick| pick.product_id }
-    end
+    product_ids = non_compare_picks.map { |pick| pick.product_id }
+    @prices_by_url_by_product_id = Product.prices_by_url_by_product_id(product_ids, session.currency)
     
-    # TODO: should be able to remove once product batch rendering is client side
-    @product_ids = prod_ids_by_group.values_at("buy_later", "buy_now").flatten.compact
-    @prices_by_url_by_product_id = Product.prices(@product_ids, session.currency)
-    
-    @counts_by_url = Hash.new(0)
-    @totals_by_url = Hash.new(0)
-    @prices_by_url_by_product_id.values_at(*prod_ids_by_group["buy_now"]).compact.each do |prices_by_url|
-      prices_by_url.each do |url, price|
-        @counts_by_url[url] += 1
-        @totals_by_url[url] += price
-      end
-    end
-    
-    @facilities_by_url = Facility.all.hash_by { |facility| facility.primary_url }
-    @facility_urls = (@counts_by_url.empty? ? @facilities_by_url.keys : @counts_by_url.keys).sort
+    # TODO: remove hard-coding when we have more than a couple of partners and a DB lookup based on @prices_by_url_by_product_id is justified
+    @facility_urls = %w(marinestore.co.uk)
     
     render
   end

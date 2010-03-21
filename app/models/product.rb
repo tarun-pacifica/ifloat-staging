@@ -21,7 +21,7 @@ class Product
   has n, :values, :model => "PropertyValue"
   
   # TODO: spec
-  def self.marshal_values(product_ids, language_code, range_sep)  
+  def self.marshal_values(product_ids, language_code, range_sep)
     attributes = {:product_id => product_ids}
     db_values = NumericPropertyValue.all(attributes).map
     db_values += TextPropertyValue.all(attributes.merge(:language_code => language_code))

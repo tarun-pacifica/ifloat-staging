@@ -155,4 +155,6 @@ function pick_lists_update_handle(data) {
 		pick_lists.mouseleave();
 		product_detail_pick_buttons_update(product_group, product_pick_id);
 	}
+	
+	pick_options_update(data);
 }

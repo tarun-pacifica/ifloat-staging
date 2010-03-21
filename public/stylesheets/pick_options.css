@@ -1,4 +1,11 @@
-/* Picked Product Options */
+#po_buy_later p {
+	font-size: 14px;
+	margin: 0;
+	padding: 17px 0;
+	text-align: center;
+}
+
+/* Picked Product Options Legacy */
 
 #picked_product_options {
 	margin: 38px auto 0 auto;

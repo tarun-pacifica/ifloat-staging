@@ -1,79 +1,31 @@
 <%= partial "common/header" %>
 
-<div id="picked_product_options">
-	<% unless @picks_by_group["buy_now"].nil? %>
-	<table id="ppo_buy_now">
-		<tr>
-			<th>Shopping List</th>
-			<td> </td>
-			<% @facility_urls.each do |url| %>
-			<td class="facility"> <img src="/images/partner/facilities/<%= url %>.png" alt=<%= url.inspect %> /> </td>
-			<% end %>
-		</tr>
-		
-		<tr class="separator"> <td colspan="<%= (2 + @facility_urls.size) %>"></td> </tr>
-		
-		<% @picks_by_group["buy_now"].each do |pick| %>
-		<% prices = (@prices_by_url_by_product_id[pick.product_id] || {}) %>
-		<tr>
-			<td class="move">
-				<a href="#" onclick="pick_list_move('buy_now', 'buy_later', <%= pick.id %>)">
-					<p>Move to Wish List</p> <img src="/images/pick_options/buttons/arrow_down.png" />
-				</a>
-			</td>
-			<td class="product" id="prod_<%= pick.product_id %>"> </td>
-			<% @facility_urls.each do |url| %>
-			<td class="price"><%= money(prices[url]) || "Not currently in stock" %></td>
-			<% end %>
-		</tr>
-		<% end %>
-		
-		<tr class="total">
-			<th colspan="2">Totals</th>
-			<% @facility_urls.each do |url| %>
-			<% count = @counts_by_url[url] %>
-			<td class="buy">
-				<% if count.zero? %>
-					No items to buy
-				<% else %>
-					<a href="/picked_products/buy/<%= @facilities_by_url[url].id %>">Buy <%= count %> item<%= count == 1 ? '' : 's' %> for <%= money(@totals_by_url[url]) %></a>
-				<% end%>
-			</td>
-			<% end %>
-		</tr>
-	</table>
-	<% end %>
+<div id="body">
 	
-	<% unless @picks_by_group["buy_later"].nil? %>
-	<table class="ppo_buy_later">
-		<tr> <th>Wish List</th> </tr>
-		<tr class="separator"> <td colspan="3"></td> </tr>
-		
-		<% @picks_by_group["buy_later"].each do |pick| %>
-		<% prices = (@prices_by_url_by_product_id[pick.product_id] || {}) %>
-		<tr>
-			<td class="move">
-				<a href="#" onclick="pick_list_move('buy_later', 'buy_now', <%= pick.id %>)">
-					<p>Move to Shopping List</p> <img src="/images/pick_options/buttons/arrow_up.png" />
-				</a>
-			</td>
-			<td class="product" id="prod_<%= pick.product_id %>"> </td>
-			<td class="price">
-				<% min_price, max_price = prices.values.minmax %>
-				<% if min_price.nil? %>
-					None of our partners currently have this item in stock
-				<% else %>
-					<%= [min_price, max_price].uniq.map { |amount| money(amount) }.join(" &ndash; ") %>
-				<% end %>
-			</td>
+<div id="po_buy_later" class="panel minor">
+	<div class="title"> <h2>Wish List</h2> </div>
+	<div class="sections"> </div>
+</div>
+
+<div id="po_buy_now" class="panel major">
+	<div class="title"> <h2>Shopping List</h2> </div>
+	
+	<table>
+		<tr class="facilities">
+			<td colspan="2"> </td>
+			<% @facility_urls.each do |url| %>
+			<td> <img src="/images/partner/facilities/<%= url %>.png" alt=<%= url.inspect %> /> </td>
+			<% end %>
 		</tr>
-		<% end %>
-		
-		<tr class="total"> <th colspan="3"></th> </tr>
 	</table>
-	<% end %>
+</div>
+
 </div>
 
 <script type="text/javascript" charset="utf-8">
-	product_links_load(<%= @product_ids.to_json %>);
+	var $ifloat_body = {
+		currency: <%= session.currency.inspect %>,
+		facility_urls: <%= @facility_urls.to_json %>,
+		prices_by_url_by_product_id: <%= @prices_by_url_by_product_id.to_json %>
+	};
 </script>

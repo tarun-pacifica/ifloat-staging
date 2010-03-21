@@ -1,5 +1,6 @@
 module Merb
-  module GlobalHelpers    
+  module GlobalHelpers
+    # TODO: remove
     def money(amount, currency = session.currency)
       return nil if amount.nil?
       

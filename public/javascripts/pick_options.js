@@ -5,10 +5,13 @@ function pick_options_update(data) {
 	
 	var buy_later_items = (data.buy_later ? data.buy_later : []);
 	var buy_now_items = (data.buy_now ? data.buy_now : []);
+	var product_ids = [];
 	
 	var html = [];
 	for(i in buy_later_items) {
 		var info = buy_later_items[i];
+		product_ids.push(info.product_id);
+		
 		var image = product_image_make(info.image_urls[0], info.image_urls[1], 'right');
 		html.push('<div class="product">' + image + info.title_parts.join('<br/>') + '</div>');
 		html.push('<div class="button move" onclick="pick_list_move(\'buy_later\', \'buy_now\', ' + info.id + ')"> Shopping List </div>');
@@ -23,7 +26,6 @@ function pick_options_update(data) {
 	for(url in fac_ids_by_url) counts_by_url[url] = 0;
 	
 	var parity = 'odd';
-	var product_ids = []
 	html = [];
 	for(i in buy_now_items) {
 		var info = buy_now_items[i];

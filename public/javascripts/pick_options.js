@@ -10,7 +10,7 @@ function pick_options_update(data) {
 	for(i in buy_later_items) {
 		var info = buy_later_items[i];
 		var image = product_image_make(info.image_urls[0], info.image_urls[1], 'right');
-		html.push('<div>' + image + info.title_parts.join('<br/>') + '</div>');
+		html.push('<div class="product">' + image + info.title_parts.join('<br/>') + '</div>');
 		html.push('<div class="button move" onclick="pick_list_move(\'buy_later\', \'buy_now\', ' + info.id + ')"> Shopping List </div>');
 	}
 	if(html.length == 0) html.push('<p class="empty">Your wish list is <strong>empty</strong>.</p>');

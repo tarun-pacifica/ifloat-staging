@@ -1,7 +1,7 @@
 #po_buy_later div.button {
 	cursor: pointer;
 	height: 18px;
-	margin: 5px 0 0 4px;
+	margin: 1px 0 5px 65px;
 	padding: 5px 0 0 25px;
 	width: 137px;
 }
@@ -16,6 +16,18 @@
 
 #po_buy_later div.button:active {
 	background-position: 0 -46px;
+}
+
+#po_buy_later div.product {
+	padding-top: 5px;
+}
+
+#po_buy_later img {
+	border: 1px solid gray;
+	float: left;
+	height: 50px;
+	margin: 0 7px;
+	width: 50px;
 }
 
 #po_buy_later p.empty {
@@ -62,7 +74,6 @@
 
 #po_buy_now div.button {
 	cursor: pointer;
-/*	float: right;*/
 	height: 18px;
 	padding: 5px 0 0 25px;
 	width: 60px; /* 137px */

@@ -32,8 +32,11 @@ function pick_options_update(data) {
 		html.push('<tr class="' + parity + '">');
 		
 		html.push('<td class="product">');
-		html.push('<div class="button move" onclick="pick_list_move(\'buy_now\', \'buy_later\', ' + info.id + ')"> Wish List </div>');
 		html.push('<div id="prod_' + info.product_id + '" class="product"></div>');
+		html.push('</td>');
+		
+		html.push('<td class="move">');
+		html.push('<div class="button move" onclick="pick_list_move(\'buy_now\', \'buy_later\', ' + info.id + ')"> Wish List </div>');
 		html.push('</td>');
 		
 		var prices_by_url = $ifloat_body.prices_by_url_by_product_id[info.product_id];
@@ -63,8 +66,8 @@ function pick_options_update(data) {
 		empty_warning.show();
 		facilities_row.hide();
 	} else {
-		html.push('<tr>');
-		html.push('<td> </td>');
+		html.push('<tr class="counts">');
+		html.push('<td colspan="2"> </td>');
 		
 		for(i in fac_urls) {
 			html.push('<td class="count">');

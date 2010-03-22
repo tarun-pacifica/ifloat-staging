@@ -40,7 +40,7 @@
 				</table>
 				
 				<% unless @related_media.empty? %>
-				<div class="button media" onclick="alert('Not wired up yet.')">Related Media</div>
+				<div class="button media" onclick="$('#related_media').dialog('open')">Related Media</div>
 				<% end %>
 				
 				<div id="pick_buttons"> </div>
@@ -103,6 +103,12 @@
 
 </div>
 
+<% unless @related_media.empty? %>
+<div id="related_media" title="Related Media">
+	<%= @related_media.map { |name, url| "<a href=#{url.inspect} target=\"_blank_\">#{name}</a>" }.join(" ") %>
+</div>
+<% end %>
+
 <script type="text/javascript" charset="utf-8">
 	$ifloat_body = {product_id: <%= @product.id %>};
 	
@@ -110,5 +116,12 @@
 	<% product_ids = @related_products_by_rel_name.values.map { |products| products.map { |product| product.id } }.flatten.uniq %>
 	product_links_load(<%= product_ids.to_json %>);
 	$('#product_detail .relations div').each(function() { $(this).children('.product:gt(2)').hide(); });
+	<% end %>
+	
+	<% unless @related_media.empty? %>
+	var related_media = $('#related_media');
+	related_media.dialog({autoOpen: false, modal: true, resizable: false});
+	related_media.dialog('option', 'buttons', {Close: function() {$('#related_media').dialog('close')}});
+	related_media.data('width.dialog', 700 + 'px');
 	<% end %>
 </script>

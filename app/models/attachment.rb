@@ -12,9 +12,20 @@
 class Attachment
   include DataMapper::Resource
   
-  ROLES = ["image", "image_hi_res", "brochure", "specification", "dimensions",
-           "installation", "operation", "maintenance", "parts", "review",
-           "user_experience", "safety_data_sheet"]
+  ROLES = {
+    "image"             => "Image",
+    "image_hi_res"      => "High Resolution Image",
+    "brochure"          => "Brochure",
+    "specification"     => "Specification Set",
+    "dimensions"        => "Dimension Set",
+    "installation"      => "Installation Guide",
+    "operation"         => "Operation Guide",
+    "maintenance"       => "Maintenance Guide",
+    "parts"             => "Parts Listing",
+    "review"            => "Review",
+    "user_experience"   => "User Experience Review",
+    "safety_data_sheet" => "Safety Data Sheet"
+  }
   
   property :id, Serial
   property :role, String, :unique_index => :seq_num_per_prod_per_role
@@ -24,7 +35,7 @@ class Attachment
   belongs_to :product
     property :product_id, Integer, :unique_index => :seq_num_per_prod_per_role
   
-  validates_within :role, :set => ROLES
+  validates_within :role, :set => ROLES.keys
   
   def self.product_role_assets(product_ids, include_chains = true)
     return [] if product_ids.empty?

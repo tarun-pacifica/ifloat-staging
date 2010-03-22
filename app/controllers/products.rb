@@ -1,4 +1,4 @@
-class Products < Application
+class Products < Application  
   def batch(ids)
     product_ids = ids.split("_").map { |id| id.to_i }.uniq[0, 100]
     
@@ -46,23 +46,22 @@ class Products < Application
     @image_urls = (assets_by_role.delete("image") || []).map { |asset| asset.url }
     @image_urls << "/images/common/no_image.png" if @image_urls.empty?
     
-    # TODO: consider how everything below here will be marshalled into the related_media panel
     @related_media = []
     assets_by_role.sort.each do |role, assets|
-      next if role == "source_notes"
-      
-      name = role.tr("_", " ").downcase.gsub(/\b\w/) { |s| s.upcase }
+      name = Attachment::ROLES[role]
 
       if assets.size == 1
         @related_media << [name, assets.first.url]
       else
         assets.each_with_index do |asset, i|
-          @related_media << ["#{name} #{i}", asset.url]
+          @related_media << ["#{name} #{i + 1}", asset.url]
         end
       end
     end
         
-    stub = (@body_values_by_name["reference:wikipedia"].first rescue nil)
-    @related_media << ["Wikipedia Article", "http://en.wikipedia.org/wiki/#{stub}"] unless stub.nil?
+    (@body_values_by_name["reference:wikipedia"] || []).each do |stub|
+      title = stub.split("_").map { |word| word[0..0].upcase + word[1..-1] }.join(" ")
+      @related_media << ["#{title.inspect} Wikipedia Article", "http://en.wikipedia.org/wiki/#{stub}"]
+    end
   end
 end

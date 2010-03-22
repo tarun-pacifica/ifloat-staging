@@ -199,7 +199,7 @@ class ProductParser < AbstractParser
 
     when /^attachment\.([a-z_]+)\.(\d+)$/
       role, seq_num = $1, $2
-      raise "unknown role: #{role}" unless Attachment::ROLES.include?(role)
+      raise "unknown role: #{role}" unless Attachment::ROLES.has_key?(role)
       [:attachments, role, seq_num.to_i]
 
     else raise "unknown/invalid header: #{header}"

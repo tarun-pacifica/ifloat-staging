@@ -1,7 +1,7 @@
 module Merb
   module GlobalHelpers
     # TODO: augment to accept UOMs and then use in formatting prices _before_ they go out over JSON
-    def money(amount, currency = session.currency, per_unit = nil)
+    def money(amount, currency, per_unit = nil)
       return nil if amount.nil?
       
       prefix =

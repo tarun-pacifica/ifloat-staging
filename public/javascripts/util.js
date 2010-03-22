@@ -45,14 +45,6 @@ function util_highlight_row(action) {
 	else row.removeClass('hover');
 }
 
-function util_money(amount, currency) {
-	var prefix = '';
-	if(currency == "GBP") prefix = '&#163;';
-	
-	var postfix = (prefix == '' ? ' ' + currency : '');
-  return [prefix, parseFloat(amount).toFixed(2), postfix].join('');
-}
-
 function util_pluralize(count, singular) {
 	return count + ' ' + (count == 1 ? singular : singular + 's');
 }

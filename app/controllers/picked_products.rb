@@ -104,6 +104,13 @@ class PickedProducts < Application
     
     product_ids = non_compare_picks.map { |pick| pick.product_id }
     @prices_by_url_by_product_id = Product.prices_by_url_by_product_id(product_ids, session.currency)
+    @prices_by_url_by_product_id.values.each do |prices_by_url|
+      formatted_prices_by_url = {}
+      prices_by_url.each do |url, price|
+        formatted_prices_by_url[url] = money(price, session.currency)
+      end
+      prices_by_url.update(formatted_prices_by_url)
+    end
     
     # TODO: replace simplified logic with a DB lookup based on @prices_by_url_by_product_id when > 1 partners
     @facility_ids_by_url = {}

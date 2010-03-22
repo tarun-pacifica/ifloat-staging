@@ -46,7 +46,7 @@ function pick_options_update(data) {
 				var url = fac_urls[j];
 				var price = prices_by_url[url];
 				if(price) {
-					html.push('<td class="price">' + util_money(price, $ifloat_body.currency) + '</td>');
+					html.push('<td class="price">' + price + '</td>');
 					counts_by_url[url] += 1;
 				} else {
 					html.push('<td>Not in stock</td>');

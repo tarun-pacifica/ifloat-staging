@@ -4,13 +4,11 @@ class PickedProducts < Application
     raise NotFound if facility.nil?
     return redirect("/picked_products/options") if facility.primary_url.nil?
     
-    @picks_by_group = session.picked_products.group_by { |pick| pick.group }
-    return redirect("/picked_products/options") unless @picks_by_group.has_key?("buy_now")
-    
     prod_ids_by_group = {}
-    @picks_by_group.each do |group, picks|
-      prod_ids_by_group[group] = picks.map { |pick| pick.product_id }
+    session.picked_products.each do |pick|
+      (prod_ids_by_group[pick.group] ||= []).push(pick.product_id)
     end
+    return redirect("/picked_products/options") unless prod_ids_by_group.has_key?("buy_now")
     
     product_ids = prod_ids_by_group.values.flatten
     fac_prods_by_prod_id = facility.map_products(product_ids)

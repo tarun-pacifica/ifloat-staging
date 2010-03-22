@@ -85,7 +85,7 @@ function pick_lists_bind_unavailable(partner_panel) {
 	function show_unavailable() {
 		var item = $(this);
 		this.original_html = item.html();
-		item.html('<p>UNAVAILABLE</p>');
+		item.html('<p>Not in stock</p>');
 		item.css('color', 'red');
 	}
 

@@ -14,6 +14,7 @@ function pick_options_update(data) {
 		html.push('<div class="button move" onclick="pick_list_move(\'buy_later\', \'buy_now\', ' + info.id + ')"> Shopping List </div>');
 	}
 	if(html.length == 0) html.push('<p class="empty">Your wish list is <strong>empty</strong>.</p>');
+	else html.push('<hr class="terminator" />');
 	buy_later.find('.sections').html(html.join(' '));
 	
 	var counts_by_url = {};

@@ -12,32 +12,38 @@
 	<a class="back" href="/picked_products/options">&lt;&lt; Back to iFloat</a>
 	
 	<div id="pl_buy_now" class="pick_list">
-		<span class="name">Shopping List</span>
-		<span class="total"></span>
+		<div class="menu">
+			<span class="name">Shopping List</span>
+		</div>
 		<div class="items"></div>
 	</div>
-	
+
 	<div id="pl_buy_later" class="pick_list">
-		<span class="name">Wish List</span>
-		<span class="total"></span>
+		<div class="menu">
+			<span class="name">Wish List</span>
+		</div>
 		<div class="items"></div>
 	</div>
 </div>
 
+<iframe id="partner_store" name="partner_store"></iframe>
+
 <script type="text/javascript">
-$(document).ready(function() {
+	$ifloat_body = {}
+	
+	$('body').css('background', 'white');
+
 	var partner_panel = $('#partner_panel');
 	partner_panel.data('partner_urls', <%= @partner_product_urls.to_json %>);
 	pick_lists_update();
 	
 	var partner_store = $('#partner_store');
-	var find_bar_width = partner_panel.width() + 5;
+	var find_bar_width = partner_panel.width();
 	function auto_size_partner_store() { partner_store.width($(window).width() - find_bar_width + 'px'); }
 	auto_size_partner_store();
 	$(window).resize(auto_size_partner_store);
 	partner_store.css('left', find_bar_width + 'px');
 	partner_store.attr('src', <%= @partner_url.inspect %>);
-});
 </script>
 
-<iframe id="partner_store" name="partner_store"></iframe>
+

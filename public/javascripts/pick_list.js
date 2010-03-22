@@ -47,7 +47,8 @@ function pick_list_make_link(info, partner_urls) {
 	
 	var link_url = (partner ? partner_urls[info.product_id] : info.url);
 	var klass = (link_url ? 'available' : 'unavailable');
-	var target = (partner ? 'partner_store' : '');
+	var target = '';
+	if(link_url && partner) target = 'partner_store';
 	if(!link_url) link_url = '#';
 	
 	var image = product_image_make(info.image_urls[0], partner ? undefined : info.image_urls[1]);
@@ -145,8 +146,11 @@ function pick_lists_update_handle(data) {
 		var pick_list = $('#pl_' + group);
 		pick_list.children('.items').html(links.join(' '));
 		pick_list.find('.total').text(total_products);
-		pick_list.css('background-position', '0 -21px');
-		if(!partner) pick_list_enable(pick_list);
+		
+		if(!partner) {
+			pick_list_enable(pick_list);
+			pick_list.css('background-position', '0 -21px');
+		}
 	}
 	
 	if(partner) {

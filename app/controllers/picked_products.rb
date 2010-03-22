@@ -5,7 +5,7 @@ class PickedProducts < Application
     return redirect("/picked_products/options") if facility.primary_url.nil?
     
     @picks_by_group = session.picked_products.group_by { |pick| pick.group }
-    return redirect("/picked_products/options") if @picks_by_group["buy_now"].empty?
+    return redirect("/picked_products/options") unless @picks_by_group.has_key?("buy_now")
     
     prod_ids_by_group = {}
     @picks_by_group.each do |group, picks|

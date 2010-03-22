@@ -151,6 +151,7 @@
 
 #po_buy_now table td.product {
 	border-top: 1px solid silver;
+	max-width: 447px;
 }
 
 #po_buy_now table tr.counts {

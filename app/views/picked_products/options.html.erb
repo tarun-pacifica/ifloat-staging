@@ -10,14 +10,18 @@
 <div id="po_buy_now" class="panel major">
 	<div class="title"> <h2>Shopping List</h2> </div>
 	
-	<table>
-		<tr class="facilities">
-			<td colspan="2"> </td>
-			<% @facility_urls.each do |url| %>
-			<td> <img src="/images/partner/facilities/<%= url %>.png" alt=<%= url.inspect %> /> </td>
-			<% end %>
-		</tr>
-	</table>
+	<div class="body">
+		<p class="empty">Your shopping list is <strong>empty</strong>.</p>
+	
+		<table>
+			<tr class="facilities">
+				<td> </td>
+				<% @facility_urls.each do |url| %>
+				<td class="facility"> <img src="/images/partner/facilities/<%= url %>.png" alt=<%= url.inspect %> /> </td>
+				<% end %>
+			</tr>
+		</table>
+	</div>
 </div>
 
 </div>
@@ -25,6 +29,7 @@
 <script type="text/javascript" charset="utf-8">
 	var $ifloat_body = {
 		currency: <%= session.currency.inspect %>,
+		facility_ids_by_url: <%= @facility_ids_by_url.to_json %>,
 		facility_urls: <%= @facility_urls.to_json %>,
 		prices_by_url_by_product_id: <%= @prices_by_url_by_product_id.to_json %>
 	};

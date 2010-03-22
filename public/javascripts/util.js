@@ -53,6 +53,10 @@ function util_money(amount, currency) {
   return [prefix, parseFloat(amount).toFixed(2), postfix].join('');
 }
 
+function util_pluralize(count, singular) {
+	return count + ' ' + (count == 1 ? singular : singular + 's');
+}
+
 function util_preload_image(url) {
 	(new Image()).src = url;
 }

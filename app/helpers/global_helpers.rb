@@ -1,7 +1,7 @@
 module Merb
   module GlobalHelpers
-    # TODO: remove
-    def money(amount, currency = session.currency)
+    # TODO: augment to accept UOMs and then use in formatting prices _before_ they go out over JSON
+    def money(amount, currency = session.currency, per_unit = nil)
       return nil if amount.nil?
       
       prefix =
@@ -10,7 +10,8 @@ module Merb
         else nil
         end
         
-      postfix = (prefix.nil? ? " #{currency}" : nil)
+      postfix = (prefix.nil? ? " #{currency}" : "")
+      postfix += " / #{per_unit}" unless per_unit.nil?
       
       [prefix, "%0.2f" % amount, postfix].join
     end

@@ -13,12 +13,13 @@ function pick_options_update(data) {
 		html.push('<div>' + image + info.title_parts.join('<br/>') + '</div>');
 		html.push('<div class="button move" onclick="pick_list_move(\'buy_later\', \'buy_now\', ' + info.id + ')"> Shopping List </div>');
 	}
-	if(html.length == 0) html.push('<p>Your wish list is <strong>empty</strong>.</p>');
+	if(html.length == 0) html.push('<p class="empty">Your wish list is <strong>empty</strong>.</p>');
 	buy_later.find('.sections').html(html.join(' '));
 	
 	var counts_by_url = {};
-	var facility_urls = $ifloat_body.facility_urls;
-	for(i in facility_urls) counts_by_url[facility_urls[i]] = 0;
+	var fac_ids_by_url = $ifloat_body.facility_ids_by_url;
+	var fac_urls = $ifloat_body.facility_urls;
+	for(url in fac_ids_by_url) counts_by_url[url] = 0;
 	
 	var parity = 'odd';
 	var product_ids = []
@@ -30,16 +31,18 @@ function pick_options_update(data) {
 		parity = (parity == 'even' ? 'odd' : 'even');
 		html.push('<tr class="' + parity + '">');
 		
-		html.push('<td> <div class="button move" onclick="pick_list_move(\'buy_now\', \'buy_later\', ' + info.id + ')"> Wish List </div> </td>');
-		html.push('<td> <div id="prod_' + info.product_id + '" class="product"></div> </td>');
+		html.push('<td class="product">');
+		html.push('<div class="button move" onclick="pick_list_move(\'buy_now\', \'buy_later\', ' + info.id + ')"> Wish List </div>');
+		html.push('<div id="prod_' + info.product_id + '" class="product"></div>');
+		html.push('</td>');
 		
 		var prices_by_url = $ifloat_body.prices_by_url_by_product_id[info.product_id];
 		if(prices_by_url) {
-			for(j in facility_urls) {
-				var url = facility_urls[j];
+			for(j in fac_urls) {
+				var url = fac_urls[j];
 				var price = prices_by_url[url];
 				if(price) {
-					html.push('<td>' + util_money(price, $ifloat_body.currency) + '</td>');
+					html.push('<td class="price">' + util_money(price, $ifloat_body.currency) + '</td>');
 					counts_by_url[url] += 1;
 				} else {
 					html.push('<td>Not in stock</td>');
@@ -52,12 +55,32 @@ function pick_options_update(data) {
 	
 	// TODO: summary row
 	
+	var empty_warning = buy_now.find('p.empty');
 	var facilities_row = buy_now.find('tr.facilities');
-	if(html.length == 0) facilities_row.hide();
-	else facilities_row.show();
-	
 	facilities_row.nextAll().remove();
-	facilities_row.after(html.join(' '));
+	
+	if(html.length == 0) {
+		empty_warning.show();
+		facilities_row.hide();
+	} else {
+		html.push('<tr>');
+		html.push('<td> </td>');
+		
+		for(i in fac_urls) {
+			html.push('<td class="count">');
+			var url = fac_urls[i];
+			var count = counts_by_url[url];
+			if(count == 0) html.push('No items in stock');
+			else html.push('<a href="/picked_products/buy/' + fac_ids_by_url[url] + '">Buy ' + util_pluralize(count, 'item') + '</a>');
+			html.push('</td>');
+		}
+		
+		html.push('</tr>');
+		
+		empty_warning.hide();
+		facilities_row.show();
+		facilities_row.after(html.join(' '));
+	}
 	
 	// TODO: introduce caching and load all products first time
 	// TODO: should then be able to insert / remove rows without jumping about

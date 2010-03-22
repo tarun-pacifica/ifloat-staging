@@ -105,8 +105,12 @@ class PickedProducts < Application
     product_ids = non_compare_picks.map { |pick| pick.product_id }
     @prices_by_url_by_product_id = Product.prices_by_url_by_product_id(product_ids, session.currency)
     
-    # TODO: remove hard-coding when we have more than a couple of partners and a DB lookup based on @prices_by_url_by_product_id is justified
-    @facility_urls = %w(marinestore.co.uk)
+    # TODO: replace simplified logic with a DB lookup based on @prices_by_url_by_product_id when > 1 partners
+    @facility_ids_by_url = {}
+    Facility.all.each do |facility|
+      @facility_ids_by_url[facility.primary_url] = facility.id
+    end
+    @facility_urls = @facility_ids_by_url.keys
     
     render
   end

@@ -172,7 +172,7 @@
 	white-space: nowrap;
 }
 
-/* Verify needed by Firefox */
+/* TODO: Verify needed by Firefox */
 #product_detail .relations a.product h2 {
 	border: none;
 }

@@ -55,16 +55,15 @@ function pick_options_update(data) {
 		html.push('</td>');
 		
 		var prices_by_url = $ifloat_body.prices_by_url_by_product_id[info.product_id];
-		if(prices_by_url) {
-			for(j in fac_urls) {
-				var url = fac_urls[j];
-				var price = prices_by_url[url];
-				if(price) {
-					html.push('<td class="price">' + price + '</td>');
-					counts_by_url[url] += 1;
-				} else {
-					html.push('<td>Not in stock</td>');
-				}
+		if(prices_by_url == undefined) prices_by_url = {}
+		for(j in fac_urls) {
+			var url = fac_urls[j];
+			var price = prices_by_url[url];
+			if(price) {
+				html.push('<td class="price">' + price + '</td>');
+				counts_by_url[url] += 1;
+			} else {
+				html.push('<td class="price">Not in stock</td>');
 			}
 		}
 		

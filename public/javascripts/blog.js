@@ -1,11 +1,23 @@
-function blog_article_edit(a) {
-	var article = $(a).parents('.article');
+function blog_article_edit() {
+	var article = $(event.target).parents('.article');
 	article.children().hide();
 	
 	var form = article.children('form');
 	form.show();
-	form.animate({backgroundColor: '#FCBB1A'}).animate({backgroundColor: '#F3F3F3'});
-	form.animate({backgroundColor: '#FCBB1A'}).animate({backgroundColor: '#F3F3F3'});
+	form.animate({backgroundColor: 'yellow'}).animate({backgroundColor: '#F3F3F3'});
 	
 	$(document).scrollTop(form.offset().top);
+}
+
+function blog_article_validate() {
+	var form = $(event.target);
+	
+	var errors = [];
+	if(form.find('input:text').val() == '') errors.push("Articles must have a title.");
+	if(form.find('textarea').val() == '') errors.push("Articles must have a body.");
+	
+	if(errors.length == 0) return true;
+	
+	alert(errors.join('\n'));
+	return false;
 }

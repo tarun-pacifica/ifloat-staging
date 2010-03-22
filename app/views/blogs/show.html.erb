@@ -1,18 +1,23 @@
 <%= partial "common/header" %>
 
-<div id="blog">
-	<div id="blog_info">
-		<div class="title">Weblog</div>
+<div id="body">
+
+<div id="blog_info" class="panel minor">
+	<div class="title"> <h2><%= @blog.user.name %></h2> </div>
+	<div class="sections">
 		<% unless @blog_image_src.nil? %> <img src=<%= @blog_image_src.inspect %> /> <% end %>
-		<h1><%= @blog.user.name %></h1>
 		<hr />
+		
 		<p><%= @blog.description %></p>
+		
 		<% unless @blog.email.nil? %>
 		<p class="link"> <a href="mailto:<%= @blog.email %>"><%= @blog.email %></a> </p>
 		<% end %>
+		
 		<% unless @blog.primary_url.nil? %>
 		<p class="link"> <a href="http://<%= @blog.primary_url %>"><%= @blog.primary_url %></a> </p>
 		<% end %>
+		
 		<% unless @blog.call_to_action.nil? %>
 		<%= form :action => resource(:cached_finds) do %>
 			<%= hidden_field :language_code, :value => session.language %>
@@ -21,15 +26,21 @@
 		<% end =%>
 		<% end %>
 	</div>
+</div>
+
+<div id="blog" class="panel major">
+	<div class="title">
+		<h2><%= panel_title_back_to_find(session.most_recent_cached_find) %></h2>
+	</div>
 	
-	<div id="blog_articles">
+	<div class="body">
 		<% if @admin %>
-		<%= form :action => resource(:articles) do %>
+		<%= form :action => resource(:articles), :onsubmit => "return blog_article_validate()" do %>
 			<%= hidden_field :blog_id, :value => @blog.id %>
 			<h3>Create Article</h3>
 			<p><%= text_field :title, :value => "Title", :size => 50, :maxlength => 50 %></p>
 			<p><%= text_area :name => "body" %></p>
-			<p>Image to attach: <%= file_field :name => "image"%></p>
+			<p>Attach image: <%= file_field :name => "image"%></p>
 			<p><%= submit "Create" %></p>
 		<% end =%>
 		<% end %>
@@ -39,24 +50,24 @@
 		<div class="article">
 			<% if @admin %>
 			<p class="update" onclick="blog_article_edit(this)">Click here to update <%= article.title.inspect %>...</p>
-			<%= form :action => resource(article), :class => "update" do %>
+			<%= form :action => resource(article), :class => "update", :onsubmit => "return blog_article_validate()" do %>
 				<%= hidden_field :_method, :value => "PUT" %>
 				<h3>Update Article</h3>
 				<p><%= text_field :title, :value => article.title, :size => 50, :maxlength => 50 %></p>
 				<p><%= text_area article.body, :name => "body" %></p>
 				<% if image.nil? %>
-				<p>Image to attach: <%= file_field :name => "image"%></p>
+				<p>Attach image: <%= file_field :name => "image"%></p>
 				<% else %>
 				<img src=<%= image.url.inspect %> />
 				<p>Replace image with: <%= file_field :name => "image"%></p>
 				<% end %>
 				<p><%= submit "Update" %></p>
-				<hr />
+				<hr class="terminator" />
 			<% end =%>
 			<% end %>
 			
 			<h1><%= article.title %></h1>
-			<h2>Written on <%= article.created_at.strftime("%B %d, %Y") %> by <%= article.user.name %></h2>
+			<h2>Posted on <%= article.created_at.strftime("%B %d, %Y") %> by <%= article.user.name %></h2>
 		
 			
 			<% unless image.nil? %> <img src=<%= image.url.inspect %> /> <% end %>
@@ -65,8 +76,10 @@
 			<p><%= paragraph %></p>
 			<% end %>
 		
-			<hr />
+			<hr class="terminator" />
 		</div>
 		<% end %>
-	</div>	
+	</div>
+</div>
+
 </div>

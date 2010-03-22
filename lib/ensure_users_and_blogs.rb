@@ -41,7 +41,8 @@ if toms_blog.nil?
   toms_blog = tom.blogs.new(:company => Company.first(:reference => "GBR-04426357"),
                             :name => "tom_cunliffe",
                             :email => "info@tomcunliffe.com",
-                            :primary_url => "www.tomcunliffe.com")
+                            :primary_url => "www.tomcunliffe.com",
+                            :call_to_action => "Find books by Tom")
   toms_blog.description = "After a lifetime of cruising, teaching, examining and skippering to high levels, I find I am often asked for guidance or an opinion. Sometimes this may be an 'expert opinion' to be used in a legal dispute, but often a private client merely wishes to save trouble and expense by tapping into my experience."
   whiny_save(toms_blog)
 end

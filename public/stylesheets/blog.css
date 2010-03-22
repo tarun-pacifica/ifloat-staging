@@ -1,94 +1,67 @@
-#blog {
-	margin: 38px auto 0 auto;
-	width: 906px;
+#blog .article {
+	padding: 10px;
 }
 
-#blog_articles {
-	float: left;
-	margin-left: 10px;
-	width: 644px;
-}
-
-#blog_articles form {
-	background: #F3F3F3;
-	border: 1px solid silver;
-	margin-bottom: 20px;
-	padding: 5px 15px 10px 15px;
-}
-
-#blog_articles form.update {
-	display: none;
-}
-
-#blog_articles form hr {
-	border: none;
-	height: 0;
+#blog .article h1 {
+	font-size: 18px;
 	margin: 0;
 }
 
-#blog_articles form img {
-	float: left;
-	margin: 5px 5px 0 0;
-	width: 100px;
-}
-
-#blog_articles h1 {
-	margin: 0;
-}
-
-#blog_articles h2 {
+#blog .article h2 {
 	color: #404040;
 	font-size: 14px;
 	font-weight: normal;
 	margin: 3px 0 10px 0;
 }
 
-#blog_articles h3 {
-	float: left;
-	margin: 8px 10px 0 0;
-}
-
-#blog_articles hr {
-	clear: both;
-}
-
-#blog_articles img {
+#blog .article img {
 	float: left;
 	margin: 0 10px 10px 0;
 	width: 200px;
 }
 
-#blog_articles p {
-	margin: 5px 0 0 0;
-}
-
-#blog_articles p.update {
-	background: #404040;
-	color: white;
+#blog .article p.update {
+	background: #DCE9F7;
+	color: #404040;
 	cursor: pointer;
+	margin: 0 -10px 5px -10px;
 	padding: 5px;
 }
 
-#blog_articles textarea {
+#blog form {
+	background: #F3F3F3;
+	border-bottom: 1px solid silver;
+	margin-bottom: 10px;
+	padding: 5px 15px 10px 15px;
+}
+
+#blog form.update {
+	border-top: 1px solid silver;
+	display: none;
+	margin-left: -10px;
+	margin-right: -10px;
+}
+
+#blog form h3 {
+	float: left;
+	margin: 8px 10px 0 0;
+}
+
+#blog form img {
+	float: left;
+	margin: 5px 5px 0 0;
+	width: 100px;
+}
+
+#blog form textarea {
 	height: 200px;
 	width: 100%;
 }
 
-#blog_info {
-	background: #D2EFFF;
-	border: 1px silver solid;
-	border-top: none;
-	float: left;
-	padding-bottom: 5px;
-	width: 250px;
+#blog p {
+	margin: 5px 0 0 0;
 }
 
-#blog_info .title {
-	background: url(/images/blog/backgrounds/panel_header.png) repeat-x;
-	color: white;
-	height: 16px;
-	padding: 4px 10px;
-}
 
 #blog_info a {
 	color: #404040;
@@ -100,21 +73,16 @@
 	text-decoration: underline;
 }
 
-#blog_info h1 {
-	font-size: 14px;
+#blog_info img {
 	margin: 10px;
+	width: 230px;
 }
 
 #blog_info hr {
 	background: silver;
 	border: none;
 	height: 1px;
-	margin: 10px;
-}
-
-#blog_info img {
-	margin: 10px;
-	width: 230px;
+	margin: 0 10px;
 }
 
 #blog_info p {
@@ -123,4 +91,8 @@
 
 #blog_info p.link {
 	text-align: center;
+}
+
+#blog_info .sections {
+	padding-bottom: 10px;
 }

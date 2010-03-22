@@ -1,3 +1,15 @@
+function pick_options_to_shop(pick_id) {
+	var button = $(event.target);
+	button.fadeOut('fast');
+	button.prev().fadeOut('fast');
+	pick_list_move('buy_later', 'buy_now', pick_id);
+}
+
+function pick_options_to_wish(pick_id) {
+	$(event.target).parents('tr').fadeOut('fast');
+	pick_list_move('buy_now', 'buy_later', pick_id);
+}
+
 function pick_options_update(data) {
 	var buy_later = $('#po_buy_later');
 	if(buy_later.length == 0) return;
@@ -14,7 +26,7 @@ function pick_options_update(data) {
 		
 		var image = product_image_make(info.image_urls[0], info.image_urls[1], 'right');
 		html.push('<div class="product">' + image + info.title_parts.join('<br/>') + '</div>');
-		html.push('<div class="button move" onclick="pick_list_move(\'buy_later\', \'buy_now\', ' + info.id + ')"> Shopping List </div>');
+		html.push('<div class="button move" onclick="pick_options_to_shop(' + info.id + ')"> Shopping List </div>');
 	}
 	if(html.length == 0) html.push('<p class="empty">Your wish list is <strong>empty</strong>.</p>');
 	else html.push('<hr class="terminator" />');
@@ -39,7 +51,7 @@ function pick_options_update(data) {
 		html.push('</td>');
 		
 		html.push('<td class="move">');
-		html.push('<div class="button move" onclick="pick_list_move(\'buy_now\', \'buy_later\', ' + info.id + ')"> Wish List </div>');
+		html.push('<div class="button move" onclick="pick_options_to_wish(' + info.id + ')"> Wish List </div>');
 		html.push('</td>');
 		
 		var prices_by_url = $ifloat_body.prices_by_url_by_product_id[info.product_id];
@@ -58,8 +70,6 @@ function pick_options_update(data) {
 		
 		html.push('</tr>');
 	}
-	
-	// TODO: summary row
 	
 	var empty_warning = buy_now.find('p.empty');
 	var facilities_row = buy_now.find('tr.facilities');
@@ -88,8 +98,5 @@ function pick_options_update(data) {
 		facilities_row.after(html.join(' '));
 	}
 	
-	// TODO: introduce caching and load all products first time
-	// TODO: should then be able to insert / remove rows without jumping about
-	// TODO: can then fade in (and maybe even fade out rows)
 	product_links_load(product_ids);
 }

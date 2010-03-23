@@ -59,11 +59,9 @@ function filter_panel_reload(data) {
 function filter_panel_remove(filter_id) {
 	$('#filter_' + filter_id).fadeOut('fast');
 	$.post(filter_configure_url(filter_id), {method: 'delete'}, filter_panel_reload, 'json');
-	// TODO: spinner
 }
 
 function filter_panel_remove_all() {
 	$('#filter_panel').find('h3,.filter,hr').fadeOut('fast');
 	$.getJSON('/cached_finds/' + $ifloat_body.find_id + '/reset/', filter_panel_reload);
-	// TODO: spinner
 }

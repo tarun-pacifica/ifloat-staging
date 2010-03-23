@@ -1,6 +1,6 @@
 function filter_configure(filter_id) {
 	$.getJSON(filter_configure_url(filter_id), filter_configure_handle);
-	// TODO: spinner
+	$('#filter_choose').fadeOut('slow');
 }
 
 function filter_configure_apply() {
@@ -18,7 +18,7 @@ function filter_configure_apply() {
 	}
 		
 	$.post(filter_configure_url(filter_configure.data('id')), data, filter_configure_apply_handle, 'json');
-	// TODO: spinner
+	filter_configure.fadeOut('slow');
 }
 
 function filter_configure_apply_handle(data) {
@@ -80,7 +80,7 @@ function filter_configure_handle(filter) {
 	
 	filter_configure.data('id', filter.id);
 	filter_configure.data('type', filter.type);
-	filter_configure.dialog('open');
+	filter_configure.show().dialog('open');
 }
 
 function filter_configure_url(filter_id) {

@@ -49,13 +49,4 @@ class PropertyValue
   validates_with_block :type do
     (self.class != PropertyValue and self.kind_of?(PropertyValue)) || [false, "must be a sub-class of PropertyValue"]
   end
-    
-  def self.text?
-    false
-  end
-  
-  # TODO: check all pvalue specs for where this may be stubbed
-  # def property_type
-  #   definition.nil? ? nil : definition.property_type
-  # end
 end

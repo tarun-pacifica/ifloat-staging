@@ -30,10 +30,6 @@ class NumericPropertyValue < PropertyValue
     attributes
   end
   
-  def self.date?
-    false
-  end
-  
   # TODO: spec to reflect params and default unit behaviour (fractional support etc...)
   def self.format(min_value, max_value, range_separator = "...", unit = nil, params = {})
     params[:unit] = unit

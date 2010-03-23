@@ -10,10 +10,6 @@ class DatePropertyValue < NumericPropertyValue
   
   validates_absent :tolerance, :unit
   
-  def self.date?
-    true
-  end
-  
   # TODO: spec verbose examples
   def self.format_value(value, params = {})
     v = value.to_i

@@ -9,19 +9,15 @@
 	<% unless @hide_title %>
     <title>iFloat - Find, Buy, Float</title>
     <% end %>
+
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	<!-- <link rel="stylesheet" href="/stylesheets/compiled.css" type="text/css" media="screen" charset="utf-8" /> -->
-	<% Dir["public/stylesheets/*.css"].each do |path| %>
-		<link rel="stylesheet" href="/stylesheets/<%= File.basename(path) %>" type="text/css" media="screen" charset="utf-8" />
-	<% end %>
+
+	<link rel="stylesheet" href="/stylesheets/compiled.css" type="text/css" media="screen" charset="utf-8" />
 	<% unless @skip_javascript %>
 	<link rel="stylesheet" href="/stylesheets/ui/ui.css" type="text/css" media="screen" charset="utf-8" />
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js"></script>
-	<!-- <script src="/javascripts/compiled.js" type="text/javascript" charset="utf-8"></script> -->
-	<% Dir["public/javascripts/*.js"].each do |path| %>
-		<script type="text/javascript" src="/javascripts/<%= File.basename(path) %>"></script>
-	<% end %>
+	<script src="/javascripts/compiled.js" type="text/javascript" charset="utf-8"></script>
 	<% end %>
   </head>
 

@@ -16,10 +16,6 @@ class TextPropertyValue < PropertyValue
     {:text_value => value}
   end
   
-  def self.text? # TODO: spec (in this class and parent only)
-    true
-  end
-  
   def comparison_key # TODO: spec
     [text_value]
   end

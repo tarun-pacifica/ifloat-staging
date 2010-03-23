@@ -108,7 +108,7 @@ class CachedFinds < Application
     end
     
     session.most_recent_cached_find = @find
-    @find.accessed_at = DateTime.now # TODO: move to ensure_cached_find? - only used for expiry now
+    @find.accessed_at = DateTime.now
     @find.ensure_valid
     @find.save
     

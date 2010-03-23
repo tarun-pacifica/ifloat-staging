@@ -71,12 +71,4 @@ class PropertyDefinition
     end
     urls
   end
-  
-  def date?
-    property_type.value_class.date?
-  end
-  
-  def text?
-    property_type.value_class.text?
-  end
 end

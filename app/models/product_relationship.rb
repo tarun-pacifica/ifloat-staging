@@ -41,10 +41,6 @@ class ProductRelationship
   
   validates_within :name, :set => NAMES.keys
   
-  validates_with_block :property_definition, :if => :property_definition do
-    property_definition.text? || [false, "should be a text property"]
-  end
-  
   def self.related_products(product)
     product_ids_by_relationship = {}
     

@@ -221,7 +221,7 @@ class ProductParser < AbstractParser
       attributes = {:definition => property, :auto_generated => false, :sequence_number => seq_num}
       attributes.update(klass.parse_or_error(value))
       attributes[:unit] = unit unless unit.nil?
-      attributes[:language_code] = "ENG" if klass.text?
+      attributes[:language_code] = "ENG" if klass == TextPropertyValue
       ImportObject.new(klass, attributes)
       
     else "unknown component: #{component}"

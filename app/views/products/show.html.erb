@@ -89,9 +89,10 @@
 			<div>
 				<h3>This product <%= name.tr("_", " ") %>...</h3>
 				<%= products.map { |prod| "<div class=\"product\" id=\"prod_#{prod.id}\"></div>" }.join %>
-				<% if products.size > 3 %>
+				<% hidden = products.size - 3 %>
+				<% if hidden > 0 %>
 				<div class="more" onclick="product_detail_more_relations()">
-					(show <%= products.size - 3 %> more results)
+					(show <%= hidden %> more result<%= hidden == 1 ? "" : "s" %>)
 				</div>
 				<% end %>
 			</div>

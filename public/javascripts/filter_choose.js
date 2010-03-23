@@ -85,7 +85,7 @@ function filter_choose_load_handle(filters) {
 }
 
 function filter_choose_open() {
-	if($ifloat_body.filter_unused_count > 0) $('#filter_choose').show().dialog('open');
+	if($ifloat_body.filter_unused_count > 0) $('#filter_choose').dialog('open');
 }
 
 function filter_choose_title() {

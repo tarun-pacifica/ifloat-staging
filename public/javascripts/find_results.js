@@ -34,7 +34,7 @@ function find_results_update_handle(data) {
 	frps.find('.product').remove();
 	frps.find('.terminator').before(products.join(' '));
 		
-	$('#find_results_count').text(image_prod_count + ' / ' + total_prod_count);
+	$('#find_results_count').text(image_prod_count + ' / ' + util_pluralize(total_prod_count, ' product'));
 	
 	if(data.length == 0) {
 		frps.find('.terminator').before('<p>You have filtered out all possible products. To fix this, <strong>relax or remove some of your filters</strong>.</p>');

@@ -1,3 +1,7 @@
+#filter_panel .controls .button {
+	color: silver;
+}
+
 #filter_panel .sections .filter {
 	margin-left: 5px;
 	width: 240px;
@@ -40,22 +44,6 @@
 	background: url(/images/filter_panel/buttons/add.png) no-repeat;
 }
 
-#filter_panel_add:hover {
-	background-position: 0 -23px;
-}
-
-#filter_panel_add:active {
-	background-position: 0 -46px;
-}
-
 #filter_panel_remove_all {
 	background: url(/images/filter_panel/buttons/remove_all.png) no-repeat;
-}
-
-#filter_panel_remove_all:hover {
-	background-position: 0 -23px;
-}
-
-#filter_panel_remove_all:active {
-	background-position: 0 -46px;
 }

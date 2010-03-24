@@ -16,7 +16,11 @@ function filter_choose_load_handle(filters) {
 		return;
 	}
 	
-	$ifloat_body.filter_unused_count = filters.length;
+	if(filters.length == 0) {
+		filter_panel_button('add', 'disable');
+		return;
+	}
+	filter_panel_button('add', 'enable');
 	
 	var filters_by_section = util_group_by(filters, 'section');
 	
@@ -85,7 +89,7 @@ function filter_choose_load_handle(filters) {
 }
 
 function filter_choose_open() {
-	if($ifloat_body.filter_unused_count > 0) $('#filter_choose').dialog('open');
+	$('#filter_choose').dialog('open');
 }
 
 function filter_choose_title() {

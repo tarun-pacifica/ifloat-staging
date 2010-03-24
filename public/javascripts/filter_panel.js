@@ -6,6 +6,25 @@ function filter_panel_edit(filter_id) {
 	filter_configure(filter_id);
 }
 
+function filter_panel_button(name, action) {
+	var button = $('#filter_panel_' + name);
+	
+	if(action == 'enable') {
+		button.css('color', 'black');
+		button.mouseenter(function() { $(this).css('background-position', '0 -23px'); });
+		button.mouseleave(function() { $(this).css('background-position', '0 0');     });
+		
+		if(name == 'add') button.click(filter_choose_open);
+		else button.click(filter_panel_remove_all);
+	} else {
+		button.css('color', 'silver');
+		button.mouseenter(function() { $(this).css('background-position', '0 0');     });
+		button.mouseleave(function() { $(this).css('background-position', '0 0');     });
+		
+		button.unbind('click');
+	}
+}
+
 function filter_panel_load() {
 	$.getJSON('/cached_finds/' + $ifloat_body.find_id + '/filters/used', filter_panel_load_handle);
 	filter_choose_load();
@@ -35,7 +54,12 @@ function filter_panel_load_handle(filters) {
 		html.push('</table>');
 	}
 	
-	if(html.length > 0) html.push('<hr class="terminator" />');
+	if(html.length == 0) {
+		filter_panel_button('remove_all', 'disable');
+	} else {
+		filter_panel_button('remove_all', 'enable');
+		html.push('<hr class="terminator" />');
+	}
 	
 	$('#filter_panel .sections').html(html.join(' '));
 }

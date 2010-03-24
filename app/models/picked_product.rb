@@ -11,7 +11,7 @@
 class PickedProduct
   include DataMapper::Resource
   
-  GROUPS = %w(buy_later buy_now compare)
+  GROUPS = %w(buy_later buy_now compare).to_set
   
   property :id,           Serial
   property :created_at,   DateTime, :default => proc { DateTime.now }

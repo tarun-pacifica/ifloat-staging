@@ -36,9 +36,9 @@ class Asset
     "top-right-front", "top-right-back",
     "bottom-left-front", "bottom-left-back",
     "bottom-right-front", "bottom-right-back"
-  ]
+  ].to_set
   
-  BUCKETS = %w(articles blogs products property_icons)
+  BUCKETS = %w(articles blogs products property_icons).to_set
   IMAGE_FORMAT = /\.(gif|jpeg|jpg|png|tif|tiff)$/
   NAME_FORMAT = /^([\w\-\.]+?)(___(\d+))?\.([a-z]{3,})$/
   

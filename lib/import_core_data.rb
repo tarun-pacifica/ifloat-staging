@@ -50,7 +50,7 @@ class ImportSet
     TextPropertyValue       => [:product, :definition, :sequence_number, :language_code]
   }
   
-  TRUNK_CLASSES = [PropertyType, PropertyDefinition, Company, Asset, Product]
+  TRUNK_CLASSES = [PropertyType, PropertyDefinition, Company, Asset, Product].to_set
   
   def initialize
     @errors = []
@@ -606,7 +606,7 @@ mail_fail(errors.join("\n")) unless errors.empty?
 # Parse each class
 
 puts "=== Parsing CSVs ==="
-freshly_parsed_classes = []
+freshly_parsed_classes = Set.new
 import_set = ImportSet.new
 CLASSES.each do |klass|
   # TODO: remove once the corresponding get in the product parser is removed

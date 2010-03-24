@@ -3,7 +3,7 @@
 # See the Contact superclass.
 #
 class PhoneContact < Contact
-  VARIANTS = ["Landline", "Mobile", "Fax"]
+  VARIANTS = %w(Landline Mobile Fax).to_set
   
   validates_within :variant, :set => VARIANTS
   validates_format :value, :with => /^\+?[\d ]{8,}$/

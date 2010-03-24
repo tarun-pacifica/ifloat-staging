@@ -1,6 +1,7 @@
 class AbstractParser
-  ESSENTIAL_HEADERS = []
+  HEADERS = []
   KCODE = "NONE"
+  REQUIRED_VALUE_HEADERS = []
   
   def initialize(import_set)
     @import_set = import_set
@@ -131,12 +132,12 @@ class AbstractParser
   end
   
   def reject_blank_value?(head)
-    true
+    self.class.const_get("REQUIRED_VALUE_HEADERS").include?(head)
   end
   
   def validate_headers(headers)
-    self.class.const_get("ESSENTIAL_HEADERS").map do |header|
-      headers.has_key?(header) ? nil : "essential header missing: #{header}"
+    self.class.const_get("HEADERS").map do |header|
+      headers.has_key?(header) ? nil : "header missing: #{header}"
     end.compact
   end
 end

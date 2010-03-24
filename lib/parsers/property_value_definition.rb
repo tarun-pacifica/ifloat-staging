@@ -1,11 +1,12 @@
 class PropertyValueDefinitionParser < AbstractParser
-  ESSENTIAL_HEADERS = ["type", "value", "definition"]
+  HEADERS = %w(type value definition)
+  REQUIRED_VALUE_HEADERS = HEADERS.to_set
   
   
   private
   
   def generate_objects(parsed_fields)
-    type, value, definition = parsed_fields.values_at("type", "value", "definition")
+    type, value, definition = parsed_fields.values_at(*HEADERS)
     [ImportObject.new(PropertyValueDefinition, :property_type => type, :language_code => "ENG", :value => value, :definition => definition[0, 255])]
     # TODO: remove auto-truncation when data better
   end

@@ -1,5 +1,6 @@
 class TitleStrategyParser < AbstractParser
-  ESSENTIAL_HEADERS = ["Name", "Classes", "Title_1", "Title_2", "Title_3", "Title_4"]
+  HEADERS = %w(Name Classes Title_1 Title_2 Title_3 Title_4)
+  REQUIRED_VALUE_HEADERS = %w(Name)
   
   
   private
@@ -23,9 +24,5 @@ class TitleStrategyParser < AbstractParser
     else
       super
     end
-  end
-  
-  def reject_blank_value?(head)
-    head == "Name"
   end
 end

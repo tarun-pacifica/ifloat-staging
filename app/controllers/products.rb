@@ -20,7 +20,7 @@ class Products < Application
     
     @common_values, diff_values = @product.marshal_values(session.language, RANGE_SEPARATOR)
     
-    names = Set.new(%w(auto:title marketing:description marketing:feature_list marketing:summary reference:wikipedia))
+    names = %w(auto:title marketing:description marketing:feature_list marketing:summary reference:wikipedia).to_set
     @body_values_by_name = {}
     @common_values.each do |info|
       raw_name = info[:raw_name]

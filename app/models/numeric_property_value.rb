@@ -3,7 +3,7 @@
 # See the PropertyValue superclass.
 #
 class NumericPropertyValue < PropertyValue
-  FRACTIONAL_UNITS = %w(ft in)
+  FRACTIONAL_UNITS = %w(ft in).to_set
   MAX_DP = 6
   PRECISION = 15
   VALUE_RANGE = BigDecimal.new("-999999999.999999")..BigDecimal.new("999999999.999999")

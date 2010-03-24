@@ -1,12 +1,13 @@
 class CompanyParser < AbstractParser
-  ESSENTIAL_HEADERS = ["reference", "name", "primary_url", "description"]
+  HEADERS = %w(reference name primary_url description)
+  REQUIRED_VALUE_HEADERS = %w(reference name).to_set
   
   
   private
   
   def generate_objects(parsed_fields)
     attributes = {}
-    ESSENTIAL_HEADERS.each { |head| attributes[head.to_sym] = parsed_fields[head] }
+    HEADERS.each { |head| attributes[head.to_sym] = parsed_fields[head] }
     [ImportObject.new(Company, attributes)]
   end
   
@@ -15,9 +16,5 @@ class CompanyParser < AbstractParser
     raise "invalid format: #{value.inspect}" unless value =~ Company::REFERENCE_FORMAT
     raise "longer than 50 characters: #{value.inspect}" unless value.size <= 50
     value
-  end
-  
-  def reject_blank_value?(head)
-    ESSENTIAL_HEADERS[0..1].include?(head)
   end
 end

@@ -39,7 +39,7 @@ class ProductRelationship
   belongs_to :property_definition, :required => false
     property :property_definition_id, Integer, :unique_index => :val_per_company_per_prod_per_prop_per_name
   
-  validates_within :name, :set => NAMES.keys
+  validates_within :name, :set => NAMES.keys.to_set
   
   def self.related_products(product)
     product_ids_by_relationship = {}

@@ -28,7 +28,7 @@ class PropertyType
   
   validates_absent :units, :unless => :numeric?
   validates_with_method :units, :method => :validate_numeric_units, :if => :numeric?
-  validates_within :core_type, :set => CORE_TYPES.keys
+  validates_within :core_type, :set => CORE_TYPES.keys.to_set
   
   # TODO: rearrange spec
   def self.value_class(core_type)

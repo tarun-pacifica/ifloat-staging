@@ -1,5 +1,6 @@
 class PropertyDefinitionParser < AbstractParser
-  ESSENTIAL_HEADERS = ["sort", "first-level", "second-level", "property type", "findable", "filterable", "displayed as data", "ui first level name", "ui second level name wording"]
+  HEADERS = ["sort", "first-level", "second-level", "property type", "findable", "filterable", "displayed as data", "ui first level name", "ui second level name wording"]
+  REQUIRED_VALUE_HEADERS = HEADERS.to_set
     
   
   private
@@ -30,9 +31,5 @@ class PropertyDefinitionParser < AbstractParser
   def parse_field(head, value, fields)
     return super unless head == "property type"
     @import_set.get!(PropertyType, value)
-  end
-  
-  def reject_blank_value?(head)
-    ESSENTIAL_HEADERS.include?(head)
   end
 end

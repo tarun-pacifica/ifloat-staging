@@ -99,7 +99,7 @@ class CachedFind
     values_by_unit = {}
     Indexer.filterable_values_for_property_id(property_id, apids, fpids, language_code).each do |unit, values|
       all_values, relevant_values = values
-      relevant = Set.new(relevant_values)
+      relevant = relevant_values.to_set
       
       selected_values = 
         if filter[:data].nil? then all_values
@@ -110,7 +110,7 @@ class CachedFind
           else all_values.select { |v| min <= v && max >= v }
           end
         end
-      selected = Set.new(selected_values)
+      selected = selected_values.to_set
         
       extra_values =
         if type == "text" then all_values.map { |v| definitions[v] }

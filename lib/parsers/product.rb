@@ -1,12 +1,12 @@
 class ProductParser < AbstractParser
-  ESSENTIAL_HEADERS = ["company.reference", "product.reference"]
+  HEADERS = %w(company.reference product.reference)
   
-  REQUIRED_PROPERTY_NAMES = ["reference:class"]
+  REQUIRED_PROPERTY_NAMES = %w(reference:class)
   
   SPECIAL_VALUE_VALIDITIES = {
-    "AUTO" => [:values],
-    "N/A"  => [:attachments, :mappings, :relationships, :values],
-    "NIL"  => [:attachments, :mappings, :relationships, :values]
+    "AUTO" => [:values].to_set,
+    "N/A"  => [:attachments, :mappings, :relationships, :values].to_set,
+    "NIL"  => [:attachments, :mappings, :relationships, :values].to_set
   }
   
   def initialize(*args)
@@ -90,20 +90,21 @@ class ProductParser < AbstractParser
     
     value_objects_by_property_name = {}
     
+    domains = [:attachments, :mappings, :relationships, :values].to_set
     parsed_fields.each do |head, object|
       next if object.nil?
+      
       domain = head.first
+      next unless domains.include?(domain)
       
       if domain == :values
         property_name = object.attributes[:definition].attributes[:name]
         (value_objects_by_property_name[property_name] ||= []) << object
       end
         
-      if [:attachments, :mappings, :relationships, :values].include?(domain)
-        values = (object.is_a?(Array) ? object : [object])
-        values.each { |o| o.attributes[:product] = objects[0] }
-        objects.push(*values)  
-      end
+      values = (object.is_a?(Array) ? object : [object])
+      values.each { |o| o.attributes[:product] = objects[0] }
+      objects.push(*values)
     end
     
     # TODO: Remove this temporary hack when ready
@@ -149,7 +150,7 @@ class ProductParser < AbstractParser
     when :relationships
       name, company, property = domain_info
       attributes = {:company => company, :property_definition => property, :name => name}
-      fields = []
+      fields = Set.new
       value.split(",").map do |field|
         raise "empty relationship (possible double comma): #{value.inspect}" if field.blank?
         f = field.strip
@@ -238,7 +239,7 @@ class ProductParser < AbstractParser
       next if object.nil?
 
       tolerance_key = [:values, klass, property, seq_num, search_unit, :tolerance]
-      return :deferred if @headers.values.include?(tolerance_key) and not fields.has_key?(tolerance_key)
+      return :deferred if @header_values.include?(tolerance_key) and not fields.has_key?(tolerance_key)
       
       attributes = {:definition => property, :auto_generated => true, :sequence_number => seq_num}
       attributes.update(klass.convert(object.attributes, unit))
@@ -254,12 +255,17 @@ class ProductParser < AbstractParser
     errors
   end
   
+  def reject_blank_value?(head)
+    true
+  end
+  
   def validate_headers(headers)
     errors = super
     
+    @header_values = headers.values.to_set
     properties = []
     units_by_seq_nums_by_property = {}
-    headers.values.each do |head|
+    @header_values.each do |head|
       next unless head.first == :values
       
       property, seq_num, unit, component = head[2..-1]

@@ -101,6 +101,7 @@ class Product
   
   # TODO: spec
   def self.values_by_property_name_by_product_id(product_ids, language_code, names)
+    names = names.to_set
     names_by_property_id = {}
     Indexer.property_display_cache.each do |property_id, info|
       name = info[:raw_name]

@@ -1,5 +1,7 @@
 module AssetStore
-  # TODO: period compare and delete from the store (for all obsolete storage names)
+  COMMON_METHODS = [:delete_obsolete, :url, :url_direct, :write].to_set
+  
+  # TODO: periodically compare and delete from the store (for all obsolete storage names)
   @@engine = nil
   
   def self.config(engine, config = {})
@@ -10,7 +12,7 @@ module AssetStore
   
   def self.method_missing(method, *args)
     raise "asset store engine not configured" if @@engine.nil?
-    super unless [:delete_obsolete, :url, :url_direct, :write].include?(method)
+    super unless COMMON_METHODS.include?(method)
     @@engine.send(method, *args)
   end
   

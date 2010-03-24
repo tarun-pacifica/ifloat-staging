@@ -1,16 +1,12 @@
 function pick_list_add(group, product_id) {
-	pick_list_add_move(group, product_id);
-	pick_list_blink(group);
+	if(pick_list_add_move(group, product_id)) pick_list_blink(group);
 }
 
 function pick_list_add_move(group, product_id, pick_id) {
 	if(group == "buy_later" && ! $ifloat_header.authenticated) {
 		login_open('Please login / register to add items to your wish list...');
-		return;
+		return false;
 	}
-	
-	// TODO: attempt to build ppo page dynamically using the data from this call + an extra call to retrieve prod _&_ pricing data
-	// if($('#picked_product_options').length > 0) options.success = function() { window.location.reload(); };
 	
 	var data = {group: group};
 	var url = "/picked_products";
@@ -23,6 +19,7 @@ function pick_list_add_move(group, product_id, pick_id) {
 	}
 	
 	$.post(url, data, pick_lists_update_handle, 'json');
+	return true;
 }
 
 function pick_list_blink(group) {
@@ -57,9 +54,10 @@ function pick_list_make_link(info, partner_urls) {
 }
 
 function pick_list_move(from_group, to_group, pick_id) {
-	pick_list_add_move(to_group, undefined, pick_id);
-	pick_list_blink(from_group);
-	pick_list_blink(to_group);
+	if(pick_list_add_move(to_group, undefined, pick_id)) {
+		pick_list_blink(from_group);
+		pick_list_blink(to_group);
+	}
 }
 
 function pick_list_remove(group, pick_id) {

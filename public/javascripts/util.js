@@ -7,7 +7,7 @@ function util_defined(value, definition, position) {
 
 function util_escape(string, characters) {
 	var s = string;
-	for(i in characters) {
+	for(var i in characters) {
 		var c = characters[i];
 		s = s.replace(c, '\\' + c);
 	}
@@ -16,7 +16,7 @@ function util_escape(string, characters) {
 
 function util_group_by(array, property) {
 	var grouped = {};
-	for(i in array) {
+	for(var i in array) {
 		var a = array[i];
 		var key = a[property];
 		if(grouped[key] == undefined) grouped[key] = [];
@@ -27,7 +27,7 @@ function util_group_by(array, property) {
 
 function util_hash_from_array(keys, value) {
 	var hash = {};
-	for(i in keys) hash[keys[i]] = value;
+	for(var i in keys) hash[keys[i]] = value;
 	return hash;
 }
 

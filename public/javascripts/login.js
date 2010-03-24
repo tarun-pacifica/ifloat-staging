@@ -33,7 +33,7 @@ function login_submit() {
 	var options = {type: 'POST', url: form.attr('action'), success: login_success, error: login_error, data: {}};
 	
 	var inputs = form.find('input:not(:submit)');
-	for(i in inputs) {
+	for(var i in inputs) {
 		var input = inputs[i];
 		options.data[input.name] = input.value;
 	}

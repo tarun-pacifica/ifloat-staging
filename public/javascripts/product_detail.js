@@ -20,7 +20,7 @@ function product_detail_pick_buttons_update(group, pick_id) {
 	
 	pick_buttons.empty();
 	
-	for(i in groups) {
+	for(var i in groups) {
 		var g = groups[i];
 		var action = (group ? (group == g ? 'remove' : 'move') : 'add');
 		var click = "product_detail_pick_button_click('" + action + "', '" + group + "', '" + g + "', " + pick_id + ")";

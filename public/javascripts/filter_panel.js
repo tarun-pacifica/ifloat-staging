@@ -15,7 +15,7 @@ function filter_panel_load_handle(filters) {
 	var html = [];
 	var section = '';
 	
-	for(i in filters) {
+	for(var i in filters) {
 		var filter = filters[i];
 		
 		if(section != filter.section) {

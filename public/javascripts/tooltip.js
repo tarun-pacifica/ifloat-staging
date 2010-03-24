@@ -5,8 +5,8 @@ function tooltip_hide() {
 function tooltip_preload_backgrounds() {
 	var vert = ["top", "middle", "bottom"];
 	var horiz = ["left", "center", "right"];
-	for(v in vert) {
-		for(h in horiz) {
+	for(var v in vert) {
+		for(var h in horiz) {
 			util_preload_image("/images/tooltip/backgrounds/" + vert[v] + "_" + horiz[h] + ".png");
 		}
 	}

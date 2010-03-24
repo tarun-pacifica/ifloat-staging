@@ -118,12 +118,12 @@ function pick_lists_update_handle(data) {
 	var product_id = $ifloat_body.product_id;
 	var product_group, product_pick_id;
 	
-	for(group in data) {
+	for(var group in data) {
 		var links = [];
 		
 		var list = data[group];
 		var total_products = (group == 'compare' ? 0 : list.length);
-		for(i in list) {
+		for(var i in list) {
 			var info = list[i];
 			links.push(pick_list_make_link(info, partner_urls));
 			
@@ -131,7 +131,7 @@ function pick_lists_update_handle(data) {
 				total_products += info.title_parts[1];
 				
 				var product_ids = info.product_ids;
-				for(i in product_ids) {
+				for(var i in product_ids) {
 					if(product_ids[i] == product_id) {
 						product_group = group;
 						product_pick_id = info.ids[i];

@@ -24,7 +24,7 @@ function find_results_update_handle(data) {
 	var insertion_point = frps.find('.terminator');
 	
 	var products = [];
-	for(i in data) {
+	for(var i in data) {
 		var d = data[i];
 		image_prod_count += d[1];
 		products.push(find_results_make(d[0], d[1], d[2], d[3]));

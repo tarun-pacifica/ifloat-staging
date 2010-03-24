@@ -19,7 +19,7 @@ function pick_options_update(data) {
 	var product_ids = [];
 	
 	var html = [];
-	for(i in buy_later_items) {
+	for(var i in buy_later_items) {
 		var info = buy_later_items[i];
 		product_ids.push(info.product_id);
 		
@@ -34,11 +34,11 @@ function pick_options_update(data) {
 	var counts_by_url = {};
 	var fac_ids_by_url = $ifloat_body.facility_ids_by_url;
 	var fac_urls = $ifloat_body.facility_urls;
-	for(url in fac_ids_by_url) counts_by_url[url] = 0;
+	for(var url in fac_ids_by_url) counts_by_url[url] = 0;
 	
 	var parity = 'odd';
 	html = [];
-	for(i in buy_now_items) {
+	for(var i in buy_now_items) {
 		var info = buy_now_items[i];
 		product_ids.push(info.product_id);
 		
@@ -55,7 +55,7 @@ function pick_options_update(data) {
 		
 		var prices_by_url = $ifloat_body.prices_by_url_by_product_id[info.product_id];
 		if(prices_by_url == undefined) prices_by_url = {}
-		for(j in fac_urls) {
+		for(var j in fac_urls) {
 			var url = fac_urls[j];
 			var price = prices_by_url[url];
 			if(price) {
@@ -80,7 +80,7 @@ function pick_options_update(data) {
 		html.push('<tr class="counts">');
 		html.push('<td colspan="2"> </td>');
 		
-		for(i in fac_urls) {
+		for(var i in fac_urls) {
 			html.push('<td class="count">');
 			var url = fac_urls[i];
 			var count = counts_by_url[url];

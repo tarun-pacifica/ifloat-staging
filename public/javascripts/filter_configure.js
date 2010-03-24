@@ -92,7 +92,7 @@ function filter_configure_url(filter_id) {
 function filter_configure_values_numeric(variant, values_by_unit, html) {
 	var selected_unit;
 	var unit_count = 0;
-	for(unit in values_by_unit) {
+	for(var unit in values_by_unit) {
 		if(selected_unit == undefined) selected_unit = unit;
 		unit_count += 1;
 	}
@@ -100,7 +100,7 @@ function filter_configure_values_numeric(variant, values_by_unit, html) {
 	if(unit_count > 1) {
 		html.push('<p class="units">Measurements in ');
 		html.push('<select class="unit" onchange="filter_configure_values_numeric_handle_select()">');
-		for(unit in values_by_unit) {
+		for(var unit in values_by_unit) {
 			var selected = (unit == selected_unit ? 'selected="selected"' : '');
 			html.push('<option ' + selected + '>' + unit + '</option>');
 		}
@@ -108,7 +108,7 @@ function filter_configure_values_numeric(variant, values_by_unit, html) {
 		html.push('</p>');
 	}
 	
-	for(unit in values_by_unit) {
+	for(var unit in values_by_unit) {
 		html.push('<div class="slider_set" title="' + unit + '">');
 		html.push('<p class="min">min:</p> <div class="min"> </div>');
 		html.push('<p class="max">max:</p> <div class="max"> </div>');
@@ -118,14 +118,14 @@ function filter_configure_values_numeric(variant, values_by_unit, html) {
 
 function filter_configure_values_numeric_build_sliders(filter_configure, values_by_unit) {
 	var selected_unit;
-	for(unit in values_by_unit) { selected_unit = unit; break; }
+	for(var unit in values_by_unit) { selected_unit = unit; break; }
 	filter_configure.data('unit', selected_unit);
 	filter_configure.data('values_by_unit', values_by_unit);
 	
-	for(unit in values_by_unit) {
+	for(var unit in values_by_unit) {
 		var extremes = {};
 		var values = values_by_unit[unit];
-		for(i in values) {
+		for(var i in values) {
 			var v = values[i];
 			if(extremes['min'] == undefined) { if(v[1]) extremes['min'] = extremes['max'] = i; }
 			else if(! v[1]) break;
@@ -136,7 +136,7 @@ function filter_configure_values_numeric_build_sliders(filter_configure, values_
 		var options = {  max: values.length - 1,
 			             slide: filter_configure_values_numeric_handle_slide,
 			              stop: filter_configure_values_numeric_handle_slide };
-		for(extreme in extremes) {
+		for(var extreme in extremes) {
 			var i = extremes[extreme]
 			options['range'] = extreme;
 			options['value'] = i;
@@ -178,7 +178,7 @@ function filter_configure_values_numeric_update_minmax(unit) {
 	var values = filter_configure.data('values_by_unit')[unit];
 	
 	var extremes = {min: null, max: null};
-	for(extreme in extremes) {
+	for(var extreme in extremes) {
 		var i = slider_set.find('div.' + extreme).slider('value');
 		var value = values[i];
 		slider_set.data(extreme, value[0]);
@@ -199,7 +199,7 @@ function filter_configure_values_text(values_by_unit, html) {
 	
 	var columns = [];
 	while(columns.length < column_count) columns.push([]);
-	for(c in columns) {
+	for(var c in columns) {
 		var length = column_length + (column_remainder > c ? 1 : 0);
 		var column = columns[c];
 		while(column.length < length) column.push(values.shift());
@@ -209,7 +209,7 @@ function filter_configure_values_text(values_by_unit, html) {
 	for(var i in columns[0]) {
 		html.push('<tr>');
 		
-		for(c in columns) {
+		for(var c in columns) {
 			var v = columns[c][i];
 			if(v == undefined) continue;
 			

@@ -81,7 +81,7 @@ function filter_choose_load_handle(filters) {
 	if(filter_choose.length == 0) {
 		$('body').append('<div id="filter_choose"> </div>');
 		filter_choose = $('#filter_choose');
-		filter_choose.dialog({autoOpen: false, modal: true, resizable: false, title: filter_choose_title()});
+		filter_choose.dialog({autoOpen: false, modal: true, resizable: false, title: 'Filter your results by...'});
 	}
 	filter_choose.data('width.dialog', section_count_max * 78 + 'px');
 	filter_choose.html(html.join(' '));
@@ -90,8 +90,4 @@ function filter_choose_load_handle(filters) {
 
 function filter_choose_open() {
 	$('#filter_choose').dialog('open');
-}
-
-function filter_choose_title() {
-	return 'Filter your "' + $ifloat_body.find_spec + '" results by...';
 }

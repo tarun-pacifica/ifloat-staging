@@ -52,7 +52,7 @@ function filter_configure_handle(filter) {
 	if(filter_configure.length == 0) {
 		$('body').append('<div id="filter_configure"> </div>');
 		filter_configure = $('#filter_configure');
-		filter_configure.dialog({autoOpen: false, modal: true, resizable: false, title: filter_choose_title()});
+		filter_configure.dialog({autoOpen: false, modal: true, resizable: false, title: 'Configure the filter...'});
 		filter_configure.dialog('option', 'buttons', {Apply: filter_configure_apply});
 		filter_configure.data('width.dialog', 700 + 'px');
 	}

@@ -54,10 +54,14 @@ function pick_list_make_link(info, partner_urls) {
 }
 
 function pick_list_move(from_group, to_group, pick_id) {
-	if(pick_list_add_move(to_group, undefined, pick_id)) {
+	var success = pick_list_add_move(to_group, undefined, pick_id);
+	
+	if(success) {
 		pick_list_blink(from_group);
 		pick_list_blink(to_group);
 	}
+	
+	return success;
 }
 
 function pick_list_remove(group, pick_id) {

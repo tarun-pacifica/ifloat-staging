@@ -6,8 +6,7 @@ function pick_options_to_shop(pick_id) {
 }
 
 function pick_options_to_wish(pick_id) {
-	$(event.target).parents('tr').fadeOut('fast');
-	pick_list_move('buy_now', 'buy_later', pick_id);
+	if(pick_list_move('buy_now', 'buy_later', pick_id)) $(event.target).parents('tr').fadeOut('fast');
 }
 
 function pick_options_update(data) {

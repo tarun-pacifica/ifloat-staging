@@ -1,3 +1,5 @@
+util_preload_image('/images/common/spinner.gif');
+
 function spinner_hide() {
 	$('#spinner').fadeOut('fast');
 }

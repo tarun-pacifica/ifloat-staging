@@ -171,11 +171,6 @@
 	white-space: nowrap;
 }
 
-/* TODO: Verify needed by Firefox */
-#product_detail .relations a.product h2 {
-	border: none;
-}
-
 #product_detail .relations a.product img {
 	border: 1px solid gray;
 	float: left;

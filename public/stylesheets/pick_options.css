@@ -63,11 +63,6 @@
 	white-space: nowrap;
 }
 
-/* TODO: Verify needed by Firefox */
-#po_buy_now a.product h2 {
-	border: none;
-}
-
 #po_buy_now a.product img {
 	border: 1px solid gray;
 	float: left;

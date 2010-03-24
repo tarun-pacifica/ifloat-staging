@@ -1,11 +1,11 @@
 function product_image_make(url, popup_url, relative_position) {
 	if(relative_position == undefined) relative_position = 'left';
 	
-	if(popup_url) return '<img class="product" src="' + url + '" onmouseover="product_image_popup(event, \'' + popup_url + '\', \'' + relative_position + '\')" onmouseout="product_image_unpopup()" />';
+	if(popup_url) return '<img class="product" src="' + url + '" onmouseover="product_image_popup(\'' + popup_url + '\', \'' + relative_position + '\')" onmouseout="product_image_unpopup()" />';
 	return '<img class="product" src="' + url + '" />';
 }
 
-function product_image_popup(event, image_url, relative_position) {
+function product_image_popup(image_url, relative_position) {
 	var zoom = $("#image_popup");
 	zoom.attr('src', image_url);
 	

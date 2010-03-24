@@ -28,6 +28,6 @@ function product_detail_pick_buttons_update(group, pick_id) {
 	}
 }
 
-function product_detail_select_image(event) {
+function product_detail_select_image() {
 	$('#product_detail').find('img.main').attr('src', event.target.src);
 }

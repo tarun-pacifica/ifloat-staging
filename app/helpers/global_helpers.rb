@@ -60,7 +60,7 @@ module Merb
     
     def product_image(image)
       url, popup_url = product_image_urls(image)
-      "<img class=\"product\" src=#{url.inspect} onmouseover=\"product_image_popup(event, '#{popup_url}')\" onmouseout=\"product_image_unpopup()\" />"
+      "<img class=\"product\" src=#{url.inspect} onmouseover=\"product_image_popup('#{popup_url}')\" onmouseout=\"product_image_unpopup()\" />"
     end
     
     def product_image_urls(image)
@@ -83,7 +83,7 @@ module Merb
         
         definition.gsub!(/(['"])/) { "\\" + $1 }
         values << <<-HTML
-    	    <span class="defined" onmouseover="tooltip_show(event, '#{definition}', '#{tooltip_position}')" onmouseout="tooltip_hide()">#{value}</span>
+    	    <span class="defined" onmouseover="tooltip_show('#{definition}', '#{tooltip_position}')" onmouseout="tooltip_hide()">#{value}</span>
     	  HTML
       end
       
@@ -93,7 +93,7 @@ module Merb
     def property_icon(url, tooltip, position = :right)
       tooltip.gsub!(/(')/) { "\\'" }
       <<-HTML
-        <img class="icon" src=#{url.inspect} onmouseover="tooltip_show(event, '#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
+        <img class="icon" src=#{url.inspect} onmouseover="tooltip_show('#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
       HTML
     end
   end

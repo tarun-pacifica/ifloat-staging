@@ -21,7 +21,7 @@
 			
 			<div class="thumbs">
 				<% @image_urls.each do |url|%>
-				<img src=<%= url.inspect %> onmouseover="product_detail_select_image(event)" />
+				<img src=<%= url.inspect %> onmouseover="product_detail_select_image()" />
 				<% end %>
 			</div>
 			

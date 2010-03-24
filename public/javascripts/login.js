@@ -28,10 +28,11 @@ function login_reset() {
 	forms.find('.errors').remove();
 }
 
-function login_submit(f) {
-	var options = {type: 'POST', url: f.action, success: login_success, error: login_error, data: {}};
+function login_submit() {
+	var form = $(event.target);
+	var options = {type: 'POST', url: form.attr('action'), success: login_success, error: login_error, data: {}};
 	
-	var inputs = $(f).find('input:not(:submit)');
+	var inputs = form.find('input:not(:submit)');
 	for(i in inputs) {
 		var input = inputs[i];
 		options.data[input.name] = input.value;

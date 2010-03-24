@@ -2,7 +2,7 @@ function util_defined(value, definition, position) {
 	if(definition == undefined) return value;
 	if(position == undefined) position = 'right';
 	
-	return '<span class="defined" onmouseover="tooltip_show(event, \'' + util_escape(definition, ['"', "'"]) + '\', \'' + position + '\')" onmouseout="tooltip_hide()">' + value + '</span>';
+	return '<span class="defined" onmouseover="tooltip_show(\'' + util_escape(definition, ['"', "'"]) + '\', \'' + position + '\')" onmouseout="tooltip_hide()">' + value + '</span>';
 }
 
 function util_escape(string, characters) {

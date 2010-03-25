@@ -30,3 +30,8 @@ span.defined {
 span.defined:hover {
 	color: #17A1FF;
 }
+
+sup {
+	font-size: 0.7em;
+	vertical-align: top;
+}

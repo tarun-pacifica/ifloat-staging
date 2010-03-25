@@ -113,7 +113,7 @@ class Product
     db_values += TextPropertyValue.all(attributes.merge(:language_code => language_code))
     
     values_by_prop_name_by_prod_id = {}
-    db_values.group_by { |value| value.product.id }.each do |product_id, values|
+    db_values.group_by { |value| value.product_id }.each do |product_id, values|
       values_by_prop_name_by_prod_id[product_id] =
         values.group_by { |value| names_by_property_id[value.property_definition_id] }
     end

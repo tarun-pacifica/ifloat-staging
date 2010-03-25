@@ -18,7 +18,7 @@
 	<div class="body">
 		<div class="summary">
 			<%= product_image(@image) %>
-			<%= @title_parts.map { |part| "<h3>#{part.sort.join(" / ")}</h3>" } %>
+			<%= @title_parts.map { |part| "<h3>#{part.sort.join(" / ").superscript}</h3>" } %>
 			<hr class="terminator"/>
 		</div>
 		

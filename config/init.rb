@@ -53,6 +53,19 @@ Merb::BootLoader.before_app_loads do
     end
   end
   
+  class String
+    def superscript(matcher = /([®™])/)
+      gsub(matcher) { "<sup>#{$1}</sup>" }
+    end
+    
+    def superscript_numeric
+      parts = split(" ")
+      last_part = parts.pop
+      return self unless last_part =~ /[a-z]/
+      (parts << last_part.superscript(/(\d)/)).join(" ")
+    end
+  end
+  
   # Merge all JS files - TODO: lint + minify
   path = "public/javascripts/compiled.js"
   File.delete(path) if File.exist?(path)

@@ -50,6 +50,8 @@ function pick_list_make_link(info, partner_urls) {
 	
 	var image = product_image_make(info.image_urls[0], partner ? undefined : info.image_urls[1]);
 	
+	info.title_parts[0] = util_superscript('text', info.title_parts[0]);
+	
 	return '<a class="' + klass + '" target="' + target + '" href="' + link_url + '">' + image + info.title_parts.join('<br/>') + '</a>';
 }
 

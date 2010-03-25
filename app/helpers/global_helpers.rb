@@ -87,6 +87,9 @@ module Merb
     	  HTML
       end
       
+      if info[:type] == 'text' then values.map! { |value| value.superscript }
+      else values.map! { |value| value.superscript_numeric }
+      end
       values.join("<br />")
     end
     
@@ -96,5 +99,7 @@ module Merb
         <img class="icon" src=#{url.inspect} onmouseover="tooltip_show('#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
       HTML
     end
+  
+    
   end
 end

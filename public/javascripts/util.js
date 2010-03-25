@@ -52,3 +52,18 @@ function util_pluralize(count, singular) {
 function util_preload_image(url) {
 	(new Image()).src = url;
 }
+
+function util_superscript(type, value) {
+	if(type == 'text') return value.replace(/([®™])/g, '<sup>$1</sup>');
+	
+	if(type == 'numeric') {
+		var parts = value.split(' ');
+		var last_part = parts.pop();
+		
+		if(! last_part.match(/[a-z]/)) return value;
+		parts.push(last_part.replace(/(\d)/g, '<sup>$1</sup>'))
+		return parts.join(' ');
+	}
+	
+	return value;
+}

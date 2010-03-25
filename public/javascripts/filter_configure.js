@@ -182,7 +182,7 @@ function filter_configure_values_numeric_update_minmax(unit) {
 		var i = slider_set.find('div.' + extreme).slider('value');
 		var value = values[i];
 		slider_set.data(extreme, value[0]);
-		slider_set.find('p.' + extreme).text(extreme + ': ' + value[3]);
+		slider_set.find('p.' + extreme).html(extreme + ': ' + util_superscript('numeric', value[3]));
 	}
 }
 
@@ -222,7 +222,7 @@ function filter_configure_values_text(values_by_unit, html) {
 			var definition = v[3];
 			value = util_defined(value, definition, c >= columns.length / 2 ? 'left' : 'right');
 			escaped_value = "'" + util_escape(v[0], ['"', "'"]) + "'";
-			html.push('<td ' + klass + ' onclick="filter_configure_values_text_handle_click(' + escaped_value + ')"> ' + value + ' </td>');
+			html.push('<td ' + klass + ' onclick="filter_configure_values_text_handle_click(' + escaped_value + ')"> ' + util_superscript('text', value) + ' </td>');
 		}
 		
 		html.push('</tr>');

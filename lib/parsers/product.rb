@@ -59,9 +59,9 @@ class ProductParser < AbstractParser
             value_attributes = value_attributes.select { |attribs| attribs[:sequence_number] == min_seq_num }
             value_attributes = value_attributes.sort_by { |attribs| attribs[:unit].to_s }            
             formatted_values = value_attributes.map do |attribs|
-              [klass.format(attribs[:min_value], attribs[:max_value], "&ndash;"), attribs[:unit]].compact.join(" ")
+              klass.format(attribs[:min_value], attribs[:max_value], " <em>to</em> ", attribs[:unit]).superscript_numeric
             end
-            rendered_parts << formatted_values.join("_")
+            rendered_parts << formatted_values.join(" / ")
           end
         end
       end

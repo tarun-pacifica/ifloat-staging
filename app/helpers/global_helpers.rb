@@ -81,9 +81,9 @@ module Merb
           next
         end
         
-        definition.gsub!(/(['"])/) { "\\" + $1 }
+        d = definition.gsub(/(['"])/) { "\\" + $1 }
         values << <<-HTML
-    	    <span class="defined" onmouseover="tooltip_show(event, '#{definition}', '#{tooltip_position}')" onmouseout="tooltip_hide()">#{value}</span>
+    	    <span class="defined" onmouseover="tooltip_show(event, '#{d}', '#{tooltip_position}')" onmouseout="tooltip_hide()">#{value}</span>
     	  HTML
       end
       
@@ -94,9 +94,9 @@ module Merb
     end
     
     def property_icon(url, tooltip, position = :right)
-      tooltip.gsub!(/(')/) { "\\'" }
+      t = tooltip.gsub(/(')/) { "\\'" }
       <<-HTML
-        <img class="icon" src=#{url.inspect} onmouseover="tooltip_show(event, '#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
+        <img class="icon" src=#{url.inspect} onmouseover="tooltip_show(event, '#{t}', '#{position}')" onmouseout="tooltip_hide()" />
       HTML
     end
   

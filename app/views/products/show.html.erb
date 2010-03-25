@@ -51,14 +51,14 @@
 	
 		<div class="description">
 			<% (@body_values_by_name["auto:title"] || []).each do |title| %>
-			<h2><%= title %></h2>
+			<h2><%= title.superscript %></h2>
 			<% end %>
 			
 			<% unless @related_products_by_rel_name.empty? %>
 			<a href="#relations">View Related Products</a>
 			<% end %>
 
-			<% summary, features, description = @body_values_by_name.values_at("marketing:summary", "marketing:feature_list", "marketing:description").map { |values| (values || []).first.to_s } %>
+			<% summary, features, description = @body_values_by_name.values_at("marketing:summary", "marketing:feature_list", "marketing:description").map { |values| (values || []).first.to_s.superscript } %>
 
 			<% unless summary.blank? %>
 			<h3>Summary</h3>

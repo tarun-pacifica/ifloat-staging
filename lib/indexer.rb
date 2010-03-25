@@ -53,9 +53,9 @@ module Indexer
       type = prop_info[:type]
       
       if type == "text"
-        inclusions = filter[:data]
+        inclusions = filter[:data].to_set
         (text_index[property_id] || {}).each do |product_id, values|
-          product_ids << product_id if (values & inclusions).empty?
+          product_ids << product_id if (inclusions & values).empty?
         end
       else
         min, max, unit = filter[:data]
@@ -127,7 +127,7 @@ module Indexer
     filtering_indexes(language_code).each do |root_key, products_by_property_id|
       property_ids.each do |property_id|
         values_by_product_id = products_by_property_id[property_id]
-        product_id_sets << values_by_product_id.keys unless values_by_product_id.nil?
+        product_id_sets << values_by_product_id.keys.to_set unless values_by_product_id.nil?
       end
     end
     product_id_sets.inject { |union, product_ids| union & product_ids }
@@ -137,8 +137,9 @@ module Indexer
   def self.product_ids_for_phrase(phrase, language_code)
     return [] if phrase.blank? or not ensure_loaded
 
+    index = (@@text_finding_index[language_code] || {})
     phrase.downcase.split(/\W+/).map do |word|
-       (@@text_finding_index[language_code] || {})[word] || []
+       (index[word] || Set.new).to_set
     end.inject { |union, product_ids| union & product_ids } & @@image_checksum_index.keys
   end
   
@@ -151,11 +152,21 @@ module Indexer
   def self.property_ids_for_product_ids(product_ids, language_code)
     return [] if product_ids.empty? or not ensure_loaded
     
-    filtering_indexes(language_code).map do |root_key, products_by_property_id|
-      products_by_property_id.map do |property_id, values_by_product_id|
-        (values_by_product_id.keys & product_ids).empty? ? nil : property_id
-      end.compact
-    end.flatten.uniq
+    product_ids = product_ids.to_set
+    property_ids = Set.new
+    
+    filtering_indexes(language_code).each do |root_key, products_by_property_id|
+      products_by_property_id.each do |property_id, values_by_product_id|
+        matching_product_ids = (product_ids & values_by_product_id.keys)
+        
+        next if matching_product_ids.empty?
+        property_ids << property_id and next if matching_product_ids.size < product_ids.size
+        next if values_by_product_id.values_at(*product_ids).uniq.size == 1
+        property_ids << property_id        
+      end
+    end
+    
+    property_ids
   end
   
   

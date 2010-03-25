@@ -61,13 +61,16 @@ class CachedFind
   def ensure_valid
     return [] unless invalidated?
     
-    changes = [] # TODO: track changes
+    changes = []
     new_filters = {}
     pdc = Indexer.property_display_cache
     
     filters.each do |property_id, filter|
       prop_info = pdc[property_id]
-      next if prop_info.nil?
+      if prop_info.nil?
+        changes << "Discarded filter for defunct property #{property_id}"
+        next
+      end
       
       type = prop_info[:type]
       choices, unit =
@@ -75,9 +78,13 @@ class CachedFind
         else [filter[:data][0..1], filter[:data][2]]
         end
       data = filter_sanitize_choice(property_id, type, choices, unit)
-      next if data.nil?
+      if data.nil?
+        changes << "Discarded filter for #{prop_info[:raw_name]} as unable to sanitize data"
+        next
+      end
       
-      new_filters[property_id] = {:data => data, :include_unknown => filter[:include_unknown]} unless data.nil?
+      new_filters[property_id] = {:data => data, :include_unknown => filter[:include_unknown]}
+      changes << "Updated filter values for #{prop_info[:raw_name]}" unless data == filter[:data]
     end
     
     self.invalidated = false

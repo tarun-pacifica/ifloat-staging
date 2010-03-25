@@ -22,8 +22,8 @@
 				<% @product_ids.each_with_index do |product_id, i| %>
 				<td class="product image"
 					onclick="window.location = '<%= url(:product, :id => product_id) %>'"
-					onmouseover="util_highlight_column('on', <%= i + 2 %>)"
-					onmouseout="util_highlight_column('off')">
+					onmouseover="util_highlight_column(event, 'on', <%= i + 2 %>)"
+					onmouseout="util_highlight_column(event, 'off')">
 					<%= product_image(@images_by_product_id[product_id])%>
 				</td>
 				<% end %>
@@ -40,8 +40,8 @@
 				<% @product_ids.each_with_index do |product_id, i| %>
 				<td class="product"
 					onclick="window.location = '<%= url(:product, :id => product_id) %>'"
-					onmouseover="util_highlight_column('on', <%= i + 2 %>)"
-					onmouseout="util_highlight_column('off')">
+					onmouseover="util_highlight_column(event, 'on', <%= i + 2 %>)"
+					onmouseout="util_highlight_column(event, 'off')">
 					<%= product_value_summary(infos_by_product_id[product_id], :left) %>
 				</td>
 				<% end %>

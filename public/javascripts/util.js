@@ -2,7 +2,7 @@ function util_defined(value, definition, position) {
 	if(definition == undefined) return value;
 	if(position == undefined) position = 'right';
 	
-	return '<span class="defined" onmouseover="tooltip_show(\'' + util_escape(definition, ['"', "'"]) + '\', \'' + position + '\')" onmouseout="tooltip_hide()">' + value + '</span>';
+	return '<span class="defined" onmouseover="tooltip_show(event, \'' + util_escape(definition, ['"', "'"]) + '\', \'' + position + '\')" onmouseout="tooltip_hide()">' + value + '</span>';
 }
 
 function util_escape(string, characters) {
@@ -31,14 +31,14 @@ function util_hash_from_array(keys, value) {
 	return hash;
 }
 
-function util_highlight_column(action, col_num) {
+function util_highlight_column(event, action, col_num) {
 	var table = $(event.target).parents("table");
 	
 	table.find('.hover').removeClass('hover');
 	if(action == 'on') table.find('td:nth-child(' + col_num + ')').addClass('hover');
 }
 
-function util_highlight_row(action) {
+function util_highlight_row(event, action) {
 	var row = $(event.target).parent();
 
 	if(action == 'on') row.addClass('hover');

@@ -35,7 +35,7 @@
 	
 	<div class="body">
 		<% if @admin %>
-		<%= form :action => resource(:articles), :onsubmit => "return blog_article_validate()" do %>
+		<%= form :action => resource(:articles), :onsubmit => "return blog_article_validate(event)" do %>
 			<%= hidden_field :blog_id, :value => @blog.id %>
 			<h3>Create Article</h3>
 			<p><%= text_field :title, :value => "Title", :size => 50, :maxlength => 50 %></p>
@@ -49,8 +49,8 @@
 		<% image = @images[article.asset_id] %>
 		<div class="article">
 			<% if @admin %>
-			<p class="update" onclick="blog_article_edit(this)">Click here to update <%= article.title.inspect %>...</p>
-			<%= form :action => resource(article), :class => "update", :onsubmit => "return blog_article_validate()" do %>
+			<p class="update" onclick="blog_article_edit(event)">Click here to update <%= article.title.inspect %>...</p>
+			<%= form :action => resource(article), :class => "update", :onsubmit => "return blog_article_validate(event)" do %>
 				<%= hidden_field :_method, :value => "PUT" %>
 				<h3>Update Article</h3>
 				<p><%= text_field :title, :value => article.title, :size => 50, :maxlength => 50 %></p>

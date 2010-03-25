@@ -1,11 +1,11 @@
-function pick_options_to_shop(pick_id) {
+function pick_options_to_shop(event, pick_id) {
 	var button = $(event.target);
 	button.fadeOut('fast');
 	button.prev().fadeOut('fast');
 	pick_list_move('buy_later', 'buy_now', pick_id);
 }
 
-function pick_options_to_wish(pick_id) {
+function pick_options_to_wish(event, pick_id) {
 	if(pick_list_move('buy_now', 'buy_later', pick_id)) $(event.target).parents('tr').fadeOut('fast');
 }
 
@@ -25,7 +25,7 @@ function pick_options_update(data) {
 		
 		var image = product_image_make(info.image_urls[0], info.image_urls[1], 'right');
 		html.push('<div class="product">' + image + info.title_parts.join('<br/>') + '</div>');
-		html.push('<div class="button move" onclick="pick_options_to_shop(' + info.id + ')"> Shopping List </div>');
+		html.push('<div class="button move" onclick="pick_options_to_shop(event, ' + info.id + ')"> Shopping List </div>');
 	}
 	if(html.length == 0) html.push('<p class="empty">Your wish list is <strong>empty</strong>.</p>');
 	else html.push('<hr class="terminator" />');
@@ -50,7 +50,7 @@ function pick_options_update(data) {
 		html.push('</td>');
 		
 		html.push('<td class="move">');
-		html.push('<div class="button move" onclick="pick_options_to_wish(' + info.id + ')"> Wish List </div>');
+		html.push('<div class="button move" onclick="pick_options_to_wish(event, ' + info.id + ')"> Wish List </div>');
 		html.push('</td>');
 		
 		var prices_by_url = $ifloat_body.prices_by_url_by_product_id[info.product_id];

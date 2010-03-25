@@ -21,7 +21,7 @@
 			
 			<div class="thumbs">
 				<% @image_urls.each do |url|%>
-				<img src=<%= url.inspect %> onmouseover="product_detail_select_image()" />
+				<img src=<%= url.inspect %> onmouseover="product_detail_select_image(event)" />
 				<% end %>
 			</div>
 			
@@ -91,7 +91,7 @@
 				<%= products.map { |prod| "<div class=\"product\" id=\"prod_#{prod.id}\"></div>" }.join %>
 				<% hidden = products.size - 3 %>
 				<% if hidden > 0 %>
-				<div class="more" onclick="product_detail_more_relations()">
+				<div class="more" onclick="product_detail_more_relations(event)">
 					(show <%= hidden %> more product<%= hidden == 1 ? "" : "s" %>)
 				</div>
 				<% end %>

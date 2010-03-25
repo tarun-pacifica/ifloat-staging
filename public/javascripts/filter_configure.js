@@ -99,7 +99,7 @@ function filter_configure_values_numeric(variant, values_by_unit, html) {
 	
 	if(unit_count > 1) {
 		html.push('<p class="units">Measurements in ');
-		html.push('<select class="unit" onchange="filter_configure_values_numeric_handle_select()">');
+		html.push('<select class="unit" onchange="filter_configure_values_numeric_handle_select(event)">');
 		for(var unit in values_by_unit) {
 			var selected = (unit == selected_unit ? 'selected="selected"' : '');
 			html.push('<option ' + selected + '>' + unit + '</option>');
@@ -149,7 +149,7 @@ function filter_configure_values_numeric_build_sliders(filter_configure, values_
 	}
 }
 
-function filter_configure_values_numeric_handle_select() {
+function filter_configure_values_numeric_handle_select(event) {
 	var filter_configure = $('#filter_configure');
 	var unit = $(event.target).val();
 	

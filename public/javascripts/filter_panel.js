@@ -65,7 +65,7 @@ function filter_panel_load_handle(filters) {
 }
 
 function filter_panel_property_icon(filter, onclick, tooltip_position) {
-	return '<img class="property_icon" src="' + filter.icon_url + '" onclick="' + onclick + '(' + filter.id + ')" onmouseover="tooltip_show(\'' + filter.name + '\', \'' + tooltip_position + '\')" onmouseout="tooltip_hide()" />';
+	return '<img class="property_icon" src="' + filter.icon_url + '" onclick="' + onclick + '(' + filter.id + ')" onmouseover="tooltip_show(event, \'' + filter.name + '\', \'' + tooltip_position + '\')" onmouseout="tooltip_hide()" />';
 }
 
 function filter_panel_reload(data) {

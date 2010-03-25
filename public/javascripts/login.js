@@ -28,7 +28,7 @@ function login_reset() {
 	forms.find('.errors').remove();
 }
 
-function login_submit() {
+function login_submit(event) {
 	var form = $(event.target);
 	var options = {type: 'POST', url: form.attr('action'), success: login_success, error: login_error, data: {}};
 	

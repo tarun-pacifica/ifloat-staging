@@ -1,4 +1,4 @@
-function blog_article_edit() {
+function blog_article_edit(event) {
 	var article = $(event.target).parents('.article');
 	article.children().hide();
 	
@@ -9,7 +9,7 @@ function blog_article_edit() {
 	$(document).scrollTop(form.offset().top);
 }
 
-function blog_article_validate() {
+function blog_article_validate(event) {
 	var form = $(event.target);
 	
 	var errors = [];

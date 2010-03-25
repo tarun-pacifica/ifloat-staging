@@ -1,4 +1,4 @@
-function product_detail_more_relations() {
+function product_detail_more_relations(event) {
 	var more = $(event.target);
 	more.prevAll().show();
 	more.hide();
@@ -28,6 +28,6 @@ function product_detail_pick_buttons_update(group, pick_id) {
 	}
 }
 
-function product_detail_select_image() {
+function product_detail_select_image(event) {
 	$('#product_detail').find('img.main').attr('src', event.target.src);
 }

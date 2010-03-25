@@ -1,4 +1,4 @@
-function finder_recall() {
+function finder_recall(event) {
 	var specification = $('#finder_specification');
 	specification.val(event.target.value);
 	specification.siblings('#submit').click();

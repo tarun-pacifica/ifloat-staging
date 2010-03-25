@@ -52,7 +52,7 @@ function pick_list_make_link(info, partner_urls) {
 	
 	info.title_parts[0] = util_superscript('text', info.title_parts[0]);
 	
-	return '<a class="' + klass + '" target="' + target + '" href="' + link_url + '">' + image + info.title_parts.join('<br/>') + '</a>';
+	return '<a class="' + klass + '" target="' + target + '" href="' + link_url + '">' + image + '<span class="summary">' + info.title_parts.join('<br/>') + '</span>' + (klass == 'available' ? '' : '<span class="no_stock">Not in stock</span>') + '</a>';
 }
 
 function pick_list_move(from_group, to_group, pick_id) {
@@ -77,25 +77,6 @@ function pick_list_show() {
 	list.find('a').show();
 	list.children('.menu').css('background-position', '0 -21px');
 	list.children('.items').css('border-bottom', '1px solid #404040');
-}
-
-function pick_lists_bind_unavailable(partner_panel) {
-	function hide_unavailable() {
-		var item = $(this);
-		item.html(this.original_html);
-		item.css('color', 'gray');
-	}
-
-	function show_unavailable() {
-		var item = $(this);
-		this.original_html = item.html();
-		item.html('<p>Not in stock</p>');
-		item.css('color', 'red');
-	}
-
-	unavailable_items = partner_panel.find('a.unavailable');
-	unavailable_items.mouseenter(show_unavailable);
-	unavailable_items.mouseleave(hide_unavailable);
 }
 
 function pick_lists_clear(pick_lists) {
@@ -158,7 +139,6 @@ function pick_lists_update_handle(data) {
 	}
 	
 	if(partner) {
-		pick_lists_bind_unavailable(partner_panel);
 		pick_lists.hide();
 		for(var group in data) $('#pl_' + group).show();
 	} else {

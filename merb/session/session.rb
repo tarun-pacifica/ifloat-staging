@@ -42,7 +42,7 @@ module Merb
     
     def cached_finds
       return [] if cached_find_ids.empty?
-      CachedFind.all(:id => cached_find_ids, :order => [:specification])
+      CachedFind.all(:id => cached_find_ids)
     end
     
     def currency

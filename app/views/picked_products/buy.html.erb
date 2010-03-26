@@ -1,13 +1,7 @@
 <div id="partner_panel">
 	<img src="/images/partner/logo.png" />
 	
-	<div class="finder">
-		<%= form :action => resource(:cached_finds), :onsubmit => "return finder_validate()" do %>
-			<%= hidden_field :language_code, :value => session.language %>
-			<p> <%= text_field :specification, :id => "finder_specification" %> </p>
-			<p> <%= submit "Find", :id => "submit" %> </p>
-		<% end =%>
-	</div>
+	<%= partial "common/finder" %>
 	
 	<a class="back" href="/picked_products/options">&lt;&lt; Back to iFloat</a>
 	

@@ -2,16 +2,8 @@
 	<div class="left"></div>
 	<%= form :action => resource(:cached_finds), :onsubmit => "return finder_validate()" do %>
 		<%= hidden_field :language_code, :value => session.language %>
-		<p> 
-			<% if session.cached_finds.empty? %>
-			<%= select :prompt => "No previous finds", :disabled => true %>
-			<% else %>
-			<%= select :prompt => "Previous finds...", :onchange => "finder_recall(event)", :collection => session.cached_finds, :text_method => :specification, :value_method => :specification %>
-			<% end %>
-			
-			<%= text_field :specification, :id => "finder_specification" %>
-			<%= submit "Find", :id => "submit" %>
-		</p>
+		<p> <%= text_field :specification, :id => "finder_specification" %> </p>
+		<p> <%= submit "Find", :id => "submit" %> </p>
 	<% end =%>
 	<div class="right"></div>
 </div>

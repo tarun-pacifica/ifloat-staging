@@ -17,6 +17,7 @@
 }
 
 #header .find_bar #finder_specification {
+	margin-left: 12px;
 	width: 180px;
 }
 
@@ -25,12 +26,7 @@
 }
 
 #header .find_bar .finder p {
-	margin: 0;
-}
-
-#header .find_bar .finder select {
-	margin: 0 0 0 2px;
-	width: 15px;
+	display: inline;
 }
 
 #header .find_bar .pick_list {

@@ -25,8 +25,8 @@
 #partner_panel .finder {
 	background: url(/images/partner/backgrounds/finder.png) repeat-x;
 	margin: 5px 0 0 0;
-	padding: 4px 5px;
-	width: 140px;
+	padding: 4px 0;
+	width: 150px;
 }
 
 #partner_panel .finder form {
@@ -35,16 +35,17 @@
 
 #partner_panel .finder p {
 	margin: 0;
+	text-align: center;
 }
 
 #partner_panel .finder #finder_specification {
 	border-size: 3px;
-	width: 134px;
+	width: 140px;
 }
 
 #partner_panel .finder #submit {
 	margin-top: 5px;
-	width: 140px;
+	width: 146px;
 }
 
 #partner_panel .pick_list {

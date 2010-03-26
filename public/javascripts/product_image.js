@@ -16,7 +16,7 @@ function product_image_popup(event, image_url, relative_position) {
 	var left = position.left + (relative_position == 'right' ? (image.width() + 10) : (-10 - zoom.width())) + 'px';
 	zoom.css('left', left);
 	zoom.css('top', position.top + (image.height() - zoom.height()) / 2 + 'px');
-	zoom.css('display', 'block');
+	zoom.fadeIn('fast');
 }
 
 function product_image_unpopup(event) {

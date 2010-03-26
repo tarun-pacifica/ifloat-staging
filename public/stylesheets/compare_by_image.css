@@ -1,5 +1,6 @@
 #compare_by_image .summary {
 	clear: both;
+	margin-left: 30px;
 	padding: 5px;
 }
 
@@ -50,4 +51,16 @@
 #compare_by_image table tr.values td {
 	cursor: pointer;
 	vertical-align: top;
+}
+
+#compare_by_image table tr.values td.bullet {
+	text-align: center;
+	vertical-align: middle;
+	width: 29px;
+}
+
+#compare_by_image table tr.values td.bullet img {
+	border: 1px solid gray;
+	height: 25px;
+	width: 25px;
 }

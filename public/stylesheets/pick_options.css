@@ -50,7 +50,7 @@
 }
 
 #po_buy_now a.product:hover {
-	background: yellow;
+	background: #F9BD48;
 }
 
 #po_buy_now a.product > * {

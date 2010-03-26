@@ -158,7 +158,7 @@
 }
 
 #product_detail .relations a.product:hover {
-	background: yellow;
+	background: #F9BD48;
 }
 
 #product_detail .relations a.product > * {

@@ -64,11 +64,14 @@
 
 #filter_configure p.include_unknown {
 	padding-left: 13px;
-	text-align: left;
 }
 
 #filter_configure p.include_unknown strong {
 	color: #17A1FF;
+}
+
+#filter_configure p.select_all {
+	padding-left: 13px;
 }
 
 #filter_configure p.units {

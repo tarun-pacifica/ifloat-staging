@@ -77,7 +77,8 @@ function filter_configure_handle(filter) {
 	else filter_configure_values_numeric(filter.type, filter.values_by_unit, html);
 	
 	filter_configure.html(html.join(' '));
-	if(filter.type != 'text') filter_configure_values_numeric_build_sliders(filter_configure, filter.values_by_unit);
+	if(filter.type == 'text') filter_configure_values_text_update_select_all();
+	else filter_configure_values_numeric_build_sliders(filter_configure, filter.values_by_unit);
 	
 	filter_configure.data('id', filter.id);
 	filter_configure.data('type', filter.type);
@@ -188,6 +189,8 @@ function filter_configure_values_numeric_update_minmax(unit) {
 
 function filter_configure_values_text(values_by_unit, html) {
 	var values = values_by_unit[$ifloat_body.language];
+	
+	if(values.length > 0) html.push('<p class="select_all"> <input type="checkbox" onclick="filter_configure_values_text_select_all()"> Select <strong>all</strong> values </p>');
 
 	var column_count = 0;
 	var column_length = 11;
@@ -216,13 +219,13 @@ function filter_configure_values_text(values_by_unit, html) {
 			var value = v[0];
 			var checked = (v[1] ? 'checked="checked"' : '');
 			var escaped_value = util_escape(v[0], ['"']);
-			html.push('<td class="check"> <input value="' + escaped_value + '" type="checkbox" ' + checked + ' /> </td>');
+			html.push('<td class="check"> <input value="' + escaped_value + '" type="checkbox" ' + checked + ' onclick="filter_configure_values_text_update_select_all()"/> </td>');
 			
 			var klass = ((v[1] && !v[2]) ? 'class="value irrelevant"' : 'class="value"');
 			var definition = v[3];
 			value = util_defined(value, definition, c >= columns.length / 2 ? 'left' : 'right');
 			escaped_value = "'" + util_escape(v[0], ['"', "'"]) + "'";
-			html.push('<td ' + klass + ' onclick="filter_configure_values_text_handle_click(' + escaped_value + ')"> ' + util_superscript('text', value) + ' </td>');
+			html.push('<td ' + klass + ' onclick="filter_configure_values_text_select_one(' + escaped_value + ')"> ' + util_superscript('text', value) + ' </td>');
 		}
 		
 		html.push('</tr>');
@@ -230,10 +233,22 @@ function filter_configure_values_text(values_by_unit, html) {
 	html.push('</table>');
 }
 
-function filter_configure_values_text_handle_click(value) {
+function filter_configure_values_text_select_all() {
+	$('#filter_configure table input').attr('checked', true);
+}
+
+function filter_configure_values_text_select_one(value) {
 	var filter_configure = $('#filter_configure');
 	filter_configure.find('table input').each(function() {
 		var checkbox = $(this);
 		checkbox.attr('checked', checkbox.val() == value);
 	});
+	filter_configure_values_text_update_select_all();
+}
+
+function filter_configure_values_text_update_select_all() {
+	var filter_configure = $('#filter_configure');
+	var checked_count = filter_configure.find('table input:checked').length;
+	var total_count = filter_configure.find('table input').length;
+	filter_configure.find('p.select_all input').attr('checked', checked_count == total_count);
 }

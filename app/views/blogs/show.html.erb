@@ -22,6 +22,7 @@
 		<%= form :action => resource(:cached_finds) do %>
 			<%= hidden_field :language_code, :value => session.language %>
 			<%= hidden_field :specification, :value => @blog.user.name %>
+			<%= hidden_field :unfiltered, :value => true %>
 			<p class="link"> <%= submit @blog.call_to_action, :id => "submit" %> </p>
 		<% end =%>
 		<% end %>

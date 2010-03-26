@@ -47,7 +47,9 @@ class CachedFinds < Application
     find = session.add_cached_find(CachedFind.new(:language_code => language_code, :specification => specification))
     
     if find.valid?
-      CachedFindEvent.log!(specification, (not find.accessed_at.nil?), request.remote_ip)
+      recalled = (not find.accessed_at.nil?)
+      CachedFindEvent.log!(specification, recalled, request.remote_ip)
+      find.unfilter_all! if params[:unfiltered] == "true" and recalled
       redirect(resource(find))
     else
       redirect("/")

@@ -4,7 +4,7 @@ function pick_list_add(group, product_id) {
 
 function pick_list_add_move(group, product_id, pick_id) {
 	if(group == "buy_later" && ! $ifloat_header.authenticated) {
-		login_open('Please login / register to add items to your wish list...');
+		login_open('Please login / register to add items to your future buys...');
 		return false;
 	}
 	

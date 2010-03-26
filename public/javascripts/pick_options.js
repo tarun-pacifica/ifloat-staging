@@ -25,9 +25,9 @@ function pick_options_update(data) {
 		
 		var image = product_image_make(info.image_urls[0], info.image_urls[1], 'right');
 		html.push('<div class="product">' + image + info.title_parts.join('<br/>') + '</div>');
-		html.push('<div class="button move" onclick="pick_options_to_shop(event, ' + info.id + ')"> Shopping List </div>');
+		html.push('<div class="button move" onclick="pick_options_to_shop(event, ' + info.id + ')"> Buy Now </div>');
 	}
-	if(html.length == 0) html.push('<p class="empty">Your wish list is <strong>empty</strong>.</p>');
+	if(html.length == 0) html.push('<p class="empty">Your have no future buys.</p>');
 	else html.push('<hr class="terminator" />');
 	buy_later.find('.sections').html(html.join(' '));
 	
@@ -50,7 +50,7 @@ function pick_options_update(data) {
 		html.push('</td>');
 		
 		html.push('<td class="move">');
-		html.push('<div class="button move" onclick="pick_options_to_wish(event, ' + info.id + ')"> Wish List </div>');
+		html.push('<div class="button move" onclick="pick_options_to_wish(event, ' + info.id + ')"> Future Buys </div>');
 		html.push('</td>');
 		
 		var prices_by_url = $ifloat_body.prices_by_url_by_product_id[info.product_id];

@@ -104,6 +104,8 @@ function pick_lists_update_handle(data) {
 	for(var group in data) {
 		var links = [];
 		
+		if(!partner && group == 'buy_now') links.push('<a class="buy" href="/picked_products/options">Buy from...</a>');
+		
 		var list = data[group];
 		var total_products = (group == 'compare' ? 0 : list.length);
 		for(var i in list) {
@@ -125,8 +127,6 @@ function pick_lists_update_handle(data) {
 				product_pick_id = info.id;
 			}
 		}
-		
-		if(!partner && group == 'buy_now') links.push('<a class="buy" href="/picked_products/options">Buy from...</a>');
 		
 		var pick_list = $('#pl_' + group);
 		pick_list.children('.items').html(links.join(' '));

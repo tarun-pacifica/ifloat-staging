@@ -149,10 +149,6 @@
 	max-width: 447px;
 }
 
-#po_buy_now table tr.counts {
-	border-top: 1px solid silver;
-}
-
 #po_buy_now table tr.even td {
 	background: #F3F3F3;
 }

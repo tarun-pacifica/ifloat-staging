@@ -18,6 +18,9 @@ function pick_options_update(data) {
 	var buy_now_items = (data.buy_now ? data.buy_now : []);
 	var product_ids = [];
 	
+	
+	// BUY LATER
+	
 	var html = [];
 	for(var i in buy_later_items) {
 		var info = buy_later_items[i];
@@ -31,13 +34,56 @@ function pick_options_update(data) {
 	else html.push('<hr class="terminator" />');
 	buy_later.find('.sections').html(html.join(' '));
 	
-	var counts_by_url = {};
+	
+	// BUY NOW
+	
+	var empty_warning = buy_now.find('p.empty');
+	var facilities_row = buy_now.find('tr.facilities');
+	facilities_row.nextAll().remove();
+	
+	if(buy_now_items.length == 0) {
+		empty_warning.show();
+		facilities_row.hide();
+		return;
+	}
+	
+	empty_warning.hide();
+	facilities_row.show();
+	html = [];
+	
 	var fac_ids_by_url = $ifloat_body.facility_ids_by_url;
 	var fac_urls = $ifloat_body.facility_urls;
-	for(var url in fac_ids_by_url) counts_by_url[url] = 0;
+	var prices_by_url_by_product_id = $ifloat_body.prices_by_url_by_product_id;
+	
+	// Counts
+	
+	var counts_by_url = {};
+	for(var url in fac_ids_by_url) {
+		counts_by_url[url] = 0;
+		
+		for(var i in buy_now_items) {
+			var info = buy_now_items[i];
+			var prices_by_url = prices_by_url_by_product_id[info.product_id];
+			if(prices_by_url == undefined) continue;
+			for(var url in prices_by_url) counts_by_url[url] += 1
+		}
+	}
+	
+	html.push('<tr class="counts">');
+	html.push('<td colspan="2"> </td>');
+	for(var i in fac_urls) {
+		html.push('<td class="count">');
+		var url = fac_urls[i];
+		var count = counts_by_url[url];
+		if(count == 0) html.push('No items in stock');
+		else html.push('<a href="/picked_products/buy/' + fac_ids_by_url[url] + '">Buy ' + util_pluralize(count, 'item') + '</a>');
+		html.push('</td>');
+	}
+	html.push('</tr>');
+	
+	// Products
 	
 	var parity = 'odd';
-	html = [];
 	for(var i in buy_now_items) {
 		var info = buy_now_items[i];
 		product_ids.push(info.product_id);
@@ -53,48 +99,19 @@ function pick_options_update(data) {
 		html.push('<div class="button move" onclick="pick_options_to_wish(event, ' + info.id + ')"> Future Buys </div>');
 		html.push('</td>');
 		
-		var prices_by_url = $ifloat_body.prices_by_url_by_product_id[info.product_id];
+		var prices_by_url = prices_by_url_by_product_id[info.product_id];
 		if(prices_by_url == undefined) prices_by_url = {}
 		for(var j in fac_urls) {
 			var url = fac_urls[j];
 			var price = prices_by_url[url];
-			if(price) {
-				html.push('<td class="price">' + price + '</td>');
-				counts_by_url[url] += 1;
-			} else {
-				html.push('<td class="price">Not in stock</td>');
-			}
+			if(price == undefined) html.push('<td class="price">Not in stock</td>');
+			else html.push('<td class="price">' + price + '</td>');
 		}
 		
 		html.push('</tr>');
 	}
 	
-	var empty_warning = buy_now.find('p.empty');
-	var facilities_row = buy_now.find('tr.facilities');
-	facilities_row.nextAll().remove();
-	
-	if(html.length == 0) {
-		empty_warning.show();
-		facilities_row.hide();
-	} else {
-		html.push('<tr class="counts">');
-		html.push('<td colspan="2"> </td>');
-		
-		for(var i in fac_urls) {
-			html.push('<td class="count">');
-			var url = fac_urls[i];
-			var count = counts_by_url[url];
-			if(count == 0) html.push('No items in stock');
-			else html.push('<a href="/picked_products/buy/' + fac_ids_by_url[url] + '">Buy ' + util_pluralize(count, 'item') + '</a>');
-			html.push('</td>');
-		}
-		
-		html.push('</tr>');
-		
-		empty_warning.hide();
-		facilities_row.show();
-		facilities_row.after(html.join(' '));
-	}
+	facilities_row.after(html.join(' '));
 	
 	product_links_load(product_ids);
 }

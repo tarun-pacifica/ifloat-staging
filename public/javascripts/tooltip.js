@@ -14,7 +14,7 @@ function tooltip_preload_backgrounds() {
 
 function tooltip_show(event, text, relative_position) {
 	var bubble = $('#tooltip');
-	bubble.find('p').text(text);
+	bubble.find('p').html(text);
 	
 	var target = $(event.target);
 	var position = target.offset();

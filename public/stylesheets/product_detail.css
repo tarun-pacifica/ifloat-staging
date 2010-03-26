@@ -66,6 +66,7 @@
 
 #product_detail .assets .price_actions div.button:hover {
 	background-position: 0 -23px;
+	color: white;
 }
 
 #product_detail .assets .price_actions div.button:active {

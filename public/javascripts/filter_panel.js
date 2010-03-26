@@ -11,8 +11,12 @@ function filter_panel_button(name, action) {
 	
 	if(action == 'enable') {
 		button.css('color', 'black');
-		button.mouseenter(function() { $(this).css('background-position', '0 -23px'); });
-		button.mouseleave(function() { $(this).css('background-position', '0 0');     });
+		button.mouseenter(function() {
+			$(this).css('background-position', '0 -23px').css('color', 'white');
+		});
+		button.mouseleave(function() {
+			$(this).css('background-position', '0 0').css('color', 'black');
+		});
 		
 		if(name == 'add') button.click(filter_choose_open);
 		else button.click(filter_panel_remove_all);

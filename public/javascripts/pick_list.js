@@ -35,7 +35,7 @@ function pick_list_enable(pick_list) {
 function pick_list_hide() {
 	var list = $(this);
 	list.find('a').hide();
-	list.children('.menu').css('background-position', '0 0');
+	list.children('.menu').css('background-position', '0 0').css('color', 'black');
 	list.children('.items').css('border-bottom', 'none');
 }
 
@@ -75,7 +75,7 @@ function pick_list_show() {
 	var list = $(this);
 	if(list.find('.total').text() == '') return;
 	list.find('a').show();
-	list.children('.menu').css('background-position', '0 -21px');
+	list.children('.menu').css('background-position', '0 -21px').css('color', 'white');
 	list.children('.items').css('border-bottom', '1px solid #404040');
 }
 

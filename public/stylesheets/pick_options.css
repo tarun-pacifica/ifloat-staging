@@ -12,6 +12,7 @@
 
 #po_buy_later div.button:hover {
 	background-position: 0 -23px;
+	color: white;
 }
 
 #po_buy_later div.button:active {
@@ -84,6 +85,7 @@
 
 #po_buy_now div.button:hover {
 	background-position: 0 -23px;
+	color: white;
 }
 
 #po_buy_now div.button:active {

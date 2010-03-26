@@ -234,7 +234,9 @@ function filter_configure_values_text(values_by_unit, html) {
 }
 
 function filter_configure_values_text_select_all() {
-	$('#filter_configure table input').attr('checked', true);
+	var filter_configure = $('#filter_configure');
+	filter_configure.find('table input').attr('checked', true);
+	filter_configure.find('p.select_all input').attr('checked', true);
 }
 
 function filter_configure_values_text_select_one(value) {

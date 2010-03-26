@@ -11,7 +11,7 @@ class Users < Application
       if user.save
         # TODO: reactivate before going live
         # send_mail(MainMailer, :registration,
-        #           {:from => "admin@ifloat.biz", :to => user.login, :subject => "iFloat Registration"},
+        #           {:from => "admin@ifloat.biz", :to => user.login, :subject => "ifloat Registration"},
         #           {:user => user})
         session.login!(login, password)
         "<p>Successfully registered and logged in as <strong>#{user.name}</strong>. Confirmation e-mail sent to <strong>#{login}</strong>.</p>"
@@ -32,7 +32,7 @@ class Users < Application
       user.save
       
       send_mail(MainMailer, :password_reset,
-        {:from => "admin@ifloat.biz", :to => user.login, :subject => "iFloat Password Reset"},
+        {:from => "admin@ifloat.biz", :to => user.login, :subject => "ifloat Password Reset"},
         {:user => user})
       "<p>Password reset e-mail sent to <strong>#{login}</strong>.</p>"
       

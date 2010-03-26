@@ -13,10 +13,15 @@ function product_image_popup(event, image_url, relative_position) {
 	image.css('border-color', 'black');
 	
 	var position = image.offset();
-	var left = position.left + (relative_position == 'right' ? (image.width() + 10) : (-10 - zoom.width())) + 'px';
-	zoom.css('left', left);
-	zoom.css('top', position.top + (image.height() - zoom.height()) / 2 + 'px');
-	zoom.fadeIn('fast');
+	var zoom_height = zoom.outerHeight();
+	
+	var left = position.left + (relative_position == 'right' ? (image.outerWidth() + 10) : (-10 - zoom.outerWidth()));
+	var top = position.top + (image.outerHeight() - zoom_height) / 2;
+	
+	var document_overhang = top + zoom_height - $(document).height();
+	if(document_overhang > 0) top -= document_overhang;
+	
+	zoom.css('left', left + 'px').css('top', top + 'px').fadeIn('fast');
 }
 
 function product_image_unpopup(event) {

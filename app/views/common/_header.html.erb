@@ -43,25 +43,7 @@
 
 <%= partial "common/login" %>
 
-<div id="tooltip">
-	<table>
-		<tr class="top">
-			<td class="left">&nbsp;</td>
-			<td class="center">&nbsp;</td>
-			<td class="right">&nbsp;</td>
-		</tr>
-		<tr class="middle">
-			<td class="left">&nbsp;</td>
-			<td class="center"><p></p></td>
-			<td class="right">&nbsp;</td>
-		</tr>
-		<tr class="bottom">
-			<td class="left">&nbsp;</td>
-			<td class="center">&nbsp;</td>
-			<td class="right">&nbsp;</td>
-		</tr>
-	</table>
-</div>
+<div id="tooltip"> </div>
 
 <img id="image_popup" src="" />
 
@@ -69,7 +51,6 @@
 	var $ifloat_header = {authenticated: <%= session.authenticated? %>};
 	var $ifloat_body = {};
 	
-	tooltip_preload_backgrounds();
 	$(document).ready(pick_lists_update);
 </script>
 	

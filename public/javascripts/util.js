@@ -60,7 +60,7 @@ function util_superscript(type, value) {
 		var parts = value.split(' ');
 		var last_part = parts.pop();
 		
-		if(! last_part.match(/[a-z]/)) return value;
+		if(!last_part.match(/[a-z]/)) return value;
 		parts.push(last_part.replace(/(\d)/g, '<sup>$1</sup>'))
 		return parts.join(' ');
 	}

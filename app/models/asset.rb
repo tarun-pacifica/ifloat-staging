@@ -38,7 +38,7 @@ class Asset
     "bottom-right-front", "bottom-right-back"
   ].to_set
   
-  BUCKETS = %w(articles blogs products property_icons).to_set
+  BUCKETS = %w(articles blogs brand_logos products property_icons).to_set
   IMAGE_FORMAT = /\.(gif|jpeg|jpg|png|tif|tiff)$/
   NAME_FORMAT = /^([\w\-\.]+?)(___(\d+))?\.([a-z]{3,})$/
   
@@ -56,6 +56,7 @@ class Asset
   belongs_to :company
     property :company_id, Integer, :unique_index => :name_per_company_per_bucket
   has n, :attachments
+  has n, :brands
   
   validates_within :bucket, :set => BUCKETS
   validates_within :view, :set => CUBIC_VIEWS

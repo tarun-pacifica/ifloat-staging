@@ -66,6 +66,10 @@
 	padding: 5px 0 0 5px;
 }
 
+.minor h3.topmost {
+	border: none;
+}
+
 .minor .sections {
 	border-bottom: 1px solid silver;
 	border-left: 1px solid silver;

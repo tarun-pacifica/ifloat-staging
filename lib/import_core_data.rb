@@ -14,7 +14,7 @@ CSV_REPO = "../ifloat_csvs"
 
 ERRORS_PATH = "/tmp/errors.csv"
 
-CLASSES = [PropertyType, PropertyDefinition, PropertyValueDefinition, TitleStrategy, Company, Facility, Asset, Product]
+CLASSES = [PropertyType, PropertyDefinition, PropertyValueDefinition, TitleStrategy, Company, Facility, Asset, Brand, Product]
 
 class ImportObject
   attr_accessor :primary_key, :resource_id
@@ -41,6 +41,7 @@ class ImportSet
     Company                 => [:reference],
     Facility                => [:company, :name],
     Asset                   => [:bucket, :company, :name],
+    Brand                   => [:company, :name],
     Product                 => [:company, :reference],
     Attachment              => [:product, :role, :sequence_number],
     ProductMapping          => [:company, :product, :reference],
@@ -431,7 +432,7 @@ def build_asset_csv
         next
       end
     
-      errors << [relative_path, "empty file"] if File.size(path).zero?
+      errors << [relative_path, "empty file"] if File.size(path) == 0
     
       bucket = path_parts.shift
       errors << [relative_path, "unknown bucket"] unless Asset::BUCKETS.include?(bucket)
@@ -567,11 +568,11 @@ error_message = "Some errors occurred whilst compilig assets from #{ASSET_REPO.i
 begin
   errors = build_asset_csv
   unless errors.nil?
-    FasterCSV.open(ASSET_ERRORS_PATH, "w") do |error_report|
+    FasterCSV.open(ERRORS_PATH, "w") do |error_report|
       error_report << ["path", "error"]
       errors.each { |error| error_report << error }
     end
-    mail_fail(error_message, ASSET_ERRORS_PATH)
+    mail_fail(error_message, ERRORS_PATH)
   end
 rescue SystemExit
   exit 1
@@ -658,7 +659,7 @@ report = ["Asset repository @ #{repo_summary(ASSET_REPO)}", "CSV repository @ #{
 report += class_stats.map do |klass, stats|
   "#{klass}: " + [:created, :updated, :destroyed, :skipped].map do |stat|
     count = stats[stat]
-    count.zero? ? nil : "#{stat} #{count}"
+    count == 0 ? nil : "#{stat} #{count}"
   end.compact.join(", ")
 end
 

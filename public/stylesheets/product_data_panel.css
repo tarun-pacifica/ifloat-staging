@@ -3,6 +3,12 @@
 	text-align: center;
 }
 
+#product_data_panel .advert img {
+	border: 1px solid silver;
+	margin: 10px 0 8px 0;
+	width: 230px;
+}
+
 #product_data_panel .sections .property {
 	margin-left: 5px;
 	width: 240px;

@@ -29,6 +29,12 @@ module Merb
     def product_data_panel(values)
       html = []
       
+      brands = values.map { |info| info[:raw_name] == "marketing:brand" ? info[:values] : [] }.flatten.uniq
+      logos = Brand.logos(brands)
+      html << "<div class=\"advert\"> <img src=#{logos[rand(logos.size)].url.inspect} /> </div>" unless logos.empty?
+      	
+      html << '<div class="sections">'
+      
       seq_nums_by_section = {}
       values_by_section = {}
       values.sort_by { |info| info[:seq_num] }.each do |info|
@@ -38,8 +44,8 @@ module Merb
         (values_by_section[section] ||= []).push(info)
       end
       
-      seq_nums_by_section.keys.sort_by { |section| seq_nums_by_section[section] }.each do |section|
-        html << "<h3>#{section}</h3>"
+      seq_nums_by_section.keys.sort_by { |section| seq_nums_by_section[section] }.each_with_index do |section, i|
+        html << ((i == 0 and logos.empty?) ? "<h3 class=\"topmost\">#{section}</h3>" : "<h3>#{section}</h3>")
 
         values_by_section[section].each do |info|
           html << <<-HTML
@@ -54,6 +60,8 @@ module Merb
         
         html << '<hr class="terminator" />'
       end
+      
+      html << "</div>"
       
       html.join("\n")
     end

@@ -16,4 +16,5 @@ gems %w(merb-core merb-action-args merb-helpers merb-mailer merb_datamapper), "1
 gem "cloudfiles", "1.4.6"
 gem "fastercsv",  "1.5.1" unless RUBY_VERSION =~ /^1\.9\./
 gem "json",       "1.2.2"
+gem "rspec",      "1.3.0"
 gem "thin",       "1.2.7"

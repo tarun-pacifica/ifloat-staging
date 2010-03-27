@@ -57,7 +57,7 @@ describe Purchase do
       Purchase.abandon_obsolete
       @purchases.each_with_index do |purchase, i|
         purchase.reload
-        if i.zero? then purchase.completed_at.should == nil
+        if i == 0 then purchase.completed_at.should == nil
         else purchase.completed_at.should_not == nil
         end
         purchase.abandoned.should == [false, false, true, false][i]

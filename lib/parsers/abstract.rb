@@ -41,7 +41,7 @@ class AbstractParser
         
         while errors.empty?
           deferred_count = deferred.size
-          break if deferred_count.zero?
+          break if deferred_count == 0
           
           fields, deferred, def_errors = parse_deferred(deferred, fields)
           errors += def_errors

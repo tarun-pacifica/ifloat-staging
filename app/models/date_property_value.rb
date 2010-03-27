@@ -23,7 +23,7 @@ class DatePropertyValue < NumericPropertyValue
   
   def self.parse_atom(atom)
     raise "invalid format (expected YYYYMMDD) in #{atom.inspect}" unless atom.to_s =~ /^(\d{4})(\d\d)(\d\d)$/
-    raise "invalid format (expected YYYY0000) in #{atom.inspect}" if $2.to_i.zero? and $3.to_i > 0
+    raise "invalid format (expected YYYY0000) in #{atom.inspect}" if $2.to_i == 0 and $3.to_i > 0
     atom.to_i
   end
 end

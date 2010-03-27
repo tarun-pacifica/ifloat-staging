@@ -12,7 +12,7 @@ class Article
   
   property :id, Serial
   property :title, String, :required => true
-  property :body, Text, :required => true
+  property :body, Text, :required => true, :lazy => false
   property :created_at, DateTime, :default => proc { DateTime.now }
   
   belongs_to :asset, :required => false

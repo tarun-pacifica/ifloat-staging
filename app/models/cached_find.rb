@@ -102,7 +102,7 @@ class CachedFind
     type = prop_info[:type]
     value_class = PropertyType.value_class(type)
     
-    apids, fpids = all_product_ids, filtered_product_ids
+    apids, fpids = all_product_ids, filtered_product_ids(property_id)
     values_by_unit = {}
     Indexer.filterable_values_for_property_id(property_id, apids, fpids, language_code).each do |unit, values|
       all_values, relevant_values = values
@@ -151,10 +151,16 @@ class CachedFind
     save
   end
   
-  def filtered_product_ids
+  def filtered_product_ids(ignore_filter_id = nil)
     return [] if all_product_ids.empty?
     
-    property_ids = filters.keys
+    filts = filters
+    unless ignore_filter_id.nil?
+      filts = filters.dup
+      filts.delete(ignore_filter_id)
+    end
+    
+    property_ids = filts.keys
     return all_product_ids if property_ids.empty?
     
     # TODO: spec examples where this kicks in
@@ -162,9 +168,9 @@ class CachedFind
     # - since we use exclusion based filtering, any product without a value will not be excluded normally
     # - thus if we mark a filter as not including unknown, we specifically limit the products to the set with that filter's property_id
     relevant_product_ids = all_product_ids
-    required_property_ids = property_ids.select { |id| filters[id][:include_unknown] == false }
+    required_property_ids = property_ids.select { |id| filts[id][:include_unknown] == false }
     relevant_product_ids &= Indexer.product_ids_for_property_ids(required_property_ids, language_code) unless required_property_ids.empty?
-    relevant_product_ids - Indexer.excluded_product_ids_for_filters(filters, language_code)
+    relevant_product_ids - Indexer.excluded_product_ids_for_filters(filts, language_code)
   end
   
   # TODO: spec
@@ -180,10 +186,7 @@ class CachedFind
   # TODO: spec
   def filters_used(range_sep)
     infos = Indexer.property_display_cache.values_at(*(filters.keys)).compact.sort_by { |info| info[:seq_num] }
-    infos.map do |info|
-      filter = filters[info[:id]]
-      info.merge(:summary=> filter_summarize(info[:type], filter[:data], range_sep))
-    end
+    infos.map { |info| info.merge(:summary=> filter_summarize(info, range_sep)) }
   end
   
   # TODO: spec
@@ -217,14 +220,20 @@ class CachedFind
     (choices || [min_limit, max_limit]).map { |m| [[m.to_f, min_limit].max, max_limit].min }.sort + [unit]
   end
     
-  def filter_summarize(type, data, range_sep)
+  def filter_summarize(info, range_sep)
+    property_id, type = info.values_at(:id, :type)    
+    filter = filters[property_id]
+    
     if type == "text"
-      values = data
-      return values.empty? ? "[none]" : values.join(", ").truncate(40)
+      apids, fpids = all_product_ids, filtered_product_ids(property_id)
+      all_values, relevant_values = Indexer.filterable_values_for_property_id(property_id, apids, fpids, language_code)[language_code]
+      
+      values = (filter[:data] & relevant_values)
+      return values.empty? ? "[none]" : values.sort.join(", ").truncate(40)
     end
     
     begin
-      min, max, unit = data
+      min, max, unit = filter[:data]
       PropertyType.value_class(type).format(min, max, range_sep, unit)
     rescue
       "unknown type #{type.inspect}"

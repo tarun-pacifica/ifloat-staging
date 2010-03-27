@@ -10,7 +10,7 @@ function filter_configure_apply() {
 	
 	if(filter_configure.data('type') == 'text') {
 		data['unit'] = $ifloat_body.language;
-		data['value'] = filter_configure.find("table input:checked").map(function() {return $(this).val();}).toArray().join("::");
+		data['value'] = filter_configure.find("table input:checked").map(function() {return $(this).val();}).toArray().concat(filter_configure.data('hidden_values')).join("::");
 	} else {
 		data['unit'] = filter_configure.data('unit');
 		var slider_set = filter_configure.find('.slider_set[title=' + data['unit'] + ']');
@@ -124,12 +124,19 @@ function filter_configure_values_numeric_build_sliders(filter_configure, values_
 	filter_configure.data('values_by_unit', values_by_unit);
 	
 	for(var unit in values_by_unit) {
+		var raw_values = values_by_unit[unit];
+		var values = []
+		for(var i in raw_values) {
+			var v = raw_values[i];
+			if(v[2]) values.push(v);
+		}
+		values_by_unit[unit] = values;
+		
 		var extremes = {};
-		var values = values_by_unit[unit];
 		for(var i in values) {
 			var v = values[i];
 			if(extremes['min'] == undefined) { if(v[1]) extremes['min'] = extremes['max'] = i; }
-			else if(! v[1]) break;
+			else if(!v[1]) break;
 			else extremes['max'] = i;
 		}
 		
@@ -188,9 +195,18 @@ function filter_configure_values_numeric_update_minmax(unit) {
 }
 
 function filter_configure_values_text(values_by_unit, html) {
-	var values = values_by_unit[$ifloat_body.language];
+	var raw_values = values_by_unit[$ifloat_body.language];
 	
-	if(values.length > 0) html.push('<p class="select_all"> <input type="checkbox" onclick="filter_configure_values_text_select_all()"> Select <strong>all</strong> values </p>');
+	var hidden_values = [];
+	var values = [];
+	for(var i in raw_values) {
+		var v = raw_values[i];
+		if(!v[1] || v[2]) values.push(v);
+		else hidden_values.push(v[0]);
+	}
+	$('#filter_configure').data('hidden_values', hidden_values);
+	
+	if(values.length > 1) html.push('<p class="select_all"> <input type="checkbox" onclick="filter_configure_values_text_select_all()"> Select <strong>all</strong> values </p>');
 
 	var column_count = 0;
 	var column_length = 11;
@@ -221,7 +237,7 @@ function filter_configure_values_text(values_by_unit, html) {
 			var escaped_value = util_escape(v[0], ['"']);
 			html.push('<td class="check"> <input value="' + escaped_value + '" type="checkbox" ' + checked + ' onclick="filter_configure_values_text_update_select_all()"/> </td>');
 			
-			var klass = ((v[1] && !v[2]) ? 'class="value irrelevant"' : 'class="value"');
+			var klass = (!v[2] ? 'class="value irrelevant"' : 'class="value"');
 			var definition = v[3];
 			value = util_defined(value, definition, c >= columns.length / 2 ? 'left' : 'right');
 			escaped_value = "'" + util_escape(v[0], ['"', "'"]) + "'";

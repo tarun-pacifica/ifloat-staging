@@ -25,7 +25,7 @@
 				
 				<% @diff_property_ids.each do |property_id| %>
 				<% prop_info = Indexer.property_display_cache[property_id] %>
-				<% primary = (property_id == @primary_property_id and @diff_property_ids.size > 1) %>
+				<% primary = (property_id == @primary_property_id) %>
 				<% dom_class = (primary ? 'class="primary"' : '') %>
 				<% chevron = (primary ? "selected" : "unselected") %>
 				<td <%= dom_class %>>

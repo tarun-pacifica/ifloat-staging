@@ -14,7 +14,7 @@ class PropertyValueDefinition
   property :id, Serial
   property :language_code, String, :required => true, :format => /^[A-Z]{3}$/, :unique_index => :val_per_lang_per_prop_type
   property :value, String, :required => true, :unique_index => :val_per_lang_per_prop_type
-  property :definition, String, :required => true, :length => 255
+  property :definition, Text, :required => true, :lazy => false
   
   belongs_to :property_type
     property :property_type_id, Integer, :unique_index => :val_per_lang_per_prop_type

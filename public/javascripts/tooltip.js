@@ -1,5 +1,5 @@
 function tooltip_hide() {
-	$('#tooltip').css('display', 'none');
+	$('#tooltip').stop(true, true).hide();;
 }
 
 function tooltip_show(event, text, relative_position) {

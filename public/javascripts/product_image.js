@@ -26,5 +26,5 @@ function product_image_popup(event, image_url, relative_position) {
 
 function product_image_unpopup(event) {
 	$(event.target).css('border-color', 'gray');
-	$('#image_popup').css('display', 'none');
+	$('#image_popup').stop(true, true).hide();
 }

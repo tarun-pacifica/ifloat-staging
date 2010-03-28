@@ -15,7 +15,11 @@
 	<div class="body">
 		<table>
 			<tr>
-				<td></td>
+				<td class="count">
+					<% if @product_count > @product_ids.size %>
+					showing <%= @product_ids.size %>/<%= @product_count %> items
+					<% end %>
+				</td>
 				<% @product_ids.each_with_index do |product_id, i| %>
 				<td class="product image"
 					onclick="window.location = '<%= url(:product, :id => product_id) %>'"

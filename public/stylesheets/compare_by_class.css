@@ -17,6 +17,13 @@
 	vertical-align: top;
 }
 
+#compare_by_class table td.count {
+	color: #404040;
+	font-weight: bold;
+	text-align: center;
+	vertical-align: bottom;
+}
+
 #compare_by_class table td.icon {
 	text-align: center;
 }

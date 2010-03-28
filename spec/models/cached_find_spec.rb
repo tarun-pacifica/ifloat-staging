@@ -79,6 +79,7 @@ describe CachedFind do
   it "needs specs for the filter! command"
   it "needs updated specs for filtered_product_ids (that take the class_only path into account)"
   it "needs specs for language_code"
+  it "needs specs reflecting that 'filters' is a read-only property"
   
   describe "execution with product data" do
     before(:all) do

@@ -61,13 +61,13 @@
 
 			<% unless summary.blank? %>
 			<h3>Summary</h3>
-			<p><%= summary %></p>
+			<p><%= summary.superscript %></p>
 			<% end %>
 
 			<% unless features.blank? %>
 			<h3>Features</h3>
 			<ul>
-				<% features.split("\n").each do |feature| %>
+				<% features.superscript.split("\n").each do |feature| %>
 				<li><%= feature %></li>
 				<% end %>
 			</ul>
@@ -75,7 +75,7 @@
 
 			<% unless description.blank? %>
 			<h3>Description</h3>
-			<% description.split("\n").each do |paragraph| %>
+			<% description.superscript.split("\n").each do |paragraph| %>
 			<p><%= paragraph %></p>
 			<% end %>
 			<% end %>

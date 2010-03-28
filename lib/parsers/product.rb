@@ -196,6 +196,7 @@ class ProductParser < AbstractParser
       raise "unknown relationship: #{relationship_name}" unless ProductRelationship::NAMES.has_key?(relationship_name)
       company = ((company_ref == "*") ? nil : @import_set.get!(Company, company_ref))
       property = (property_name.blank? ? nil : @import_set.get!(PropertyDefinition, property_name))
+      raise "non-text property: #{property_name}" unless property.nil? or property.attributes[:property_type].attributes[:core_type] == "text"
       [:relationships, relationship_name, company, property]
 
     when /^attachment\.([a-z_]+)\.(\d+)$/

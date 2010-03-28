@@ -88,6 +88,7 @@ class CachedFinds < Application
   end
   
   def new
+    @background_css = "url(/images/marquee/backgrounds/sky.png) repeat-x"
     @show_purchases_button = session.picked_products.any? { |pick| pick.group =~ /^buy/ }
     render
   end

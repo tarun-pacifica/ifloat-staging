@@ -19,11 +19,13 @@
 		</div>
 		<div class="right"></div>
 	</div>
+	
+	<noscript>
+	<p class="noscript">This site makes extensive use of Javascript throughout and is largely unusable without it. Please activate Javascript support in your browser or switch to a browser with such support.</p>
+	</noscript>
 </div>
 
 <script type="text/javascript" charset="utf-8">
-	$('body').css('background', 'url(/images/marquee/backgrounds/sky.png) repeat-x');
-	
 	<% Dir[Merb.root / "public" / "images" / "marquee" / "buttons" / "*.png"].each do |path| %>
 	util_preload_image('/images/marquee/buttons/<%= File.basename(path) %>');
 	<% end %>

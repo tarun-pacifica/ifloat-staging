@@ -25,8 +25,6 @@
 <script type="text/javascript">
 	$ifloat_body = {}
 	
-	$('body').css('background', 'white');
-
 	var partner_panel = $('#partner_panel');
 	partner_panel.data('partner_urls', <%= @partner_product_urls.to_json %>);
 	pick_lists_update();

@@ -1,6 +1,5 @@
 module Merb
   module GlobalHelpers
-    # TODO: augment to accept UOMs and then use in formatting prices _before_ they go out over JSON
     def money(amount, currency, per_unit = nil)
       return nil if amount.nil?
       
@@ -11,9 +10,17 @@ module Merb
         end
         
       postfix = (prefix.nil? ? " #{currency}" : "")
-      postfix += " / #{per_unit}" unless per_unit.nil?
+      postfix += "&nbsp;/&nbsp;#{per_unit.superscript(/(\d)/)}" unless per_unit.nil?
       
       [prefix, "%0.2f" % amount, postfix].join
+    end
+    
+    def money_uom(amount, currency, unit, divisor)
+      return money(amount, currency, unit) if divisor.nil?
+        
+      parts = [money(amount, currency)]
+      parts << "(" + money(amount / divisor, currency, unit) + ")" unless divisor == 0
+      parts.join("<br/>")
     end
     
     def panel_title_back_to_find(find)
@@ -25,7 +32,7 @@ module Merb
   			<hr class="terminator" />
 			HTML
     end
-    
+        
     def product_data_panel(values)
       html = []
       
@@ -107,7 +114,5 @@ module Merb
         <img class="icon" src=#{url.inspect} onmouseover="tooltip_show(event, '#{t}', '#{position}')" onmouseout="tooltip_hide()" />
       HTML
     end
-  
-    
   end
 end

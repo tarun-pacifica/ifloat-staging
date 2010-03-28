@@ -101,12 +101,18 @@ class PickedProducts < Application
     return redirect("/") if non_compare_picks.empty?
     
     product_ids = non_compare_picks.map { |pick| pick.product_id }
+    
     @prices_by_url_by_product_id = Product.prices_by_url_by_product_id(product_ids, session.currency)
-    @prices_by_url_by_product_id.values.each do |prices_by_url|
+    unit_and_divisor_by_product_id = UnitOfMeasure.unit_and_divisor_by_product_id(product_ids)    
+    
+    @prices_by_url_by_product_id.each do |product_id, prices_by_url|
+      unit, divisor = unit_and_divisor_by_product_id[product_id]
+      
       formatted_prices_by_url = {}
       prices_by_url.each do |url, price|
-        formatted_prices_by_url[url] = money(price, session.currency)
+        formatted_prices_by_url[url] = money_uom(price, session.currency, unit, divisor)
       end
+      
       prices_by_url.update(formatted_prices_by_url)
     end
     

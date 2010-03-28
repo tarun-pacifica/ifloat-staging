@@ -27,7 +27,9 @@
 					<% @prices_by_url.each do |url, amount| %>
 						<tr>
 							<td> <img src="/images/partner/facilities/<%= url %>.png" alt=<%= url.inspect %> /> </td>
-							<td class="price"> <%= money(amount, session.currency) %> </td>
+							<td class="price">
+								<%= money_uom(amount, session.currency, @price_unit, @price_divisor) %>
+							</td>
 						</tr>
 					<% end %>
 

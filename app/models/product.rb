@@ -100,12 +100,12 @@ class Product
   end
   
   # TODO: spec
-  def self.values_by_property_name_by_product_id(product_ids, language_code, names)
-    names = names.to_set
+  def self.values_by_property_name_by_product_id(product_ids, language_code, names_or_ids)
+    names_or_ids = names_or_ids.to_set
     names_by_property_id = {}
     Indexer.property_display_cache.each do |property_id, info|
       name = info[:raw_name]
-      names_by_property_id[property_id] = name if names.include?(name)
+      names_by_property_id[property_id] = name if names_or_ids.include?(property_id) or names_or_ids.include?(name)
     end
     
     attributes = {:product_id => product_ids, :property_definition_id => names_by_property_id.keys }
@@ -136,7 +136,7 @@ class Product
   end
   
   # TODO: spec
-  def values_by_property_name(language_code, names)
-    Product.values_by_property_name_by_product_id([id], language_code, property_names)[id] || {}
+  def values_by_property_name(language_code, names_or_ids)
+    Product.values_by_property_name_by_product_id([id], language_code, names_or_ids)[id] || {}
   end
 end

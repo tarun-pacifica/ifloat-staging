@@ -14,7 +14,7 @@ CSV_REPO = "../ifloat_csvs"
 
 ERRORS_PATH = "/tmp/errors.csv"
 
-CLASSES = [PropertyType, PropertyDefinition, PropertyValueDefinition, TitleStrategy, Company, Facility, Asset, Brand, Product]
+CLASSES = [PropertyType, PropertyDefinition, PropertyValueDefinition, TitleStrategy, UnitOfMeasure, Company, Facility, Asset, Brand, Product]
 
 class ImportObject
   attr_accessor :primary_key, :resource_id
@@ -38,6 +38,7 @@ class ImportSet
     Translation             => [:property_definition, :language_code],
     PropertyValueDefinition => [:property_type, :value],
     TitleStrategy           => [:name],
+    UnitOfMeasure           => [:class_name],
     Company                 => [:reference],
     Facility                => [:company, :name],
     Asset                   => [:bucket, :company, :name],

@@ -47,9 +47,20 @@ class PickedProducts < Application
     
     @diff_values_by_prop_id = diff_values.select { |info| info[:dad] }.group_by { |info| info[:id] }
     
+    all_values = (@common_values + diff_values)
+    names = %w(marketing:summary marketing:feature_list).to_set
+    named_values = all_values.select { |info| names.include?(info[:raw_name]) }.group_by { |info| info[:id] }
+    @diff_values_by_prop_id.update(named_values)
+    
     @diff_properties = @diff_values_by_prop_id.keys.map do |property_id|
       Indexer.property_display_cache[property_id]
-    end.sort_by { |info| info[:seq_num] }
+    end.sort_by do |info|
+      case info[:raw_name]
+      when "marketing:summary" then -2
+      when "marketing:feature_list" then -1
+      else info[:seq_num]
+      end
+    end
     
     @images_by_product_id = Product.primary_images_by_product_id(@product_ids)
     

@@ -105,6 +105,18 @@ module Merb
       if info[:type] == 'text' then values.map! { |value| value.superscript }
       else values.map! { |value| value.superscript_numeric }
       end
+      
+      case info[:raw_name]
+      when "marketing:description"
+        values.map! do |value|
+          value.split("\n").map { |paragraph| "<p>#{paragraph}</p>" }.join
+        end
+      when "marketing:feature_list"
+        values.map! do |value|
+          "<ul>" + value.split("\n").map { |feature| "<li>#{feature}</li>" }.join + "</ul>"
+        end
+      end
+      
       values.join("<br />")
     end
     

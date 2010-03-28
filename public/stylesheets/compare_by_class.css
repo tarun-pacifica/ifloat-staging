@@ -8,6 +8,10 @@
 	width: 100%;
 }
 
+#compare_by_class table p {
+	margin: 0 0 5px 0;
+}
+
 #compare_by_class table td {
 	padding: 5px;
 	vertical-align: top;
@@ -35,4 +39,9 @@
 
 #compare_by_class table tr td.hover {
 	background: #F9BD48;
+}
+
+#compare_by_class table ul {
+	margin: 0 0 5px 0;
+	padding-left: 15px;
 }

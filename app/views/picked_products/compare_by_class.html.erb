@@ -32,7 +32,7 @@
 			<% infos_by_product_id = @diff_values_by_prop_id[property_id].hash_by { |info| info[:product_id] } %>
 			<tr class="<%= parity = (parity == :even ? :odd : :even) %>">
 				<td class="icon">
-					<%= property_icon(prop_info[:icon_url], prop_info[:name], :right) %>
+					<%= property_icon(prop_info[:icon_url], prop_info[:name], :right) if prop_info[:dad] %>
 				</td>
 				<% @product_ids.each_with_index do |product_id, i| %>
 				<td class="product"

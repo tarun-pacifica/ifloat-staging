@@ -4,7 +4,7 @@ class CachedFinds < Application
     @find.ensure_valid
     
     product_ids = @find.filtered_product_ids_by_image_checksum[image_checksum]
-    return redirect(resource(find)) if product_ids.nil? or product_ids.empty?
+    return redirect(resource(@find)) if product_ids.nil? or product_ids.empty?
     return redirect(url(:product, :id => product_ids.first)) if product_ids.size == 1
     
     @image = Asset.first(:checksum => image_checksum)

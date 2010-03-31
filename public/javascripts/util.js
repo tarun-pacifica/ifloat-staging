@@ -2,16 +2,11 @@ function util_defined(value, definition, position) {
 	if(definition == undefined) return value;
 	if(position == undefined) position = 'right';
 	
-	return '<span class="defined" onmouseover="tooltip_show(event, \'' + util_escape(definition, ['"', "'"]) + '\', \'' + position + '\')" onmouseout="tooltip_hide()">' + value + '</span>';
+	return '<span class="defined" onmouseover="tooltip_show(event, \'' + util_escape(definition, '"\'') + '\', \'' + position + '\')" onmouseout="tooltip_hide()">' + value + '</span>';
 }
 
 function util_escape(string, characters) {
-	var s = string;
-	for(var i in characters) {
-		var c = characters[i];
-		s = s.replace(c, '\\' + c);
-	}
-	return s;
+	return string.replace(RegExp("([" + characters + "])", "g"), '\\$1');
 }
 
 function util_group_by(array, property) {

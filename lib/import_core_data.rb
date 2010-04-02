@@ -7,6 +7,7 @@ ASSET_REPO = "../ifloat_assets"
 ASSET_VARIANT_DIR = "/tmp/ifloat_asset_variants"
 FileUtils.mkpath(ASSET_VARIANT_DIR)
 ASSET_VARIANT_SIZES = {:small => "200x200", :tiny => "100x100"}
+ASSET_WATERMARK_PATH = "public/images/common/watermark.png"
 
 CSV_DUMP_DIR = "/tmp/ifloat_csv_dumps"
 FileUtils.mkpath(CSV_DUMP_DIR)
@@ -479,16 +480,30 @@ def build_asset_csv
   stopwatch("created missing image variants") do
     assets.each do |info|
       bucket, company_ref, name, path, checksum, size = info
-      next unless size == "400x400"
-    
+      next if size.nil? or bucket != "products"
+
       ext = File.extname(path)
+      wm_path = info[3] = ASSET_VARIANT_DIR / "#{checksum}#{ext}"
+      unless File.exist?(wm_path)
+      	report = `gm composite -geometry +10+10 -gravity SouthEast #{ASSET_WATERMARK_PATH.inspect} #{path.inspect} #{wm_path.inspect}`
+        unless $?.success?
+	  errors << [path, "GM.composite failed: #{report.inspect}"]
+          next
+        end
+      end
+      
+      # TODO: remove exit once the watermarking process is verified
+      puts "exiting - verify #{wm_path} looks right"
+      exit 0
+
+      next unless size == "400x400"    
       [:small, :tiny].map do |variant|
         variant_path = ASSET_VARIANT_DIR / "#{checksum}-#{variant}#{ext}"
         info << variant_path
         next if File.exist?(variant_path)
       
         variant_size = ASSET_VARIANT_SIZES[variant]
-        report = `gm convert -size #{variant_size} #{path.inspect} -resize #{variant_size} +profile '*' #{variant_path.inspect}`
+        report = `gm convert -size #{variant_size} #{wm_path.inspect} -resize #{variant_size} +profile '*' #{variant_path.inspect}`
         errors << [path, "GM.convert failed: #{report.inspect}"] unless $?.success?
       end
     end

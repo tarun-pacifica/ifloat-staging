@@ -12,7 +12,7 @@ class TextPropertyValue < PropertyValue
   
   # TODO: spec
   def self.parse_or_error(value)
-    marked_value = value.gsub(/[^\n\w\.\/\- !@%()'";:,?®™]/) { " >>> #{$1} <<< " }
+    marked_value = value.gsub(/[^\n\w\.\/\- !@%()'";:,?®™]/) { |c| " >>> #{c} <<< " }
     raise "invalid characters: #{marked_value}" if marked_value.size > value.size 
     {:text_value => value}
   end

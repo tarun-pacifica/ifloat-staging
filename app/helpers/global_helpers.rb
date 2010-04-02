@@ -96,7 +96,7 @@ module Merb
           next
         end
         
-        d = definition.gsub(/(['"])/) { "\\" + $1 }
+        d = definition.gsub(/(['"])/) { |c| "\\#{c}" }
         values << <<-HTML
     	    <span class="defined" onmouseover="tooltip_show(event, '#{d}', '#{tooltip_position}')" onmouseout="tooltip_hide()">#{value}</span>
     	  HTML

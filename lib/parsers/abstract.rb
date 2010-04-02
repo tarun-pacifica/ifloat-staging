@@ -1,6 +1,6 @@
 class AbstractParser
   HEADERS = []
-  KCODE = "NONE"
+  KCODE = "UTF-8"
   REQUIRED_VALUE_HEADERS = []
   
   def initialize(import_set)

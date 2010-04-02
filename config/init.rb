@@ -55,7 +55,7 @@ Merb::BootLoader.before_app_loads do
   
   class String
     def superscript(matcher = /([®™])/)
-      gsub(matcher) { "<sup>#{$1}</sup>" }
+      gsub(matcher) { |c| "<sup>#{c}</sup>" }
     end
     
     def superscript_numeric

@@ -53,7 +53,7 @@ class ImportSet
     TextPropertyValue       => [:product, :definition, :sequence_number, :language_code]
   }
   
-  TRUNK_CLASSES = [PropertyType, PropertyDefinition, Company, Asset, Product].to_set
+  BULK_CLASSES = [Attachment, ProductMapping, ProductRelationship, DatePropertyValue, NumericPropertyValue, TextPropertyValue].to_set
   
   def initialize
     @errors = []
@@ -275,7 +275,7 @@ class ImportSet
     to_destroy_ids.each_slice(1000) { |ids| klass.all(:id => ids).destroy! }
     stats = {:created => 0, :updated => 0, :destroyed => to_destroy_ids.size, :skipped => skipped_pk_md5s.size}
     
-    unless TRUNK_CLASSES.include?(klass)
+    if BULK_CLASSES.include?(klass)
       table_name = @adapter.send(:quote_name, klass.storage_name)
       
       properties = klass.properties

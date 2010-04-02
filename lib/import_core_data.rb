@@ -590,7 +590,7 @@ CLASSES.each do |klass|
   stub = (klass == Asset ? "/tmp" : CSV_REPO) / klass.storage_name
 
   if File.directory?(stub)
-    paths = Dir[stub / "*.csv"]
+    paths = Dir[stub / "*.csv"].sort
     if paths.empty? then errors << "No CSVs found for #{klass} in #{stub.inspect}."
     else csv_paths_by_class[klass] = paths
     end

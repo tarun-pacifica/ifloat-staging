@@ -39,12 +39,12 @@ class PropertyType
   def self.validate_unit(unit, name, core_type, valid_units)
     case core_type
     when "currency"
-      unit =~ /^[A-Z]{3}$/ || [false, "should always be an ISO-4217 code for a #{name}[#{core_type}] property"]
+      unit =~ /^[A-Z]{3}$/ || [false, "Unit should always be an ISO-4217 code for a #{name}[#{core_type}] property"]
     when "numeric"
       valid_units = [nil] if valid_units.blank?
-      valid_units.include?(unit) || [false, "invalid for a #{name}[#{core_type}] property"]
+      valid_units.include?(unit) || [false, "Unit invalid for a #{name}[#{core_type}] property"]
     else
-      unit.nil? || [false, "should always be nil for a #{name}[#{core_type}] property"]
+      unit.nil? || [false, "Unit should always be nil for a #{name}[#{core_type}] property"]
     end
   end
   
@@ -66,7 +66,7 @@ class PropertyType
   def validate_numeric_units
     return true if units.blank?
     
-    error = [false, "should be an array of unique, valid units (or nil / [])"]
+    error = [false, "Units should be an array of unique, valid units (or nil / [])"]
     
     return error unless units.is_a?(Array)
     return error unless units.repeated.empty?
@@ -81,7 +81,7 @@ class PropertyType
         missing_conversions << "#{from} -> #{to}"
       end
     end
-    return [false, "should only specify units which already have conversions defined (missing: #{missing_conversions.join(', ')})"] unless missing_conversions.empty?
+    return [false, "Units should only specify units which already have conversions defined (missing: #{missing_conversions.join(', ')})"] unless missing_conversions.empty?
     
     true
   end

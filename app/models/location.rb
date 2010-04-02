@@ -24,7 +24,7 @@ class Location
     if gln_13.nil? then true
     else
       check_digit = gln_13 % 10
-      gln_13_checksum(gln_13) == check_digit || [false, "should pass the GLN-13 checksum"]
+      gln_13_checksum(gln_13) == check_digit || [false, "GLN-13 should pass the GLN-13 checksum"]
     end
   end
   

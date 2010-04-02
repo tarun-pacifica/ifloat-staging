@@ -32,11 +32,11 @@ class CachedFind
   belongs_to :user, :required => false
   
   validates_with_block :language_code, :unless => :new? do
-    attribute_dirty?(:language_code) ? [false, "cannot be updated"] : true
+    attribute_dirty?(:language_code) ? [false, "Language code cannot be updated"] : true
   end
   
   validates_with_block :specification, :unless => :new? do
-    attribute_dirty?(:specification) ? [false, "cannot be updated"] : true
+    attribute_dirty?(:specification) ? [false, "Specification cannot be updated"] : true
   end
   
   before :valid? do

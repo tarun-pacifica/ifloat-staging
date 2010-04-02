@@ -21,6 +21,6 @@ class Contact
   belongs_to :user
     
   validates_with_block :type do
-    (self.class != Contact and self.kind_of?(Contact)) || [false, "must be a sub-class of Contact"]
+    (self.class != Contact and self.kind_of?(Contact)) || [false, "Type must be a sub-class of Contact"]
   end
 end

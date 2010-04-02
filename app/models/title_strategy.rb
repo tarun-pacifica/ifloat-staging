@@ -27,7 +27,7 @@ class TitleStrategy
   
   validates_with_block :class_names, :if => :class_names do
     class_names.is_a?(Array) and class_names.all? { |name| name.is_a?(String) and name.size > 0 } ||
-      [false, "should be an array of class names"]
+      [false, "Class names should be an array of class names"]
   end
   
   TITLE_PROPERTIES.each do |title|
@@ -39,6 +39,6 @@ class TitleStrategy
   # TODO: spec
   def validate_title(title)
     title.is_a?(Array) and title.all? { |part| name.is_a?(Integer) or name = "-" } ||
-      [false, "should be an array containing PropertyDefinition IDs and (optionally) '-'s"]
+      [false, "Title should be an array containing PropertyDefinition IDs and (optionally) '-'s"]
   end
 end

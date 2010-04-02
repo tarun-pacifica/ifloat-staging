@@ -62,7 +62,7 @@ class Asset
   validates_within :view, :set => CUBIC_VIEWS
   
   validates_with_block :chain_id do
-    chain_id.nil? || Asset.get(chain_id) || [false, "should be the ID of an existing Asset"]
+    chain_id.nil? || Asset.get(chain_id) || [false, "Chain ID should be the ID of an existing Asset"]
   end
   
   validates_absent :chain_sequence_number, :if => proc { |asset| asset.chain_id.nil? }

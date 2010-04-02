@@ -47,6 +47,6 @@ class PropertyValue
   belongs_to :definition, :model => "PropertyDefinition", :child_key => [:property_definition_id]
   
   validates_with_block :type do
-    (self.class != PropertyValue and self.kind_of?(PropertyValue)) || [false, "must be a sub-class of PropertyValue"]
+    (self.class != PropertyValue and self.kind_of?(PropertyValue)) || [false, "Type must be a sub-class of PropertyValue"]
   end
 end

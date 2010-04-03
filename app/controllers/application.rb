@@ -14,6 +14,6 @@ class Application < Merb::Controller
   end
   
   def ensure_authenticated
-    redirect "/prelaunch/login" unless params[:action] == "track" or Merb.environment == "development" or session.authenticated?
+    redirect "/prelaunch/login" unless params[:action] == "track" or Merb.environment != "staging" or session.authenticated?
   end
 end

@@ -30,8 +30,9 @@ module Mailer
     when :registration
       user = params[:user]
       return if user.nil?
-      confirmation_link = Merb::Config.registration_host +
-        Merb::Router.url(:user_confirm, :id => user.id, :reg_key => user.confirm_key)
+      confirmation_link =
+        Merb::Config.registration_host +
+        Merb::Router.url(:user_confirm, :id => user.id, :confirm_key => user.confirm_key)
 
       Mail.deliver do |mail|
         Mailer.envelope(mail, action, :admin, user.login)

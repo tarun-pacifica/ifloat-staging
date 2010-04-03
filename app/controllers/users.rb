@@ -1,6 +1,16 @@
 class Users < Application
   redact_params :password, :confirmation
   
+  def confirm(id, confirm_key)
+    user = User.get(id)
+    return redirect("/") if user.nil? or confirm_key != user.confirm_key or not user.confirmed_at.nil?
+    
+    user.confirmed_at = DateTime.now
+    user.save
+    
+    render
+  end
+  
   def create(name, nickname, login, password, confirmation)
     nickname = nil if nickname.blank?    
     user = User.new(:name => name, :nickname => nickname, :login => login, :password => password, :confirmation => confirmation, :created_from => request.remote_ip)

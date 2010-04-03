@@ -28,7 +28,7 @@ Merb::Router.prepare do
   
   match('/purchases/track').to(:controller => 'purchases', :action => 'track')
   
-  match('/users/:id/confirm/:reg_key').to(:controller => 'users', :action => 'confirm').name(:user_confirm)
+  match('/users/:id/confirm/:confirm_key').to(:controller => 'users', :action => 'confirm').name(:user_confirm)
   match('/users/login').to(:controller => 'users', :action => 'login')
   match('/users/logout').to(:controller => 'users', :action => 'logout')
   resources :users

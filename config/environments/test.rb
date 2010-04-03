@@ -9,10 +9,11 @@ Merb::Config.use { |c|
   c[:log_level] = :error
   c[:log_stream] = STDOUT
   c[:log_file] = nil
+  
+  c[:registration_host] = "http://localhost:4000"
 }
 
 Merb::BootLoader.after_app_loads do
-  Merb::Mailer.delivery_method = :test_send
-  AssetStore.config(:local, :local_root => "/tmp/ifloat_assets", :url_stem => "http://194.74.168.178:4000/assets")
-  # ln -s /tmp/ifloat_assets public/assets
+  Mail.defaults { delivery_method :test }
+  AssetStore.config(:local, :local_root => "/tmp/ifloat_assets", :url_stem => "http://localhost:4000/assets")
 end

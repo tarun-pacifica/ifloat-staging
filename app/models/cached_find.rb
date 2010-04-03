@@ -10,11 +10,11 @@
 #
 # === 1. Anonimize Unused CachedFinds
 #
-# Run CachedFind.unusued.update!(:user_id => nil) periodically. This will detach any unused CachedFinds from their parent users.
+# Run CachedFind.unused.update!(:user_id => nil) periodically. This will detach any unused (accessed more then ANONIMIZATION_TIME ago) CachedFinds from their parent users.
 #
 # === 2. Destroy Obsolete CachedFinds
 #
-# Run CachedFind.obsolete.destroy! peridically. This will destroy any anonymous CachedFinds no longer featured in any Session.
+# Run CachedFind.obsolete.destroy! periodically. This will destroy any anonymous CachedFinds no longer featured in any Session.
 #
 class CachedFind
   include DataMapper::Resource

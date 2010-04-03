@@ -8,6 +8,8 @@ Merb::Config.use { |c|
   c[:log_level] = :error
   c[:log_stream] = nil
   c[:log_file] = Merb.root / "log" / "staging.log"
+  
+  c[:registration_host] = "http://staging.ifloat.biz"
 }
 
 Merb::BootLoader.after_app_loads do

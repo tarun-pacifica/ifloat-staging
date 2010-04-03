@@ -14,8 +14,16 @@
 # nickname:: 'Bloggsy
 # login:: 'joe.bloggs@example.org'
 #
+# = Processes
+#
+# === 1. Destroy Unconfirmed Users
+#
+# Run User.expired.destroy! periodically. This will destroy any users who have failed to confirm their registration within UNCONFIRMED_EXPIRY_HOURS hours.
+#
 class User
   include DataMapper::Resource
+  
+  UNCONFIRMED_EXPIRY_HOURS = 24
   
   # TODO: update spec with field definitions
   property :id,             Serial
@@ -28,6 +36,9 @@ class User
   property :send_marketing, Boolean,   :required => true, :default => false
   property :created_at,     DateTime,  :required => true, :default => proc { DateTime.now }
   property :created_from,   IPAddress, :required => true
+  # TODO: spec
+  property :confirm_key,    String,    :required => true, :default => proc { Password.gen_string(16) }
+  property :confirmed_at,   DateTime
   
   has n, :blogs
   has n, :cached_finds
@@ -58,6 +69,11 @@ class User
     user = User.first(:login => login)
     return nil if user.nil?
     Password.match?(user.password, pass) ? user : nil
+  end
+  
+  # TODO: spec
+  def self.expired
+    all(:confirmed_at => nil, :created_at.lt => UNCONFIRMED_EXPIRY_HOURS.hours.ago)
   end
   
   attr_reader :plain_password

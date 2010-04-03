@@ -9,10 +9,7 @@ class Users < Application
 
     if errors.empty?
       if user.save
-        # TODO: reactivate before going live
-        # send_mail(MainMailer, :registration,
-        #           {:from => "admin@ifloat.biz", :to => user.login, :subject => "ifloat Registration"},
-        #           {:user => user})
+        Mailer.deliver(:registration, :user => user)
         session.login!(login, password)
         "<p>Successfully registered and logged in as <strong>#{user.name}</strong>. Confirmation e-mail sent to <strong>#{login}</strong>.</p>"
       else raise Unauthenticated, "Unable to register, please try again later"
@@ -31,9 +28,7 @@ class Users < Application
       user.reset_password
       user.save
       
-      send_mail(MainMailer, :password_reset,
-        {:from => "admin@ifloat.biz", :to => user.login, :subject => "ifloat Password Reset"},
-        {:user => user})
+      Mailer.deliver(:password_reset, :user => user)
       "<p>Password reset e-mail sent to <strong>#{login}</strong>.</p>"
       
     else

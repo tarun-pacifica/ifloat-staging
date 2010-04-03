@@ -17,12 +17,6 @@ Dir[PRICES_REPO / "*"].each do |path|
     product_info_by_ref = YAML.load(File.open(path / "prices.yaml"))
     facility.update_products(product_info_by_ref)
   rescue Exception => e
-    mail_attributes = {
-      :from    => "admin@ifloat.biz",
-      :to      => "andre@bluetheta.com",
-      :subject => "Price import failure on #{`hostname`.chomp} (#{Merb.environment} environment)"
-    }
-        
-    send_mail(MainMailer, :exception, mail_attributes, {:context => url, :exception => e})
+    Mailer.deliver(:exception, :exception => e, :context => "#{url} price import failure on #{`hostname`.chomp} (#{Merb.environment} environment)")
   end
 end

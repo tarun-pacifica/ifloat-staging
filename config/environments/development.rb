@@ -15,6 +15,6 @@ Merb::Config.use { |c|
 }
 
 Merb::BootLoader.after_app_loads do
-  Mail.defaults { delivery_method :test }
   AssetStore.config(:local, :local_root => Merb.root / "public" / "assets", :url_stem => "/assets")
+  Mail.defaults { delivery_method :test }
 end

@@ -1,7 +1,5 @@
 # merb -i -r lib/import_prices.rb
 
-extend Merb::MailerMixin
-
 PRICES_REPO = "../ifloat_prices"
 
 facilities_by_url = Facility.all.hash_by(:primary_url)

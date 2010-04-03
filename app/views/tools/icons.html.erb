@@ -1,5 +1,5 @@
 <div id="property_icons">
-	<table>
+	<table summary="associated">
 		<tr> <th colspan="2"><h1>Properties</h1></th> </tr>
 		
 		<% domain = nil %>		
@@ -22,7 +22,7 @@
 		<% end %>
 	</table>
 	
-	<table>
+	<table summary="unassociated">
 		<tr> <th colspan="2"><h1>Unassociated</h1></th> </tr>
 		<% @unused_property_icons.each do |asset| %>
 		<tr>

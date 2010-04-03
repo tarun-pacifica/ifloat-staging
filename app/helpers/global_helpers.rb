@@ -56,7 +56,7 @@ module Merb
 
         values_by_section[section].each do |info|
           html << <<-HTML
-            <table class="property">
+            <table class="property" summary="property">
               <tr>
                 <td class="icon"> #{property_icon(info[:icon_url], info[:name])} </td>
                 <td class="summary"> #{product_value_summary(info)} </td>

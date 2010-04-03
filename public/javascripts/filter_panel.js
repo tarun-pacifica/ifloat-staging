@@ -47,7 +47,7 @@ function filter_panel_load_handle(filters) {
 			section = filter.section;
 		}
 		
-		html.push('<table class="filter" id="filter_' + filter.id + '">');
+		html.push('<table class="filter" id="filter_' + filter.id + '" summary="filter ' + filter.id + '">');
 		html.push('<tr>');
 		html.push('<td class="icon">');
 		html.push(filter_panel_property_icon(filter, 'filter_panel_edit'));

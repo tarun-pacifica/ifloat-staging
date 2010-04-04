@@ -44,6 +44,7 @@ class CachedFinds < Application
   end
   
   def create(language_code, specification)
+    specification = specification.downcase
     find = session.add_cached_find(CachedFind.new(:language_code => language_code, :specification => specification))
     
     if find.valid?

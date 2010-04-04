@@ -656,7 +656,7 @@ mail_fail("verifying data integrity") if import_set.write_errors(ERRORS_PATH)
 
 # Import the entire set
 
-puts "=== Importing Objects ==="
+puts "=== Updating Database ==="
 class_stats = import_set.import
 mail_fail("updating the database") if import_set.write_errors(ERRORS_PATH)
 Mailer.deliver(:import_success, :ars => repo_summary(ASSET_REPO), :crs => repo_summary(CSV_REPO), :stats => class_stats)

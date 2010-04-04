@@ -525,6 +525,7 @@ def mail_fail(whilst)
                                   :crs => repo_summary(CSV_REPO),
                                   :whilst => whilst,
                                   :attach => ERRORS_PATH)
+  puts "ERROR whilst #{whilst} - emailed report: #{ERRORS_PATH}"
   exit 1
 end
 

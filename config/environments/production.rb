@@ -16,11 +16,12 @@ Merb::BootLoader.after_app_loads do
   AssetStore.config(:mosso, :user => "pristine", :key => "b7db73b0bd047f7292574d7c9f0d16de", :container => "ifloat-production", :url_stem => "http://c0210061.cdn.cloudfiles.rackspacecloud.com")
   
   Mail.defaults do
-    delivery_method :smtp, :address        => "mail.authsmtp.com"
-                           :port           => 2525,
-                           :domain         => "www.ifloat.biz",
-                           :user_name      => "ac47472",
-                           :password       => "vkzb6eyrv",
-                           :authentication => :cram_md5
+    delivery_method :smtp, :address              => "mail.authsmtp.com"
+                           :port                 => 2525,
+                           :domain               => "www.ifloat.biz",
+                           :user_name            => "ac47472",
+                           :password             => "vkzb6eyrv",
+                           :authentication       => :cram_md5,
+                           :enable_starttls_auto => false
   end
 end

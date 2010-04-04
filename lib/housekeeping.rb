@@ -10,8 +10,7 @@ module HouseKeeping
       # TODO: check for /tmp/update_caches; if present, delete it and update indexer cache and conflate product values
       # TODO: delete UNCONFIRMED_EXPIRY_HOURS exceeding users
     rescue Exception => e
-      p e
-      # TODO: send mail
+      Mailer.deliver(:exception, :exception => e, :whilst => "performing housekeeping")
     end
   end
   
@@ -19,7 +18,6 @@ module HouseKeeping
   private
   
   def self.expire_old_sessions
-    ttl = Merb::Config[:session_ttl]
-    Merb::DataMapperSession.store.all(:created_at.lt => ttl.ago).destroy!
+    Merb::DataMapperSessionStore.expired.destroy!
   end
 end

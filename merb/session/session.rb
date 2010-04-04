@@ -20,7 +20,6 @@ module Merb
       
       pick.user = user
       update_picked_product_title_values([pick])
-      p pick
       self[:picked_product_ids] = (picked_product_ids << pick.id) if pick.save
     end
     

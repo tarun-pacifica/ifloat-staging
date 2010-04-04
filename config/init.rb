@@ -22,7 +22,6 @@ use_template_engine :erb
 Merb::Config.use do |c|
   c[:use_mutex] = false
   c[:session_store] = "datamapper"
-  c[:session_ttl] = Merb::Const::WEEK
 end
  
 Merb::BootLoader.before_app_loads do
@@ -66,7 +65,7 @@ Merb::BootLoader.before_app_loads do
       (parts << last_part.superscript(/(\d)/)).join(" ")
     end
   end
-  
+    
   # Merge all JS files - TODO: lint + minify
   path = "public/javascripts/compiled.js"
   File.delete(path) if File.exist?(path)
@@ -77,4 +76,18 @@ Merb::BootLoader.before_app_loads do
   File.delete(path) if File.exist?(path)
   raise $?.inspect unless system("cat public/stylesheets/*.css > #{path}")
   
+end
+
+Merb::BootLoader.after_app_loads do
+  # Monkey-patch DM session storage to persist an update time _and_ base expiry thereon
+  class Merb::DataMapperSessionStore
+    EXPIRY_TIME = Merb::Const::WEEK
+    
+    property :updated_at, DateTime
+    before(:save) { self.updated_at = DateTime.now }
+    
+    def self.expired
+      all(:updated_at.lt => EXPIRY_TIME.ago)
+    end
+  end
 end

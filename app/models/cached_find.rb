@@ -14,7 +14,7 @@
 #
 # === 2. Destroy Obsolete CachedFinds
 #
-# Run CachedFind.obsolete.destroy! periodically. This will destroy any anonymous CachedFinds no longer featured in any Session.
+# When destroying sessions, destroy any anonymous cached finds whose IDs no longer appear in any session.
 #
 class CachedFind
   include DataMapper::Resource
@@ -43,10 +43,6 @@ class CachedFind
     self.specification = (specification || "").split.uniq.join(" ")
     self.description = specification if description.blank?
     self.filters ||= {}
-  end
-  
-  def self.obsolete
-    all(:user_id => nil, :accessed_at.lt => Merb::Config[:session_ttl].ago)
   end
   
   def self.unused

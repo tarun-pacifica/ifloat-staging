@@ -115,7 +115,7 @@ class Asset
   
   def store_names
     variants = [nil]
-    variants += ["small", "tiny"] if name =~ IMAGE_FORMAT
+    variants += ["small", "tiny"] if bucket == "products" and name =~ IMAGE_FORMAT
     variants.map { |variant| store_name(variant) }
   end
   

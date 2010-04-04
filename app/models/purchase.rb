@@ -13,14 +13,9 @@
 #
 # = Processes
 #
-# === 1. Purchase One or More Products
+# === 1. Abandon Obsolete Purchases
 #
-# TODO: it may be prudent to e-mail support every time a complete parsing is not possible (as commission rides on it)
-#       - in any case we need to e-mail a confirmation of the purchase (pretty-print response)
-#
-# === 2. Abandon Obsolete Purchases
-#
-# Run Purchase.obsolete.destroy! periodically. This marks all Purchases open for longer than OBSOLESCENCE_TIME as abandoned.
+# Run Purchase.obsolete.destroy! periodically. This treats all Purchases open for longer than OBSOLESCENCE_TIME as abandoned.
 #
 class Purchase
   include DataMapper::Resource

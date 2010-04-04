@@ -8,16 +8,43 @@ module Mailer
     case action
     
     when :exception
-      exception = params[:exception]
-      whilst = params[:whilst]
+      exception, whilst = params.values_at(:exception, :whilst)
       return if exception.nil? or whilst.nil?
       
       backtrace = (exception.backtrace || []).join("\n")
-      context = "#{whilst} on #{`hostname`.chomp} (#{Merb.environment} environment)"
       
       Mail.deliver do |mail|
         Mailer.envelope(mail, action, :admin, :sysadmin)
-        body ["Context: #{context}", "#{exception.class}: #{exception}", backtrace].join("\n\n")
+        body ["Context: #{Mailer.context(whilst)}", "#{exception.class}: #{exception}", backtrace].join("\n\n")
+      end
+    
+    when :import_failure
+      ars, crs, whilst, attachment_path = params.values_at(:ars, :crs, :whilst, :attach)
+      return if ars.nil? or crs.nil? or whilst.nil?
+      
+      report = ["Context: #{Mailer.context(whilst)}", "", "Asset repository @ #{ars}", "CSV repository @ #{crs}"]
+      
+      Mail.deliver do |mail|
+        Mailer.envelope(mail, action, :admin, :sysadmin)
+        body report.join("\n")
+        add_file attachment_path unless attachment_path.nil?
+      end
+    
+    when :import_success
+      ars, crs, stats_by_class = params.values_at(:ars, :crs, :stats)
+      return if ars.nil? or crs.nil? or stats_by_class.nil?
+      
+      report = ["Asset repository @ #{ars}", "CSV repository @ #{crs}", ""]
+      report += stats_by_class.map do |klass, stats|
+        "#{klass}: " + [:created, :updated, :destroyed, :skipped].map do |stat|
+          count = stats[stat]
+          count == 0 ? nil : "#{stat} #{count}"
+        end.compact.join(", ")
+      end
+      
+      Mail.deliver do |mail|
+        Mailer.envelope(mail, action, :admin, :sysadmin)
+        body report.join("\n")
       end
       
     when :password_reset
@@ -45,6 +72,10 @@ module Mailer
     else raise "Unknown mail delivery action #{action.inspect}"  
     
     end
+  end
+  
+  def self.context(whilst)
+    "#{whilst} on #{`hostname`.chomp} (#{Merb.environment} environment)"
   end
   
   def self.envelope(mail, action, from_address, to_address)

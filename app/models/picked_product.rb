@@ -6,7 +6,7 @@
 #
 # === 1. Abandon Obsolete PickedProducts
 #
-# Run PickedProduct.obsolete.destroy! periodically. This destroys anonymous PickedProducts created longer than the Merb session TTL ago.
+# When destroying sessions, destroy any anonymous picked products whose IDs no longer appear in any session.
 #
 class PickedProduct
   include DataMapper::Resource
@@ -24,10 +24,6 @@ class PickedProduct
   belongs_to :user, :required => false
   
   validates_within :group, :set => GROUPS
-  
-  def self.obsolete
-    all(:user_id => nil, :accessed_at.lt => Merb::Config[:session_ttl].ago)
-  end
   
   # TODO: spec
   def self.all_primary_keys

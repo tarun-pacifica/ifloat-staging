@@ -462,7 +462,7 @@ def build_asset_csv
   stopwatch("catalogued image sizes") do
     assets_by_path = assets.hash_by { |bucket, company_ref, name, path, checksum| path }
     assets_by_path.keys.map { |k| k =~ /(jpg|png)$/ ? k.inspect : nil }.compact.each_slice(500) do |paths|
-      `gm identify #{paths.join(" ")}`.lines.each do |line|
+      `gm identify #{paths.join(" ")} 2>&1`.lines.each do |line|
         unless line =~ /^(.+?\.(jpg|png)).*?(\d+x\d+)/
           errors <<  [nil, "unable to read GM.identify report line: #{line.inspect}"]
           next
@@ -485,16 +485,12 @@ def build_asset_csv
       ext = File.extname(path)
       wm_path = info[3] = ASSET_VARIANT_DIR / "#{checksum}#{ext}"
       unless File.exist?(wm_path)
-      	report = `gm composite -geometry +10+10 -gravity SouthEast #{ASSET_WATERMARK_PATH.inspect} #{path.inspect} #{wm_path.inspect}`
+        report = `gm composite -geometry +10+10 -gravity SouthEast #{ASSET_WATERMARK_PATH.inspect} #{path.inspect} #{wm_path.inspect} 2>&1`
         unless $?.success?
-	  errors << [path, "GM.composite failed: #{report.inspect}"]
+          errors << [path, "GM.composite failed: #{report.inspect}"]
           next
         end
       end
-      
-      # TODO: remove exit once the watermarking process is verified
-      puts "exiting - verify #{wm_path} looks right"
-      exit 0
 
       next unless size == "400x400"    
       [:small, :tiny].map do |variant|
@@ -503,7 +499,7 @@ def build_asset_csv
         next if File.exist?(variant_path)
       
         variant_size = ASSET_VARIANT_SIZES[variant]
-        report = `gm convert -size #{variant_size} #{wm_path.inspect} -resize #{variant_size} +profile '*' #{variant_path.inspect}`
+        report = `gm convert -size #{variant_size} #{wm_path.inspect} -resize #{variant_size} +profile '*' #{variant_path.inspect} 2>&1`
         errors << [path, "GM.convert failed: #{report.inspect}"] unless $?.success?
       end
     end
@@ -519,18 +515,11 @@ def build_asset_csv
   nil
 end
 
-
-def mail(success, message, attachment_path = nil)
-  puts "Import #{success} on #{`hostname`.chomp} (#{Merb.environment} environment)"
-  puts message
-  puts "attachment: #{attachment_path}" unless attachment_path.nil?
-  # TODO: do not send mail if Merb.environment == "development"
-  # system "open #{attachment_path}" if Merb.environment == "development"
-end
-
-def mail_fail(message, attachment_path = nil, exception = nil)
-  message += "\n#{exception.inspect}" unless exception.nil?
-  mail(:failure, message, attachment_path)
+def mail_fail(whilst)
+  Mailer.deliver(:import_failure, :ars => repo_summary(ASSET_REPO),
+                                  :crs => repo_summary(CSV_REPO),
+                                  :whilst => whilst,
+                                  :attach => ERRORS_PATH)
   exit 1
 end
 
@@ -561,7 +550,7 @@ end
 
 # Ensure that GraphicsMagick is installed
 
-mail_fail("Failed to locate the 'gm' tool - is GraphicsMagick installed?") if `which gm`.blank?
+raise "Failed to locate the 'gm' tool - is GraphicsMagick installed?" if `which gm`.blank?
 
 
 # Ensure each class has an associated parser
@@ -572,7 +561,7 @@ CLASSES.each do |klass|
     require "lib/parsers/#{klass.to_s.snake_case}"
     parsers_by_class[klass] = Kernel.const_get("#{klass}Parser")
   rescue Exception => e
-    mail_fail("Failed to locate parser for #{klass}.", nil, e)
+    raise "Failed to locate parser for #{klass}: #{e}"
   end
 end
 
@@ -580,20 +569,13 @@ end
 # Build an asset import CSV from the contents of the asset repo
 
 puts "=== Compiling Assets ==="
-error_message = "Some errors occurred whilst compilig assets from #{ASSET_REPO.inspect}."
-begin
-  errors = build_asset_csv
-  unless errors.nil?
-    FasterCSV.open(ERRORS_PATH, "w") do |error_report|
-      error_report << ["path", "error"]
-      errors.each { |error| error_report << error }
-    end
-    mail_fail(error_message, ERRORS_PATH)
+errors = build_asset_csv
+unless errors.nil?
+  FasterCSV.open(ERRORS_PATH, "w") do |error_report|
+    error_report << ["path", "error"]
+    errors.each { |error| error_report << error }
   end
-rescue SystemExit
-  exit 1
-rescue Exception => e
-  mail_fail(error_message, nil, e)
+  mail_fail("compiling assets")
 end
 
 
@@ -616,8 +598,13 @@ CLASSES.each do |klass|
     end
   end
 end
-
-mail_fail(errors.join("\n")) unless errors.empty?
+unless errors.empty?
+  FasterCSV.open(ERRORS_PATH, "w") do |error_report|
+    error_report << ["error"]
+    errors.each { |error| error_report << error }
+  end
+  mail_fail("checking for missing CSVs")
+end
 
 
 # Parse each class
@@ -652,36 +639,24 @@ CLASSES.each do |klass|
     end
   end
 end
-
-mail_fail("Some errors occurred whilst parsing CSVs from #{CSV_REPO.inspect} (and /tmp/assets.csv).", ERRORS_PATH) if import_set.write_errors(ERRORS_PATH)
+mail_fail("parsing CSVs") if import_set.write_errors(ERRORS_PATH)
 
 
 # Verify global integrity
 
 puts "=== Verifying Global Integrity ==="
 import_set.verify_integrity
-
-mail_fail("Some errors occurred whilst verifying the integrity of CSVs from #{CSV_REPO.inspect} (and /tmp/assets.csv).", ERRORS_PATH) if import_set.write_errors(ERRORS_PATH)
+mail_fail("verifying data integrity") if import_set.write_errors(ERRORS_PATH)
 
 
 # Import the entire set
 
 puts "=== Importing Objects ==="
 class_stats = import_set.import
+mail_fail("updating the database") if import_set.write_errors(ERRORS_PATH)
+Mailer.deliver(:import_success, :ars => repo_summary(ASSET_REPO), :crs => repo_summary(CSV_REPO), :stats => class_stats)
 
-mail_fail("Some errors occurred whilst importing objects defined in CSVs from #{CSV_REPO.inspect} (and /tmp/assets.csv).", ERRORS_PATH) if import_set.write_errors(ERRORS_PATH)
-
-report = ["Asset repository @ #{repo_summary(ASSET_REPO)}", "CSV repository @ #{repo_summary(CSV_REPO)}", ""]
-report += class_stats.map do |klass, stats|
-  "#{klass}: " + [:created, :updated, :destroyed, :skipped].map do |stat|
-    count = stats[stat]
-    count == 0 ? nil : "#{stat} #{count}"
-  end.compact.join(", ")
-end
-
-report = report.join("\n")
-ImportEvent.create(:succeeded => true, :report => report)
-mail(:success, report)
+begin; stopwatch("destroyed obsolete assets") { AssetStore.delete_obsolete }; rescue; end
 
 puts "=== Compiling Indexes ==="
 stopwatch(Indexer::COMPILED_PATH) do

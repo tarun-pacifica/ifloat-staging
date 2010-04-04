@@ -1,23 +1,49 @@
-module HouseKeeping
-  def self.run
-    begin
-      # TODO: exception if already running
-      expire_old_sessions
-      # TODO: cached_find anonimization (may not need to delete filters if they are subsumed into cached finds)
-      # TODO: tidy up obsolete assets
-      # TODO: tidy up obsolete controller errors
-      # TODO: Purchase.abandon_obsolete
-      # TODO: check for /tmp/update_caches; if present, delete it and update indexer cache and conflate product values
-      # TODO: delete UNCONFIRMED_EXPIRY_HOURS exceeding users
-    rescue Exception => e
-      Mailer.deliver(:exception, :exception => e, :whilst => "performing housekeeping")
-    end
+# === General Housekeeping ===
+
+begin
+  Merb::DataMapperSessionStore.expired.destroy!
+  
+  cached_find_ids = Set.new
+  picked_product_ids = Set.new
+  Merb::DataMapperSessionStore.all.each do |session|
+    cached_find_ids += (session.data["cached_find_ids"] || [])
+    picked_product_ids += (session.data["picked_product_ids"] || [])
   end
   
+  CachedFind.unused.update!(:user_id => nil)
+  CachedFind.all(:user_id => nil, :id.not => cached_find_ids).destroy!
   
-  private
+  ControllerError.obsolete.destroy!
   
-  def self.expire_old_sessions
-    Merb::DataMapperSessionStore.expired.destroy!
+  PickedProduct.all(:user_id => nil, :id.not => picked_product_ids).destroy!
+  
+  Purchase.obsolete.destroy!
+  
+  User.expired.destroy!
+  
+rescue Exception => e
+  Mailer.deliver(:exception, :exception => e, :whilst => "performing housekeeping")
+  
+end
+
+
+# === Partner Store Price Import ===
+
+PRICES_REPO = "../ifloat_prices"
+
+facilities_by_url = Facility.all.hash_by(:primary_url)
+
+Dir[PRICES_REPO / "*"].each do |path|
+  next unless File.directory?(path)
+
+  url = File.basename(path)
+  facility = facilities_by_url[url]
+  next if facility.nil?
+
+  begin
+    product_info_by_ref = YAML.load(File.open(path / "prices.yaml"))
+    facility.update_products(product_info_by_ref)
+  rescue Exception => e
+    Mailer.deliver(:exception, :exception => e, :whilst => "importing #{url} prices")
   end
 end

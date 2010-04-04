@@ -113,10 +113,7 @@ class ProductRelationship
       product_ids << record.product_id
     end
     
-    products_by_id = {}
-    Product.all(:id => product_ids_by_relationship.values.flatten).each do |product|
-      products_by_id[product.id] = product
-    end
+    products_by_id = Product.all(:id => product_ids_by_relationship.values.flatten).hash_by(:id)
     
     products_by_relationship = {}
     product_ids_by_relationship.each do |name, product_ids|

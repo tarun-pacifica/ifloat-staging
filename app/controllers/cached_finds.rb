@@ -85,7 +85,7 @@ class CachedFinds < Application
     provides :js
     find = session.ensure_cached_find(id.to_i)
     result = gather_images(find)
-    (find.ensure_valid.empty? ? result : nil).to_json # TODO: react to nil in JS
+    (find.ensure_valid.empty? ? result : nil).to_json
   end
   
   def new

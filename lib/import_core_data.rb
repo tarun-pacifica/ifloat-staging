@@ -477,6 +477,7 @@ def build_asset_csv
   end
   return errors unless errors.empty?
   
+  wm_mod_time = (File.mtime(ASSET_WATERMARK_PATH) rescue nil)
   stopwatch("created missing image variants") do
     assets.each do |info|
       bucket, company_ref, name, path, checksum, size = info
@@ -485,9 +486,9 @@ def build_asset_csv
       ext = File.extname(path)
       
       wm_path = path
-      if File.exist?(ASSET_WATERMARK_PATH)      
+      unless wm_mod_time.nil?    
         wm_path = info[3] = ASSET_VARIANT_DIR / "#{checksum}#{ext}"
-        unless File.exist?(wm_path)
+        unless File.exist?(wm_path) and File.mtime(wm_path) > wm_mod_time
           report = `gm composite -geometry +10+10 -gravity SouthEast #{ASSET_WATERMARK_PATH.inspect} #{path.inspect} #{wm_path.inspect} 2>&1`
           unless $?.success?
             errors << [path, "GM.composite failed: #{report.inspect}"]

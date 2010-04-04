@@ -25,7 +25,7 @@ users.each do |info|
   
   user = User.first(:login => info[:login])
   if user.nil?
-    user = User.new(info.update(:confirmation => info[:password]))
+    user = User.new(info.update(:confirmation => info[:password]), :confirmed_at => DateTime.now)
   else
     info.delete(:password) if Password.match?(user.password, info[:password])
     user.attributes = info

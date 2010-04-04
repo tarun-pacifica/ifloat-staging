@@ -56,11 +56,12 @@ class Facility
     transaction.begin
     adapter.push_transaction(transaction)
   
-    products.all(:reference.not => product_info_by_ref.keys).destroy!
     # TODO: switch to the simpler form when the call to save below stops triggering the facility's validations
     # http://datamapper.lighthouseapp.com/projects/20609-datamapper/tickets/1154
     # existing_products_by_ref = products.all.hash_by { |product| product.reference }
     existing_products_by_ref = FacilityProduct.all(:facility_id => id).hash_by { |product| product.reference }
+    
+    products.all(:reference => existing_products_by_ref.keys - product_info_by_ref.keys).destroy!
   
     product_info_by_ref.each do |ref, info|
       # TODO: see above

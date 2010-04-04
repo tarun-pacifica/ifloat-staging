@@ -483,12 +483,16 @@ def build_asset_csv
       next if size.nil? or bucket != "products"
 
       ext = File.extname(path)
-      wm_path = info[3] = ASSET_VARIANT_DIR / "#{checksum}#{ext}"
-      unless File.exist?(wm_path)
-        report = `gm composite -geometry +10+10 -gravity SouthEast #{ASSET_WATERMARK_PATH.inspect} #{path.inspect} #{wm_path.inspect} 2>&1`
-        unless $?.success?
-          errors << [path, "GM.composite failed: #{report.inspect}"]
-          next
+      
+      wm_path = path
+      if File.exist?(ASSET_WATERMARK_PATH)      
+        wm_path = info[3] = ASSET_VARIANT_DIR / "#{checksum}#{ext}"
+        unless File.exist?(wm_path)
+          report = `gm composite -geometry +10+10 -gravity SouthEast #{ASSET_WATERMARK_PATH.inspect} #{path.inspect} #{wm_path.inspect} 2>&1`
+          unless $?.success?
+            errors << [path, "GM.composite failed: #{report.inspect}"]
+            next
+          end
         end
       end
 

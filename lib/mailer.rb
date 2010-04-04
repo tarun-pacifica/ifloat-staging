@@ -8,10 +8,12 @@ module Mailer
     case action
     
     when :exception
-      context = (params[:context] || "<none>")
       exception = params[:exception]
-      return if exception.nil?
+      whilst = params[:whilst]
+      return if exception.nil? or whilst.nil?
+      
       backtrace = (exception.backtrace || []).join("\n")
+      context = "#{whilst} on #{`hostname`.chomp} (#{Merb.environment} environment)"
       
       Mail.deliver do |mail|
         Mailer.envelope(mail, action, :admin, :sysadmin)
@@ -30,8 +32,9 @@ module Mailer
     when :registration
       user = params[:user]
       return if user.nil?
+      
       confirmation_link =
-        Merb::Config.registration_host +
+        Merb::Config[:registration_host] +
         Merb::Router.url(:user_confirm, :id => user.id, :confirm_key => user.confirm_key)
 
       Mail.deliver do |mail|

@@ -16,7 +16,7 @@ function product_detail_pick_buttons_update(group, pick_id) {
 	if(pick_buttons.length == 0) return;
 	
 	var groups = ['compare', 'buy_later', 'buy_now'];
-	var lists = {compare: 'Compare', buy_later: 'Future Buys', buy_now: 'Buy Now'};
+	var lists = {compare: 'Differentiate', buy_later: 'Future Buys', buy_now: 'Buy Now'};
 	
 	pick_buttons.empty();
 	

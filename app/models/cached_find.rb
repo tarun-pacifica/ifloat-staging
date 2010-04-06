@@ -27,7 +27,7 @@ class CachedFind
   property :description,   String,  :length => 255
   property :filters,       Object,  :accessor => :protected, :lazy => false
   property :accessed_at,   DateTime
-  property :invalidated,   Boolean, :required => true, :default => true
+  property :invalidated,   Boolean, :required => true, :default => false
   
   belongs_to :user, :required => false
   

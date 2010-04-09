@@ -1,4 +1,6 @@
 function filter_configure(filter_id) {
+	if($ifloat_body.find_id == null) return;
+	
 	$.getJSON(filter_configure_url(filter_id), filter_configure_handle);
 	spinner_show('Loading filter...');
 }

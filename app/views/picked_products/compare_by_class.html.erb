@@ -56,8 +56,8 @@
 
 <script type="text/javascript" charset="utf-8">
 	var $ifloat_body = {
-		find_id: <%= @find.id %>,
-		find_spec: <%= @find.specification.to_json %>,
+		find_id: <%= @find.nil? ? "null" : @find.id %>,
+		find_spec: <%= @find.nil? ? "null" : @find.specification.to_json %>,
 		language: <%= session.language.inspect %>
 	};
 </script>

@@ -10,8 +10,9 @@ function filter_configure_apply() {
 	
 	var data = {include_unknown: filter_configure.find('.include_unknown input:checked').length == 1}
 	
-	data.apply_exclusively = !$ifloat_body.find_home;
 	data.inline_response = $ifloat_body.find_home;
+	data.primary_class = $ifloat_body.primary_class;
+	data.reset_filters = !$ifloat_body.find_home;
 	
 	if(filter_configure.data('type') == 'text') {
 		data['unit'] = $ifloat_body.language;

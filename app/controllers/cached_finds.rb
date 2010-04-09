@@ -40,6 +40,10 @@ class CachedFinds < Application
       @title_parts[i] += info[:values] unless i.nil?
     end
     
+    class_infos = (@common_values + diff_values).select { |info| info[:raw_name] == "reference:class" }
+    classes = class_infos.map { |info| info[:values] }.flatten.uniq
+    @primary_class = classes.first
+    
     render
   end
   
@@ -68,10 +72,17 @@ class CachedFinds < Application
     provides :js
     find = session.ensure_cached_find(id.to_i)
     
-    return nil.to_json if params["apply_exclusively"] == "true" and not find.unfilter_all!
+    return nil.to_json unless params["reset_filters"] != "true" or find.unfilter_all!
     
-    result = (params["method"] == "delete" ? find.unfilter!(property_id.to_i) : find.filter!(property_id.to_i, params))
-    return nil.to_json unless result and params["inline_response"] == "true"
+    return nil.to_json unless
+      (params["method"] == "delete" ?
+       find.unfilter!(property_id.to_i) :
+       find.filter!(property_id.to_i, params))
+    
+    primary_class = params["primary_class"]
+    return nil.to_json unless primary_class.blank? or find.filter!(Indexer.class_property_id, "value" => primary_class)
+    
+    return nil.to_json unless params["inline_response"] == "true"
     
     result = [find.filters_used(RANGE_SEPARATOR), find.filters_unused, gather_images(find)]
     (find.ensure_valid.empty? ? result : nil).to_json

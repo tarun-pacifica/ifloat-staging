@@ -34,7 +34,7 @@ module Merb
     end
         
     def product_data_panel(values)
-      html = []
+      html = []  
       
       brands = values.map { |info| info[:raw_name] == "marketing:brand" ? info[:values] : [] }.flatten.uniq
       logos = Brand.logos(brands)

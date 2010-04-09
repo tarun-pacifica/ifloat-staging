@@ -63,7 +63,8 @@
 	var $ifloat_body = {
 		find_id: <%= @find.id %>,
 		find_spec: <%= @find.specification.to_json %>,
-		language: <%= session.language.inspect %>
+		language: <%= session.language.inspect %>,
+		primary_class: <%= @primary_class.inspect %>
 	};
 	$('img.property_icon').not('.disabled').css('cursor', 'pointer');
 </script>

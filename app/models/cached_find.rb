@@ -136,7 +136,7 @@ class CachedFind
     
     type = prop_info[:type]
     unit = (params["unit"].blank? ? nil : params["unit"])
-    data = filter_sanitize_choice(property_id, type, params["value"].split("::"), unit)
+    data = filter_sanitize_choice(property_id, type, (params["value"] || "").split("::"), unit)
     return nil if data.nil?
     
     new_filters = Marshal.load(Marshal.dump(filters))

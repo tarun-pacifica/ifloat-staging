@@ -123,14 +123,16 @@ module Indexer
   def self.product_ids_for_property_ids(property_ids, language_code)
     return [] if property_ids.empty? or not ensure_loaded
     
-    product_id_sets = []
+    product_id_sets_by_property_id = {}
     filtering_indexes(language_code).each do |root_key, products_by_property_id|
       property_ids.each do |property_id|
         values_by_product_id = products_by_property_id[property_id]
-        product_id_sets << values_by_product_id.keys.to_set unless values_by_product_id.nil?
+        next if values_by_product_id.nil?
+        product_id_set = (product_id_sets_by_property_id[property_id] ||= Set.new)
+        product_id_set.merge(values_by_product_id.keys)
       end
     end
-    product_id_sets.inject { |union, product_ids| union & product_ids }
+    product_id_sets_by_property_id.values.inject { |union, product_ids| union & product_ids }
   end
   
   # TODO: remove use of @@image_checksum_index once all products are guaranteed to have a primary image

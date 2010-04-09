@@ -86,7 +86,7 @@ function filter_panel_reload(data) {
 
 function filter_panel_remove(filter_id) {
 	$('#filter_' + filter_id).fadeOut('fast');
-	$.post(filter_configure_url(filter_id), {method: 'delete'}, filter_panel_reload, 'json');
+	$.post(filter_configure_url(filter_id), {inline_response: true, method: 'delete'}, filter_panel_reload, 'json');
 	filter_panel_button('add', 'disable');
 	filter_panel_button('remove_all', 'disable');
 }

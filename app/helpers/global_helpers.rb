@@ -123,9 +123,16 @@ module Merb
     def property_icon(info, position = :right)
       prop_id, src = info.values_at(:id, :icon_url)
       tooltip = info[:name].gsub(/(')/) { "\\'" }
-      <<-HTML
-      <img class="property_icon" src="#{src}" onclick="filter_configure(#{prop_id})" onmouseover="tooltip_show(event, '#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
-      HTML
+      
+      if info[:raw_name] == "reference:class"
+        <<-HTML
+          <img class="property_icon reference_class" src="#{src}" onmouseover="tooltip_show(event, '#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
+        HTML
+      else
+        <<-HTML
+          <img class="property_icon" src="#{src}" onclick="filter_configure(#{prop_id})" onmouseover="tooltip_show(event, '#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
+        HTML
+      end
     end
   end
 end

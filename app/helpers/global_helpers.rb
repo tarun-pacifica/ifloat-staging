@@ -126,7 +126,7 @@ module Merb
       
       if info[:raw_name] == "reference:class"
         <<-HTML
-          <img class="property_icon reference_class" src="#{src}" onmouseover="tooltip_show(event, '#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
+          <img class="property_icon disabled" src="#{src}" onmouseover="tooltip_show(event, '#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
         HTML
       else
         <<-HTML

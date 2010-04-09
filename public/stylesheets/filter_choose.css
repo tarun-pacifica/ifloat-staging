@@ -30,6 +30,11 @@
 	width: 151px;
 }
 
+#filter_choose .section img.property_icon {
+	cursor: pointer;
+}
+
+
 #filter_choose .section p {
 	color: blue;
 	margin: 0;

@@ -64,6 +64,11 @@ Merb::BootLoader.before_app_loads do
       return self unless last_part =~ /[a-z]/
       (parts << last_part.superscript(/(\d)/)).join(" ")
     end
+    
+    def truncate_utf8(size)
+      self =~ /^(.{1,#{size}})/
+      ($1.size + 3) < self.size ? "#{$1}..." : self
+    end
   end
     
   # Merge all JS files - TODO: lint + minify

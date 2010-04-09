@@ -225,7 +225,7 @@ class CachedFind
       all_values, relevant_values = Indexer.filterable_values_for_property_id(property_id, apids, fpids, language_code)[language_code]
       
       values = (filter[:data] & relevant_values)
-      return values.empty? ? "[none]" : values.sort.join(", ").truncate(40)
+      return values.empty? ? "[none]" : values.sort.join(", ").truncate_utf8(40)
     end
     
     begin

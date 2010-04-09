@@ -110,12 +110,8 @@
 <% end %>
 
 <script type="text/javascript" charset="utf-8">
-	$ifloat_body = {
-		find_id: <%= @find.nil? ? "null" : @find.id %>,
-		find_spec: <%= @find.nil? ? "null" : @find.specification.to_json %>,
-		language: <%= session.language.inspect %>,
-		product_id: <%= @product.id %>
-	};
+	$ifloat_body = { product_id: <%= @product.id %> };
+	$('img.property_icon').css('cursor', 'default').unbind('click');
 	
 	<% unless @related_products_by_rel_name.empty? %>
 	<% product_ids = @related_products_by_rel_name.values.map { |products| products.map { |product| product.id } }.flatten.uniq %>

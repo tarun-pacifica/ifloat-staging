@@ -15,11 +15,7 @@ module Indexer
   
   def self.compile
     Tempfile.open(File.basename(COMPILED_PATH)) do |f|
-      records = text_records
-      
-      p records.size
-      p records.select { |r| r.filterable }.size
-      
+      records = text_records      
       indexes = {
         :image_checksums         => compile_image_checksum_index,
         :numeric_filtering       => compile_numeric_filtering_index,

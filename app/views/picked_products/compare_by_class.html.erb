@@ -9,7 +9,7 @@
 
 <div id="compare_by_class" class="panel major">
 	<div class="title">
-		<h2><%= panel_title_back_to_find(session.most_recent_cached_find) %></h2>
+		<h2><%= panel_title_back_to_find(@find) %></h2>
 	</div>
 	
 	<div class="body">
@@ -36,7 +36,7 @@
 			<% infos_by_product_id = @diff_values_by_prop_id[property_id].hash_by { |info| info[:product_id] } %>
 			<tr class="<%= parity = (parity == :even ? :odd : :even) %>">
 				<td class="icon">
-					<%= property_icon(prop_info[:icon_url], prop_info[:name], :right) if prop_info[:dad] %>
+					<%= property_icon(prop_info) if prop_info[:dad] %>
 				</td>
 				<% @product_ids.each_with_index do |product_id, i| %>
 				<td class="product"
@@ -53,3 +53,11 @@
 </div>
 
 </div>
+
+<script type="text/javascript" charset="utf-8">
+	var $ifloat_body = {
+		find_id: <%= @find.id %>,
+		find_spec: <%= @find.specification.to_json %>,
+		language: <%= session.language.inspect %>
+	};
+</script>

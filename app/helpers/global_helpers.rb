@@ -27,7 +27,7 @@ module Merb
       return "&nbsp;" if find.nil?
       
       <<-HTML
-        <a href="#{resource(find)}">Back to <strong>#{find.specification.inspect}</strong> results</a>
+        <a href="#{resource(find)}">Back to your <strong>#{find.specification.inspect}</strong> results</a>
   			<img src="/images/panel/backgrounds/title_button_sep.png">
   			<hr class="terminator" />
 			HTML
@@ -58,7 +58,7 @@ module Merb
           html << <<-HTML
             <table class="property" summary="property">
               <tr>
-                <td class="icon"> #{property_icon(info[:icon_url], info[:name])} </td>
+                <td class="icon"> #{property_icon(info)} </td>
                 <td class="summary"> #{product_value_summary(info)} </td>
               </tr>
             </table>
@@ -120,10 +120,11 @@ module Merb
       values.join("<br />")
     end
     
-    def property_icon(url, tooltip, position = :right)
-      t = tooltip.gsub(/(')/) { "\\'" }
+    def property_icon(info, position = :right)
+      prop_id, src = info.values_at(:id, :icon_url)
+      tooltip = info[:name].gsub(/(')/) { "\\'" }
       <<-HTML
-        <img class="icon" src=#{url.inspect} onmouseover="tooltip_show(event, '#{t}', '#{position}')" onmouseout="tooltip_hide()" />
+      <img class="property_icon" src="#{src}" onclick="filter_configure(#{prop_id})" onmouseover="tooltip_show(event, '#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
       HTML
     end
   end

@@ -29,8 +29,9 @@
 				<% dom_class = (primary ? 'class="primary"' : '') %>
 				<% chevron = (primary ? "selected" : "unselected") %>
 				<td <%= dom_class %>>
+					<%= property_icon(prop_info, :above) %> <br />
+					
 					<% unless primary %> <a href="?sort_by=<%= property_id %>"> <% end %>
-					<%= property_icon(prop_info[:icon_url], prop_info[:name], :above) %><br />
 					<img src="/images/compare_by_image/backgrounds/chevron_<%= chevron %>.png" />
 					<% unless primary %> </a> <% end %>
 				</td>
@@ -57,3 +58,11 @@
 </div>
 
 </div>
+
+<script type="text/javascript" charset="utf-8">
+	var $ifloat_body = {
+		find_id: <%= @find.id %>,
+		find_spec: <%= @find.specification.to_json %>,
+		language: <%= session.language.inspect %>
+	};
+</script>

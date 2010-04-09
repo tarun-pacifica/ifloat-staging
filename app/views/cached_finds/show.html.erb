@@ -34,8 +34,9 @@
 
 <script type="text/javascript" charset="utf-8">
 	var $ifloat_body = {
+		find_home: true,
 		find_id: <%= @find.id %>,
-		find_spec: <%= @find.specification.inspect %>,
+		find_spec: <%= @find.specification.to_json %>,
 		language: <%= session.language.inspect %>
 	};
 	

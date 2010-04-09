@@ -26,6 +26,10 @@
 	background: #F3F3F3;
 }
 
+#compare_by_image table tr.icons a {
+	display: block;
+}
+
 #compare_by_image table tr.icons td {
 	background: #B9B9B9;
 	padding: 6px 0 3px 0;

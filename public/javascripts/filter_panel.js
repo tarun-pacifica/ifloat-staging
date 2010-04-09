@@ -50,7 +50,7 @@ function filter_panel_load_handle(filters) {
 		html.push('<table class="filter" id="filter_' + filter.id + '" summary="filter ' + filter.id + '">');
 		html.push('<tr>');
 		html.push('<td class="icon">');
-		html.push(filter_panel_property_icon(filter, 'filter_panel_edit'));
+		html.push(filter_panel_property_icon(filter));
 		html.push('</td>');
 		html.push('<td class="summary">' + util_superscript(filter.type, filter.summary) + '</td>');
 		html.push('<td><div class="remove" onclick="filter_panel_remove(' + filter.id + ')"></div></td>');
@@ -68,8 +68,8 @@ function filter_panel_load_handle(filters) {
 	$('#filter_panel .sections').html(html.join(' '));
 }
 
-function filter_panel_property_icon(filter, onclick, tooltip_position) {
-	return '<img class="property_icon" src="' + filter.icon_url + '" onclick="' + onclick + '(' + filter.id + ')" onmouseover="tooltip_show(event, \'' + util_escape(filter.name, '"\'') + '\', \'' + tooltip_position + '\')" onmouseout="tooltip_hide()" />';
+function filter_panel_property_icon(filter, tooltip_position) {
+	return '<img class="property_icon" src="' + filter.icon_url + '" onclick="filter_configure(' + filter.id + ')" onmouseover="tooltip_show(event, \'' + util_escape(filter.name, '"\'') + '\', \'' + tooltip_position + '\')" onmouseout="tooltip_hide()" />';
 }
 
 function filter_panel_reload(data) {

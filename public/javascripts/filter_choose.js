@@ -1,5 +1,7 @@
 function filter_choose_close() {
 	var filter_choose = $('#filter_choose');
+	if(filter_choose.length == 0) return false;
+	
 	var isOpen = filter_choose.dialog('isOpen');
 	if(isOpen) $('#filter_choose').dialog('close');
 	return isOpen;
@@ -66,7 +68,7 @@ function filter_choose_load_handle(filters) {
 			for(var k in filters) {
 				var filter = filters[k];
 				html.push('<div class="filter">');
-				html.push(filter_panel_property_icon(filter, 'filter_configure', 'above'));
+				html.push(filter_panel_property_icon(filter, 'above'));
 				html.push('</div>');
 			}
 			

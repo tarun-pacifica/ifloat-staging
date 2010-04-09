@@ -8,6 +8,9 @@ function filter_configure_apply() {
 	
 	var data = {include_unknown: filter_configure.find('.include_unknown input:checked').length == 1}
 	
+	data.apply_exclusively = !$ifloat_body.find_home;
+	data.inline_response = $ifloat_body.find_home;
+	
 	if(filter_configure.data('type') == 'text') {
 		data['unit'] = $ifloat_body.language;
 		data['value'] = filter_configure.find("table input:checked").map(function() {return $(this).val();}).toArray().concat(filter_configure.data('hidden_values')).join("::");
@@ -22,6 +25,11 @@ function filter_configure_apply() {
 }
 
 function filter_configure_apply_handle(data) {
+	if(!$ifloat_body.find_home) {
+		window.location = '/cached_finds/' + $ifloat_body.find_id;
+		return;
+	}
+	
 	var filter_configure = $('#filter_configure');
 	var filter_dom_id = '#filter_' + filter_configure.data('id');
 	var update = $(filter_dom_id).length > 0;
@@ -46,14 +54,27 @@ function filter_configure_handle(filter) {
 		return;
 	}
 	
+	var no_values = true;
+	for(var unit in filter.values_by_unit) no_values = false;
+	if(no_values) {
+		spinner_hide();
+		alert('Your "' + $ifloat_body.find_spec + '" results cannot be filtered by ' + filter.name + '.');
+		return;
+	}
+	
 	var from_filter_choose = filter_choose_close();
 	
 	var filter_configure = $('#filter_configure');
 	if(filter_configure.length == 0) {
 		$('body').append('<div id="filter_configure"> </div>');
 		filter_configure = $('#filter_configure');
-		filter_configure.dialog({autoOpen: false, modal: true, resizable: false, title: 'Configure the filter...'});
-		filter_configure.dialog('option', 'buttons', {Apply: filter_configure_apply});
+		filter_configure.dialog({autoOpen: false, modal: true, resizable: false});
+		filter_configure.dialog('option', 'title', 'Filter your "' + $ifloat_body.find_spec + '" results by...');
+		
+		var apply = {};
+		apply['Apply' + ($ifloat_body.find_home ? '' : ' Exclusively')] = filter_configure_apply;
+		filter_configure.dialog('option', 'buttons', apply);
+		
 		filter_configure.data('width.dialog', 700 + 'px');
 	}
 	
@@ -73,6 +94,7 @@ function filter_configure_handle(filter) {
 		var checked = (filter.include_unknown ? 'checked="checked"' : '');
 		html.push('<p class="include_unknown"> <input type="checkbox" ' + checked + ' /> Show products with no <strong>' + filter.name + '</strong> value </p>');
 	}
+	
 	if(filter.type == 'text') filter_configure_values_text(filter.values_by_unit, html);
 	else filter_configure_values_numeric(filter.type, filter.values_by_unit, html);
 	

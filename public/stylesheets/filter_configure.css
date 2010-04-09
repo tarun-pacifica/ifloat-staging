@@ -13,6 +13,7 @@
 }
 
 #filter_configure .location img.property_icon {
+	cursor: default;
 	float: none;
 	padding: 0 10px 0 17px;
 	vertical-align: middle;

@@ -35,6 +35,7 @@ class Products < Application
     @related_products_by_rel_name = ProductRelationship.related_products(@product)
     @related_products_by_rel_name.delete_if { |name, products| products.empty? } # TODO: work out why we have to do this
     
+    @find = session.most_recent_cached_find
     render
   end
   

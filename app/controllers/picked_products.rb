@@ -67,6 +67,7 @@ class PickedProducts < Application
     
     @images_by_product_id = Product.primary_images_by_product_id(@product_ids)
     
+    @find = session.most_recent_cached_find
     render
   end
   

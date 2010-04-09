@@ -67,8 +67,12 @@ class CachedFinds < Application
   def filter_set(id, property_id)
     provides :js
     find = session.ensure_cached_find(id.to_i)
+    
+    return nil.to_json if params["apply_exclusively"] == "true" and not find.unfilter_all!
+    
     result = (params["method"] == "delete" ? find.unfilter!(property_id.to_i) : find.filter!(property_id.to_i, params))
-    return nil.to_json unless result
+    return nil.to_json unless result and params["inline_response"] == "true"
+    
     result = [find.filters_used(RANGE_SEPARATOR), find.filters_unused, gather_images(find)]
     (find.ensure_valid.empty? ? result : nil).to_json
   end

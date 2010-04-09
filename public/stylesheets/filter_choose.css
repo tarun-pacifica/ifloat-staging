@@ -21,10 +21,6 @@
 	padding: 5px 10px;
 }
 
-#filter_choose .section .filter img.property_icon {
-	cursor: pointer;
-}
-
 #filter_choose .section h3 {
 	color: #404040;
 	font-weight: normal;

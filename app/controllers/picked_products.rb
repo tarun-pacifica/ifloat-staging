@@ -10,6 +10,7 @@ class PickedProducts < Application
     end
     return redirect("/picked_products/options") unless prod_ids_by_group.has_key?("buy_now")
     
+    prod_ids_by_group.delete("compare")
     product_ids = prod_ids_by_group.values.flatten
     fac_prods_by_prod_id = facility.map_products(product_ids)
             

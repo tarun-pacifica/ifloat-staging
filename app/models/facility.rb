@@ -29,13 +29,14 @@ class Facility
   def map_products(product_ids)
     pids_by_fp_ref = {}
     ProductMapping.all(:company_id => company_id, :product_id => product_ids).each do |mapping|
-      pids_by_fp_ref[mapping.reference] = mapping.product_id
+      (pids_by_fp_ref[mapping.reference] ||= []).push(mapping.product_id)
     end
     
     fps_by_pid = {}
     products.all(:reference => pids_by_fp_ref.keys).each do |product|
-      pid = pids_by_fp_ref[product.reference]
-      fps_by_pid[pid] = product
+      pids_by_fp_ref[product.reference].each do |product_id|
+        fps_by_pid[product_id] = product
+      end
     end
     fps_by_pid
   end

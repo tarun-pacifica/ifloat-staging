@@ -15,11 +15,7 @@
 	<div class="body">
 		<table summary="comparison">
 			<tr>
-				<td class="count">
-					<% if @product_count > @product_ids.size %>
-					showing <%= @product_ids.size %>/<%= @product_count %> items
-					<% end %>
-				</td>
+				<td> </td>
 				<% @product_ids.each_with_index do |product_id, i| %>
 				<td class="product image"
 					onclick="window.location = '<%= url(:product, :id => product_id) %>'"
@@ -56,4 +52,5 @@
 
 <script type="text/javascript" charset="utf-8">
 	$('img.property_icon').unbind('click');
+	util_carousel_table('#compare_by_class table', [0], [1, 2, 3]);
 </script>

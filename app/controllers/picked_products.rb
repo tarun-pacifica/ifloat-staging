@@ -40,8 +40,6 @@ class PickedProducts < Application
     klass = Merb::Parse.unescape(klass)
     picks = session.picked_products.select { |pick| pick.group == "compare" and pick.cached_class == klass }
     @product_ids = picks.map { |pick| pick.product_id }
-    @product_count = @product_ids.size
-    @product_ids = @product_ids[0, 3]
     
     return redirect("/") if @product_ids.empty?
     return redirect(url(:product, :id => @product_ids.first)) if @product_ids.size == 1

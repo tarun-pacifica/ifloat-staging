@@ -1,3 +1,47 @@
+function util_carousel_table(selector, label_cols, data_cols) {
+	var shown_cols = label_cols.concat(data_cols);
+	var table = $(selector);
+	
+  var column_count = table.find('tr:first td').length;
+	if(column_count <= shown_cols.length) return;
+	
+	var nav_row = table.find('tr.nav');
+	if(nav_row.length == 0) {
+		table.prepend('<tr class="nav"> </tr>');
+		nav_row = table.find('tr.nav');
+	}
+	nav_row.empty();
+	
+	var min_data_col = data_cols[0];
+	var max_data_col = data_cols[data_cols.length - 1];
+	var max_label_col = label_cols[label_cols.length - 1];
+	
+	if(min_data_col == max_label_col + 1) min_data_col = undefined;
+	if(max_data_col == column_count - 1) max_data_col = undefined;
+	
+	var sel = "'" + selector + "'";
+	var lcols = '[' + label_cols.join(', ') + ']';
+
+	for(var i = 0; i < column_count; i += 1) {
+		if(i != min_data_col && i != max_data_col) {
+			nav_row.append('<td> </td>');
+			continue;
+		}
+		
+		var dcols = [];
+		for(var j in data_cols) dcols.push(data_cols[j] + (i == min_data_col ? -1 : 1));
+		
+		var klass = (i == min_data_col ? 'minimize' : 'maximize');
+		var message = 'show <strong>' + dcols.join(', ') + '</strong> of ' + (column_count - label_cols.length);
+		message = (i == min_data_col ? '&lt;&lt;&lt; ' + message : message + ' &gt;&gt;&gt;');
+		nav_row.append('<td class="' + klass + '" onclick="util_carousel_table(\'' + selector + '\', [' + label_cols.join(', ') + '], [' + dcols + '])">' + message + '</td>');
+	}
+	
+	var rows = table.find('tr');
+	rows.find('td').hide();
+	for(var i in shown_cols) rows.find('td:eq(' + shown_cols[i] + ')').show();
+}
+
 function util_defined(value, definition, position) {
 	if(definition == undefined) return value;
 	if(position == undefined) position = 'right';

@@ -26,6 +26,10 @@
 	background: #F3F3F3;
 }
 
+#compare_by_image table tr.hover td {
+	background: #F9BD48;
+}
+
 #compare_by_image table tr.icons a {
 	display: block;
 }
@@ -44,12 +48,26 @@
 	background: #959494;
 }
 
-#compare_by_image table tr.odd td {
-	background: #DCE9F7;
+#compare_by_image table tr.nav td {
+	color: #404040;
+/*	width: 1%;*/
 }
 
-#compare_by_image table tr.hover td {
-	background: #F9BD48;
+#compare_by_image table tr.nav td:hover {
+	text-decoration: underline;
+}
+
+#compare_by_image table tr.nav td.maximize {
+	cursor: pointer;
+	text-align: right;
+}
+
+#compare_by_image table tr.nav td.minimize {
+	cursor: pointer;
+}
+
+#compare_by_image table tr.odd td {
+	background: #DCE9F7;
 }
 
 #compare_by_image table tr.values td {

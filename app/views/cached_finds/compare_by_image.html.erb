@@ -66,5 +66,7 @@
 		language: <%= session.language.inspect %>,
 		primary_class: <%= @primary_class.inspect %>
 	};
+	
 	$('img.property_icon').not('.disabled').css('cursor', 'pointer');
+	util_carousel_table('#compare_by_image table', [0], [1, 2, 3, 4, 5, 6], true);
 </script>

@@ -1,4 +1,4 @@
-function util_carousel_table(selector, label_cols, data_cols) {
+function util_carousel_table(selector, label_cols, data_cols, slim) {
 	var shown_cols = label_cols.concat(data_cols);
 	var table = $(selector);
 	
@@ -32,9 +32,9 @@ function util_carousel_table(selector, label_cols, data_cols) {
 		for(var j in data_cols) dcols.push(data_cols[j] + (i == min_data_col ? -1 : 1));
 		
 		var klass = (i == min_data_col ? 'minimize' : 'maximize');
-		var message = 'show <strong>' + dcols.join(', ') + '</strong> of ' + (column_count - label_cols.length);
+		var message = (slim ? 'more' : ('show <strong>' + dcols.join(', ') + '</strong> of ' + (column_count - label_cols.length)));
 		message = (i == min_data_col ? '&lt;&lt;&lt; ' + message : message + ' &gt;&gt;&gt;');
-		nav_row.append('<td class="' + klass + '" onclick="util_carousel_table(\'' + selector + '\', [' + label_cols.join(', ') + '], [' + dcols + '])">' + message + '</td>');
+		nav_row.append('<td class="' + klass + '" onclick="util_carousel_table(\'' + selector + '\', [' + label_cols.join(', ') + '], [' + dcols + '], ' + slim + ')">' + message + '</td>');
 	}
 	
 	var rows = table.find('tr');

@@ -1,4 +1,4 @@
-class Products < Application  
+class Products < Application
   def batch(ids)
     product_ids = ids.split("_").map { |id| id.to_i }.uniq[0, 100]
     
@@ -51,19 +51,31 @@ class Products < Application
     @related_media = []
     assets_by_role.sort.each do |role, assets|
       name = Attachment::ROLES[role]
-
+      
       if assets.size == 1
-        @related_media << [name, assets.first.url]
+        url = assets.first.url
+        @related_media << [name, url, icon_for_url(url)]
       else
         assets.each_with_index do |asset, i|
-          @related_media << ["#{name} #{i + 1}", asset.url]
+          url = asset.url
+          @related_media << ["#{name} #{i + 1}", url, icon_for_url(url)]
         end
       end
     end
         
     (@body_values_by_name["reference:wikipedia"] || []).each do |stub|
       title = stub.split("_").map { |word| word[0..0].upcase + word[1..-1] }.join(" ")
-      @related_media << ["#{title.inspect} Wikipedia Article", "http://en.wikipedia.org/wiki/#{stub}"]
+      url = "http://en.wikipedia.org/wiki/#{stub}"
+      @related_media << ["#{title.inspect} Wikipedia Article", url, icon_for_url(url)]
     end
+  end
+  
+  def icon_for_url(url)
+    "/images/product_detail/icons/" +
+      case url
+      when Asset::IMAGE_FORMAT then "image.png"
+      when /\.pdf$/ then "pdf.png"
+      else "link.png"      
+      end
   end
 end

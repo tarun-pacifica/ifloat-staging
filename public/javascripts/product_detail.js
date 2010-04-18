@@ -11,6 +11,7 @@ function product_detail_pick_button_click(action, from_group, to_group, pick_id)
 }
 
 function product_detail_pick_buttons_update(group, pick_id) {
+	return;
 	var pick_buttons = $('#pick_buttons');
 	
 	if(pick_buttons.length == 0) return;

@@ -1,90 +1,3 @@
-#product_detail .assets {
-	padding: 5px;
-}
-
-#product_detail .assets img.main {
-	border: 1px solid gray;
-	float: left;
-	height: 400px;
-	width: 400px;
-}
-
-#product_detail .assets .price_actions {
-	float: left;
-	margin-left: 10px;
-	width: 169px;
-}
-
-#product_detail .assets .price_actions table.prices {
-	border: 1px solid silver;
-	border-collapse: collapse;
-	margin-bottom: 10px;
-	width: 100%;
-}
-
-#product_detail .assets .price_actions table.prices img {
-	width: 75px;
-}
-
-#product_detail .assets .price_actions table.prices td {
-	padding: 5px;
-	text-align: center;
-}
-
-#product_detail .assets .price_actions table.prices td.no_stock {
-	background: #F3F3F3;
-}
-
-#product_detail .assets .price_actions table.prices td.price {
-	background: #DCE9F7;
-}
-
-#product_detail .assets .price_actions div.button {
-	cursor: pointer;
-	height: 18px;
-	margin: 5px 0 0 4px;
-	padding: 5px 0 0 25px;
-	width: 137px;
-}
-
-#product_detail .assets .price_actions div.add {
-	background: url(/images/product_detail/buttons/add.png) no-repeat;
-}
-
-#product_detail .assets .price_actions div.media {
-	background: url(/images/product_detail/buttons/move.png) no-repeat;
-	margin-bottom: 10px;
-}
-
-#product_detail .assets .price_actions div.move {
-	background: url(/images/product_detail/buttons/move.png) no-repeat;
-}
-
-#product_detail .assets .price_actions div.remove {
-	background: url(/images/product_detail/buttons/remove.png) no-repeat;
-}
-
-#product_detail .assets .price_actions div.button:hover {
-	background-position: 0 -23px;
-	color: white;
-}
-
-#product_detail .assets .price_actions div.button:active {
-	background-position: 0 -46px;
-}
-
-#product_detail .assets .thumbs {
-	float: left;
-	margin-left: 5px;
-	width: 50px;
-}
-
-#product_detail .assets .thumbs img {
-	border: 1px solid gray;
-	height: 50px;
-	width: 50px;
-}
-
 #product_detail .description {
 	padding: 10px;
 }
@@ -128,6 +41,85 @@
 	margin: 5px 0 0 0;
 }
 
+#product_detail .images {
+	float: left;
+	padding: 5px;
+	text-align: center;
+	width: 400px;
+}
+
+#product_detail .images img.main {
+	border: 1px solid gray;
+	height: 400px;
+	width: 400px;
+}
+
+#product_detail .images img.thumb {
+	border: 1px solid gray;
+	height: 50px;
+	margin: 1px;
+	width: 50px;
+}
+
+#product_detail .price_actions {
+	float: left;
+	margin-left: 2px;
+	width: 230px;
+}
+
+#product_detail .price_actions h3 {
+	color: #404040;
+	font-size: 14px;
+	margin: 15px 0 5px 5px;
+}
+
+#product_detail .price_actions table.prices {
+	border: 1px solid silver;
+	border-collapse: collapse;
+	margin-top: 5px;
+	width: 100%;
+}
+
+#product_detail .price_actions table.prices img {
+	width: 100px;
+}
+
+#product_detail .price_actions table.prices td {
+	padding: 2px;
+	text-align: center;
+}
+
+#product_detail .price_actions table.prices td.no_stock {
+	background: #F3F3F3;
+}
+
+#product_detail .price_actions table.prices td.price {
+	background: #DCE9F7;
+}
+
+#product_detail .price_actions table.related_media {
+	border: none;
+	border-collapse: collapse;
+	width: 100%;
+}
+
+#product_detail .price_actions table.related_media a {
+	color: #404040;
+	text-decoration: none;
+}
+
+#product_detail .price_actions table.related_media a:hover {
+	color: black;
+	text-decoration: underline;
+}
+
+#product_detail .price_actions table.related_media td.icon {
+	text-align: center;
+	width: 35px;
+}
+
+
+
 #product_detail .relations {
 	background: #F3F3F3;
 	border-top: 1px dotted gray;
@@ -146,6 +138,7 @@
 }
 
 #product_detail .relations .more:hover {
+	color: black;
 	text-decoration: underline;
 }
 

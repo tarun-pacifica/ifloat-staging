@@ -49,6 +49,7 @@
 }
 
 #compare_by_image table tr.nav td:hover {
+	color: black;
 	text-decoration: underline;
 }
 

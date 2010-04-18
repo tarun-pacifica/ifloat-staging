@@ -13,40 +13,53 @@
 	</div>
 	
 	<div class="body">
-		<div class="assets">
+		<div class="images">
 			<img class="main" src=<%= @image_urls.first.inspect %> />
-			
-			<div class="thumbs">
+			<% if @image_urls.size > 1 %>			
 				<% @image_urls.each do |url|%>
-				<img src=<%= url.inspect %> onmouseover="product_detail_select_image(event)" />
+				<img class="thumb" src=<%= url.inspect %> onmouseover="product_detail_select_image(event)" />
 				<% end %>
-			</div>
-			
-			<div class="price_actions">
-				<table class="prices" summary="prices">
-					<% @prices_by_url.each do |url, amount| %>
-						<tr>
-							<td> <img src="/images/partner/facilities/<%= url %>.png" alt=<%= url.inspect %> /> </td>
-							<td class="price">
-								<%= money_uom(amount, session.currency, @price_unit, @price_divisor) %>
-							</td>
-						</tr>
-					<% end %>
-
-					<% if @prices_by_url.empty? %>
-						<tr> <td class="no_stock">None of our partners have this item in stock</td> </tr>
-					<% end %>
-				</table>
-				
-				<% unless @related_media.empty? %>
-				<div class="button media" onclick="$('#related_media').dialog('open')">Related Media</div>
-				<% end %>
-				
-				<div id="pick_buttons"> </div>
-			</div>
-			
-			<hr class="terminator" />
+			<% end %>
 		</div>
+			
+		<div class="price_actions">
+			<div id="pick_buttons">
+				<div class="button compare"> </div>
+				<div class="button buy_later"> </div>
+				<div class="button buy_now"> </div>
+				<div class="button reset"> </div>
+				<hr class="terminator" />
+			</div>
+			
+			<table class="prices" summary="prices">
+				<% @prices_by_url.each do |url, amount| %>
+					<tr>
+						<td> <img src="/images/partner/facilities/<%= url %>.png" alt=<%= url.inspect %> /> </td>
+						<td class="price">
+							<%= money_uom(amount, session.currency, @price_unit, @price_divisor) %>
+						</td>
+					</tr>
+				<% end %>
+
+				<% if @prices_by_url.empty? %>
+					<tr> <td class="no_stock">None of our partners have this item in stock</td> </tr>
+				<% end %>
+			</table>
+			
+			<% unless @related_media.empty? %>
+			<h3>Related Media</h3>
+			<table class="related_media" summary="related media">
+				<% @related_media.each do |name, url, icon_url| %>
+				<tr>
+					<td class="icon"> <img src=<%= icon_url.inspect %> /> </td>
+					<td> <a href=<%= url.inspect %> target=\"_blank_\"><%= name %></a> </td>
+				</tr>
+				<% end %>
+			</table>
+			<% end %>
+		</div>
+		
+		<hr class="terminator" />
 	
 		<div class="description">
 			<% (@body_values_by_name["auto:title"] || []).each do |title| %>
@@ -103,12 +116,6 @@
 
 </div>
 
-<% unless @related_media.empty? %>
-<div id="related_media" title="Related Media">
-	<%= @related_media.map { |name, url| "<a href=#{url.inspect} target=\"_blank_\">#{name}</a>" }.join(" ") %>
-</div>
-<% end %>
-
 <script type="text/javascript" charset="utf-8">
 	$ifloat_body = { product_id: <%= @product.id %> };
 	$('img.property_icon').unbind('click');
@@ -117,12 +124,5 @@
 	<% product_ids = @related_products_by_rel_name.values.map { |products| products.map { |product| product.id } }.flatten.uniq %>
 	product_links_load(<%= product_ids.to_json %>);
 	$('#product_detail .relations div').each(function() { $(this).children('.product:gt(2)').hide(); });
-	<% end %>
-	
-	<% unless @related_media.empty? %>
-	var related_media = $('#related_media');
-	related_media.dialog({autoOpen: false, modal: true, resizable: false});
-	related_media.dialog('option', 'buttons', {Close: function() {$('#related_media').dialog('close')}});
-	related_media.data('width.dialog', 700 + 'px');
 	<% end %>	
 </script>

@@ -46,6 +46,7 @@
 }
 
 #compare_by_class table tr.nav td:hover {
+	color: black;
 	text-decoration: underline;
 }
 

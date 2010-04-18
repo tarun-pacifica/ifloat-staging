@@ -3,23 +3,25 @@
 }
 
 #product_detail .description a {
-	background: url(/images/product_detail/buttons/view_related.png) no-repeat;
-	color: black;
+	background: #E0E0E0;
+	border: none;
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	color: #404040;
 	display: block;
+	font-weight: bold;
 	height: 18px;
 	margin-top: 15px;
 	padding-top: 5px;
 	text-align: center;
 	text-decoration: none;
-	width: 161px;
+	width: 160px;
 }
 
 #product_detail .description a:hover {
-	background-position: 0 -23px;
-}
-
-#product_detail .description a:active {
-	background-position: 0 -46px;
+	color: black;
+	text-decoration: underline;
 }
 
 #product_detail .description h2 {

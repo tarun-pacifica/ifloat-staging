@@ -1,12 +1,25 @@
-function pick_options_to_shop(event, pick_id) {
-	var button = $(event.target);
-	button.fadeOut('fast');
-	button.prev().fadeOut('fast');
-	pick_list_move('buy_later', 'buy_now', pick_id);
+function pick_options_buy_later(event, pick_id) {
+	if(pick_list_move('buy_now', 'buy_later', pick_id)) pick_options_fadeout('buy_now', event);
 }
 
-function pick_options_to_wish(event, pick_id) {
-	if(pick_list_move('buy_now', 'buy_later', pick_id)) $(event.target).parents('tr').fadeOut('fast');
+function pick_options_buy_now(event, pick_id) {
+	pick_list_move('buy_later', 'buy_now', pick_id);
+	pick_options_fadeout('buy_later', event);
+}
+
+function pick_options_fadeout(group, event) {
+	if(group == 'buy_later') {
+		var buttons = $(event.target).parent();
+		buttons.fadeOut('fast');
+		buttons.prev().fadeOut('fast');
+	} else {
+		$(event.target).parents('tr').fadeOut('fast');
+	}
+}
+
+function pick_options_reset(event, from_group, pick_id) {
+	pick_options_fadeout(from_group, event);
+	pick_list_remove(from_group, pick_id);
 }
 
 function pick_options_update(data) {
@@ -28,10 +41,14 @@ function pick_options_update(data) {
 		
 		var image = product_image_make(info.image_urls[0], info.image_urls[1], 'right');
 		html.push('<div class="product">' + image + info.title_parts.join('<br/>') + '</div>');
-		html.push('<div class="button move" onclick="pick_options_to_shop(event, ' + info.id + ')"> Buy Now </div>');
+		html.push('<div class="pick_buttons">');
+		html.push('<div class="buy_now" onclick="pick_options_buy_now(event, ' + info.id + ')"> </div>');
+		html.push('<div class="reset" onclick="pick_options_reset(event, \'buy_later\', ' + info.id + ')"> </div>');
+		html.push('</div>');
+		html.push('<hr class="terminator" />');
 	}
 	if(html.length == 0) html.push('<p class="empty">Your have no future buys.</p>');
-	else html.push('<hr class="terminator" />');
+	else html.push('<hr class="terminator final" />');
 	buy_later.find('.sections').html(html.join(' '));
 	
 	
@@ -95,8 +112,9 @@ function pick_options_update(data) {
 		html.push('<div id="prod_' + info.product_id + '" class="product"></div>');
 		html.push('</td>');
 		
-		html.push('<td class="move">');
-		html.push('<div class="button move" onclick="pick_options_to_wish(event, ' + info.id + ')"> Future Buys </div>');
+		html.push('<td class="buttons">');
+		html.push('<div class="buy_later" onclick="pick_options_buy_later(event, ' + info.id + ')"> </div>');
+		html.push('<div class="reset" onclick="pick_options_reset(event, \'bu__now\', ' + info.id + ')"> </div>');
 		html.push('</td>');
 		
 		var prices_by_url = prices_by_url_by_product_id[info.product_id];

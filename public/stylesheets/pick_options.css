@@ -1,21 +1,24 @@
-#po_buy_later div.button {
+#po_buy_later .pick_buttons div {
 	cursor: pointer;
-	height: 18px;
-	margin: 1px 0 0 65px;
-	padding: 5px 0 0 25px;
-	width: 137px;
+	float: left;
+	height: 23px;
 }
 
-#po_buy_later div.move {
-	background: url(/images/product_detail/buttons/move_blue.png) no-repeat;
+#po_buy_later .pick_buttons div.buy_now {
+	background: url(/images/pick_options/buttons/buy_now_blue.png) no-repeat;
+	width: 59px;
 }
 
-#po_buy_later div.button:hover {
+#po_buy_later .pick_buttons div.reset {
+	background: url(/images/pick_options/buttons/reset_blue.png) no-repeat;
+	width: 58px;
+}
+
+#po_buy_later .pick_buttons div:hover {
 	background-position: 0 -23px;
-	color: white;
 }
 
-#po_buy_later div.button:active {
+#po_buy_later .pick_buttons div:active {
 	background-position: 0 -46px;
 }
 
@@ -23,7 +26,7 @@
 	padding-top: 10px;
 }
 
-#po_buy_later hr.terminator {
+#po_buy_later hr.final {
 	margin: 10px 0;
 }
 
@@ -105,6 +108,37 @@
 	width: 100%;
 }
 
+#po_buy_now table td.buttons {
+	border-top: 1px solid silver;
+	padding: 0 5px 0 0;
+	white-space: nowrap;
+	width: 117px;
+}
+
+#po_buy_now table td.buttons div {
+	cursor: pointer;
+	float: left;
+	height: 23px;
+}
+
+#po_buy_now table td.buttons div.buy_later {
+	background: url(/images/pick_options/buttons/buy_later_blue.png) no-repeat;
+	width: 59px;
+}
+
+#po_buy_now table td.buttons div.reset {
+	background: url(/images/pick_options/buttons/reset_blue.png) no-repeat;
+	width: 58px;
+}
+
+#po_buy_now table td.buttons div:hover {
+	background-position: 0 -23px;
+}
+
+#po_buy_now table td.buttons div:active {
+	background-position: 0 -46px;
+}
+
 #po_buy_now table td.count {
 	background: #404040;
 	border-left: 1px solid silver;
@@ -133,12 +167,6 @@
 	width: 100px;
 }
 
-#po_buy_now table td.move {
-	border-top: 1px solid silver;
-	padding: 0;
-	width: 1%;
-}
-
 #po_buy_now table td.price {
 	border-left: 1px solid silver;
 	border-top: 1px solid silver;
@@ -148,15 +176,27 @@
 
 #po_buy_now table td.product {
 	border-top: 1px solid silver;
-	max-width: 447px;
+	max-width: 410px;
 }
 
 #po_buy_now table tr.even td {
 	background: #F3F3F3;
 }
 
-#po_buy_now table tr.odd div.move {
-	background-image: url(/images/product_detail/buttons/move_blue.png);
+#po_buy_now table tr.even td.buttons div.buy_later {
+	background: url(/images/pick_options/buttons/buy_later_grey.png) no-repeat;
+}
+
+#po_buy_now table tr.even td.buttons div.reset {
+	background: url(/images/pick_options/buttons/reset_grey.png) no-repeat;
+}
+
+#po_buy_now table tr.even td.buttons div:hover {
+	background-position: 0 -23px;
+}
+
+#po_buy_now table tr.even td.buttons div:active {
+	background-position: 0 -46px;
 }
 
 #po_buy_now table tr.odd td {

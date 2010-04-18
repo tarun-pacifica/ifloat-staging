@@ -2,14 +2,14 @@
 	margin-top: 5px;
 }
 
-#pick_buttons .button {
+#pick_buttons div {
 	cursor: pointer;
 	float: left;
 	height: 23px;
 	width: 57px;
 }
 
-#pick_buttons .button:hover {
+#pick_buttons div:hover {
 	background-position: 0 -23px;
 }
 

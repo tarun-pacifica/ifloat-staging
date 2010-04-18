@@ -2,15 +2,15 @@ function util_carousel_table(selector, label_cols, data_cols, slim) {
 	var shown_cols = label_cols.concat(data_cols);
 	var table = $(selector);
 	
+	table.find('tr.nav').remove();
   var column_count = table.find('tr:first td').length;
-	if(column_count <= shown_cols.length) return;
-	
-	var nav_row = table.find('tr.nav');
-	if(nav_row.length == 0) {
-		table.prepend('<tr class="nav"> </tr>');
-		nav_row = table.find('tr.nav');
+	if(column_count <= shown_cols.length) {
+		table.find('td').show();
+		return;
 	}
-	nav_row.empty();
+	
+	table.prepend('<tr class="nav"> </tr>');
+	var nav_row = table.find('tr.nav');
 	
 	var min_data_col = data_cols[0];
 	var max_data_col = data_cols[data_cols.length - 1];
@@ -70,11 +70,11 @@ function util_hash_from_array(keys, value) {
 	return hash;
 }
 
-function util_highlight_column(event, action, col_num) {
+function util_highlight_column(event, action, col_class) {
 	var table = $(event.target).parents("table");
 	
 	table.find('.hover').removeClass('hover');
-	if(action == 'on') table.find('tr:not(.nav) td:nth-child(' + col_num + '):not(.image)').addClass('hover');
+	if(action == 'on') table.find('tr:not(.nav) td.' + col_class + ':not(.image)').addClass('hover');
 }
 
 function util_highlight_row(event, action) {

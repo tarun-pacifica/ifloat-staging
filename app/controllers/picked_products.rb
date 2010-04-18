@@ -40,7 +40,8 @@ class PickedProducts < Application
   def compare_by_class(klass)
     klass = Merb::Parse.unescape(klass)
     picks = session.picked_products.select { |pick| pick.group == "compare" and pick.cached_class == klass }
-    @product_ids = picks.map { |pick| pick.product_id }
+    @picks_by_product_id = picks.hash_by(:product_id)
+    @product_ids = @picks_by_product_id.keys
     
     return redirect("/") if @product_ids.empty?
     return redirect(url(:product, :id => @product_ids.first)) if @product_ids.size == 1
@@ -114,7 +115,8 @@ class PickedProducts < Application
     non_compare_picks = session.picked_products.reject { |pick| pick.group == "compare" }
     return redirect("/") if non_compare_picks.empty?
     
-    product_ids = non_compare_picks.map { |pick| pick.product_id }
+    @picks_by_product_id = non_compare_picks.hash_by(:product_id) # TODO: check whether needed
+    product_ids = @picks_by_product_id.keys
     
     @prices_by_url_by_product_id = Product.prices_by_url_by_product_id(product_ids, session.currency)
     unit_and_divisor_by_product_id = UnitOfMeasure.unit_and_divisor_by_product_id(product_ids)    

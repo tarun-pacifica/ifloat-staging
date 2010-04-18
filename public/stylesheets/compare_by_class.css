@@ -32,8 +32,43 @@
 	text-align: center;
 }
 
+#compare_by_class table td.image .pick_buttons {
+	margin: auto;
+	width: 172px;
+}
+
+#compare_by_class table td.image .pick_buttons div {
+	cursor: pointer;
+	float: left;
+	height: 23px;
+}
+
+#compare_by_class table td.image .pick_buttons div.buy_later {
+	background: url(/images/compare_by_class/buttons/buy_later.png) no-repeat;
+	width: 59px;
+}
+
+#compare_by_class table td.image .pick_buttons div.buy_now {
+	background: url(/images/compare_by_class/buttons/buy_now.png) no-repeat;
+	width: 57px;
+}
+
+#compare_by_class table td.image .pick_buttons div.reset {
+	background: url(/images/compare_by_class/buttons/reset.png) no-repeat;
+	width: 56px;
+}
+
+#compare_by_class table td.image .pick_buttons div:hover {
+	background-position: 0 -23px;
+}
+
+#compare_by_class table td.image .pick_buttons div:active {
+	background-position: 0 -46px;
+}
+
 #compare_by_class table td.product {
 	cursor: pointer;
+	min-width: 178px;
 }
 
 #compare_by_class table tr.even td {
@@ -42,7 +77,7 @@
 
 #compare_by_class table tr.nav td {
 	color: #404040;
-	width: 1%;
+	padding-bottom: 0;
 }
 
 #compare_by_class table tr.nav td:hover {

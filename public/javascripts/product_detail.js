@@ -20,7 +20,7 @@ function product_detail_pick_button_click(event) {
 	var from_group = data.group;
 	var pick_id = data.pick_id;
 	
-	if(to_group == null) pick_list_remove(to_group, pick_id);
+	if(to_group == null) pick_list_remove(from_group, pick_id);
 	else if(from_group) pick_list_move(from_group, to_group, pick_id);
 	else pick_list_add(to_group, $ifloat_body.product_id);
 }

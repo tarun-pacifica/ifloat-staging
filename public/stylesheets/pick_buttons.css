@@ -13,6 +13,10 @@
 	background-position: 0 -23px;
 }
 
+#pick_buttons div:active {
+	background-position: 0 -46px;
+}
+
 #pick_buttons .buy_later {
 	background: url(/images/product_detail/buttons/buy_later.png) no-repeat;
 }

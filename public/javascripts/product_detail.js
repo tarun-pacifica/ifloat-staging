@@ -20,7 +20,9 @@ function product_detail_pick_button_click(event) {
 	var from_group = data.group;
 	var pick_id = data.pick_id;
 	
-	if(to_group == null) pick_list_remove(from_group, pick_id);
+	if(to_group == null) {
+		if(from_group) pick_list_remove(from_group, pick_id);
+	}
 	else if(from_group) pick_list_move(from_group, to_group, pick_id);
 	else pick_list_add(to_group, $ifloat_body.product_id);
 }
@@ -33,7 +35,7 @@ function product_detail_pick_buttons_update(group, pick_id) {
 	if(group) pick_buttons.data('group', group)
 	if(pick_id) pick_buttons.data('pick_id', pick_id);
 	
-	pick_buttons.find('.button').removeClass('selected').unbind('click').click(product_detail_pick_button_click);
+	pick_buttons.find('div').removeClass('selected').unbind('click').click(product_detail_pick_button_click);
 	if(group) pick_buttons.find('.' + group).addClass('selected').unbind('click');
 }
 

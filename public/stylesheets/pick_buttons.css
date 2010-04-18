@@ -31,3 +31,11 @@
 	width: 56px;
 }
 
+#pick_buttons .selected {
+	background-position: 0 -46px;
+	cursor: default;
+}
+
+#pick_buttons .selected:hover {
+	background-position: 0 -46px;
+}

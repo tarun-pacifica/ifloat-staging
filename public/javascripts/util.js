@@ -74,7 +74,7 @@ function util_highlight_column(event, action, col_num) {
 	var table = $(event.target).parents("table");
 	
 	table.find('.hover').removeClass('hover');
-	if(action == 'on') table.find('tr:not(.nav) td:nth-child(' + col_num + ')').addClass('hover');
+	if(action == 'on') table.find('tr:not(.nav) td:nth-child(' + col_num + '):not(.image)').addClass('hover');
 }
 
 function util_highlight_row(event, action) {

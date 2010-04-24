@@ -24,12 +24,9 @@ module Merb
     end
     
     def panel_title_back_to_find(find)
-      return "&nbsp;" if find.nil?
-      
+      return "&nbsp;" if find.nil?      
       <<-HTML
-        <a href="#{resource(find)}">Back to your <strong>#{find.specification.inspect}</strong> results</a>
-  			<img src="/images/panel/backgrounds/title_button_sep.png">
-  			<hr class="terminator" />
+        <a href="#{resource(find)}">« back to your <strong>#{find.specification.inspect}</strong> results</a>
 			HTML
     end
         

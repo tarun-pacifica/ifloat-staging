@@ -8,24 +8,18 @@ function filter_panel_edit(filter_id) {
 
 function filter_panel_button(name, action) {
 	var button = $('#filter_panel_' + name);
+	button.unbind();
 	
 	if(action == 'enable') {
-		button.css('color', 'black');
-		button.mouseenter(function() {
-			$(this).css('background-position', '0 -23px').css('color', 'white');
-		});
-		button.mouseleave(function() {
-			$(this).css('background-position', '0 0').css('color', 'black');
-		});
-		
+		button.css('color', 'black').css('cursor', 'pointer');
+		button.mouseenter(function() { $(this).css('background-position', '0 -23px').css('color', 'white'); });
+		button.mouseleave(function() { $(this).css('background-position', '0 0').css('color', 'black');     });
 		if(name == 'add') button.click(filter_choose_open);
 		else button.click(filter_panel_remove_all);
 	} else {
-		button.css('color', 'silver');
-		button.mouseenter(function() { $(this).css('background-position', '0 0');     });
-		button.mouseleave(function() { $(this).css('background-position', '0 0');     });
-		
-		button.unbind('click');
+		button.css('color', 'silver').css('cursor', 'default');
+		button.mouseenter(function() { $(this).css('background-position', '0 0') });
+		button.mouseleave(function() { $(this).css('background-position', '0 0') });
 	}
 }
 

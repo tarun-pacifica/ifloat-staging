@@ -524,7 +524,7 @@ def mail_fail(whilst)
   Mailer.deliver(:import_failure, :ars => repo_summary(ASSET_REPO),
                                   :crs => repo_summary(CSV_REPO),
                                   :whilst => whilst,
-                                  :attach => ERRORS_PATH)
+                                  :attach => ERRORS_PATH) unless Merb.environment == "development"
   puts "ERROR whilst #{whilst} - emailed report: #{ERRORS_PATH}"
   exit 1
 end
@@ -660,7 +660,7 @@ mail_fail("verifying data integrity") if import_set.write_errors(ERRORS_PATH)
 puts "=== Updating Database ==="
 class_stats = import_set.import
 mail_fail("updating the database") if import_set.write_errors(ERRORS_PATH)
-Mailer.deliver(:import_success, :ars => repo_summary(ASSET_REPO), :crs => repo_summary(CSV_REPO), :stats => class_stats)
+Mailer.deliver(:import_success, :ars => repo_summary(ASSET_REPO), :crs => repo_summary(CSV_REPO), :stats => class_stats)  unless Merb.environment == "development"
 
 begin; stopwatch("destroyed obsolete assets") { AssetStore.delete_obsolete }; rescue; end
 

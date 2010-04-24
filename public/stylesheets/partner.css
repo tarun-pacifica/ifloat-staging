@@ -9,22 +9,25 @@
 
 #partner_panel a.back {
 	background: url(/images/partner/backgrounds/back.png) repeat-x;
-	color: white;
+	border-bottom: 1px solid silver;
+	color: #404040;
 	display: block;
-	height: 17px;
-	padding: 8px 0;
+	height: 20px;
+	padding-top: 6px;
 	text-align: center;
 	text-decoration: none;
 	width: 150px;
 }
 
 #partner_panel a.back:hover {
+	color: black;
 	text-decoration: underline;
 }
 
 #partner_panel .finder {
-	background: url(/images/partner/backgrounds/finder.png) repeat-x;
-	margin: 5px 0 0 0;
+	background: #BBD9F9;
+	border-top: 1px solid silver;
+	margin: 5px 0 -5px 0;
 	padding: 4px 0;
 	width: 150px;
 }

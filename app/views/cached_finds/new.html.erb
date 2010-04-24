@@ -1,32 +1,7 @@
-<%= partial "common/login" %>
+<%= partial "common/header" %>
 
-<div id="marquee">
-	<%= partial "common/finder" %>
-	<div class="panel">
-		<div class="left"></div>
-		<div class="centre">
-			<% if @show_purchases_button %>
-			<a href="/picked_products/options" id="purchases"></a>
-			<% else %>
-			<div id="purchases"></div>
-			<% end %>
-			<a href="/blogs/tom_cunliffe" id="blog"></a>
-			<% if session.authenticated? %>
-			<a id="logout" href="#" onclick="login_logout()"></a>
-			<% else %>
-			<a id="login" href="#" onclick="login_open()"></a>
-			<% end %>
-		</div>
-		<div class="right"></div>
-	</div>
-	
+<div id="body">
 	<noscript>
-	<p class="noscript">This site relies on Javascript support throughout. Please turn Javascript on in your browser or switch to one with such support.</p>
+	<p class="noscript">This site relies heavily on Javascript support. <br/> <br/> Please turn Javascript on in your browser or switch to one with such support.</p>
 	</noscript>
 </div>
-
-<script type="text/javascript" charset="utf-8">
-	<% Dir[Merb.root / "public" / "images" / "marquee" / "buttons" / "*.png"].each do |path| %>
-	util_preload_image('/images/marquee/buttons/<%= File.basename(path) %>');
-	<% end %>
-</script>

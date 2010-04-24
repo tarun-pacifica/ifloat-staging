@@ -27,6 +27,16 @@ img.property_icon {
 	width: 58px;
 }
 
+p.noscript {
+	background: #FFFFE0;
+	border: 1px solid gray;
+	color: red;
+	font-size: 16px;
+	font-weight: bold;
+	padding: 10px;
+	text-align: center;
+}
+
 span.defined {
 	color: blue;
 }

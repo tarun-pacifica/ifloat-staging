@@ -46,14 +46,12 @@ class PickedProducts < Application
     return redirect("/") if @product_ids.empty?
     return redirect(url(:product, :id => @product_ids.first)) if @product_ids.size == 1
     
-    @common_values, diff_values = Product.marshal_values(@product_ids, session.language, RANGE_SEPARATOR)
+    forced_diff_props = %w(marketing:summary marketing:feature_list).to_set
+    @common_values, diff_values = Product.marshal_values(@product_ids, session.language, RANGE_SEPARATOR, forced_diff_props)
     
-    @diff_values_by_prop_id = diff_values.select { |info| info[:dad] }.group_by { |info| info[:id] }
-    
-    all_values = (@common_values + diff_values)
-    names = %w(marketing:summary marketing:feature_list).to_set
-    named_values = all_values.select { |info| names.include?(info[:raw_name]) }.group_by { |info| info[:id] }
-    @diff_values_by_prop_id.update(named_values)
+    @diff_values_by_prop_id = diff_values.select do |info|
+      info[:dad] or forced_diff_props.include?(info[:raw_name])
+    end.group_by { |info| info[:id] }
     
     @diff_properties = @diff_values_by_prop_id.keys.map do |property_id|
       Indexer.property_display_cache[property_id]

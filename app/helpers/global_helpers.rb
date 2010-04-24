@@ -89,17 +89,8 @@ module Merb
       
       values = []
       info[:values].each_with_index do |value, i|
-        definition = definitions[i]
-        
-        if definition.nil?
-          values << value
-          next
-        end
-        
-        d = definition.gsub(/(['"])/) { |c| "\\#{c}" }
-        values << <<-HTML
-    	    <span class="defined" onmouseover="tooltip_show(event, '#{d}', '#{tooltip_position}')" onmouseout="tooltip_hide()">#{value}</span>
-    	  HTML
+        definition = definitions[i]        
+        values << (definition.nil? ? value : tooltip(value, definition, tooltip_position))
       end
       
       if info[:type] == 'text' then values.map! { |value| value.superscript }
@@ -112,9 +103,8 @@ module Merb
           value.split("\n").map { |paragraph| "<p>#{paragraph}</p>" }.join
         end
       when "marketing:feature_list"
-        values.map! do |value|
-          "<ul>" + value.split("\n").map { |feature| "<li>#{feature}</li>" }.join + "</ul>"
-        end
+        content = values.map { |value| value.split("\n").join(" &middot; ") }.join("<br />")
+        return tooltip('Features', content, tooltip_position)
       end
       
       values.join("<br />")
@@ -133,6 +123,13 @@ module Merb
           <img class="property_icon" src="#{src}" onclick="filter_configure(#{prop_id})" onmouseover="tooltip_show(event, '#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
         HTML
       end
+    end
+    
+    def tooltip(value, tip, position = :right)
+      t = tip.gsub(/(['"])/) { |c| "\\#{c}" }
+      <<-HTML
+  	    <span class="defined" onmouseover="tooltip_show(event, '#{t}', '#{position}')" onmouseout="tooltip_hide()">#{value}</span>
+  	  HTML
     end
   end
 end

@@ -4,7 +4,19 @@
 
 <% if @find.all_product_ids.empty? %>
 
-<img id="no_results" src="/images/find_results/no_results.png" />
+<div id="filter_panel" class="panel minor">
+	<div class="title"> <h2></h2> </div>
+</div>
+
+<div id="find_results_panel" class="panel major">
+	<div class="title"> <h2></h2> </div>
+	
+	<div id="find_results_products" class="body">
+		<p class="empty">Sorry, we couldn't find any products matching <strong><%= @find.specification.inspect %></strong>.</p>
+		
+		<hr class="terminator" />
+	</div>
+</div>
 
 
 <% else %>

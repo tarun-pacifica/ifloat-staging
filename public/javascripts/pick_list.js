@@ -75,7 +75,7 @@ function pick_list_show() {
 	var list = $(this);
 	if(list.find('.total').text() == '') return;
 	list.find('a').fadeIn('fast');
-	list.children('.menu').css('background-position', '0 -21px').css('color', 'white');
+	list.children('.menu').css('background-position', '0 -23px').css('color', 'white');
 	list.children('.items').css('border-bottom', '1px solid #404040');
 }
 
@@ -134,7 +134,7 @@ function pick_lists_update_handle(data) {
 		
 		if(!partner) {
 			pick_list_enable(pick_list);
-			pick_list.css('background-position', '0 -21px');
+			pick_list.css('background-position', '0 -23px');
 		}
 	}
 	

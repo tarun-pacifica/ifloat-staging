@@ -100,8 +100,8 @@ module Merb
           value.split("\n").map { |paragraph| "<p>#{paragraph}</p>" }.join
         end
       when "marketing:feature_list"
-        content = values.map { |value| value.split("\n").join(" &middot; ") }.join("<br />")
-        return tooltip('Features', content, tooltip_position)
+        items = values.map { |value| value.split("\n") }.flatten.map { |value| "<li>#{value}</li>" }
+        return tooltip('Features', "<ul>#{items.join}</ul>", tooltip_position)
       end
       
       values.join("<br />")

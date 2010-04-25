@@ -10,3 +10,8 @@
 	position: absolute;
 	z-index: 5000;
 }
+
+#tooltip ul {
+	margin: 0;
+	padding-left: 10px;
+}

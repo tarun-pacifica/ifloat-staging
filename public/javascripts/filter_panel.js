@@ -17,9 +17,7 @@ function filter_panel_button(name, action) {
 		if(name == 'add') button.click(filter_choose_open);
 		else button.click(filter_panel_remove_all);
 	} else {
-		button.css('color', 'silver').css('cursor', 'default');
-		button.mouseenter(function() { $(this).css('background-position', '0 0') });
-		button.mouseleave(function() { $(this).css('background-position', '0 0') });
+		button.css('background-position', '0 0').css('color', 'silver').css('cursor', 'default');
 	}
 }
 

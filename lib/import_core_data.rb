@@ -633,6 +633,7 @@ CLASSES.each do |klass|
     
     load_from_cache = import_set.dump_exists?(dump_name)
     load_from_cache = false if klass == Product and freshly_parsed_classes.include?(PropertyType)
+    load_from_cache = false if klass == TitleStrategy and freshly_parsed_classes.include?(PropertyDefinition)
     
     if load_from_cache
       stopwatch("#{nice_path} [cached]") { import_set.add_from_dump(dump_name) }

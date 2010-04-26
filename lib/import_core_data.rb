@@ -174,8 +174,9 @@ class ImportSet
     
     stopwatch("ensured all primary images are 400x400 in size") do
       pias_by_product.values.map { |attachment| attachment.attributes[:asset] }.uniq.each do |asset|
-        path, size = asset.attributes.values_at(:file_path, :pixel_size)
-        error(Asset, asset.path, asset.row, nil, "not 400x400 (#{size}): #{path.inspect}") unless size == "400x400"
+        pk = asset.primary_key
+        size = asset.attributes[:pixel_size]
+        error(Asset, asset.path, asset.row, nil, "not 400x400 (#{size}): #{friendly_pk(pk)}") unless size == "400x400"
       end
     end
     

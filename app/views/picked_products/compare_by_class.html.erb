@@ -24,7 +24,7 @@
 					<% pick = @picks_by_product_id[product_id] %>
 					<div class="pick_buttons">
 						<div class="buy_later" onclick="compare_by_class_pick('buy_later', <%= pick.id %>, 'col_<%= i %>')"> </div>
-						<div class="buy_now" onclick="compare_by_class_pick('buy_now', <%= pick.id %>, 'col_<%= i %>'"> </div>
+						<div class="buy_now" onclick="compare_by_class_pick('buy_now', <%= pick.id %>, 'col_<%= i %>')"> </div>
 						<div class="reset" onclick="compare_by_class_pick(null, <%= pick.id %>, 'col_<%= i %>')"> </div>
 					</div>
 				</td>

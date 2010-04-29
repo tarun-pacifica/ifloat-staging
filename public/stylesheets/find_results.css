@@ -14,8 +14,8 @@
 
 #find_results_products a.product .tally {
 	background: white;
-	border-left: 1px solid gray;
-	border-top: 1px solid gray;
+	border-left: 1px solid silver;
+	border-top: 1px solid silver;
 	bottom: 3px;
 	padding: 1px 2px;
 	position: absolute;

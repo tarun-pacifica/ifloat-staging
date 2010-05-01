@@ -29,7 +29,7 @@ function login_reset() {
 }
 
 function login_submit(event) {
-	var form = $(event.target);
+	var form = util_target(event);
 	var options = {type: 'POST', url: form.attr('action'), success: login_success, error: login_error, data: {}};
 	
 	var inputs = form.find('input:not(:submit)');

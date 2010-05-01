@@ -9,11 +9,11 @@ function pick_options_buy_now(event, pick_id) {
 
 function pick_options_fadeout(group, event) {
 	if(group == 'buy_later') {
-		var buttons = $(event.target).parent();
+		var buttons = util_target(event).parent();
 		buttons.fadeOut('fast');
 		buttons.prev().fadeOut('fast');
 	} else {
-		$(event.target).parents('tr').fadeOut('fast');
+		util_target(event).parents('tr').fadeOut('fast');
 	}
 }
 

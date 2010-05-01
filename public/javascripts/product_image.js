@@ -9,7 +9,7 @@ function product_image_popup(event, image_url, relative_position) {
 	var zoom = $("#image_popup");
 	zoom.attr('src', image_url);
 	
-	var image = $(event.target);
+	var image = util_target(event);
 	image.css('border-color', 'black');
 	
 	var position = image.offset();
@@ -25,6 +25,6 @@ function product_image_popup(event, image_url, relative_position) {
 }
 
 function product_image_unpopup(event) {
-	$(event.target).css('border-color', 'gray');
+	util_target(event).css('border-color', 'gray');
 	$('#image_popup').stop(true, true).hide();
 }

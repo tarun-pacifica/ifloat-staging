@@ -1,11 +1,11 @@
 function product_detail_more_relations(event) {
-	var more = $(event.target);
+	var more = util_target(event);
 	more.prevAll().show();
 	more.hide();
 }
 
 function product_detail_pick_button_click(event) {
-	var button = $(event.target);
+	var button = util_target(event);
 	var to_group = null;
 	var groups = ['buy_later', 'buy_now', 'compare'];
 	for(var i in groups) {

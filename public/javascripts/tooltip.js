@@ -6,7 +6,7 @@ function tooltip_show(event, text, relative_position) {
 	var tooltip = $('#tooltip');
 	tooltip.html(text);
 	
-	var target = $(event.target);
+	var target = util_target(event);
 	var position = target.offset();
 	var tooltip_height = tooltip.outerHeight();
 	

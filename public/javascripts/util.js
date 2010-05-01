@@ -71,14 +71,14 @@ function util_hash_from_array(keys, value) {
 }
 
 function util_highlight_column(event, action, col_class) {
-	var table = $(event.target).parents("table");
+	var table = util_target(event).parents("table");
 	
 	table.find('.hover').removeClass('hover');
 	if(action == 'on') table.find('tr:not(.nav) td.' + col_class + ':not(.image)').addClass('hover');
 }
 
 function util_highlight_row(event, action) {
-	var row = $(event.target).parent();
+	var row = util_target(event).parent();
 
 	if(action == 'on') row.addClass('hover');
 	else row.removeClass('hover');
@@ -107,4 +107,8 @@ function util_superscript(type, value) {
 	}
 	
 	return value;
+}
+
+function util_target(event) {
+	return $(event.target ? event.target : event.srcElement);
 }

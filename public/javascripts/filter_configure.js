@@ -177,7 +177,7 @@ function filter_configure_values_numeric_build_sliders(filter_configure, values_
 
 function filter_configure_values_numeric_handle_select(event) {
 	var filter_configure = $('#filter_configure');
-	var unit = $(event.target).val();
+	var unit = util_target(event).val();
 	
 	filter_configure.find('.slider_set[title=' + filter_configure.data('unit') + ']').hide();
 	filter_configure.find('.slider_set[title=' + unit + ']').show();

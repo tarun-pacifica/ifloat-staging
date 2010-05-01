@@ -1,5 +1,5 @@
 function blog_article_edit(event) {
-	var article = $(event.target).parents('.article');
+	var article = util_target(event).parents('.article');
 	article.children().hide();
 	
 	var form = article.children('form');
@@ -10,7 +10,7 @@ function blog_article_edit(event) {
 }
 
 function blog_article_validate(event) {
-	var form = $(event.target);
+	var form = util_target(event);
 	
 	var errors = [];
 	if(form.find('input:text').val() == '') errors.push("Articles must have a title.");

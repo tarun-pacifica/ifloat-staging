@@ -45,6 +45,7 @@
 
 #compare_by_image table tr.nav td {
 	color: #404040;
+	font-size: 16px;
 }
 
 #compare_by_image table tr.nav td:hover {

@@ -32,7 +32,7 @@ function util_carousel_table(selector, label_cols, data_cols, slim) {
 		for(var j in data_cols) dcols.push(data_cols[j] + (i == min_data_col ? -1 : 1));
 		
 		var klass = (i == min_data_col ? 'minimize' : 'maximize');
-		var message = (slim ? 'more' : ('show <strong>' + dcols.join(', ') + '</strong> of ' + (column_count - label_cols.length)));
+		var message = (slim ? 'More' : ('Show <strong>' + dcols.join(', ') + '</strong> of ' + (column_count - label_cols.length)));
 		message = (i == min_data_col ? '« ' + message : message + ' »');
 		nav_row.append('<td class="' + klass + '" onclick="util_carousel_table(\'' + selector + '\', [' + label_cols.join(', ') + '], [' + dcols + '], ' + slim + ')">' + message + '</td>');
 	}

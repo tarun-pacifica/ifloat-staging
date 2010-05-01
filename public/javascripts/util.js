@@ -84,8 +84,10 @@ function util_highlight_row(event, action) {
 	else row.removeClass('hover');
 }
 
-function util_pluralize(count, singular) {
-	return count + ' ' + (count == 1 ? singular : singular + 's');
+function util_pluralize(count, singular, verb) {
+	var plural = singular + 's';
+	if(count == 1) return '1 ' + (verb ? plural : singular);
+	else return count + ' ' + (verb ? singular : plural);
 }
 
 function util_preload_image(url) {

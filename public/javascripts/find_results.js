@@ -26,7 +26,7 @@ function find_results_update_handle(data) {
 	frps.find('.product').remove();
 	frps.find('.terminator').before(products.join(' '));
 	
-	var remaining = (filtered_prod_count == $ifloat_body.find_total ? '' : ' - ' + filtered_prod_count + ' remain after filtering');
+	var remaining = (filtered_prod_count == $ifloat_body.find_total ? '' : ' - ' + util_pluralize(filtered_prod_count, ' remain', true) + ' after filtering');
 	$('#find_results_remaining').text(remaining);
 	
 	if(data.length == 0) {

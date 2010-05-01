@@ -7,6 +7,7 @@ function filter_configure(filter_id) {
 
 function filter_configure_apply() {
 	var filter_configure = $('#filter_configure');
+	filter_configure.find('input:submit').attr('disabled', 'disabled');
 	
 	var data = {include_unknown: filter_configure.find('.include_unknown input:checked').length == 1}
 	
@@ -65,32 +66,19 @@ function filter_configure_handle(filter) {
 		return;
 	}
 	
-	var from_filter_choose = filter_choose_close();
-	
 	var filter_configure = $('#filter_configure');
 	if(filter_configure.length == 0) {
 		$('body').append('<div id="filter_configure"> </div>');
 		filter_configure = $('#filter_configure');
 		filter_configure.dialog({autoOpen: false, modal: true, resizable: false});
-		filter_configure.dialog('option', 'title', 'Filter your "' + $ifloat_body.find_spec + '" results by...');
-		
-		var apply = {};
-		apply['Apply' + ($ifloat_body.find_home ? '' : ' Exclusively')] = filter_configure_apply;
-		filter_configure.dialog('option', 'buttons', apply);
-		
+		filter_configure.dialog('option', 'title', 'Filter your "' + $ifloat_body.find_spec + '" results by...');		
 		filter_configure.data('width.dialog', 700 + 'px');
 	}
 	
 	var html = [];
 	
-	html.push('<div class="location">');
-	if(from_filter_choose) {
-		html.push('<h3 class="back" onclick="filter_configure_back()">Back to all filters</h3>');
-		html.push('<img src="/images/filter_configure/backgrounds/location_button_sep.png" />');
-	}
-	html.push('<h3>' + filter.section + '</h3>');
-	html.push('<img src="/images/filter_configure/backgrounds/location_sep.png" />');
-	html.push('<p> <img class="property_icon" src="' + filter.icon_url + '" /> <strong>' + filter.name + '</strong> values </p>');
+	html.push('<p class="location">');
+	html.push('<strong>' + filter.section + ':</strong> ' + filter.name);
 	html.push('</div>');
 	
 	if(filter.include_unknown != null) {
@@ -100,6 +88,11 @@ function filter_configure_handle(filter) {
 	
 	if(filter.type == 'text') filter_configure_values_text(filter.values_by_unit, html);
 	else filter_configure_values_numeric(filter.type, filter.values_by_unit, html);
+	
+	html.push('<p class="apply">');
+	html.push('<input onclick="filter_configure_apply()" type="submit" value="Apply' + ($ifloat_body.find_home ? '' : ' Exclusively') + '" />');
+	if(filter_choose_close()) html.push('<span onclick="filter_configure_back()">« back to filters</span>');
+	html.push('</p>');
 	
 	filter_configure.html(html.join(' '));
 	if(filter.type == 'text') filter_configure_values_text_update_select_all();

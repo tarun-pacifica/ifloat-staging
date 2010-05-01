@@ -121,7 +121,8 @@ class CachedFinds < Application
       @find = session.ensure_cached_find(find_id)
     rescue NotFound
       defunct_find = session.most_recent_cached_find
-      @find = session.cached_finds.find { |cf| cf.specification == defunct_find.specification } if session.authenticated? and find_id == defunct_find.id
+      return redirect("/") if defunct_find.nil? or not session.authenticated? or find_id != defunct_find.id
+      @find = session.cached_finds.find { |cf| cf.specification == defunct_find.specification }
       return redirect(@find.nil? ? "/" : resource(@find))
     end
     

@@ -4,8 +4,8 @@ Merb::Config.use { |c|
   c[:reload_templates] = false
   c[:reload_classes] = false
   
-  c[:log_auto_flush ] = false
-  c[:log_level] = :error
+  c[:log_auto_flush ] = true
+  c[:log_level] = :debug
   c[:log_stream] = nil
   c[:log_file] = Merb.root / "log" / "staging.log"
   

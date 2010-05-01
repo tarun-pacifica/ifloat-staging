@@ -25,13 +25,14 @@
 }
 
 #product_detail .description h2 {
-	color: #404040;
+	color: #159FFC;
 	font-size: 16px;
 	margin: 0 0 4px 0;
 }
 
 #product_detail .description h3 {
-	color: #404040;
+	color: #159FFC;
+	font-size: 16px;
 	margin: 15px 0 0 0;
 }
 
@@ -41,6 +42,7 @@
 
 #product_detail .description ul {
 	margin: 5px 0 0 0;
+	padding-left: 25px;
 }
 
 #product_detail .images {

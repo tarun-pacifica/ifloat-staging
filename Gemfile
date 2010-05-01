@@ -1,8 +1,5 @@
 source :gemcutter
 
-# http://github.com/carlhuda/bundler/issues/#issue/107
-gem "bundler", "0.9.10"
-
 def gems(names, version)
   names.each { |n| gem(n, version) }
 end
@@ -10,7 +7,7 @@ end
 # DataObjects, DataMapper and Merb
 gems %w(data_objects do_mysql), "0.10.1"
 gems %w(dm-core dm-aggregates dm-migrations dm-types dm-validations), "0.10.2"
-gems %w(merb-core merb-action-args merb-helpers merb_datamapper), "1.1.0.pre"
+gems %w(merb-core merb-action-args merb-helpers merb_datamapper), "1.1.0"
 
 # Others
 gem "cloudfiles", "1.4.6"

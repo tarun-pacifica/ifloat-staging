@@ -8,7 +8,7 @@
 }
 
 #partner_panel a.back {
-	background: url(/images/partner/backgrounds/back.png) repeat-x;
+	background: url(/images/partner/backgrounds/control.png) no-repeat;
 	border-bottom: 1px solid silver;
 	color: #404040;
 	display: block;
@@ -25,9 +25,9 @@
 }
 
 #partner_panel .finder {
-	background: #BBD9F9;
+	background: url(/images/partner/backgrounds/control.png) no-repeat;
 	border-top: 1px solid silver;
-	margin: 5px 0 -5px 0;
+	margin: 5px 0 10px 0;
 	padding: 4px 0;
 	width: 150px;
 }
@@ -51,7 +51,6 @@
 }
 
 #partner_panel .pick_list {
-	background: url(/images/partner/backgrounds/pick_list.png) repeat-x;
 	color: black;
 	cursor: default;
 	margin-top: 5px;
@@ -112,10 +111,18 @@
 #partner_panel .pick_list .name {
 	color: #404040;
 	display: block;
-	font-size: 16px;
+	font-size: 14px;
 	height: 27px;
 	margin-bottom: 5px;
-	padding: 8px 0 0 10px;
+	padding: 8px 0 0 35px;
+}
+
+#pl_buy_later {
+	background: url(/images/partner/backgrounds/buy_later.png) no-repeat;
+}
+
+#pl_buy_now {
+	background: url(/images/partner/backgrounds/buy_now.png) no-repeat;
 }
 
 

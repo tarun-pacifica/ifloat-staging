@@ -17,3 +17,16 @@ hr.terminator {
 	margin: 10px;
 	width: 680px;
 }
+
+#login_register form {
+	margin-top: 10px;
+	width: 293px;
+}
+
+#login_register form h1 {
+	margin-top: 15px;
+}
+
+#login_register form p.submit {
+	margin-bottom: 15px;
+}

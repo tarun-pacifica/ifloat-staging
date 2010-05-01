@@ -8,11 +8,6 @@ hr.terminator {
 	margin-left: -415px;
 }
 
-#header .find_bar .pick_list .items {
-	background: none; 
-}
-/* TODO: support setting the background to white when revealed */
-
 #find_results_products hr.initiator {	
 	visibility: hidden;
 }

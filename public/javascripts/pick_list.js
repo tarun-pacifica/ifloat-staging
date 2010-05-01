@@ -36,7 +36,7 @@ function pick_list_hide() {
 	var list = $(this);
 	list.find('a').hide();
 	list.children('.menu').css('background-position', '0 0').css('color', 'black');
-	list.children('.items').css('border-bottom', 'none');
+	list.children('.items').css('background', 'none').css('border-bottom', 'none');
 }
 
 function pick_list_make_link(info, partner_urls) {
@@ -76,7 +76,7 @@ function pick_list_show() {
 	if(list.find('.total').text() == '') return;
 	list.find('a').fadeIn('fast');
 	list.children('.menu').css('background-position', '0 -23px').css('color', 'white');
-	list.children('.items').css('border-bottom', '1px solid #404040');
+	list.children('.items').css('background', 'white').css('border-bottom', '1px solid #404040');
 }
 
 function pick_lists_clear(pick_lists) {

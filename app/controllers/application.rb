@@ -1,7 +1,7 @@
 class Application < Merb::Controller
   RANGE_SEPARATOR = " <em>to</em> "
   
-  before :ensure_authenticated, :exclude => [:login]
+  before :ensure_authenticated, :exclude => [:login, :track]
   
   def self._filter_params(params)
     redacted = params.dup
@@ -14,6 +14,6 @@ class Application < Merb::Controller
   end
   
   def ensure_authenticated
-    redirect "/prelaunch/login" unless params[:action] == "track" or Merb.environment != "staging" or session.authenticated?
+    raise Unauthenticated if Merb.environment == "staging" and not session.authenticated?
   end
 end

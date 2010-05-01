@@ -14,7 +14,9 @@ class Exceptions < Merb::Controller
   alias :not_found      :common_error # 404
   alias :not_acceptable :common_error # 406
   
-  def unauthenticated
+  def unauthenticated    
+    return redirect("/prelaunch/login") if Merb.environment == "staging" and params[:action] != "login"
+    
     @errors = request.exceptions.first.message.split("\n")
     @errors = [] if @errors.first =~ /Unauthenticated/
     @errors.each { |error| error.gsub!(/Login/, "E-mail") }

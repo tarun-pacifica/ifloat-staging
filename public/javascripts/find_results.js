@@ -10,8 +10,7 @@ function find_results_update() {
 }
 
 function find_results_update_handle(data) {
-	var image_prod_count = 0;
-	var total_prod_count = data.shift();
+	var filtered_prod_count = data.shift();
 	var image_count = data.length;
 	
 	var frps = $('#find_results_products');
@@ -20,15 +19,15 @@ function find_results_update_handle(data) {
 	var products = [];
 	for(var i in data) {
 		var d = data[i];
-		image_prod_count += d[1];
 		products.push(find_results_make(d[0], d[1], d[2], d[3]));
 	}
 	
 	frps.find('p').remove();
 	frps.find('.product').remove();
 	frps.find('.terminator').before(products.join(' '));
-		
-	$('#find_results_count').text(image_prod_count + ' / ' + util_pluralize(total_prod_count, ' product'));
+	
+	var remaining = (filtered_prod_count == $ifloat_body.find_total ? '' : ' - ' + filtered_prod_count + ' remain after filtering');
+	$('#find_results_remaining').text(remaining);
 	
 	if(data.length == 0) {
 		frps.find('.terminator').before('<p>You have filtered out all possible products. To fix this, <strong>relax or remove some of your filters</strong>.</p>');

@@ -33,8 +33,9 @@
 <div id="find_results_panel" class="panel major">
 	<div class="title">
 		<h2>
-			Showing <span id="find_results_count">? / ? products</span>
-			for <strong><%= @find.specification.inspect %></strong>
+			<strong><%= @find.specification.inspect %></strong> matched
+			<%= "product".pluralize_count(@find.all_product_ids.size) %>
+			<span id="find_results_remaining"></span>
 		</h2>
 	</div>
 	
@@ -49,6 +50,7 @@
 		find_home: true,
 		find_id: <%= @find.id %>,
 		find_spec: <%= @find.specification.to_json %>,
+		find_total: <%= @find.all_product_ids.size %>,
 		language: <%= session.language.inspect %>
 	};
 	

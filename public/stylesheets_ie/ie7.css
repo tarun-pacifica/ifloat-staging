@@ -1,3 +1,9 @@
+hr.terminator {
+	visibility: hidden;
+}
+/* TODO: use some variation of display:block & margin:-7px 0 to reduce ludicrous extra spacing - approach does not work in filter dialogues*/
+/* SEE: http://en.blog.improveit.com.br/articles/2008/09/27/margins-on-the-hr-tag-a-case-solved */
+
 #header .find_bar {
 	margin-left: -415px;
 }
@@ -7,4 +13,12 @@
 }
 /* TODO: support setting the background to white when revealed */
 
+#find_results_products hr.initiator {	
+	visibility: hidden;
+}
 
+#filter_configure table {
+	border: none;
+	margin: 10px;
+	width: 680px;
+}

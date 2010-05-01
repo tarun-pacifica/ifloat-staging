@@ -104,7 +104,10 @@ function pick_lists_update_handle(data) {
 	for(var group in data) {
 		var links = [];
 		
-		if(!partner && group == 'buy_now') links.push('<a class="buy" href="/picked_products/options">Buy from...</a>');
+		if(!partner && group != 'compare') {
+			var text = (group == 'buy_now' ? 'Choose shop' : 'Browse');
+			links.push('<a class="buy" href="/picked_products/options">' + text + '...</a>');
+		}
 		
 		var list = data[group];
 		var total_products = (group == 'compare' ? 0 : list.length);

@@ -83,7 +83,7 @@ function filter_configure_handle(filter) {
 	
 	if(filter.include_unknown != null) {
 		var checked = (filter.include_unknown ? 'checked="checked"' : '');
-		html.push('<p class="include_unknown"> <input type="checkbox" ' + checked + ' /> Show products with no <strong>' + filter.name + '</strong> value </p>');
+		html.push('<p class="include_unknown"> <input type="checkbox" ' + checked + ' /> Show products with NO <strong>' + filter.name + '</strong> value </p>');
 	}
 	
 	if(filter.type == 'text') filter_configure_values_text(filter.values_by_unit, html);

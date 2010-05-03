@@ -22,6 +22,16 @@
 	background-position: 0 -46px;
 }
 
+#po_buy_later a {
+	color: #404040;
+	text-decoration: none;
+}
+
+#po_buy_later a:hover {
+	color: black;
+	text-decoration: underline;
+}
+
 #po_buy_later div.product {
 	padding-top: 10px;
 }

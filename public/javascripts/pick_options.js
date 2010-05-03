@@ -39,8 +39,10 @@ function pick_options_update(data) {
 		var info = buy_later_items[i];
 		product_ids.push(info.product_id);
 		
-		var image = product_image_make(info.image_urls[0], info.image_urls[1], 'right');
-		html.push('<div class="product">' + image + info.title_parts.join('<br/>') + '</div>');
+		html.push('<div class="product">');
+		html.push(product_image_make(info.image_urls[0], info.image_urls[1], 'right'));
+		html.push('<a href="' + info.url + '">' + info.title_parts.join('<br/>') + '</a>');
+		html.push('</div>');
 		html.push('<div class="pick_buttons">');
 		html.push('<div class="buy_now" onclick="pick_options_buy_now(event, ' + info.id + ')"> </div>');
 		html.push('<div class="reset" onclick="pick_options_reset(event, \'buy_later\', ' + info.id + ')"> </div>');

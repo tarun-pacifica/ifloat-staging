@@ -253,6 +253,7 @@ module Indexer
         # internal
         :seq_num  => property.sequence_number,
         :dad      => property.display_as_data?,
+        :fil      => property.filterable?,
         :raw_name => property.name
       }
     end

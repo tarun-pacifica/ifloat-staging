@@ -2,21 +2,22 @@
 	<table summary="associated">
 		<tr> <th colspan="2"><h1>Properties</h1></th> </tr>
 		
-		<% domain = nil %>		
-		<% @properties.each do |property| %>
+		<% section = nil %>		
+		<% @properties.each do |info| %>
 		
-		<% d = property.name.split(":").first %>
-		<% unless d == domain %>
-		<% domain = d %>
-		<tr> <th colspan="2"><%= domain %></th> </tr>
+		<% s = info[:raw_name].split(":").first %>
+		<% unless s == section %>
+		<% section = s %>
+		<tr> <th colspan="2"><%= section %></th> </tr>
 		<% end %>
 		
-		<% url = @icon_urls_by_property_id[property.id] %>
-		
 		<tr>
-			<td><img src=<%= url.inspect %> /></td>
-			<% shown = (property.filterable? or property.display_as_data?) %>
-			<td class="<%= shown ? (url =~ /blank.png$/ ? "blank" : "") : "not_needed" %>"><%= property.name %></td>
+			<td><img src=<%= info[:icon_url].inspect %> /></td>
+			<% shown = (info[:dad] or info[:fil]) %>
+			<td class="<%= shown ? (info[:icon_url] =~ /blank.png$/ ? "blank" : "") : "not_needed" %>">
+				<%= info[:raw_name] %> <br/>
+				<%= info[:section] %> / <%= info[:name] %>
+			</td>
 		</tr>
 		
 		<% end %>
@@ -24,7 +25,7 @@
 	
 	<table summary="unassociated">
 		<tr> <th colspan="2"><h1>Unassociated</h1></th> </tr>
-		<% @unused_property_icons.each do |asset| %>
+		<% @unused_icons.each do |asset| %>
 		<tr>
 			<td><img src=<%= asset.url.inspect %> /></td>
 			<td><%= asset.name %></td>

@@ -42,7 +42,14 @@ Dir[PRICES_REPO / "*"].each do |path|
 
   begin
     product_info_by_ref = YAML.load(File.open(path / "prices.yaml"))
-    facility.update_products(product_info_by_ref)
+    reports = facility.update_products(product_info_by_ref)
+    next if reports.empty?
+    
+    FasterCSV.open("/tmp/report.csv", "w") do |report|
+      report << ["facility reference", "notice", "detail..."]
+      reports.each { |line| report << line }
+    end
+    Mailer.deliver(:facility_import_success, :attach => "/tmp/report.csv", :whilst => "importing #{url} prices")
   rescue Exception => e
     Mailer.deliver(:exception, :exception => e, :whilst => "importing #{url} prices")
   end

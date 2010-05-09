@@ -52,6 +52,8 @@ class Facility
   
   # TODO: spec
   def update_products(product_info_by_ref)
+    reports = []
+    
     adapter = repository.adapter
     transaction = DataMapper::Transaction.new(adapter)
     transaction.begin
@@ -61,20 +63,45 @@ class Facility
     # http://datamapper.lighthouseapp.com/projects/20609-datamapper/tickets/1154
     # existing_products_by_ref = products.all.hash_by { |product| product.reference }
     existing_products_by_ref = FacilityProduct.all(:facility_id => id).hash_by { |product| product.reference }
-    
-    products.all(:reference => existing_products_by_ref.keys - product_info_by_ref.keys).destroy!
+
+    new_refs = product_info_by_ref.keys.to_set
+    products.all(:reference => existing_products_by_ref.keys.to_set - new_refs).destroy!
   
     product_info_by_ref.each do |ref, info|
       # TODO: see above
       # product = existing_products_by_ref[ref] || products.new(:reference => ref)
       product = existing_products_by_ref[ref] || FacilityProduct.new(:facility_id => id, :reference => ref)
-      old_price = product.price
       product.price = info[:price]
       product.currency = "GBP"
+      
+      [:title, :image_url, :description].each do |a|
+        old_val, new_val = product.attribute_get(a), info[a]
+        product.attribute_set(a, new_val)
+        reports << [ref, "updated: #{a}", "from #{old_val.inspect}", "to #{new_val.inspect}"] unless old_val == new_val
+      end
+      
       product.save if product.new? or product.dirty? # TODO: remove when DM comes to its senses
     end
 
     adapter.pop_transaction
     transaction.commit
+    
+    mappings_by_fp_ref = ProductMapping.all(:company_id => company_id).group_by { |mapping| mapping.reference }
+    product_ids = mappings_by_fp_ref.values.flatten.map { |mapping| mapping.product_id }
+    classes_by_product_id = {}
+    Product.values_by_property_name_by_product_id(product_ids, "ENG", "reference:class").each do |product_id, vbpn|
+      classes_by_product_id[product_id] = vbpn["reference:class"].first.to_s
+    end
+    
+    mapped_refs = mappings_by_fp_ref.keys.to_set
+    (new_refs - mapped_refs).each do |ref|
+      reports << [ref, "unmapped reference", product_info_by_ref[ref].inspect]
+    end
+    (mapped_refs - new_refs).each do |ref|
+      classes = mappings_by_fp_ref[ref].map { |mapping| classes_by_product_id[mapping.product_id] }.uniq.sort.join(", ")
+      reports << [ref, "obsolete mapped reference", "classes: #{classes}"]
+    end
+    
+    reports
   end
 end

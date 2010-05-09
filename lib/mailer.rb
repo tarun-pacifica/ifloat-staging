@@ -18,6 +18,16 @@ module Mailer
         body ["Context: #{Mailer.context(whilst)}", "#{exception.class}: #{exception}", backtrace].join("\n\n")
       end
     
+    when :facility_import_success
+      whilst, attachment_path = params.values_at(:whilst, :attach)
+
+      report = ["Context: #{Mailer.context(whilst)}", ""]
+      Mail.deliver do |mail|
+        Mailer.envelope(mail, action, :admin, :sysadmin)
+        body report.join("\n")
+        add_file attachment_path unless attachment_path.nil?
+      end
+    
     when :import_failure
       ars, crs, whilst, attachment_path = params.values_at(:ars, :crs, :whilst, :attach)
       return if ars.nil? or crs.nil? or whilst.nil?
@@ -46,7 +56,7 @@ module Mailer
       Mail.deliver do |mail|
         Mailer.envelope(mail, action, :admin, :sysadmin)
         body report.join("\n")
-      end
+      end    
       
     when :password_reset
       user = params[:user]

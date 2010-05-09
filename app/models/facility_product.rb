@@ -15,6 +15,10 @@ class FacilityProduct
   property :price,     BigDecimal, :precision => 15, :scale => 3, :required => true
   property :currency,  String,     :format => CURRENCY_FORMAT,    :required => true
   
+  property :title,       String,   :length => 255
+  property :image_url,   String,   :length => 255
+  property :description, Text,     :lazy => false
+  
   belongs_to :facility
     property :facility_id, Integer, :unique_index => :ref_per_facility
 end

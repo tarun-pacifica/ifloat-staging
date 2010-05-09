@@ -33,6 +33,11 @@ PRICES_REPO = "../ifloat_prices"
 
 facilities_by_url = Facility.all.hash_by(:primary_url)
 
+checkpoint_path = "/tmp/partner_store_import.checkpoint"
+repo_mtime = Time.at(`git --git-dir='#{PRICES_REPO}/.git' log -n1 --pretty='format:%at'`.to_i)
+exit if File.exist?(checkpoint_path) and File.mtime(checkpoint_path) > repo_mtime
+
+success = true
 Dir[PRICES_REPO / "*"].each do |path|
   next unless File.directory?(path)
 
@@ -52,5 +57,8 @@ Dir[PRICES_REPO / "*"].each do |path|
     Mailer.deliver(:facility_import_success, :attach => "/tmp/report.csv", :whilst => "importing #{url} prices")
   rescue Exception => e
     Mailer.deliver(:exception, :exception => e, :whilst => "importing #{url} prices")
+    success = false
   end
 end
+
+FileUtils.touch(checkpoint_path) if success

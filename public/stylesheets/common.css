@@ -27,7 +27,7 @@ img.property_icon {
 	width: 58px;
 }
 
-p.empty {
+p.noresults {
 	background: white;
 	border: 1px solid gray;
 	border-radius: 10px;

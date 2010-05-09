@@ -115,8 +115,10 @@ function pick_options_update(data) {
 		html.push('</td>');
 		
 		html.push('<td class="buttons">');
+		html.push('<div class="buttons">');
 		html.push('<div class="buy_later" onclick="pick_options_buy_later(event, ' + info.id + ')"> </div>');
-		html.push('<div class="reset" onclick="pick_options_reset(event, \'bu__now\', ' + info.id + ')"> </div>');
+		html.push('<div class="reset" onclick="pick_options_reset(event, \'buy_now\', ' + info.id + ')"> </div>');
+		html.push('</div');
 		html.push('</td>');
 		
 		var prices_by_url = prices_by_url_by_product_id[info.product_id];

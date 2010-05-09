@@ -30,3 +30,12 @@ hr.terminator {
 #login_register form p.submit {
 	margin-bottom: 15px;
 }
+
+#po_buy_now table td.buttons .buttons {
+	width: 117px;
+}
+
+#po_buy_now table td.product div {
+	width: 410px;
+	margin-right: -32px;
+}

@@ -9,6 +9,7 @@ describe Article do
     
     it "should succeed with valid data" do
       @article.should be_valid
+      @article.created_at.should_not == nil
     end
     
     it "should succeed without an asset" do

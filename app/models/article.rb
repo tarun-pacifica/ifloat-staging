@@ -1,6 +1,6 @@
 # = Summary
 #
-# Articles are single blocks of text with an optional attached image. They belong to a User (the author) and a Blog. The schema allows an Article and it's parent Blog to belong to different Users - allowing for contributing authors.
+# Articles are single blocks of text with an optional attached image. They belong to a User (the author) and a Blog. The schema allows an Article and its parent Blog to belong to different Users - supporting the concept of contributing authors.
 #
 # === Sample Data
 #
@@ -10,9 +10,9 @@
 class Article
   include DataMapper::Resource
   
-  property :id, Serial
-  property :title, String, :required => true
-  property :body, Text, :required => true, :lazy => false
+  property :id,         Serial
+  property :title,      String,   :required => true
+  property :body,       Text,     :required => true, :lazy => false
   property :created_at, DateTime, :default => proc { DateTime.now }
   
   belongs_to :asset, :required => false

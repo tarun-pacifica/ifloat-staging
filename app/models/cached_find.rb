@@ -40,7 +40,7 @@ class CachedFind
   end
   
   before :valid? do
-    self.specification = (specification || "").split.uniq.join(" ")
+    self.specification = (specification || "").split.uniq.join(" ") if new?
     self.description = specification if description.blank?
     self.filters ||= {}
   end

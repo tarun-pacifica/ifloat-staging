@@ -7,7 +7,6 @@ function product_image_make(url, popup_url, relative_position) {
 
 function product_image_popup(event, image_url, relative_position) {
 	var zoom = $("#image_popup");
-	zoom.attr('src', null);
 	zoom.attr('src', image_url);
 	
 	var image = util_target(event);
@@ -22,7 +21,8 @@ function product_image_popup(event, image_url, relative_position) {
 	var document_overhang = top + zoom_height - $(document).height();
 	if(document_overhang > 0) top -= document_overhang;
 	
-	zoom.css('left', left + 'px').css('top', top + 'px').fadeIn('fast');
+	zoom.css('left', left + 'px').css('top', top + 'px');
+	zoom.load(function() { $("#image_popup").fadeIn('fast'); });
 }
 
 function product_image_unpopup(event) {

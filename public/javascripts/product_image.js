@@ -7,6 +7,7 @@ function product_image_make(url, popup_url, relative_position) {
 
 function product_image_popup(event, image_url, relative_position) {
 	var zoom = $("#image_popup");
+	zoom.attr('src', null);
 	zoom.attr('src', image_url);
 	
 	var image = util_target(event);

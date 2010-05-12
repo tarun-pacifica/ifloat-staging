@@ -1,7 +1,8 @@
 module Mailer
   ADDRESSES = {
-    :admin => "admin@ifloat.biz",
-    :sysadmin => "andre@bluetheta.com"
+    :admin     => "admin@ifloat.biz",
+    :prodadmin => "graemec13@yahoo.com",
+    :sysadmin  => "andre@bluetheta.com"
   }
   
   def self.deliver(action, params)
@@ -23,7 +24,7 @@ module Mailer
 
       report = ["Context: #{Mailer.context(whilst)}", ""]
       Mail.deliver do |mail|
-        Mailer.envelope(mail, action, :admin, :sysadmin)
+        Mailer.envelope(mail, action, :admin, :prodadmin)
         body report.join("\n")
         add_file attachment_path unless attachment_path.nil?
       end

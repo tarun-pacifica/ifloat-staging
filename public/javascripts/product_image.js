@@ -6,26 +6,25 @@ function product_image_make(url, popup_url, relative_position) {
 }
 
 function product_image_popup(event, image_url, relative_position) {
-	var zoom = $("#image_popup");
-	zoom.attr('src', image_url);
+	$('body').append('<img id="image_popup" src="' + image_url + '" />');
+	var popup = $('#image_popup');
 	
 	var image = util_target(event);
 	image.css('border-color', 'black');
 	
 	var position = image.offset();
-	var zoom_height = zoom.outerHeight();
+	var popup_height = popup.outerHeight();
 	
-	var left = position.left + (relative_position == 'right' ? (image.outerWidth() + 10) : (-10 - zoom.outerWidth()));
-	var top = position.top + (image.outerHeight() - zoom_height) / 2;
+	var left = position.left + (relative_position == 'right' ? (image.outerWidth() + 10) : (-10 - popup.outerWidth()));
+	var top = position.top + (image.outerHeight() - popup_height) / 2;
 	
-	var document_overhang = top + zoom_height - $(document).height();
+	var document_overhang = top + popup_height - $(document).height();
 	if(document_overhang > 0) top -= document_overhang;
 	
-	zoom.css('left', left + 'px').css('top', top + 'px');
-	zoom.load(function() { $("#image_popup").fadeIn('fast'); });
+	popup.css('left', left + 'px').css('top', top + 'px').fadeIn('fast');
 }
 
 function product_image_unpopup(event) {
 	util_target(event).css('border-color', 'gray');
-	$('#image_popup').stop(true, true).hide();
+	$('#image_popup').remove();
 }

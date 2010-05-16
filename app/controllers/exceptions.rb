@@ -6,8 +6,7 @@ class Exceptions < Merb::Controller
   def common_error
     ControllerError.log!(request)
     exception = request.exceptions.first
-    ""
-    # "#{exception.status}: #{exception.class.to_s.split('::').last}"
+    "#{exception.status}: #{exception.class.to_s.split('::').last}"
   end
   
   alias :unauthorized   :common_error # 401

@@ -10,6 +10,7 @@ class Purchases < Application
     raise NotFound unless purchase
     
     references = purchase.complete!(params, request.remote_ip)
+    Mailer.deliver(:purchase_completed, :purchase => purchase)
     session.remove_purchase(purchase)
     
     prod_ids_by_ref = facility.map_references(references)

@@ -21,6 +21,7 @@ module Mailer
     
     when :facility_import_success
       whilst, attachment_path = params.values_at(:whilst, :attach)
+      return if whilst.nil? or attachment_path.nil?
 
       report = ["Context: #{Mailer.context(whilst)}", ""]
       Mail.deliver do |mail|
@@ -66,6 +67,24 @@ module Mailer
       Mail.deliver do |mail|
         Mailer.envelope(mail, action, :admin, user.login)
         Mailer.user_body(mail, user, ["Your ifloat password has been reset to...", user.plain_password].join("\n\n"))
+      end
+    
+    when :purchase_completed
+      purchase = params[:purchase]
+      return if purchase.nil?
+      response = purchase.response
+      
+      report = ["Purchase #{purchase.id} completed at #{purchase.facility.primary_url} from #{purchase.completed_ip}"]
+      report << "Date: #{purchase.completed_at.strftime('%B %d, %Y at %H:%M:%S')}"
+      report << "#{purchase.facility.name} reference: #{response['reference'].inspect}"
+      report << "Total: #{response.values_at('total', 'currency').join(' ').inspect}"
+      report << ""
+      report << "Items..."
+      report += response[:items].map { |item| item.inspect }
+      
+      Mail.deliver do |mail|
+        Mailer.envelope(mail, action, :admin, :admin)
+        body report.join("\n")
       end
       
     when :registration

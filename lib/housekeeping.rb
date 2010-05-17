@@ -48,7 +48,7 @@ Dir[PRICES_REPO / "*"].each do |path|
   begin
     product_info_by_ref = YAML.load(File.open(path / "prices.yaml"))
     reports = facility.update_products(product_info_by_ref)
-    next if reports.empty?
+    next if reports.empty? or Merb.environment != "production"
     
     FasterCSV.open("/tmp/report.csv", "w") do |report|
       report << ["facility reference", "notice", "detail..."]

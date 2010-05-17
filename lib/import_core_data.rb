@@ -8,6 +8,7 @@ ASSET_VARIANT_DIR = "/tmp/ifloat_asset_variants"
 FileUtils.mkpath(ASSET_VARIANT_DIR)
 ASSET_VARIANT_SIZES = {:small => "200x200", :tiny => "100x100"}
 ASSET_WATERMARK_PATH = "public/images/common/watermark.png"
+ASSET_WATERMARK_PATH_LARGE = "public/images/common/watermark_large.png"
 
 CSV_DUMP_DIR = "/tmp/ifloat_csv_dumps"
 FileUtils.mkpath(CSV_DUMP_DIR)
@@ -478,7 +479,6 @@ def build_asset_csv
   end
   return errors unless errors.empty?
   
-  wm_exists = File.exist?(ASSET_WATERMARK_PATH)
   stopwatch("created missing image variants") do
     assets.each do |info|
       bucket, company_ref, name, path, checksum, size = info
@@ -486,11 +486,12 @@ def build_asset_csv
 
       ext = File.extname(path)
       
-      wm_path = path
-      if wm_exists   
-        wm_path = info[3] = ASSET_VARIANT_DIR / "#{checksum}#{ext}"
-        unless File.exist?(wm_path)
-          report = `gm composite -geometry +10+10 -gravity SouthEast #{ASSET_WATERMARK_PATH.inspect} #{path.inspect} #{wm_path.inspect} 2>&1`
+      wm_path = (size.split("x").all? { |dim| dim.to_i > 400 } ? ASSET_WATERMARK_PATH_LARGE : ASSET_WATERMARK_PATH)
+      watermarked_path = path
+      if File.exists?(wm_path)
+        watermarked_path = info[3] = ASSET_VARIANT_DIR / "#{checksum}#{ext}"
+        unless File.exist?(watermarked_path)
+          report = `gm composite -geometry +10+10 -gravity SouthEast #{wm_path.inspect} #{path.inspect} #{watermarked_path.inspect} 2>&1`
           unless $?.success?
             errors << [path, "GM.composite failed: #{report.inspect}"]
             next
@@ -505,7 +506,7 @@ def build_asset_csv
         next if File.exist?(variant_path)
       
         variant_size = ASSET_VARIANT_SIZES[variant]
-        report = `gm convert -size #{variant_size} #{wm_path.inspect} -resize #{variant_size} +profile '*' #{variant_path.inspect} 2>&1`
+        report = `gm convert -size #{variant_size} #{watermarked_path.inspect} -resize #{variant_size} +profile '*' #{variant_path.inspect} 2>&1`
         errors << [path, "GM.convert failed: #{report.inspect}"] unless $?.success?
       end
     end

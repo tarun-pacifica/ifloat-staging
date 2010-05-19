@@ -83,7 +83,8 @@ module AssetStore
       source_path = asset.file_path(variant)
       local_path(asset, variant) do |dir, name|
         target_path = dir / name
-        File.link(source_path, target_path) unless File.exist?(target_path) and File.size(target_path) == File.size(source_path)
+        File.delete(target_path) if File.exist?(target_path) and File.size(target_path) != File.size(source_path)
+        File.link(source_path, target_path) unless File.exist?(target_path)
       end unless source_path.nil?
     end
   end

@@ -54,7 +54,7 @@ Dir[PRICES_REPO / "*"].each do |path|
       report << ["facility reference", "notice", "detail..."]
       reports.each { |line| report << line }
     end
-    system "bz2", "/tmp/report.csv"
+    system "bzip2", "-f", "/tmp/report.csv"
     Mailer.deliver(:facility_import_success, :attach => "/tmp/report.csv.bz2", :whilst => "importing #{url} prices")
   rescue Exception => e
     Mailer.deliver(:exception, :exception => e, :whilst => "importing #{url} prices")

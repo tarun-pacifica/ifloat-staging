@@ -27,6 +27,11 @@ img.property_icon {
 	width: 58px;
 }
 
+p.copyright {
+	color: #404040;
+	text-align: center;
+}
+
 p.noresults {
 	background: white;
 	border: 1px solid gray;

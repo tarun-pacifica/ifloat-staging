@@ -48,7 +48,7 @@ function pick_list_make_link(info, partner_urls) {
 	if(link_url && partner) target = 'partner_store';
 	if(!link_url) link_url = '#';
 	
-	var image = product_image_make(info.image_urls[0], partner ? undefined : info.image_urls[1]);
+	var image = product_image_make(info.image_urls[0], info.image_urls[1], partner ? 'right' : null);
 	
 	info.title_parts[0] = util_superscript('text', info.title_parts[0]);
 	

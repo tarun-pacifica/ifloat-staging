@@ -32,7 +32,9 @@
 
 <%= catch_content :for_layout %>
 	
+	<% unless @skip_copyright %>
 	<hr class="terminator" />
 	<p class="copyright">© 2010 Pristine Marine Leisure</p>
+	<% end %>
   </body>
 </html>

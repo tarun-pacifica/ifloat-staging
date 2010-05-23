@@ -26,6 +26,7 @@ class PickedProducts < Application
     session.add_purchase(Purchase.new(:facility => facility, :created_ip => request.remote_ip))
     
     @background_css = "white"
+    @skip_copyright = true
     @transitional = true
     render
   end

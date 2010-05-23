@@ -95,7 +95,8 @@ class Facility
     
     mapped_refs = mappings_by_fp_ref.keys.to_set
     (new_refs - mapped_refs).each do |ref|
-      reports << [ref, "unmapped reference", product_info_by_ref[ref].inspect]
+      fields = product_info_by_ref[ref].values_at(:classification, :title, :description, :image_url)
+      reports << fields.unshift(ref, "unmapped reference")
     end
     (mapped_refs - new_refs).each do |ref|
       classes = mappings_by_fp_ref[ref].map { |mapping| classes_by_product_id[mapping.product_id] }.uniq.sort.join(", ")

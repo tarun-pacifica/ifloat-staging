@@ -191,8 +191,8 @@ class ProductParser < AbstractParser
       klass = PropertyType.value_class(property_type.attributes[:core_type])
       [:values, klass, property, seq_num.to_i, unit, (component || :value).to_sym]
 
-    when /^relationship\.([a-z_]+)\.(.+?)(\.(.+?))?$/
-      relationship_name, company_ref, property_name = $1, $2, $4
+    when /^(uni-)?relationship\.([a-z_]+)\.(.+?)(\.(.+?))?$/
+      relationship_name, company_ref, property_name = $2, $3, $5 # TODO: track uni- and reflect in model
       raise "unknown relationship: #{relationship_name}" unless ProductRelationship::NAMES.has_key?(relationship_name)
       company = ((company_ref == "*") ? nil : @import_set.get!(Company, company_ref))
       property = (property_name.blank? ? nil : @import_set.get!(PropertyDefinition, property_name))

@@ -1,6 +1,6 @@
 .major {
 	float: left;
-	width: 649px;
+	width: 699px;
 }
 
 .major .body {
@@ -38,7 +38,7 @@
 	border-right: 1px solid silver;
 	float: left;
 	margin-right: -1px;
-	width: 250px;
+	width: 200px;
 }
 
 .minor .controls {
@@ -78,7 +78,7 @@
 
 .minor .title h2 {
 	background: url(/images/panel/backgrounds/title_left.png) no-repeat;
-	width: 240px;
+	width: 190px;
 }
 
 .panel .title {

@@ -6,12 +6,12 @@
 #product_data_panel .advert img {
 	border: 1px solid silver;
 	margin: 10px 0 8px 0;
-	width: 230px;
+	width: 180px;
 }
 
 #product_data_panel .sections .property {
 	margin-left: 5px;
-	width: 240px;
+	width: 190px;
 }
 
 #product_data_panel .sections .property img.property_icon {

@@ -44,7 +44,7 @@ describe Asset do
       @asset.should be_valid
     end
     
-    it "should fail without an unkown view" do
+    it "should fail without an unknown view" do
       @asset.view = "top-bottom"
       @asset.should_not be_valid
     end
@@ -54,33 +54,7 @@ describe Asset do
       @asset.should be_valid
     end
   end
-  
-  describe "creation with existing asset" do
-    before(:all) do
-      @asset = Asset.create(:company_id => 1, :bucket => "products", :name => "car.jpg")
-    end
     
-    after(:all) do
-      @asset.destroy
-    end
-    
-    it "should succeed with a different name for the same bucket" do
-      Asset.new(:company_id => 1, :bucket => "products", :name => "foo.jpg").should be_valid
-    end
-    
-    it "should succeed with a different name for a different bucket" do
-      Asset.new(:company_id => 1, :bucket => "articles", :name => "foo.jpg").should be_valid
-    end
-    
-    it "should fail with the same name for the same bucket" do
-      Asset.new(:company_id => 1, :bucket => "products", :name => "car.jpg").should_not be_valid
-    end
-    
-    it "should succeed with the same name for a different bucket" do
-      Asset.new(:company_id => 1, :bucket => "articles", :name => "car.jpg").should be_valid
-    end
-  end
-  
   describe "chaining" do
     before(:all) do
       @asset = Asset.create(:company_id => 1, :bucket => "products", :name => "car___1.jpg")

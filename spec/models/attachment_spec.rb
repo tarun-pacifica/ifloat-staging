@@ -26,7 +26,7 @@ describe Attachment do
       @attachment.should_not be_valid
     end
     
-    it "should fail with an unkown role" do
+    it "should fail with an unknown role" do
       @attachment.role = "father"
       @attachment.should_not be_valid
     end

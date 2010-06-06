@@ -5,7 +5,7 @@
 	    <title>ifloat - find, buy, float</title>
 	</head>
 	
-	<body>
-		<h1>Down for maintenance - back soon</h1>
+	<body style="background:#B0DEFF">
+		<p style="text-align:center"> <img src="/images/common/maintenance.jpg" alt="site under maintenance"/> </p>
 	</body>
 </html>

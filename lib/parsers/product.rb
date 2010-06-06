@@ -148,8 +148,8 @@ class ProductParser < AbstractParser
       value
       
     when :relationships
-      name, company, property = domain_info
-      attributes = {:company => company, :property_definition => property, :name => name}
+      name, company, property, bidirectional = domain_info
+      attributes = {:company => company, :property_definition => property, :name => name, :bidirectional => bidirectional}
       fields = Set.new
       value.split(",").map do |field|
         raise "empty relationship (possible double comma): #{value.inspect}" if field.blank?
@@ -192,12 +192,12 @@ class ProductParser < AbstractParser
       [:values, klass, property, seq_num.to_i, unit, (component || :value).to_sym]
 
     when /^(uni-)?relationship\.([a-z_]+)\.(.+?)(\.(.+?))?$/
-      relationship_name, company_ref, property_name = $2, $3, $5 # TODO: track uni- and reflect in model
+      relationship_name, company_ref, property_name, bidirectional = $2, $3, $5, $1.nil?
       raise "unknown relationship: #{relationship_name}" unless ProductRelationship::NAMES.has_key?(relationship_name)
       company = ((company_ref == "*") ? nil : @import_set.get!(Company, company_ref))
       property = (property_name.blank? ? nil : @import_set.get!(PropertyDefinition, property_name))
       raise "non-text property: #{property_name}" unless property.nil? or property.attributes[:property_type].attributes[:core_type] == "text"
-      [:relationships, relationship_name, company, property]
+      [:relationships, relationship_name, company, property, bidirectional]
 
     when /^attachment\.([a-z_]+)\.(\d+)$/
       role, seq_num = $1, $2

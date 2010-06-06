@@ -31,6 +31,7 @@ class ProductRelationship
   property :id, Serial
   property :name, String, :unique_index => :val_per_company_per_prod_per_prop_per_name
   property :value, String, :required => true, :unique_index => :val_per_company_per_prod_per_prop_per_name
+  property :bidirectional, Boolean, :required => true
 
   belongs_to :company, :required => false
     property :company_id, Integer, :unique_index => :val_per_company_per_prod_per_prop_per_name
@@ -87,9 +88,10 @@ class ProductRelationship
       WHERE (r.company_id IS NULL OR r.company_id = ?)
         AND r.product_id != ?
         AND r.property_definition_id IS NULL
+        AND r.bidirectional = ?
         AND r.value = ?
     EOS
-    repository.adapter.select(query, product.company_id, product.id, product.reference).each do |record|
+    repository.adapter.select(query, product.company_id, product.id, true, product.reference).each do |record|
       implied_name = (NAMES[record.name] || record.name)
       product_ids = (product_ids_by_relationship[implied_name] ||= [])
       product_ids << record.product_id
@@ -105,9 +107,10 @@ class ProductRelationship
       WHERE (r.company_id IS NULL OR r.company_id = ?)
         AND r.product_id != ?
         AND r.property_definition_id IS NOT NULL
+        AND r.bidirectional = ?
         AND pv.product_id = ?
     EOS
-    repository.adapter.select(query, product.company_id, product.id, product.id).each do |record|
+    repository.adapter.select(query, product.company_id, product.id, true, product.id).each do |record|
       implied_name = (NAMES[record.name] || record.name)
       product_ids = (product_ids_by_relationship[implied_name] ||= [])
       product_ids << record.product_id

@@ -70,7 +70,7 @@ function filter_configure_handle(filter) {
 	if(filter_configure.length == 0) {
 		$('body').append('<div id="filter_configure"> </div>');
 		filter_configure = $('#filter_configure');
-		filter_configure.dialog({autoOpen: false, modal: true, resizable: false});
+		filter_configure.dialog({autoOpen: false, resizable: false});
 		filter_configure.dialog('option', 'title', 'Filter your "' + $ifloat_body.find_spec + '" results by...');		
 		filter_configure.data('width.dialog', 700 + 'px');
 	}

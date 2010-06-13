@@ -1,5 +1,5 @@
 class TitleStrategyParser < AbstractParser
-  HEADERS = %w(Name Classes Title_1 Title_2 Title_3 Title_4)
+  HEADERS = %w(Name Classes Title_1 Title_2 Title_3 Title_4 Title_5 Title_6)
   REQUIRED_VALUE_HEADERS = %w(Name)
   
   
@@ -7,7 +7,7 @@ class TitleStrategyParser < AbstractParser
   
   def generate_objects(parsed_fields)
     attributes = {:name => parsed_fields["Name"], :class_names => parsed_fields["Classes"]}
-    1.upto(4) { |i| attributes["title_#{i}".to_sym] = parsed_fields["Title_#{i}"] }
+    1.upto(6) { |i| attributes["title_#{i}".to_sym] = parsed_fields["Title_#{i}"] }
     [ImportObject.new(TitleStrategy, attributes)]
   end
   

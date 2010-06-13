@@ -20,7 +20,7 @@ class TitleStrategy
   property :name, String, :required => true, :unique_index => true
   property :class_names, Object, :lazy => false, :required => true, :default => []
   
-  TITLE_PROPERTIES = (1..4).to_a.map { |i| "title_#{i}".to_sym }
+  TITLE_PROPERTIES = (1..6).to_a.map { |i| "title_#{i}".to_sym }
   TITLE_PROPERTIES.each do |title|
     property title, Object, :lazy => false, :default => []
   end

@@ -635,7 +635,7 @@ CLASSES.each do |klass|
     dump_name = "#{nice_path}_#{checksum}.dump".tr("/", "_")
     
     load_from_cache = import_set.dump_exists?(dump_name)
-    load_from_cache = false if klass == Product and freshly_parsed_classes.include?(PropertyType)
+    load_from_cache = false if klass == Product and not (freshly_parsed_classes & [PropertyType, TitleStrategy]).empty?
     load_from_cache = false if klass == TitleStrategy and freshly_parsed_classes.include?(PropertyDefinition)
     
     if load_from_cache

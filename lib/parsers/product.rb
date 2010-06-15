@@ -13,6 +13,7 @@ class ProductParser < AbstractParser
     super
     
     @auto_title_property = @import_set.get(PropertyDefinition, "auto:title")
+    @auto_title_image_property = @import_set.get(PropertyDefinition, "auto:title_image")
     
     @title_strategies_by_class = {}
     @import_set.get(TitleStrategy).each do |name, strategy|
@@ -68,12 +69,12 @@ class ProductParser < AbstractParser
       
       rendered_parts.pop while rendered_parts.last == "&mdash;"
       attributes = {
-        :definition => @auto_title_property,
+        :definition => (i < 4 ? @auto_title_property : @auto_title_image_property),
         :product => product,
         :auto_generated => false,
-        :sequence_number => i + 1,
+        :sequence_number => (i % 4) + 1,
         :language_code => "ENG",
-        :text_value => rendered_parts.join(" "),
+        :text_value => rendered_parts.join(" ")
       }
       title_objects << ImportObject.new(TextPropertyValue, attributes) unless rendered_parts.empty?
     end
@@ -253,6 +254,7 @@ class ProductParser < AbstractParser
   def preflight_check
     errors = []
     errors << 'missing PropertyDefinition "auto:title"' if @auto_title_property.nil?
+    errors << 'missing PropertyDefinition "auto:title_image"' if @auto_title_image_property.nil?
     errors
   end
   

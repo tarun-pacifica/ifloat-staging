@@ -1,7 +1,7 @@
-function find_results_make(checksum, count, image_url, popup_image_url) {
+function find_results_make(checksum, count, image_url, popup_image_url, titles) {
 	var url = '/cached_finds/' + $ifloat_body.find_id + '/compare_by_image/' + checksum;
 	var tally = '<div class="tally">' + count + ' item' + (count > 1 ? 's' : '') + '</div>';
-	return '<a class="product" href="' + url + '"> ' + tally + product_image_make(image_url, popup_image_url) + ' </a>';
+	return '<a class="product" href="' + url + '"> ' + tally + product_image_make(image_url, popup_image_url, null, titles) + ' </a>';
 }
 
 function find_results_update() {
@@ -19,7 +19,7 @@ function find_results_update_handle(data) {
 	var products = [];
 	for(var i in data) {
 		var d = data[i];
-		products.push(find_results_make(d[0], d[1], d[2], d[3]));
+		products.push(find_results_make(d[0], d[1], d[2], d[3], d[4]));
 	}
 	
 	frps.find('p').remove();

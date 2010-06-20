@@ -53,13 +53,13 @@
 }
 
 #product_detail .images img.main {
-	border: 1px solid gray;
+	border: 1px solid #D0D0D0;
 	height: 400px;
 	width: 400px;
 }
 
 #product_detail .images img.thumb {
-	border: 1px solid gray;
+	border: 1px solid #D0D0D0;
 	height: 50px;
 	margin: 1px;
 	width: 50px;
@@ -168,7 +168,7 @@
 }
 
 #product_detail .relations a.product img {
-	border: 1px solid gray;
+	border: 1px solid #D0D0D0;
 	float: left;
 	height: 50px;
 	margin: 0 10px 0 5px;

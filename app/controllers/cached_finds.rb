@@ -138,19 +138,31 @@ class CachedFinds < Application
   private
   
   def gather_images(find)
+    product_ids_by_checksum = find.filtered_product_ids_by_image_checksum.take(36)
+    checksums = product_ids_by_checksum.map { |checksum, product_ids| checksum }
+    
     total = 0
     totals_by_checksum = {}
-    find.filtered_product_ids_by_image_checksum.each do |checksum, product_ids|
+    product_ids_by_checksum.each do |checksum, product_ids|
       total += (totals_by_checksum[checksum] = product_ids.size)
     end
     
-    checksums = totals_by_checksum.keys[0, 36]
-    assets_by_checksum = {}
-    Asset.all(:checksum => checksums).each { |a| assets_by_checksum[a.checksum] = a }
+    assets_by_checksum = Asset.all(:checksum => checksums).hash_by(:checksum)
+    
+    title_checksums_by_product_id = {}
+    product_ids_by_checksum.each do |checksum, product_ids|
+      title_checksums_by_product_id[product_ids.first] = checksum
+    end
+    
+    titles_by_checksum = {}
+    Product.values_by_property_name_by_product_id(title_checksums_by_product_id.keys, session.language, %w(auto:title_image)).map do |product_id, values_by_property_name|
+      checksum = title_checksums_by_product_id[product_id]
+      titles_by_checksum[checksum] = (values_by_property_name["auto:title_image"] || []).map { |t| t.to_s }
+    end
     
     checksums.map do |checksum|
       asset = assets_by_checksum[checksum]
-      [checksum, totals_by_checksum[checksum], asset.url(:tiny), asset.url(:small)]
+      [checksum, totals_by_checksum[checksum], asset.url(:tiny), asset.url(:small), titles_by_checksum[checksum]]
     end.unshift(total)
   end
 end

@@ -10,7 +10,7 @@
 }
 
 #compare_by_image .summary img.product {
-	border: 1px solid gray;
+	border: 1px solid #D0D0D0;
 	float: left;
 	height: 100px;
 	margin-right: 10px;
@@ -82,7 +82,7 @@
 }
 
 #compare_by_image table tr.values td.bullet img {
-	border: 1px solid gray;
+	border: 1px solid #D0D0D0;
 	height: 25px;
 	width: 25px;
 }

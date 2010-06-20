@@ -41,7 +41,7 @@
 }
 
 #po_buy_later img {
-	border: 1px solid gray;
+	border: 1px solid #D0D0D0;
 	float: left;
 	height: 50px;
 	margin: 0 7px;
@@ -78,7 +78,7 @@
 }
 
 #po_buy_now a.product img {
-	border: 1px solid gray;
+	border: 1px solid #D0D0D0;
 	float: left;
 	height: 50px;
 	margin: 0 10px 0 5px;

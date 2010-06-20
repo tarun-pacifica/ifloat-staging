@@ -70,7 +70,7 @@
 }
 
 #header .find_bar .pick_list .items a img {
-	border: 1px solid gray;
+	border: 1px solid #D0D0D0;
 	float: left;
 	height: 25px;
 	margin: 0 7px;

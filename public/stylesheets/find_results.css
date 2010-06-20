@@ -18,8 +18,8 @@
 
 #find_results_products a.product .tally {
 	background: white;
-	border-left: 1px solid silver;
-	border-top: 1px solid silver;
+	border-left: 1px solid #D0D0D0;
+	border-top: 1px solid #D0D0D0;
 	bottom: 3px;
 	padding: 1px 2px;
 	position: absolute;
@@ -27,7 +27,7 @@
 }
 
 #find_results_products a.product img {
-	border: 1px solid gray;
+	border: 1px solid #D0D0D0;
 	height: 100px;
 	width: 100px;
 }

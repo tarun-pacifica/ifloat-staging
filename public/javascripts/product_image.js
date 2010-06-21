@@ -13,8 +13,8 @@ function product_image_make(url, popup_url, relative_position, titles) {
 }
 
 function product_image_popup(event, image_url, relative_position, caption) {
-	if(caption == undefined) caption = '';
-	$('body').append('<div id="image_popup"> <img src="' + image_url + '" /> <p>' + caption + '</p> </div>');
+	caption = (caption ? '<p>' + caption + '</p>' : '');
+	$('body').append('<div id="image_popup"> <img src="' + image_url + '" /> ' + caption + ' </div>');
 	var popup = $('#image_popup');
 	
 	var image = util_target(event);

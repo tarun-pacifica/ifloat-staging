@@ -1,23 +1,20 @@
 #image_popup {
-	background: gray;
-/*	background: #B0E0FF;*/
-	border-radius: 5px;
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
+	background: #B0E0FF;
+	border: 1px solid #404040;
 	display: none;
-	padding: 5px;
 	position: absolute;
 	z-index: 10;
 }
 
 #image_popup img {
 	height: 200px;
+	margin-bottom: -3px;
 	width: 200px;
 }
 
 #image_popup p {
-	color: white;
+	color: #404040;
 	margin: 0;
-/*	padding: 3px;*/
-	width: 200px;
+	padding: 5px;
+	width: 190px;
 }

@@ -162,14 +162,8 @@ class ImportSet
     pias_by_product = stopwatch("derived primary image list") { primary_image_attachments }
     
     stopwatch("ensured all products have a primary image") do
-      warning_rows_by_path = {}
       (@objects.select { |object| object.klass == Product } - pias_by_product.keys).each do |product|
-        (warning_rows_by_path[File.basename(product.path)] ||= []).push(product.row)
-        # error(Product, product.path, product.row, nil, "no image specified")
-      end
-      
-      warning_rows_by_path.sort.each do |path, rows|
-        warn "WARNING: no primary image specified in #{path} rows #{rows.inspect}"
+        error(Product, product.path, product.row, nil, "no primary image specified")
       end
     end
     

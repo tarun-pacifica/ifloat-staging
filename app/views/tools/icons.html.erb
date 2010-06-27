@@ -14,7 +14,7 @@
 		<tr>
 			<td><img src=<%= info[:icon_url].inspect %> /></td>
 			<% shown = (info[:dad] or info[:fil]) %>
-			<td class="<%= shown ? (info[:icon_url] =~ /blank.png$/ ? "blank" : "") : "not_needed" %>">
+			<td class="<%= shown ? (info[:icon_url] == @blank_icon_url ? "blank" : "") : "not_needed" %>">
 				<%= info[:raw_name] %> <br/>
 				<%= info[:section] %> / <%= info[:name] %>
 			</td>

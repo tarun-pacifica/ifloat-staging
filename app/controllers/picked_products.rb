@@ -73,7 +73,7 @@ class PickedProducts < Application
       unit, divisor = unit_and_divisor_by_product_id[product_id]
       @formatted_prices_by_product_id[product_id] = money_uom(price, session.currency, unit, divisor)
     end
-    @sale_price_property = Indexer.property_display_cache.values.find { |info| info[:raw_name] == "sale:price_min" }
+    @sale_price_property_info = Indexer.property_display_cache[Indexer.sale_price_min_property_id]
     
     @find = session.most_recent_cached_find
     render

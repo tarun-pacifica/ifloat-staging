@@ -6,6 +6,7 @@ module Indexer
   @@last_loaded_md5 = nil
   @@numeric_filtering_index = {}
   @@property_display_cache = {}
+  @@sale_price_min_property_id = nil
   @@text_filtering_index = {}
   @@text_finding_index = {}
   
@@ -116,6 +117,7 @@ module Indexer
     end
     
     @@class_property_id = PropertyDefinition.first(:name => "reference:class").id
+    @@sale_price_min_property_id = PropertyDefinition.first(:name => "sale:price_min").id
     
     @@last_loaded_md5 = source_md5
   end
@@ -169,6 +171,10 @@ module Indexer
     end
     
     property_ids
+  end
+  
+  def self.sale_price_min_property_id
+    @@sale_price_min_property_id
   end
   
   

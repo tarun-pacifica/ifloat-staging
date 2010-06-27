@@ -1,5 +1,5 @@
 function product_image_caption(titles) {
-	return titles ? util_superscript('text', util_escape_attr_js(titles.join('<br/>'))) : '';
+	return titles ? util_superscript('text', util_escape_attr_js(titles.join('<br/>'))) : 'null';
 }
 
 function product_image_make(url, popup_url, relative_position, titles) {

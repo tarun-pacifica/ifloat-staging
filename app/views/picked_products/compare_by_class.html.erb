@@ -49,6 +49,20 @@
 				<% end %>
 			</tr>
 			<% end %>
+			
+			<tr class="<%= parity = (parity == :even ? :odd : :even) %>">
+				<td class="icon">
+					<%= property_icon(@sale_price_property_info) %>
+				</td>
+				<% @product_ids.each_with_index do |product_id, i| %>
+				<td class="product col_<%= i %>"
+					onclick="window.location = '<%= url(:product, :id => product_id) %>'"
+					onmouseover="util_highlight_column(event, 'on', 'col_<%= i %>')"
+					onmouseout="util_highlight_column(event, 'off')">
+					<%= @formatted_prices_by_product_id[product_id] %>
+				</td>
+				<% end %>
+			</tr>
 		</table>
 	</div>
 </div>

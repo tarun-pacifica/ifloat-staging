@@ -66,6 +66,15 @@ class PickedProducts < Application
     
     @images_by_product_id = Product.primary_images_by_product_id(@product_ids)
     
+    @formatted_prices_by_product_id = Hash.new { "None of our partners have this item in stock" }
+    unit_and_divisor_by_product_id = UnitOfMeasure.unit_and_divisor_by_product_id(@product_ids)
+    Product.prices_by_url_by_product_id(@product_ids, session.currency).each do |product_id, prices_by_url|
+      price = prices_by_url.values.min
+      unit, divisor = unit_and_divisor_by_product_id[product_id]
+      @formatted_prices_by_product_id[product_id] = money_uom(price, session.currency, unit, divisor)
+    end
+    @sale_price_property = Indexer.property_display_cache.values.find { |info| info[:raw_name] == "sale:price_min" }
+    
     @find = session.most_recent_cached_find
     render
   end
@@ -118,7 +127,7 @@ class PickedProducts < Application
     product_ids = @picks_by_product_id.keys
     
     @prices_by_url_by_product_id = Product.prices_by_url_by_product_id(product_ids, session.currency)
-    unit_and_divisor_by_product_id = UnitOfMeasure.unit_and_divisor_by_product_id(product_ids)    
+    unit_and_divisor_by_product_id = UnitOfMeasure.unit_and_divisor_by_product_id(product_ids)
     
     @prices_by_url_by_product_id.each do |product_id, prices_by_url|
       unit, divisor = unit_and_divisor_by_product_id[product_id]

@@ -252,14 +252,12 @@ function filter_configure_values_text(values_by_unit, html) {
 			
 			var value = v[0];
 			var checked = (v[1] ? 'checked="checked"' : '');
-			var escaped_value = util_escape(v[0], '"');
-			html.push('<td class="check"> <input value="' + escaped_value + '" type="checkbox" ' + checked + ' onclick="filter_configure_values_text_update_select_all()"/> </td>');
+			html.push('<td class="check"> <input value="' + util_escape_attr(v[0]) + '" type="checkbox" ' + checked + ' onclick="filter_configure_values_text_update_select_all()"/> </td>');
 			
 			var klass = (!v[2] ? 'class="value irrelevant"' : 'class="value"');
 			var definition = v[3];
 			value = util_defined(value, definition, c >= columns.length / 2 ? 'left' : 'right');
-			escaped_value = "'" + util_escape(v[0], '"\'') + "'";
-			html.push('<td ' + klass + ' onclick="filter_configure_values_text_select_one(' + escaped_value + ')"> ' + util_superscript('text', value) + ' </td>');
+			html.push('<td ' + klass + ' onclick="filter_configure_values_text_select_one(' + util_escape_attr_js(v[0]) + ')"> ' + util_superscript('text', value) + ' </td>');
 		}
 		
 		html.push('</tr>');

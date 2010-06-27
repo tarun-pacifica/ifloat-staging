@@ -123,7 +123,7 @@ module Merb
     end
     
     def tooltip(value, tip, position = :right)
-      t = tip.gsub(/(['"])/) { |c| "\\#{c}" }
+      t = tip.gsub(/"/) { "&quot;" }.gsub("'") { "\\'" }
       <<-HTML
   	    <span class="defined" onmouseover="tooltip_show(event, '#{t}', '#{position}')" onmouseout="tooltip_hide()">#{value}</span>
   	  HTML

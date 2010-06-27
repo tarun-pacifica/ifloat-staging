@@ -1,12 +1,12 @@
 function product_image_caption(titles) {
-	return titles ? util_superscript('text', util_escape(titles.join('<br/>'), '"\'')) : '';
+	return titles ? util_superscript('text', util_escape_attr_js(titles.join('<br/>'))) : '';
 }
 
 function product_image_make(url, popup_url, relative_position, titles) {
 	if(relative_position == undefined) relative_position = 'left';
 	
 	if(popup_url) {
-		return '<img class="product" src="' + url + '" onmouseover="product_image_popup(event, \'' + popup_url + '\', \'' + relative_position + '\', \'' + product_image_caption(titles) + '\')" onmouseout="product_image_unpopup(event)" />';
+		return '<img class="product" src="' + url + '" onmouseover="product_image_popup(event, \'' + popup_url + '\', \'' + relative_position + '\', ' + product_image_caption(titles) + ')" onmouseout="product_image_unpopup(event)" />';
 	}
 	
 	return '<img class="product" src="' + url + '" />';

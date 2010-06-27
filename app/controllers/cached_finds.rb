@@ -138,20 +138,21 @@ class CachedFinds < Application
   private
   
   def gather_images(find)
-    product_ids_by_checksum = find.filtered_product_ids_by_image_checksum.take(36)
-    checksums = product_ids_by_checksum.map { |checksum, product_ids| checksum }
+    product_ids_by_checksum = find.filtered_product_ids_by_image_checksum
+    total = product_ids_by_checksum.values.inject(0) { |sum, product_ids| sum + product_ids.size }
+    checksums = product_ids_by_checksum.keys[0, 36]
     
-    total = 0
     totals_by_checksum = {}
-    product_ids_by_checksum.each do |checksum, product_ids|
-      total += (totals_by_checksum[checksum] = product_ids.size)
+    checksums.each do |checksum|
+      totals_by_checksum[checksum] = product_ids_by_checksum[checksum].size
     end
     
     assets_by_checksum = Asset.all(:checksum => checksums).hash_by(:checksum)
     
     title_checksums_by_product_id = {}
-    product_ids_by_checksum.each do |checksum, product_ids|
-      title_checksums_by_product_id[product_ids.first] = checksum
+    checksums.each do |checksum|
+      product_id = product_ids_by_checksum[checksum].first
+      title_checksums_by_product_id[product_id] = checksum
     end
     
     titles_by_checksum = {}

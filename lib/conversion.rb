@@ -51,16 +51,17 @@ module Conversion
     raise "no conversion available for #{from_unit.inspect} -> #{to_unit.inspect}" if a.nil?    
     converted_value = (from_unit < to_unit) ? (value * a + b) : ((value - b) / a)
     
-    converted_to_integer = converted_value.to_i
-    if converted_to_integer >= 1 and converted_to_integer.to_s.size >= sig_figs then converted_to_integer
-    else ("%.#{sig_figs}g" % converted_value).to_f
-    end
+    converted_integer = converted_value.to_i
+    return converted_integer if Math.log10(converted_integer) >= sig_figs
+    
+    m = 10 ** (sig_figs - Math.log10(converted_value).ceil)
+    (converted_value * m).round / m.to_f
   end
   
   def self.determine_sig_figs(value)
     value_string = value.to_f.to_s.delete(".")
     value_string =~ /^(0*)(.*?)(0*)$/
-    [$2.size, 2].max
+    [$2.size, 3].max
   end
   
   def self.javascript

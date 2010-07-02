@@ -50,6 +50,7 @@ module Conversion
     a, b = MAPPINGS[[from_unit, to_unit].sort]
     raise "no conversion available for #{from_unit.inspect} -> #{to_unit.inspect}" if a.nil?    
     converted_value = (from_unit < to_unit) ? (value * a + b) : ((value - b) / a)
+    return 0 if converted_value == 0
     
     converted_integer = converted_value.to_i
     return converted_integer if converted_integer > 0 and Math.log10(converted_integer) >= sig_figs

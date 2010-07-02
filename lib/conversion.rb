@@ -41,7 +41,7 @@ module Conversion
     ["kg/m2", "lb/ft2"]       => [0.20482, 0],
     ["kg/m3", "lb/ft3"]       => [0.062428, 0],
     ["kPa", "lb/in2"]         => [0.14504, 0],
-    ["li", "m3"]              => [1/1000, 0],
+    ["li", "m3"]              => [1.0 / 1000, 0],
     ["min", "w"]              => [1.0 / 10080, 0],
     ["mo", "y"]               => [1.0 / 12, 0]
   }
@@ -52,7 +52,7 @@ module Conversion
     converted_value = (from_unit < to_unit) ? (value * a + b) : ((value - b) / a)
     
     converted_integer = converted_value.to_i
-    return converted_integer if Math.log10(converted_integer) >= sig_figs
+    return converted_integer if converted_integer > 0 and Math.log10(converted_integer) >= sig_figs
     
     m = 10 ** (sig_figs - Math.log10(converted_value).ceil)
     (converted_value * m).round / m.to_f

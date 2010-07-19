@@ -105,7 +105,7 @@ function pick_lists_update_handle(data) {
 		var links = [];
 		
 		if(!partner && group != 'compare') {
-			var text = (group == 'buy_now' ? 'Choose shop' : 'Browse');
+			var text = (group == 'buy_now' ? 'Buy from' : 'Browse');
 			links.push('<a class="buy" href="/picked_products/options">' + text + '...</a>');
 		}
 		

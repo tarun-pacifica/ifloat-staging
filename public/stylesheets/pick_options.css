@@ -149,21 +149,36 @@
 	background-position: 0 -46px;
 }
 
-#po_buy_now table td.count {
-	background: #404040;
+#po_buy_now table td.buy {
 	border-left: 1px solid silver;
-	color: silver;
-	padding: 5px;
+	color: gray;
+	padding: 5px 10px 0 10px;
 	text-align: center;
 }
 
-#po_buy_now table td.count a {
-	color: white;
+#po_buy_now table td.buy a {
+	background: url(/images/pick_options/buttons/buy_from.png) no-repeat;
+	color: black;
+	display: block;
+	height: 19px;
+	padding-top: 4px;
+	text-align: center;
 	text-decoration: none;
+	width: 90px;
 }
 
-#po_buy_now table td.count a:hover {
-	text-decoration: underline;
+#po_buy_now table td.buy a:hover {
+	background-position: 0 -23px;
+	color: white;
+}
+
+#po_buy_now table td.buy a:active {
+	background-position: 0 -46px;
+}
+
+#po_buy_now table td.howto p {
+	margin: 5px 5px 0 5px;
+	text-align: right;
 }
 
 #po_buy_now table td.facility {
@@ -173,7 +188,7 @@
 }
 
 #po_buy_now table td.facility img {
-	padding: 5px;
+	padding: 0 5px;
 	width: 100px;
 }
 

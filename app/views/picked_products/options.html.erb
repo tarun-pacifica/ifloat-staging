@@ -8,14 +8,18 @@
 </div>
 
 <div id="po_buy_now" class="panel major">
-	<div class="title"> <h2>Buy Now</h2> </div>
+	<div class="title"> <h2>Basket</h2> </div>
 	
 	<div class="body">
-		<p class="empty">You have nothing selected to buy now.</p>
+		<p class="empty">You have nothing in your basket</p>
 	
 		<table summary="prices">
 			<tr class="facilities">
-				<td colspan="2"> </td>
+				<td class="howto" colspan="2">
+					<p>Marinestore have quoted the following prices for your items</p>
+					<p>Use the Buy button to jump to their website and complete your purchase</p>
+					<p>While there, you will still have access to your items</p>
+				</td>
 				<% @facility_urls.each do |url| %>
 				<td class="facility"> <img src="/images/partner/facilities/<%= url %>.png" alt=<%= url.inspect %> /> </td>
 				<% end %>

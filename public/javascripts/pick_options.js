@@ -49,7 +49,7 @@ function pick_options_update(data) {
 		html.push('</div>');
 		html.push('<hr class="terminator" />');
 	}
-	if(html.length == 0) html.push('<p class="empty">Your have no future buys.</p>');
+	if(html.length == 0) html.push('<p class="empty">You have no future buys</p>');
 	else html.push('<hr class="terminator final" />');
 	buy_later.find('.sections').html(html.join(' '));
 	
@@ -74,7 +74,7 @@ function pick_options_update(data) {
 	var fac_urls = $ifloat_body.facility_urls;
 	var prices_by_url_by_product_id = $ifloat_body.prices_by_url_by_product_id;
 	
-	// Counts
+	// Buy Buttons
 	
 	var counts_by_url = {};
 	for(var url in fac_ids_by_url) {
@@ -88,17 +88,19 @@ function pick_options_update(data) {
 		}
 	}
 	
-	html.push('<tr class="counts">');
+	html.push('<tr>');
 	html.push('<td colspan="2"> </td>');
 	for(var i in fac_urls) {
-		html.push('<td class="count">');
+		html.push('<td class="buy">');
 		var url = fac_urls[i];
 		var count = counts_by_url[url];
 		if(count == 0) html.push('No items in stock');
-		else html.push('<a href="/picked_products/buy/' + fac_ids_by_url[url] + '">Buy ' + util_pluralize(count, 'item') + '</a>');
+		else html.push('<a href="/picked_products/buy/' + fac_ids_by_url[url] + '">Buy from...</a>');
 		html.push('</td>');
 	}
 	html.push('</tr>');
+	facilities_row.before(html.join(' '));
+	html = []
 	
 	// Products
 	

@@ -14,12 +14,12 @@ Merb::Router.prepare do
   match('/cached_finds/:id/filter/:property_id', :method => 'post').to(:controller => 'cached_finds', :action => 'filter_set')
   match('/cached_finds/:id/filters/:list').to(:controller => 'cached_finds', :action => 'filters', :format => 'js')
   match('/cached_finds/:id/images').to(:controller => 'cached_finds', :action => 'images', :format => 'js')
-  match('/cached_finds/:id/compare_by_image/:image_checksum').to(:controller => 'cached_finds', :action => 'compare_by_image')
+  match('/cached_finds/:id/products_for/:image_checksum').to(:controller => 'cached_finds', :action => 'compare_by_image')
   match('/cached_finds/:id/reset').to(:controller => 'cached_finds', :action => 'reset')
   resources :cached_finds
   
   match('/picked_products/buy/:facility_id').to(:controller => 'picked_products', :action => 'buy')
-  match('/picked_products/compare_by_class/:klass').to(:controller => 'picked_products', :action => 'compare_by_class')
+  match('/picked_products/products_for/:klass').to(:controller => 'picked_products', :action => 'compare_by_class')
   match('/picked_products/options').to(:controller => 'picked_products', :action => 'options')
   resources :picked_products
   

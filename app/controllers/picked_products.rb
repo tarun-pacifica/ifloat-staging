@@ -112,7 +112,7 @@ class PickedProducts < Application
           :product_ids => info_for_picks.map { |info| info[:product_id] },
           :image_urls  => info_for_picks.map { |info| info[:image_urls] }.compact.first,
           :title_parts => [klass, info_for_picks.size],
-          :url         => "/picked_products/compare_by_class/#{Merb::Parse.escape(klass)}" }
+          :url         => "/picked_products/products_for/#{Merb::Parse.escape(klass)}" }
       end
     end
     

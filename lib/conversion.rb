@@ -2,6 +2,7 @@ module Conversion
   # conversion of v (unit 1) to V (unit 2): V = av + b
   # each mapping value is of the form [a, b]
   MAPPINGS = {
+    ["#/in", "#/mm"]          => [1 / 25.4, 0],
     ["C", "F"]                => [1.8, 32],
     ["cm3", "in3"]            => [0.061024, 0],
     ["d", "h"]                => [24, 0],

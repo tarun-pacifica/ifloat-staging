@@ -58,6 +58,7 @@ function pick_options_update(data) {
 	
 	var empty_warning = buy_now.find('p.empty');
 	var facilities_row = buy_now.find('tr.facilities');
+	facilities_row.prevAll().remove();
 	facilities_row.nextAll().remove();
 	
 	if(buy_now_items.length == 0) {

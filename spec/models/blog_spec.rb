@@ -46,23 +46,5 @@ describe Blog do
       @blog.should be_valid
     end
   end
-  
-  describe "creation with existing blog" do
-    before(:all) do
-      @blog = Blog.create(:company_id => 1, :user_id => 1, :name => "michael_jackson")
-    end
-    
-    after(:all) do
-      @blog.destroy
-    end
-    
-    it "should succeed with a different name" do
-      Blog.new(:company_id => 1, :user_id => 1, :name => "janet_jackson").should be_valid
-    end
-    
-    it "should fail with the same name" do
-      Blog.new(:company_id => 1, :user_id => 1, :name => "michael_jackson").should_not be_valid
-    end
-  end
 
 end

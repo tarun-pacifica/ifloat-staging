@@ -37,24 +37,6 @@ describe Attachment do
     end
   end
   
-  describe "creation with existing attachment (of the same role) for a given product" do
-    before(:all) do
-      @attachment = Attachment.create(:asset_id => 1, :product_id => 1, :role => "image", :sequence_number => 1)
-    end
-    
-    after(:all) do
-      @attachment.destroy
-    end
-    
-    it "should succeed with a different sequence number" do
-      Attachment.new(:asset_id => 1, :product_id => 1, :role => "image", :sequence_number => 2).should be_valid
-    end
-    
-    it "should fail with the same sequence number" do
-      Attachment.new(:asset_id => 1, :product_id => 1, :role => "image", :sequence_number => 1).should_not be_valid
-    end
-  end
-
   describe "asset retrieval for products" do
     before(:all) do      
       @car, @bike = %w(CAR BIKE).map { |ref| Product.create(:company_id => 1, :reference => ref) }

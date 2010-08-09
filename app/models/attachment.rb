@@ -33,9 +33,9 @@ class Attachment
   
   belongs_to :asset
   belongs_to :product
-    property :product_id, Integer, :unique_index => :seq_num_per_prod_per_role
+    property :product_id, Integer, :required => true, :unique_index => :seq_num_per_prod_per_role
   
-  validates_within :role, :set => ROLES.keys.to_set
+  validates_within :role, :set => ROLES.keys
   
   def self.product_role_assets(product_ids, include_chains = true)
     return [] if product_ids.empty?

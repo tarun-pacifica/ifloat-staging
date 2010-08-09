@@ -36,9 +36,9 @@ class Asset
     "top-right-front", "top-right-back",
     "bottom-left-front", "bottom-left-back",
     "bottom-right-front", "bottom-right-back"
-  ].to_set
+  ]
   
-  BUCKETS = %w(articles blogs brand_logos products property_icons).to_set
+  BUCKETS = %w(articles blogs brand_logos products property_icons)
   IMAGE_FORMAT = /\.(gif|jpeg|jpg|png|tif|tiff)$/
   NAME_FORMAT = /^([\w\-\.]+?)(___(\d+))?\.([a-z]{3,})$/
   
@@ -54,7 +54,7 @@ class Asset
   property :checksum, String
   
   belongs_to :company
-    property :company_id, Integer, :unique_index => :name_per_company_per_bucket
+    property :company_id, Integer, :required => true, :unique_index => :name_per_company_per_bucket
   has n, :attachments
   has n, :brands
   

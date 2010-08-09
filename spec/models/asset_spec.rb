@@ -80,10 +80,6 @@ describe Asset do
       Asset.new(:company_id => 1, :bucket => "products", :name => "car___2.jpg").should be_valid
     end
     
-    it "should fail with the same chain and sequence number" do
-      Asset.new(:company_id => 1, :bucket => "products", :name => "car___1.jpg").should_not be_valid
-    end
-    
     it "should fail with an unknown chain and sequence number > 1" do
       Asset.new(:company_id => 1, :bucket => "products", :name => "bike___2.jpg").should_not be_valid
     end

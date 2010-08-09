@@ -21,12 +21,12 @@ class PropertyType
   property :id, Serial
   property :core_type, String, :required => true
   property :name, String, :required => true, :format => /^[a-z_]{3,}$/, :unique_index => :true
-  property :units, Object, :length => 255
+  property :units, Object
   
   has n, :definitions, :model => "PropertyDefinition"
   has n, :value_definitions, :model => "PropertyValueDefinition"
   
-  validates_absent :units, :unless => :numeric?
+  validates_absence_of :units, :unless => :numeric?
   validates_with_method :units, :method => :validate_numeric_units, :if => :numeric?
   validates_within :core_type, :set => CORE_TYPES.keys.to_set
   

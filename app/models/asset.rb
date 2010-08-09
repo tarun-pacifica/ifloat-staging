@@ -65,8 +65,8 @@ class Asset
     chain_id.nil? || Asset.get(chain_id) || [false, "Chain ID should be the ID of an existing Asset"]
   end
   
-  validates_absent :chain_sequence_number, :if => proc { |asset| asset.chain_id.nil? }
-  validates_present :chain_sequence_number, :if => proc { |asset| not asset.chain_id.nil? }
+  validates_absence_of :chain_sequence_number, :if => proc { |asset| asset.chain_id.nil? }
+  validates_presence_of :chain_sequence_number, :if => proc { |asset| not asset.chain_id.nil? }
   
   before :valid? do
     root_name, chain_seq_num = self.class.parse_chain(name)

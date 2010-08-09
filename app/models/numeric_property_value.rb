@@ -9,11 +9,11 @@ class NumericPropertyValue < PropertyValue
   VALUE_RANGE = BigDecimal.new("-999999999.999999")..BigDecimal.new("999999999.999999")
   
   property :unit, String
-  property :min_value, BigDecimal, :precision => PRECISION, :scale => MAX_DP
-  property :max_value, BigDecimal, :precision => PRECISION, :scale => MAX_DP
+  property :min_value, Decimal, :precision => PRECISION, :scale => MAX_DP
+  property :max_value, Decimal, :precision => PRECISION, :scale => MAX_DP
   property :tolerance, Float
   
-  validates_present :min_value, :max_value
+  validates_presence_of :min_value, :max_value
   
   def self.convert(from_attributes, to_unit)
     min, max = from_attributes.values_at(:min_value, :max_value)

@@ -11,9 +11,9 @@ class FacilityProduct
   REFERENCE_FORMAT = /^[A-Z_\d\-\.\/]+$/
   
   property :id,        Serial
-  property :reference, String,     :format => REFERENCE_FORMAT,   :required => true, :unique_index => :ref_per_facility
-  property :price,     BigDecimal, :precision => 15, :scale => 3, :required => true
-  property :currency,  String,     :format => CURRENCY_FORMAT,    :required => true
+  property :reference, String,  :format => REFERENCE_FORMAT,   :required => true, :unique_index => :ref_per_facility
+  property :price,     Decimal, :precision => 15, :scale => 3, :required => true
+  property :currency,  String,  :format => CURRENCY_FORMAT,    :required => true
   
   property :title,       String,   :length => 255
   property :image_url,   String,   :length => 255

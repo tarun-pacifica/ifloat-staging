@@ -13,5 +13,5 @@ class Employee < User
   
   belongs_to :facility, :required => false
   
-  validates_present :facility_id
+  validates_presence_of :facility_id
 end

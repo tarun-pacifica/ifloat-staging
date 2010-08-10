@@ -41,4 +41,19 @@ describe Brand do
     end
   end
   
+  describe "logos" do
+    before(:all) do
+      @asset = Asset.create(:company_id => 1, :bucket => "brand_logos", :name => "fishy.jpg")
+      @brand = Brand.create(:asset_id => 1, :company_id => 1, :name => "Musto", :asset => @asset)
+    end
+    
+    after(:all) do
+      @brand.destroy
+    end
+
+    it "should return the logos of any known brands" do
+      Brand.logos(["Musto", "Sony", "Apple"]).should == [@asset]
+    end
+  end
+  
 end

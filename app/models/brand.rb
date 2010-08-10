@@ -15,13 +15,12 @@ class Brand
   
   belongs_to :asset
   belongs_to :company
-    property :company_id, Integer, :unique_index => :name_per_company
+    property :company_id, Integer, :required => true, :unique_index => :name_per_company
     
   before :destroy do
 	  asset.destroy unless asset.nil?
   end
   
-  # TODO: spec
   # TODO: if needed, augment to take a list of names_by_company_id to support brand namespace clashes
   def self.logos(names)
     Asset.all("brands.name" => names)

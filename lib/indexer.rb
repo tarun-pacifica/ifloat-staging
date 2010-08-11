@@ -7,6 +7,7 @@ module Indexer
   @@numeric_filtering_index = {}
   @@property_display_cache = {}
   @@sale_price_min_property_id = nil
+  @@skip_load = false
   @@text_filtering_index = {}
   @@text_finding_index = {}
   
@@ -32,7 +33,19 @@ module Indexer
     end
   end
   
+  def self.compile_to_memory
+    records = text_records
+    @@image_checksum_index = compile_image_checksum_index
+    @@numeric_filtering_index = compile_numeric_filtering_index
+    @@property_display_cache = compile_property_display_cache
+    @@text_filtering_index = compile_filtering_index(records.select { |r| r.filterable }, :language_code, :text_value)
+    @@text_finding_index = compile_text_finding_index(records)
+    @@skip_load = true
+  end
+  
   def self.ensure_loaded
+    return true if @@skip_load
+    
     begin
       load
       true
@@ -140,7 +153,7 @@ module Indexer
   # TODO: remove use of @@image_checksum_index once all products are guaranteed to have a primary image
   def self.product_ids_for_phrase(phrase, language_code)
     return [] if phrase.blank? or not ensure_loaded
-
+    
     index = (@@text_finding_index[language_code] || {})
     phrase.downcase.split(/\W+/).map do |word|
        (index[word] || Set.new).to_set

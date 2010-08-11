@@ -12,6 +12,8 @@ describe CachedFind do
     
     it "should succeed with valid data" do
       @find.should be_valid
+      @find.invalidated.should == false
+      proc { @find.filters = 1 }.should raise_error
     end
     
     it "should succeed without a user" do
@@ -34,11 +36,6 @@ describe CachedFind do
       @find.should_not be_valid
     end
     
-    it "should fail with an invalid specification" do
-      @find.specification = "life ja"
-      @find.should_not be_valid
-    end
-    
     it "should use its specification as its default description" do
       @find.description = nil
       @find.specification = "purple helmet"
@@ -50,6 +47,11 @@ describe CachedFind do
       @find.specification = "   spaced  \t\t\n out  out   terms spaced  "
       @find.should be_valid
       @find.specification.should == "spaced out terms"
+    end
+    
+    it "should fail without an invalidated value" do
+      @find.invalidated = nil
+      @find.should_not be_valid
     end
   end
   
@@ -73,36 +75,34 @@ describe CachedFind do
     end
   end
   
-  it "needs specs that reflect 'invalidated is required' - and possibly ensure_valid method"
-  it "needs updated specs for execution"
   it "needs specs for filter_values & filter_values_relevant"
-  it "needs specs for the filter! command"
   it "needs updated specs for filtered_product_ids (that take the class_only path into account)"
   it "needs specs for language_code"
-  it "needs specs reflecting that 'filters' is a read-only property"
   
-  describe "execution with product data" do
+  describe "execution" do
     before(:all) do
       @text_type = PropertyType.create(:core_type => "text", :name => "text")
-      @weight_type = PropertyType.create(:core_type => "numeric", :name => "weight", :valid_units => ["kg", "lb"])
+      @weight_type = PropertyType.create(:core_type => "numeric", :name => "weight", :units => ["kg", "lb"])
       
       @properties = {}
       sequence_number = 0
       { "appearance:colour"   => @text_type,
         "marketing:brand"     => @text_type,
         "marketing:model"     => @text_type,
+        "misc:unused"         => @text_type,
         "physical:weight_dry" => @weight_type,
         "physical:weight_wet" => @weight_type }.each do |name, type|
         findable = (type == @text_type)
-        filterable = (name.contains?("marketing") or name.contains?("physical"))
+        filterable = (name.include?("marketing") or name.include?("physical"))
         property = type.definitions.create(:name => name, :findable => findable, :filterable => filterable, :sequence_number => (sequence_number += 1))
         property_key = property.name.split(":").last.to_sym
         @properties[property_key] = property
       end
-
+      
+      @asset = Asset.create(:company_id => 1, :bucket => "products", :name => "car___1.jpg")
       @products = []
       [ # Ford Taurus in red / black
-        { :brand  => {"ENG" => ["Ford"]},
+        { :brand  => {"ENG" => ["Ford"], "FRA" => ["Ford"]},
           :model  => {"ENG" => ["Taurus"]},
           :colour => {"ENG" => ["Red", "Black"], "FRA" => ["Rouge", "Noir"]} },
         # DeadMeat life jacket in red
@@ -122,6 +122,8 @@ describe CachedFind do
         product = Product.create(:company_id => i, :reference => "AF11235")
         @products << product
         
+        product.attachments.create(:asset => @asset, :role => "image", :sequence_number => 1)
+        
         info.each do |key, values_by_language_unit|
           property = @properties[key]
           value_class = property.property_type.value_class
@@ -129,199 +131,177 @@ describe CachedFind do
                     
           values_by_language_unit.each do |language_unit, values|
             values.each do |value|
-              value_class.create(:product => product, :definition => property,
-                                 :value => value, language_unit_key => language_unit)
+              attributes = value_class.parse_or_error(value.to_s)
+              attributes[:product] = product
+              attributes[:definition] = property
+              attributes[language_unit_key] = language_unit
+              attributes[:auto_generated] = false
+              attributes[:sequence_number] = 1
+              value_class.create(attributes)
             end
           end
         end
       end
+      
+      Indexer.stub(:compile_image_checksum_index).and_return do
+        # TODO: remove once MS hack is removed from indexer
+        query =<<-SQL
+          SELECT p.id, a.checksum
+          FROM products p
+            INNER JOIN attachments at ON p.id = at.product_id
+            INNER JOIN assets a ON at.asset_id = a.id
+          WHERE at.role = 'image'
+          ORDER BY at.sequence_number
+        SQL
+
+        index = {}
+        repository.adapter.select(query).each do |record|
+          index[record.id] ||= record.checksum
+        end
+        index
+      end
+      
+      Indexer.stub(:compile_numeric_filtering_index).and_return do
+        # TODO: remove once MS hack is removed from indexer
+        query =<<-SQL
+          SELECT pv.product_id, pv.property_definition_id, pv.unit, pv.min_value, pv.max_value
+          FROM property_values pv
+            INNER JOIN property_definitions pd ON pv.property_definition_id = pd.id
+          WHERE pd.filterable = ?
+            AND (pv.min_value IS NOT NULL OR pv.max_value IS NOT NULL)
+        SQL
+
+        records = repository.adapter.select(query, true)
+        Indexer.compile_filtering_index(records, :unit, :min_value, :max_value)
+      end
+      
+      Indexer.stub(:text_records).and_return do
+        # TODO: remove once MS hack is removed from indexer
+        query =<<-SQL
+          SELECT pd.findable, pd.filterable, pv.product_id, pv.property_definition_id, pv.language_code, pv.text_value
+          FROM property_values pv
+            INNER JOIN products p ON pv.product_id = p.id
+            INNER JOIN property_definitions pd ON pv.property_definition_id = pd.id
+          WHERE pv.text_value IS NOT NULL
+        SQL
+        repository.adapter.select(query)
+      end
+      Indexer.compile_to_memory
     end
     
     after(:all) do
-      @text_type.destroy
-      @weight_type.destroy
-      
-      @properties.each { |key, property| property.destroy }
-      
+      ([@text_type, @weight_type, @asset] + @properties.values).each { |object| object.destroy }
+
       @products.each do |product|
+        product.attachments.destroy!
         product.values.destroy!
         product.destroy
       end
     end
-
-    def filter_for_property(key)
-      property = @properties[key]
-      @find.filters.find { |f| f.property_definition == property }
-    end
-    
-    describe "product_count" do
-      it "should only succeed once products has been called" do
-        find = CachedFind.create(:language_code => "ENG", :specification => "Red")
-        find.execute!
-        proc { find.product_count }.should raise_error
-        find.products
-        proc { find.product_count }.should_not raise_error
-        find.destroy
-      end
-    end
-    
-    describe "spec_date" do
-      before(:each) do
-        @find = CachedFind.create(:language_code => "ENG", :specification => "Red")
-      end
-      
-      after(:each) do
-        @find.destroy
-      end
-      
-      it "should be 'Red' before execution" do
-        @find.spec_date.should == "Red"
-      end
-      
-      it "should be like 'Red (2004/01/12 15:38:26)' after execution" do
-        @find.execute!
-        @find.spec_date.should == "Red (#{@find.executed_at.strftime('%Y/%m/%d %H:%M:%S')})"
-      end
-    end
     
     [ ["Black Ford", "ENG", 1],
-      ["Black Ford", "FRA", 1],
+      ["Black Ford", "FRA", 0],
       ["Ford Noir",  "ENG", 0],
       ["Ford Noir",  "FRA", 1],
       ["Red",        "ENG", 4]
     ].each do |spec, language_code, expected_count|
-      it "should return #{expected_count} products for #{spec.inspect} [#{language_code.inspect}]" do
-        find = CachedFind.create(:language_code => language_code, :specification => spec)
-        find.execute!
-        begin
-          find.all_product_count.should == expected_count
-        ensure
-          find.destroy
-        end
+      it "should return #{expected_count} products for '#{spec}' [#{language_code.inspect}]" do
+        find = CachedFind.new(:language_code => language_code, :specification => spec)
+        find.all_product_ids.count.should == expected_count
       end
     end
     
-    describe "filtering on \"Red\" [ENG]" do
+    describe "filtering on 'Red' [ENG]" do
       before(:all) { @find = CachedFind.create(:language_code => "ENG", :specification => "Red") }
       
       after(:all) { @find.destroy }
       
-      before(:each) do
-        @find.filters.each { |filter| filter.destroy }
-        @find.execute!
+      after(:each) { @find.unfilter_all! }
+      
+      it "should return nil for an unknown property ID" do
+        @find.filter!(-1, "value" => "DeadMeat").should == nil
+      end
+      
+      it "should return nil for a property ID outside those imlpied by the specification" do
+        @find.filter!(@properties[:unused].id, "value" => "DeadMeat").should == nil
       end
     
-      it "should return only the life jacket for the brand list [\"DeadMeat\"]" do
-        filter = filter_for_property(:brand)
-        filter.exclude!("DuraBrick")
-        filter.exclude!("Ford")
-        @find.products.should == [@products[1]]
+      it "should return only the life jacket for the brand list ['DeadMeat']" do
+        @find.filter!(@properties[:brand].id, "value" => "DeadMeat")
+        @find.filtered_product_ids.should == [@products[1].id].to_set
       end
       
-      it "should return all products for the weight_dry range 1-2 kg" do
-        filter = filter_for_property(:weight_dry)
-        filter.choose!(1, 2, "kg")
-        @find.products.size.should == @products.size
+      it "should return all products for the weight_dry range 1-2 kg (include unknown)" do
+        @find.filter!(@properties[:weight_dry].id, "value" => "1::2", "unit" => "kg", "include_unknown" => "true")
+        @find.filtered_product_ids.size.should == @products.size
       end
       
-      it "should return all products but the DuraBrick for the weight_dry range 1.5-2 kg" do
-        filter = filter_for_property(:weight_dry)
-        filter.choose!(1.5, 2, "kg")
-        @find.products.size.should == @products.size - 1
+      it "should return only the products with a weight_dry range 1-2 kg (exclude unknown)" do
+        @find.filter!(@properties[:weight_dry].id, "value" => "1::2", "unit" => "kg")
+        @find.filtered_product_ids.should == [@products[2].id, @products[3].id].to_set
+      end
+      
+      it "should return all products but the DuraBrick for the weight_dry range 1.5-2 kg (include unknown)" do
+        @find.filter!(@properties[:weight_dry].id, "value" => "1.5::2", "unit" => "kg", "include_unknown" => "true")
+        @find.filtered_product_ids.size.should == @products.size - 1
+      end
+      
+      it "should return only the 2KG DuraBrick for the weight_dry range 1.5-2 kg (exclude unknown)" do
+        @find.filter!(@properties[:weight_dry].id, "value" => "1.5::2", "unit" => "kg")
+        @find.filtered_product_ids.should == [@products[3].id].to_set
       end
     end
     
-    describe "re-execution on \"Red\" [ENG]" do
-      before(:each) do
-        @find = CachedFind.create(:language_code => "FRA", :specification => "Red")
-        @find.execute!
-      end
-      
-      after(:each) do
-        @find.destroy
-      end
-      
-      it "should return the same number of products" do
-        count = @find.products.size
-        @find.execute!
-        @find.products.size.should == count
-      end
-      
-      it "should honour existing text filters only if they are in the correct language" do
-        filter_for_property(:brand).exclude!("DuraBrick")
-        filter_for_property(:model).exclude!("Taurus")
-        
-        model_values = TextPropertyValue.all(:property_definition_id => @properties[:model].id)
-        model_values.update!(:language_code => "FRA")
-        
-        @find.execute!
-        filter_for_property(:brand).exclusions.empty?.should be_false
-        filter_for_property(:model).exclusions.empty?.should be_true
-
-        model_values.update!(:language_code => "ENG")
-      end
-      
-      it "should honour exising numeric filter's values only if their chosen units are still valid" do
-        filter_for_property(:weight_dry).choose!(1.5, 1.6, "kg")
-        filter_for_property(:weight_wet).choose!(1.4, 1.5, "kg")
-        
-        weight_wet_values = NumericPropertyValue.all(:property_definition_id => @properties[:weight_wet].id)
-        weight_wet_values.update!(:unit => "lb")
-        
-        @find.execute!
-        filter_for_property(:weight_dry).chosen.first.should == 1.5
-        filter_for_property(:weight_wet).chosen.first.should_not == 1.4
-        
-        weight_wet_values.update!(:unit => "kg")
-      end
-    end
-  end if false
+    # describe "re-execution on \"Red\" [ENG]" do
+    #   before(:each) do
+    #     @find = CachedFind.create(:language_code => "FRA", :specification => "Red")
+    #     @find.execute!
+    #   end
+    #   
+    #   after(:each) do
+    #     @find.destroy
+    #   end
+    #   
+    #   it "should return the same number of products" do
+    #     count = @find.products.size
+    #     @find.execute!
+    #     @find.products.size.should == count
+    #   end
+    #   
+    #   it "should honour existing text filters only if they are in the correct language" do
+    #     filter_for_property(:brand).exclude!("DuraBrick")
+    #     filter_for_property(:model).exclude!("Taurus")
+    #     
+    #     model_values = TextPropertyValue.all(:property_definition_id => @properties[:model].id)
+    #     model_values.update!(:language_code => "FRA")
+    #     
+    #     @find.execute!
+    #     filter_for_property(:brand).exclusions.empty?.should be_false
+    #     filter_for_property(:model).exclusions.empty?.should be_true
+    # 
+    #     model_values.update!(:language_code => "ENG")
+    #   end
+    #   
+    #   it "should honour exising numeric filter's values only if their chosen units are still valid" do
+    #     filter_for_property(:weight_dry).choose!(1.5, 1.6, "kg")
+    #     filter_for_property(:weight_wet).choose!(1.4, 1.5, "kg")
+    #     
+    #     weight_wet_values = NumericPropertyValue.all(:property_definition_id => @properties[:weight_wet].id)
+    #     weight_wet_values.update!(:unit => "lb")
+    #     
+    #     @find.execute!
+    #     filter_for_property(:weight_dry).chosen.first.should == 1.5
+    #     filter_for_property(:weight_wet).chosen.first.should_not == 1.4
+    #     
+    #     weight_wet_values.update!(:unit => "kg")
+    #   end
+    # end
+  end
   
-  describe "execution without product data" do
-    it "should fail if the find is not valid" do
-      find = CachedFind.new(:language_code => "ENG", :specification => nil)
-      proc { find.execute! }.should raise_error
-    end
-    
-    it "should fail if the find is not saved" do
-      find = CachedFind.new(:language_code => "ENG", :specification => "Black Ford")
-      proc { find.execute! }.should raise_error
-    end
-    
-    it "should succeed if the find is valid" do
-      find = CachedFind.create(:language_code => "ENG", :specification => "Black Ford")
-      begin
-        proc { find.execute! }.should_not raise_error
-      ensure
-        find.destroy
-      end
-    end
-  end if false
-  
-  describe "destruction" do
-    it "should destroy any child filters (and thence exclusions)" do
-      find = CachedFind.create(:language_code => "ENG", :specification => "Red")
-      filter = TextFilter.create(:cached_find => find, :property_definition_id => 1, :language_code => "ENG")
-      filter.exclude!("DeadMeat")
-      find.destroy
-      begin
-        TextFilter.first(:cached_find_id => find.id).should be_nil
-        TextFilterExclusion.first(:filter_id => filter.id).should be_nil
-      ensure
-        TextFilter.all(:id => filter.id).destroy!
-        TextFilterExclusion.all(:filter_id => filter.id).destroy!
-      end
-    end
-  end if false
-  
-  describe "should be classified as" do
+  describe "unused" do
     before(:all) do
-      outside_anon = (CachedFind::ANONIMIZATION_TIME + 2.minutes).ago
-      outside_ttl = (Merb::Config[:session_ttl] + 2.minutes).ago
-      recently = 2.minutes.ago
-      
       @finds = []
-      [outside_anon, outside_ttl, recently].each do |t|
+      [(CachedFind::ANONIMIZATION_TIME + 2.minutes).ago, 2.minutes.ago].each do |t|
         @finds << CachedFind.create(:accessed_at => t, :language_code => "ENG", :specification => "test")
         @finds << CachedFind.create(:user_id => 1, :accessed_at => t, :language_code => "ENG", :specification => "test")
       end
@@ -331,12 +311,8 @@ describe CachedFind do
       @finds.each { |find| find.destroy }
     end
     
-    it "obsolete if both anonymous and accessed longer ago than the current session TTL" do
-      CachedFind.obsolete.count.should == (CachedFind::ANONIMIZATION_TIME > Merb::Config[:session_ttl] ? 2 : 1)
-    end
-
-    it "unused if both owned and accessed longer ago than the ANONIMIZATION_TIME" do
-      CachedFind.unused.count.should == (CachedFind::ANONIMIZATION_TIME > Merb::Config[:session_ttl] ? 1 : 2)
+    it "should return all non-anonymous finds accessed longer ago than the ANONIMIZATION_TIME" do
+      CachedFind.unused.count.should == 1
     end
   end
   

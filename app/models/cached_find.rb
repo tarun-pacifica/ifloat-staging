@@ -128,7 +128,6 @@ class CachedFind
     prop_info.merge(:include_unknown => filter[:include_unknown], :values_by_unit => values_by_unit)
   end
   
-  # TODO: spec
   def filter!(property_id, params)
     prop_info = Indexer.property_display_cache[property_id]
     return nil if prop_info.nil?
@@ -205,7 +204,7 @@ class CachedFind
   
   def filter_sanitize_choice(property_id, type, choices, unit)
     values_by_unit = Indexer.filterable_values_for_property_id(property_id, all_product_ids, [], language_code)
-    return nil if values_by_unit.nil?
+    return nil if values_by_unit.empty?
     
     unit = values_by_unit.keys.sort_by { |unit| unit.to_s }.first unless values_by_unit.has_key?(unit)
     all_values, relevant_values = values_by_unit[unit]

@@ -158,33 +158,25 @@ class CachedFind
     property_ids = filts.keys
     return all_product_ids if property_ids.empty?
     
-    # TODO: spec examples where this kicks in
-    # - the idea is that all products are relevant by default
-    # - since we use exclusion based filtering, any product without a value will not be excluded normally
-    # - thus if we mark a filter as not including unknown, we specifically limit the products to the set with that filter's property_id
     relevant_product_ids = all_product_ids
     required_property_ids = property_ids.select { |id| filts[id][:include_unknown] == false }
     relevant_product_ids &= Indexer.product_ids_for_property_ids(required_property_ids, language_code) unless required_property_ids.empty?
     relevant_product_ids - Indexer.excluded_product_ids_for_filters(filts, language_code)
   end
   
-  # TODO: spec
   def filtered_product_ids_by_image_checksum
     Indexer.image_checksums_for_product_ids(filtered_product_ids)
   end
   
-  # TODO: spec
   def filters_unused
     Indexer.property_display_cache.values_at(*property_ids_unused).compact.sort_by { |info| info[:seq_num] }
   end
   
-  # TODO: spec
   def filters_used(range_sep)
     infos = Indexer.property_display_cache.values_at(*(filters.keys)).compact.sort_by { |info| info[:seq_num] }
     infos.map { |info| info.merge(:summary=> filter_summarize(info, range_sep)) }
   end
   
-  # TODO: spec
   def unfilter!(property_id)
     return nil unless filters.has_key?(property_id)
     new_filters = Marshal.load(Marshal.dump(filters))
@@ -193,7 +185,6 @@ class CachedFind
     save
   end
   
-  # TODO: spec
   def unfilter_all!
     self.filters = {}
     save

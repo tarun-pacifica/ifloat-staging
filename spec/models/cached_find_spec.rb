@@ -99,7 +99,7 @@ describe CachedFind do
         @properties[property_key] = property
       end
       
-      @asset = Asset.create(:company_id => 1, :bucket => "products", :name => "car___1.jpg")
+      @asset = Asset.create(:company_id => 1, :bucket => "products", :name => "car___1.jpg", :checksum => "abcdef")
       @products = []
       [ # Ford Taurus in red / black
         { :brand  => {"ENG" => ["Ford"], "FRA" => ["Ford"]},
@@ -225,15 +225,35 @@ describe CachedFind do
       it "should return nil for a property ID outside those imlpied by the specification" do
         @find.filter!(@properties[:unused].id, "value" => "DeadMeat").should == nil
       end
+      
+      it "should allow for unfiltering" do
+        @find.filter!(@properties[:brand].id, "value" => "DeadMeat")
+        @find.filtered_product_ids.size.should == 1
+        @find.unfilter!(@properties[:brand].id).should == true
+        @find.unfilter!(@properties[:model].id).should == nil
+        @find.filtered_product_ids.size.should == @products.size
+      end
     
       it "should return only the life jacket for the brand list ['DeadMeat']" do
         @find.filter!(@properties[:brand].id, "value" => "DeadMeat")
         @find.filtered_product_ids.should == [@products[1].id].to_set
+        @find.filtered_product_ids(@properties[:brand].id).size.should == @products.size
+        @find.filtered_product_ids_by_image_checksum.should == {@asset.checksum => [@products[1].id]}
+        
+        @find.filters_unused.size.should == 0
+        used = @find.filters_used("::")
+        used.size.should == 1
+        used.first[:summary].should == "DeadMeat"
       end
       
       it "should return all products for the weight_dry range 1-2 kg (include unknown)" do
         @find.filter!(@properties[:weight_dry].id, "value" => "1::2", "unit" => "kg", "include_unknown" => "true")
         @find.filtered_product_ids.size.should == @products.size
+        
+        @find.filters_unused.size.should == 3
+        used = @find.filters_used("::")
+        used.size.should == 1
+        used.first[:summary].should == "1::2 kg"
       end
       
       it "should return only the products with a weight_dry range 1-2 kg (exclude unknown)" do

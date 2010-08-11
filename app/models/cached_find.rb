@@ -53,7 +53,6 @@ class CachedFind
     @all_product_ids ||= Indexer.product_ids_for_phrase(specification, language_code)
   end
   
-  # TODO: spec
   def ensure_valid
     return [] unless invalidated?
     

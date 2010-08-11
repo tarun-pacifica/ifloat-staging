@@ -75,9 +75,7 @@ describe CachedFind do
     end
   end
   
-  it "needs specs for filter_values & filter_values_relevant"
-  it "needs updated specs for filtered_product_ids (that take the class_only path into account)"
-  it "needs specs for language_code"
+  it "needs specs for filter_detail"
   
   describe "execution" do
     before(:all) do
@@ -211,6 +209,47 @@ describe CachedFind do
       end
     end
     
+    describe "ensuring validity" do
+      before(:all) { @find = CachedFind.create(:language_code => "ENG", :specification => "Red") }
+      
+      after(:all) { @find.destroy }
+      
+      after(:each) do
+        @find.invalidated = true
+        @find.unfilter_all!
+      end
+      
+      it "should return [] for a validated find" do
+        CachedFind.new(:language_code => "ENG", :specification => "Red", :invalidated => false).ensure_valid.should == []
+      end
+      
+      it "should return [] for an invalidated find with no filters" do
+        CachedFind.new(:language_code => "ENG", :specification => "Red").ensure_valid.should == []
+      end
+      
+      it "should return [] for an invalidated find with unchanged filters" do
+        @find.filter!(@properties[:brand].id, "value" => "DeadMeat")
+        @find.ensure_valid.should == []
+      end
+      
+      it "should return a list of changes for all defunct filters" do
+        data = {:data => ["DeadMeat"]}
+        @find.attribute_set(:filters, -1 => data, @properties[:brand].id => data)
+        @find.ensure_valid.should == ["Discarded filter for defunct property -1"]
+      end
+      
+      it "should return a list of changes for all unsanitizable filters" do
+        data = {:data => ["DeadMeat"]}
+        @find.attribute_set(:filters, @properties[:unused].id => data, @properties[:brand].id => data)
+        @find.ensure_valid.should == ["Discarded filter for misc:unused as unable to sanitize data"]
+      end
+      
+      it "should return a list of changes for all updated filters" do
+        @find.attribute_set(:filters, @properties[:brand].id => {:data => ["RedMeat"]})
+        @find.ensure_valid.should == ["Updated filter values for marketing:brand"]
+      end
+    end
+    
     describe "filtering on 'Red' [ENG]" do
       before(:all) { @find = CachedFind.create(:language_code => "ENG", :specification => "Red") }
       
@@ -270,54 +309,9 @@ describe CachedFind do
         @find.filter!(@properties[:weight_dry].id, "value" => "1.5::2", "unit" => "kg")
         @find.filtered_product_ids.should == [@products[3].id].to_set
       end
-    end
-    
-    # describe "re-execution on \"Red\" [ENG]" do
-    #   before(:each) do
-    #     @find = CachedFind.create(:language_code => "FRA", :specification => "Red")
-    #     @find.execute!
-    #   end
-    #   
-    #   after(:each) do
-    #     @find.destroy
-    #   end
-    #   
-    #   it "should return the same number of products" do
-    #     count = @find.products.size
-    #     @find.execute!
-    #     @find.products.size.should == count
-    #   end
-    #   
-    #   it "should honour existing text filters only if they are in the correct language" do
-    #     filter_for_property(:brand).exclude!("DuraBrick")
-    #     filter_for_property(:model).exclude!("Taurus")
-    #     
-    #     model_values = TextPropertyValue.all(:property_definition_id => @properties[:model].id)
-    #     model_values.update!(:language_code => "FRA")
-    #     
-    #     @find.execute!
-    #     filter_for_property(:brand).exclusions.empty?.should be_false
-    #     filter_for_property(:model).exclusions.empty?.should be_true
-    # 
-    #     model_values.update!(:language_code => "ENG")
-    #   end
-    #   
-    #   it "should honour exising numeric filter's values only if their chosen units are still valid" do
-    #     filter_for_property(:weight_dry).choose!(1.5, 1.6, "kg")
-    #     filter_for_property(:weight_wet).choose!(1.4, 1.5, "kg")
-    #     
-    #     weight_wet_values = NumericPropertyValue.all(:property_definition_id => @properties[:weight_wet].id)
-    #     weight_wet_values.update!(:unit => "lb")
-    #     
-    #     @find.execute!
-    #     filter_for_property(:weight_dry).chosen.first.should == 1.5
-    #     filter_for_property(:weight_wet).chosen.first.should_not == 1.4
-    #     
-    #     weight_wet_values.update!(:unit => "kg")
-    #   end
-    # end
+    end    
   end
-  
+    
   describe "unused" do
     before(:all) do
       @finds = []

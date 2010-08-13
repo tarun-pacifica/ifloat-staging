@@ -32,7 +32,7 @@ describe Facility do
     end
   end
   
-  describe "mapping products" do
+  describe "mapping products / references" do
     before(:all) do
       @companies = [1, 2].map { |n| Company.create(:name => n, :reference => "GBR-#{n}") }
       @products = (1..9).to_a.map { |n| Product.create(:company => @companies[0], :reference => n) }
@@ -49,12 +49,18 @@ describe Facility do
     
     it "should return the facility product for each product ID specified" do
       product_ids = @products.map { |product| product.id }
-      @facilities[0].map_products(product_ids).keys.sort.should == product_ids.values_at(1, 3, 5, 7)
+      map = @facilities[0].map_products(product_ids)
+      map.keys.sort.should == product_ids.values_at(1, 3, 5, 7)
+      fac_prods = map.values
+      fac_prods.all? { |v| v.class.should == FacilityProduct }
+      fac_prods.uniq.size.should == fac_prods.size
+    end
+    
+    it "should return the product IDs for each reference specified" do
+      @facilities[0].map_references([1, 2]).keys.sort.should == @products[0..1].map { |product| product.reference }
     end
   end
 
-  it "should have some specs for the product retrieval process"
-  
   it "should have some specs for the product update process"
   
 end

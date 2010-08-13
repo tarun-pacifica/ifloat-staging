@@ -25,7 +25,6 @@ class Facility
   has n, :products, :model => "FacilityProduct"
   has n, :purchases
   
-  # TODO: spec
   def map_products(product_ids)
     pids_by_fp_ref = {}
     ProductMapping.all(:company_id => company_id, :product_id => product_ids).each do |mapping|
@@ -41,7 +40,6 @@ class Facility
     fps_by_pid
   end
   
-  # TODO: spec
   def map_references(references)
     pids_by_fp_ref = {}
     ProductMapping.all(:company_id => company_id, :reference => references).each do |mapping|

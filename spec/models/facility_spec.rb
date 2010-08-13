@@ -61,6 +61,42 @@ describe Facility do
     end
   end
 
-  it "should have some specs for the product update process"
+  describe "updating products" do
+    before(:all) do
+      @text_type = PropertyType.create(:core_type => "text", :name => "text")
+      @ref_class = @text_type.definitions.create(:name => "reference:class", :sequence_number => 1)
+      @sale_price = @text_type.definitions.create(:name => "sale:price_min", :sequence_number => 2)
+      
+      @company = Company.create(:name => "Ford", :reference => "GBR-12345")
+      @facility = @company.facilities.create(:name => "Estore", :primary_url => "ford.com")
+      @product = @company.products.create(:reference => "UNUSED-P")
+      @prod_class = TextPropertyValue.create(:definition => @ref_class, :product => @product, :text_value => "Fish", :language_code => "ENG", :auto_generated => false, :sequence_number => 1)
+      @prod_class.should be_valid
+      @unused_mapping = @company.product_mappings.create(:reference => "UNUSED-M", :product => @product)
+      
+      Indexer.stub(:property_display_cache).and_return(@ref_class.id => {:raw_name => @ref_class.name})
+    end
+    
+    after(:all) do
+      [@text_type, @ref_class, @sale_price, @company, @facility, @product, @prod_class, @unused_mapping].each { |object| object.destroy }
+    end
+        
+    it "should create new products, warning on umapped / obsolete mappings (and do nothing if there are no diffs)" do
+      @facility.update_products("P1" => {:price => "42.42", :title => "T1", :description => "D1", :image_url => ""}).should == [
+        ["P1", "updated: title", "from nil", "to \"T1\""],
+        ["P1", "updated: image_url", "from nil", "to \"\""],
+        ["P1", "updated: description", "from nil", "to \"D1\""],
+        ["P1", "unmapped reference", nil, "T1", "D1", ""],
+        ["UNUSED-M", "obsolete mapped reference", "classes: Fish"]
+      ]
+      @facility.products.count.should == 1
+      @facility.update_products("P1" => {:price => "42.42", :title => "T1", :description => "D2", :image_url => ""}).should == [
+        ["P1", "updated: description", "from \"D1\"", "to \"D2\""],
+        ["P1", "unmapped reference", nil, "T1", "D2", ""],
+        ["UNUSED-M", "obsolete mapped reference", "classes: Fish"]
+      ]
+      @facility.products.count.should == 1
+    end
+  end
   
 end

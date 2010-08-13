@@ -27,6 +27,7 @@ class Company
   property :primary_url, String, :length => 255
 
   has n, :assets
-  has n, :product_mappings
   has n, :facilities
+  has n, :product_mappings
+  has n, :products
 end

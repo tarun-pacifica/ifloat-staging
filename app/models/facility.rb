@@ -48,7 +48,6 @@ class Facility
     pids_by_fp_ref
   end
   
-  # TODO: spec
   def update_products(product_info_by_ref)
     reports = []
     
@@ -68,7 +67,7 @@ class Facility
       
       [:title, :image_url, :description].each do |a|
         new_val, old_val = info[a].unpack("C*").pack("U*"), product.attribute_get(a)
-        next unless new_val == old_val
+        next if new_val == old_val
         product.attribute_set(a, new_val)
         reports << [ref, "updated: #{a}", "from #{old_val.inspect}", "to #{new_val.inspect}"]
       end

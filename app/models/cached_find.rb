@@ -87,7 +87,6 @@ class CachedFind
     save ? changes : []
   end
   
-  # TODO: spec
   def filter_detail(property_id)
     prop_info = Indexer.property_display_cache[property_id]
     return nil if prop_info.nil?

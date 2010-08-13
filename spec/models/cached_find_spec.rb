@@ -250,6 +250,32 @@ describe CachedFind do
       end
     end
     
+    describe "filter detail" do
+      before(:all) { @find = CachedFind.create(:language_code => "ENG", :specification => "Red") }
+      
+      after(:all) { @find.destroy }
+      
+      after(:each) { @find.unfilter_all! }
+      
+      it "should return nil for an unknown property ID" do
+        @find.filter_detail(-1).should == nil
+      end
+      
+      it "should return minimal data for an unused property ID" do
+        prop_detail = Indexer.property_display_cache[@properties[:unused].id]
+        expected = prop_detail.merge(:values_by_unit => {}, :include_unknown => false)
+        @find.filter_detail(@properties[:unused].id).should == expected
+      end
+      
+      it "should return filter data for a used property ID" do
+        @find.filter!(@properties[:weight_dry].id, "value" => "1.5::2", "unit" => "kg", "include_unknown" => "true")
+        prop_detail = Indexer.property_display_cache[@properties[:weight_dry].id]
+        vbu = {"kg" => [[1.0, false, true, "1 kg"], [2.0, true, true, "2 kg"]]}
+        expected = prop_detail.merge(:values_by_unit => vbu, :include_unknown => true)
+        @find.filter_detail(@properties[:weight_dry].id).should == expected
+      end
+    end
+    
     describe "filtering on 'Red' [ENG]" do
       before(:all) { @find = CachedFind.create(:language_code => "ENG", :specification => "Red") }
       
@@ -261,7 +287,7 @@ describe CachedFind do
         @find.filter!(-1, "value" => "DeadMeat").should == nil
       end
       
-      it "should return nil for a property ID outside those imlpied by the specification" do
+      it "should return nil for a property ID outside those implied by the specification" do
         @find.filter!(@properties[:unused].id, "value" => "DeadMeat").should == nil
       end
       
@@ -272,7 +298,7 @@ describe CachedFind do
         @find.unfilter!(@properties[:model].id).should == nil
         @find.filtered_product_ids.size.should == @products.size
       end
-    
+      
       it "should return only the life jacket for the brand list ['DeadMeat']" do
         @find.filter!(@properties[:brand].id, "value" => "DeadMeat")
         @find.filtered_product_ids.should == [@products[1].id].to_set
@@ -309,7 +335,7 @@ describe CachedFind do
         @find.filter!(@properties[:weight_dry].id, "value" => "1.5::2", "unit" => "kg")
         @find.filtered_product_ids.should == [@products[3].id].to_set
       end
-    end    
+    end
   end
     
   describe "unused" do

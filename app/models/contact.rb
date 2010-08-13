@@ -19,6 +19,7 @@ class Contact
   property :value, String, :required => true, :length => 255
   
   belongs_to :user
+    property :user_id, Integer, :required => true # TODO: investigate why inherited models require this
     
   validates_with_block :type do
     (self.class != Contact and self.kind_of?(Contact)) || [false, "Type must be a sub-class of Contact"]

@@ -9,8 +9,10 @@ describe Employee do
                                :nickname => "MJ",
                                :login => "mj@example.com",
                                :password => "sekrit",
+                               :confirmation => "sekrit",
                                :job_title => "Manager",
-                               :department => "MIS")
+                               :department => "MIS",
+                               :created_from => "10.0.0.1")
     end
     
     it "should succeed with valid data" do

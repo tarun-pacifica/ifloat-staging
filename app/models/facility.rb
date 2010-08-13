@@ -19,7 +19,7 @@ class Facility
   property :primary_url, String, :length => 255, :unique_index => true
   
   belongs_to :company
-    property :company_id, Integer, :unique_index => :name_per_company
+    property :company_id, Integer, :required => true, :unique_index => :name_per_company
   belongs_to :location, :required => false
   has n, :employees
   has n, :products, :model => "FacilityProduct"

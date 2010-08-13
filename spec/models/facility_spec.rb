@@ -37,7 +37,9 @@ describe Facility do
       @companies = [1, 2].map { |n| Company.create(:name => n, :reference => "GBR-#{n}") }
       @products = (1..9).to_a.map { |n| Product.create(:company => @companies[0], :reference => n) }
       @facilities = [1, 2].map { |n| @companies[1].facilities.create(:name => n, :primary_url => n) }
-      @fac_products = (1..9).to_a.map { |n| FacilityProduct.create(:facility => @facilities[n % 2], :reference => n) }
+      @fac_products = (1..9).to_a.map do |n|
+        FacilityProduct.create(:facility => @facilities[n % 2], :reference => n, :price => 42.42, :currency => "GBP")
+      end
       @mappings = (1..9).to_a.map { |n| ProductMapping.create(:company => @companies[1], :reference => n, :product => @products[n - 1]) }
     end
     

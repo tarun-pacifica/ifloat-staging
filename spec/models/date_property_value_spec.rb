@@ -18,15 +18,11 @@ describe DatePropertyValue do
     
     it "should succeed with valid data" do
       @value.should be_valid
-      @value.range?.should be_false
-      @value.value.should == 20090112
     end
     
     it "should succeed with valid data, acting as a range" do
       @value.max_value = 20090113
       @value.should be_valid
-      @value.range?.should be_true
-      @value.value.should == (20090112..20090113)
     end
     
     it "should fail without a product" do
@@ -99,14 +95,17 @@ describe DatePropertyValue do
   describe "formatting" do
     it "should succeed for YYYY0000" do
       DatePropertyValue.format_value(20090000).should == "2009"
+      DatePropertyValue.format_value(20090000, :verbose => true).should == "2009"
     end
     
     it "should succeed for YYYYMM00" do
       DatePropertyValue.format_value(20090100).should == "2009-01"
+      DatePropertyValue.format_value(20090100, :verbose => true).should == "January 2009"
     end
     
     it "should succeed for YYYYMMDD" do
       DatePropertyValue.format_value(20090112).should == "2009-01-12"
+      DatePropertyValue.format_value(20090112, :verbose => true).should == "January 12, 2009"
     end
   end
   

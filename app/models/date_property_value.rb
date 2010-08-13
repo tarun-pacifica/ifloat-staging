@@ -10,7 +10,6 @@ class DatePropertyValue < NumericPropertyValue
   
   validates_absence_of :tolerance, :unit
   
-  # TODO: spec verbose examples
   def self.format_value(value, params = {})
     v = value.to_i
     ymd = [v / 10000, (v / 100) % 100, v % 100].select { |n| n > 0 }    

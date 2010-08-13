@@ -44,7 +44,9 @@ class PropertyValue
   property :sequence_number, Integer, :required => true
   
   belongs_to :product
+    property :product_id, Integer, :required => true # TODO: investigate why inherited models require this
   belongs_to :definition, :model => "PropertyDefinition", :child_key => [:property_definition_id]
+    property :property_definition_id, Integer, :required => true # TODO: ditto
   
   validates_with_block :type do
     (self.class != PropertyValue and self.kind_of?(PropertyValue)) || [false, "Type must be a sub-class of PropertyValue"]

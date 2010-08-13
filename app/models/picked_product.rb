@@ -11,7 +11,7 @@
 class PickedProduct
   include DataMapper::Resource
   
-  GROUPS = %w(buy_later buy_now compare).to_set
+  GROUPS = %w(buy_later buy_now compare)
   
   property :id,           Serial
   property :created_at,   DateTime, :default => proc { DateTime.now }
@@ -25,7 +25,6 @@ class PickedProduct
   
   validates_within :group, :set => GROUPS
   
-  # TODO: spec
   def self.all_primary_keys
     query =<<-SQL
       SELECT DISTINCT c.reference AS cref, p.reference AS pref
@@ -37,7 +36,6 @@ class PickedProduct
     repository(:default).adapter.select(query).map { |record| [record.cref, record.pref] }
   end
   
-  # TODO: spec
   def title_parts
     [cached_brand, cached_class]
   end

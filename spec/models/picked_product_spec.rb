@@ -9,6 +9,7 @@ describe PickedProduct do
     
     it "should succeed with valid data" do
       @pick.should be_valid
+      @pick.title_parts.should == ["Marlow", "Rope"]
     end
     
     it "should fail without a product" do
@@ -47,6 +48,8 @@ describe PickedProduct do
     end
   end
   
-  it "should have specs for updating the cached values based on an ensure_valid method"
+  describe "primary key retrieval" do
+    it "should return the unique combinations of [company ref, product ref] associated with all picked products"
+  end
   
 end

@@ -20,5 +20,5 @@ class FacilityProduct
   property :description, Text,     :lazy => false
   
   belongs_to :facility
-    property :facility_id, Integer, :unique_index => :ref_per_facility
+    property :facility_id, Integer, :required => true, :unique_index => :ref_per_facility
 end

@@ -75,8 +75,6 @@ describe CachedFind do
     end
   end
   
-  it "needs specs for filter_detail"
-  
   describe "execution" do
     before(:all) do
       @text_type = PropertyType.create(:core_type => "text", :name => "text")

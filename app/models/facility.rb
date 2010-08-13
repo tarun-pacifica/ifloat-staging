@@ -56,29 +56,23 @@ class Facility
     transaction = DataMapper::Transaction.new(adapter)
     transaction.begin
     adapter.push_transaction(transaction)
-  
-    # TODO: switch to the simpler form when the call to save below stops triggering the facility's validations
-    # http://datamapper.lighthouseapp.com/projects/20609-datamapper/tickets/1154
-    # existing_products_by_ref = products.all.hash_by { |product| product.reference }
-    existing_products_by_ref = FacilityProduct.all(:facility_id => id).hash_by { |product| product.reference }
 
+    existing_products_by_ref = products.all.hash_by { |product| product.reference }
     new_refs = product_info_by_ref.keys.to_set
     products.all(:reference => existing_products_by_ref.keys.to_set - new_refs).destroy!
   
     product_info_by_ref.each do |ref, info|
-      # TODO: see above
-      # product = existing_products_by_ref[ref] || products.new(:reference => ref)
-      product = existing_products_by_ref[ref] || FacilityProduct.new(:facility_id => id, :reference => ref)
-      product.price = info[:price]
+      product = existing_products_by_ref[ref] || products.new(:reference => ref)
+      product.price = BigDecimal.new(info[:price]) # explicit conversion required to avoid triggering dirty-detection
       product.currency = "GBP"
       
       [:title, :image_url, :description].each do |a|
         old_val, new_val = product.attribute_get(a), info[a].unpack("C*").pack("U*")
         product.attribute_set(a, new_val)
-        reports << [ref, "updated: #{a}", "from #{old_val.inspect}", "to #{new_val.inspect}"] unless old_val == new_val
+        reports << [ref, "updated: #{a}", "from #{old_val.inspect}", "to #{new_val.inspect}"] unless new_val == old_val
       end
-      
-      product.save if product.new? or product.dirty? # TODO: remove when DM comes to its senses
+
+      product.save
     end
 
     adapter.pop_transaction

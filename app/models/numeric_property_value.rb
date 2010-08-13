@@ -30,7 +30,6 @@ class NumericPropertyValue < PropertyValue
     attributes
   end
   
-  # TODO: spec to reflect params and default unit behaviour (fractional support etc...)
   def self.format(min_value, max_value, range_separator = "...", unit = nil, params = {})
     params[:unit] = unit
     [min_value, max_value].uniq.map { |v| format_value(v, params) }.join(range_separator) +
@@ -51,7 +50,6 @@ class NumericPropertyValue < PropertyValue
     {:min_value => min, :max_value => max}
   end
   
-  # TODO: spec
   def comparison_key
     key = [min_value]
     key << max_value unless min_value == max_value
@@ -59,7 +57,6 @@ class NumericPropertyValue < PropertyValue
     key
   end
   
-  # TODO: spec
   def to_s(range_separator = "...")
     self.class.format(min_value, max_value, range_separator, unit)
   end

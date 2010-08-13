@@ -16,15 +16,16 @@ describe NumericPropertyValue do
 
     it "should succeed with valid data" do
       @value.should be_valid
-      @value.range?.should be_false
-      @value.value.should == 22.50
+      @value.to_s.should == "22.5 GBP"
+      @value.comparison_key.should == [22.5, "GBP"]
     end
     
     it "should succeed with valid data, acting as a range" do
       @value.max_value = 23
       @value.should be_valid
-      @value.range?.should be_true
-      @value.value.should == (22.50..23)
+      @value.to_s.should == "22.5...23 GBP"
+      @value.to_s("-").should == "22.5-23 GBP"
+      @value.comparison_key.should == [22.5, 23, "GBP"]
     end
     
     it "should fail without a product" do
@@ -60,6 +61,8 @@ describe NumericPropertyValue do
     it "should succeed without a unit" do
       @value.unit = nil
       @value.should be_valid
+      @value.to_s.should == "22.5"
+      @value.comparison_key.should == [22.5]
     end
     
     it "should succeed without a tolerance" do
@@ -68,7 +71,7 @@ describe NumericPropertyValue do
     end
   end
   
-  describe "conversion" do    
+  describe "conversion" do
     it "should succeed with a valid conversion" do
       original = {:min_value => 10, :max_value => 20, :unit => "in"}
       NumericPropertyValue.convert(original, "mm").should == {:min_value => 254, :max_value => 508, :unit => "mm"}
@@ -79,9 +82,9 @@ describe NumericPropertyValue do
       NumericPropertyValue.convert(original, "mm")[:tolerance].should == 2.82
     end
     
-    it "should honour the maximum significant figures of the input value (with a minimum of 2SF)" do
+    it "should honour the maximum significant figures of the input value (with a minimum of 3SF)" do
       original = {:min_value => 0.01, :max_value => 0.01, :unit => "in"}
-      NumericPropertyValue.convert(original, "mm")[:min_value].should == 0.25
+      NumericPropertyValue.convert(original, "mm")[:min_value].should == 0.254
       
       original = {:min_value => 1.01, :max_value => 1.01, :unit => "in"}
       NumericPropertyValue.convert(original, "mm")[:min_value].should == 25.7
@@ -175,10 +178,14 @@ describe NumericPropertyValue do
     it "should succeed for a ranged pair with a custom separator" do
       NumericPropertyValue.format(1.6, 5.0, "-").should == "1.6-5"
     end
+    
+    it "should succeed for a ranged pair with a custom separator and a unit" do
+      NumericPropertyValue.format(1.25, 5.0, "-", "kg").should == "1.25-5 kg"
+    end
+    
+    it "should succeed for a ranged pair with a custom separator and a unit (with fractional support)" do
+      NumericPropertyValue.format(1.25, 5.0, "-", "in").should == "1 1/4-5 in"
+    end    
   end
-  
-  describe "retrieving limits by unit by property ID" do
-    it "should have specs"
-  end
-  
+    
 end

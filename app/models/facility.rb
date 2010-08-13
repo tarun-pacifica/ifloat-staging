@@ -67,9 +67,10 @@ class Facility
       product.currency = "GBP"
       
       [:title, :image_url, :description].each do |a|
-        old_val, new_val = product.attribute_get(a), info[a].unpack("C*").pack("U*")
+        new_val, old_val = info[a].unpack("C*").pack("U*"), product.attribute_get(a)
+        next unless new_val == old_val
         product.attribute_set(a, new_val)
-        reports << [ref, "updated: #{a}", "from #{old_val.inspect}", "to #{new_val.inspect}"] unless new_val == old_val
+        reports << [ref, "updated: #{a}", "from #{old_val.inspect}", "to #{new_val.inspect}"]
       end
 
       product.save

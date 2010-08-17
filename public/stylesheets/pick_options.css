@@ -151,6 +151,7 @@
 
 #po_buy_now table td.howto {
 	padding: 10px;
+	text-align: right;
 }
 
 #po_buy_now table td.howto p {

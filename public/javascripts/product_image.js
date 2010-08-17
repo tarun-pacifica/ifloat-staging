@@ -23,13 +23,22 @@ function product_image_popup(event, image_url, relative_position, caption) {
 	var position = image.offset();
 	var popup_height = popup.outerHeight();
 	
-	var left = position.left + (relative_position == 'right' ? (image.outerWidth() + 10) : (-10 - popup.outerWidth()));
+	var left_end = position.left, left_start;
+	if(relative_position == 'right') {
+		left_end += image.outerWidth() + 10;
+		left_start = left_end + 10;
+	} else {
+		left_end -= popup.outerWidth() + 10;
+		left_start = left_end - 10;
+	}
+
 	var top = position.top + (image.outerHeight() - popup_height) / 2;
 	
 	var document_overhang = top + popup_height - $(document).height();
 	if(document_overhang > 0) top -= document_overhang;
 	
-	popup.css('left', left + 'px').css('top', top + 'px').fadeIn('fast');
+	popup.css('left', left_start + 'px').css('top', top + 'px').css('opacity', 0).show();
+	popup.animate({left: left_end + 'px', opacity: 1}, 'fast');
 }
 
 function product_image_unpopup(event) {

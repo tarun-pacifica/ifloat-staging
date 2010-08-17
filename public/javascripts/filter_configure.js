@@ -267,8 +267,7 @@ function filter_configure_values_text(values_by_unit, html) {
 
 function filter_configure_values_text_select_all() {
 	var filter_configure = $('#filter_configure');
-	filter_configure.find('table input').attr('checked', true);
-	filter_configure.find('p.select_all input').attr('checked', true);
+	filter_configure.find('table input').attr('checked', filter_configure.find('p.select_all input').attr('checked'));
 }
 
 function filter_configure_values_text_select_one(value) {

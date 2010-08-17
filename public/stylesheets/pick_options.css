@@ -226,8 +226,8 @@
 	background-position: 0 -46px;
 }
 
-#po_buy_now table tr.facilities td {
-	display: hidden;
+#po_buy_now table tr.facilities {
+	display: none;
 }
 
 #po_buy_now table tr.odd td {

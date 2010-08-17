@@ -71,7 +71,6 @@ class NumericPropertyValue < PropertyValue
     i = value.to_i
     return i.to_s if i == f
     
-    # TODO: spec
     if FRACTIONAL_UNITS.include?(params[:unit])
       denominator = 2
       remainder = f - i

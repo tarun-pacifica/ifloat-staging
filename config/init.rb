@@ -26,7 +26,7 @@ Merb::BootLoader.before_app_loads do
   # These methods are handy to have available in general
   
   class Array
-    def hash_by(method = nil) # TODO: check for opportunities to use this
+    def hash_by(method = nil)
       hash = {}
       each do |item|
         key = (method.nil? ? (yield item) : item.send(method))

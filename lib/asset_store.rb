@@ -1,7 +1,6 @@
 module AssetStore
   COMMON_METHODS = [:delete_obsolete, :url, :url_direct, :write].to_set
   
-  # TODO: periodically compare and delete from the store (for all obsolete storage names)
   @@engine = nil
   
   def self.config(engine, config = {})

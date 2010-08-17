@@ -149,47 +149,49 @@
 	background-position: 0 -46px;
 }
 
-#po_buy_now table td.buy {
-	border-left: 1px solid silver;
-	color: gray;
-	padding: 5px 10px 0 10px;
-	text-align: center;
+#po_buy_now table td.howto {
+	padding: 10px;
 }
 
-#po_buy_now table td.buy a {
+#po_buy_now table td.howto p {
+	margin: 5px;
+}
+
+#po_buy_now table td.facility {
+	border-left: 1px solid silver;
+	padding: 5px;
+	text-align: center;
+	width: 1%;
+}
+
+#po_buy_now table td.facility a {
 	background: url(/images/pick_options/buttons/buy_from.png) no-repeat;
 	color: black;
 	display: block;
 	height: 19px;
+	margin: 5px 10px;
 	padding-top: 4px;
 	text-align: center;
 	text-decoration: none;
 	width: 90px;
 }
 
-#po_buy_now table td.buy a:hover {
+#po_buy_now table td.facility a:hover {
 	background-position: 0 -23px;
 	color: white;
 }
 
-#po_buy_now table td.buy a:active {
+#po_buy_now table td.facility a:active {
 	background-position: 0 -46px;
-}
-
-#po_buy_now table td.howto p {
-	margin: 5px 5px 0 5px;
-	text-align: right;
-}
-
-#po_buy_now table td.facility {
-	border-left: 1px solid silver;
-	text-align: center;
-	width: 1%;
 }
 
 #po_buy_now table td.facility img {
 	padding: 0 5px;
 	width: 100px;
+}
+
+#po_buy_now table td.facility p {
+	color: gray;
 }
 
 #po_buy_now table td.price {
@@ -222,6 +224,10 @@
 
 #po_buy_now table tr.even td.buttons div:active {
 	background-position: 0 -46px;
+}
+
+#po_buy_now table tr.facilities td {
+	display: hidden;
 }
 
 #po_buy_now table tr.odd td {

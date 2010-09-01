@@ -8,11 +8,12 @@ module Indexer
   @@property_display_cache = {}
   @@sale_price_min_property_id = nil
   @@skip_load = false
+  @@tag_frequencies = {}
   @@text_filtering_index = {}
   @@text_finding_index = {}
   
   def self.class_property_id
-    @@class_property_id
+    @@class_property_id if ensure_loaded
   end
   
   def self.compile
@@ -22,6 +23,7 @@ module Indexer
         :image_checksums         => compile_image_checksum_index,
         :numeric_filtering       => compile_numeric_filtering_index,
         :property_display_cache  => compile_property_display_cache,
+        :tag_frequencies         => compile_tag_frequencies(records),
         :text_filtering          => compile_filtering_index(records.select { |r| r.filterable }, :language_code, :text_value),
         :text_finding            => compile_text_finding_index(records)
       }
@@ -38,6 +40,7 @@ module Indexer
     @@image_checksum_index = compile_image_checksum_index
     @@numeric_filtering_index = compile_numeric_filtering_index
     @@property_display_cache = compile_property_display_cache
+    @@tag_frequencies = compile_tag_frequencies
     @@text_filtering_index = compile_filtering_index(records.select { |r| r.filterable }, :language_code, :text_value)
     @@text_finding_index = compile_text_finding_index(records)
     @@skip_load = true
@@ -125,6 +128,7 @@ module Indexer
       @@image_checksum_index = indexes[:image_checksums]
       @@numeric_filtering_index = indexes[:numeric_filtering]
       @@property_display_cache = indexes[:property_display_cache]
+      @@tag_frequencies = indexes[:tag_frequencies]
       @@text_filtering_index = indexes[:text_filtering]
       @@text_finding_index = indexes[:text_finding]
     end
@@ -187,7 +191,12 @@ module Indexer
   end
   
   def self.sale_price_min_property_id
-    @@sale_price_min_property_id
+    @@sale_price_min_property_id if ensure_loaded
+  end
+  
+  def self.tag_frequencies
+    return {} unless ensure_loaded
+    @@tag_frequencies
   end
   
   
@@ -277,6 +286,16 @@ module Indexer
       }
     end
     cache
+  end
+  
+  def self.compile_tag_frequencies(records)
+    pd_ids = PropertyDefinition.all(:name => %w(reference:class_super reference:class_senior)).map { |pd| pd.id }.to_set
+    
+    frequencies = Hash.new(0)
+    records.each do |record|
+      frequencies[record.text_value] += 1 if pd_ids.include?(record.property_definition_id)
+    end
+    frequencies
   end
   
   def self.compile_text_finding_index(records)

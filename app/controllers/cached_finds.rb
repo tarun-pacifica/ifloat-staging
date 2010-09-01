@@ -104,7 +104,12 @@ class CachedFinds < Application
   end
   
   def new
-    @show_purchases_button = session.picked_products.any? { |pick| pick.group =~ /^buy/ }
+    min, max = Indexer.tag_frequencies.values.minmax
+    normalised_max = (max - min) / 4.0
+    @tags = Indexer.tag_frequencies.sort.map! do |tag, frequency|
+      [tag, ((frequency - min) / normalised_max).ceil]
+    end
+   
     render
   end
   

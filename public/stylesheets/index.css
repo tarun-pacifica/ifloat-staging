@@ -22,7 +22,12 @@ p.tag_cloud {
 }
 
 p.tag_cloud span {
+	cursor: pointer;
 	margin-right: 10px;
+}
+
+p.tag_cloud span:hover {
+	text-decoration: underline;
 }
 
 p.tag_cloud span.weight_0 {

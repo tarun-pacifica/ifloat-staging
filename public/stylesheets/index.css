@@ -27,26 +27,27 @@ p.tag_cloud span {
 
 p.tag_cloud span.weight_0 {
 	color: #83AAF1;
+	font-size: 16px;
 }
 
 p.tag_cloud span.weight_1 {
 	color: #5B87DA;
-	font-size: 150%;
+	font-size: 20px;
 }
 
 p.tag_cloud span.weight_2 {
 	color: #345EB7;
-	font-size: 200%;
+	font-size: 24px;
 }
 
 p.tag_cloud span.weight_3 {
 	color: #1A43A3;
-	font-size: 250%;
+	font-size: 28px;
 }
 
 p.tag_cloud span.weight_4 {
 	color: #122989;
-	font-size: 300%;
+	font-size: 32px;
 }
 
 #tag_cloud_cta {

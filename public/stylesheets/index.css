@@ -16,6 +16,7 @@ p.tag_cloud {
 	box-shadow: 2px 2px 2px gray;
 	-moz-box-shadow: 2px 2px 2px gray;
 	-webkit-box-shadow: 2px 2px 2px gray;
+	margin-top: 0;
 	padding: 20px;
 	text-align: justify;
 }
@@ -48,3 +49,12 @@ p.tag_cloud span.weight_4 {
 	font-size: 300%;
 }
 
+#tag_cloud_cta {
+	background: #B0E0FF;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	height: 20px;
+	margin: -5px 0 -10px 100px;
+	width: 10px;
+}

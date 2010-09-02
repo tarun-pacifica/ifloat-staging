@@ -6,3 +6,7 @@
 	width: 410px;
 	margin-right: -32px;
 }
+
+#tag_cloud_cta {
+	display: none;
+}

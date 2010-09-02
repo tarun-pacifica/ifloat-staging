@@ -107,7 +107,7 @@ class CachedFinds < Application
     min, max = Indexer.tag_frequencies.values.minmax
     normalised_max = (max - min) / 4.0
     @tags = Indexer.tag_frequencies.sort.map! do |tag, frequency|
-      [tag, ((frequency - min) / normalised_max).ceil]
+      [tag, ((frequency - min) / normalised_max).round]
     end
    
     render

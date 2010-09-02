@@ -16,9 +16,11 @@
 		<table summary="prices">
 			<tr class="facilities">
 				<td class="howto" colspan="2">
-					<p>Marinestore have quoted the following prices for your items</p>
-					<p>Use the <strong>Buy All Now</strong> button to complete your purchase on their website</p>
-					<p>While there, you will still have access to your items</p>
+					<div>
+						<p>Marinestore have quoted the following prices for your items</p>
+						<p>Use the <strong>Buy All Now</strong> button to complete your purchase on their website</p>
+						<p>While there, you will still have access to your items</p>
+					</div>
 				</td>
 				<% @facility_urls.each do |url| %>
 				<td class="facility"> <img src="/images/partner/facilities/<%= url %>.png" alt=<%= url.inspect %> /> </td>

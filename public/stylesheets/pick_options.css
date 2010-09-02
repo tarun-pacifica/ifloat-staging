@@ -154,6 +154,19 @@
 	text-align: right;
 }
 
+#po_buy_now table td.howto div {
+	background: #B0E0FF;
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	box-shadow: 2px 2px 2px gray;
+	-moz-box-shadow: 2px 2px 2px gray;
+	-webkit-box-shadow: 2px 2px 2px gray;
+	float: right;
+	padding: 5px;
+}
+
+
 #po_buy_now table td.howto p {
 	margin: 5px;
 }

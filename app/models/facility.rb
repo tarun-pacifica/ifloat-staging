@@ -18,7 +18,7 @@ class Facility
   property :id,          Serial
   property :name,        String, :required => true, :unique_index => :name_per_company
   property :primary_url, String, :length => 255, :unique_index => true
-  property :description, Text
+  property :description, Text,   :lazy => false
   
   belongs_to :company
     property :company_id, Integer, :required => true, :unique_index => :name_per_company

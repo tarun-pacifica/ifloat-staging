@@ -91,9 +91,9 @@ function pick_options_update(data) {
 		var html = '<p>No items in stock</p>';
 		var url = fac_urls[i];
 		if(counts_by_url[url] > 0) html = '<a href="/picked_products/buy/' + fac_ids_by_url[url] + '">Buy All Now</a>';
-		var image = facilities_row.find('img[alt=' + url + ']');
-		image.siblings().remove();
-		image.after(html);
+		var span = facilities_row.find('img[alt=' + url + ']').parent();
+		span.siblings().remove();
+		span.after(html);
 	}
 	
 	// Products

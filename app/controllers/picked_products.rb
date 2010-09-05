@@ -141,9 +141,12 @@ class PickedProducts < Application
     end
     
     # TODO: replace simplified logic with a DB lookup based on @prices_by_url_by_product_id when > 1 partners
+    @facility_descriptions_by_url = {}
     @facility_ids_by_url = {}
     Facility.all.each do |facility|
-      @facility_ids_by_url[facility.primary_url] = facility.id
+      url = facility.primary_url
+      @facility_descriptions_by_url[url] = facility.description
+      @facility_ids_by_url[url] = facility.id
     end
     @facility_urls = @facility_ids_by_url.keys
     

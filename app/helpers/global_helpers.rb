@@ -100,8 +100,7 @@ module Merb
           value.split("\n").map { |paragraph| "<p>#{paragraph}</p>" }.join
         end
       when "marketing:feature_list"
-        items = values.map { |value| value.split("\n") }.flatten.map { |value| "<li>#{value}</li>" }
-        return tooltip('Features', "<ul>#{items.join}</ul>", tooltip_position)
+        return tooltip_list('Features', values, tooltip_position)
       end
       
       values.join("<br />")
@@ -127,6 +126,11 @@ module Merb
       <<-HTML
   	    <span class="defined" onmouseover="tooltip_show(event, '#{t}', '#{position}')" onmouseout="tooltip_hide()">#{value}</span>
   	  HTML
+    end
+    
+    def tooltip_list(name, values, position = :right)
+      items = values.map { |value| value.split("\n") }.flatten.map { |value| "<li>#{value}</li>" }
+      tooltip(name, "<ul>#{items.join}</ul>", position)
     end
   end
 end

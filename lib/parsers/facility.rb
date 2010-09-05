@@ -1,13 +1,13 @@
 class FacilityParser < AbstractParser
-  HEADERS = %w(company.reference name primary_url)
+  HEADERS = %w(company.reference name primary_url description)
   REQUIRED_VALUE_HEADERS = %w(company.reference).to_set
   
   
   private
   
   def generate_objects(parsed_fields)
-    company, name, url = parsed_fields.values_at(*HEADERS)
-    [ImportObject.new(Facility, :company => company, :name => name, :primary_url => url)]
+    company, name, url, description = parsed_fields.values_at(*HEADERS)
+    [ImportObject.new(Facility, :company => company, :name => name, :primary_url => url, :description => description)]
   end
   
   def parse_field(head, value, fields)

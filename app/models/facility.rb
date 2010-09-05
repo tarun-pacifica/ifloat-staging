@@ -10,6 +10,7 @@
 #
 # name:: 'The Big Boats On-line Store'
 # primary_url:: 'store.bigboats.co.uk'
+# description:: 'A marvelous array of fishy things.'
 #
 class Facility
   include DataMapper::Resource
@@ -17,6 +18,7 @@ class Facility
   property :id, Serial
   property :name, String, :required => true, :unique_index => :name_per_company
   property :primary_url, String, :length => 255, :unique_index => true
+  property :description, String, :length => 255
   
   belongs_to :company
     property :company_id, Integer, :required => true, :unique_index => :name_per_company

@@ -4,7 +4,7 @@ describe Facility do
 
   describe "creation" do
     before(:each) do
-      @facility = Facility.new(:company_id => 1, :location_id => 1, :name => "HQ", :primary_url => "hq.example.com")
+      @facility = Facility.new(:company_id => 1, :location_id => 1, :name => "HQ", :primary_url => "hq.example.com", :description => "foo")
     end
     
     it "should succeed with valid data" do
@@ -28,6 +28,11 @@ describe Facility do
     
     it "should succeed without a primary URL" do
       @facility.primary_url = nil
+      @facility.should be_valid
+    end
+    
+    it "should succeed without a description" do
+      @facility.description = nil
       @facility.should be_valid
     end
   end

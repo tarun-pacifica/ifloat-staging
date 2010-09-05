@@ -290,11 +290,17 @@ module Indexer
   
   def self.compile_tag_frequencies(records)
     property_names = %w(reference:class_senior reference:tag marketing:find_word_gift)
-    pd_ids = PropertyDefinition.all(:name => property_names).map { |pd| pd.id }.to_set
+    gift_id = nil
+    pd_ids = PropertyDefinition.all(:name => property_names).map do |pd|
+      gift_id = pd.id if pd.name == "marketing:find_word_gift"
+      pd.id
+    end.to_set
     
     frequencies = Hash.new(0)
     records.each do |record|
-      frequencies[record.text_value] += 1 if pd_ids.include?(record.property_definition_id)
+      next unless pd_ids.include?(record.property_definition_id)
+      value = (record.property_definition_id == gift_id ? "Giftware" : record.text_value)
+      frequencies[value] += 1
     end
     frequencies
   end

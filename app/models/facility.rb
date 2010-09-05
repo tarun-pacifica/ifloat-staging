@@ -15,10 +15,10 @@
 class Facility
   include DataMapper::Resource
   
-  property :id, Serial
-  property :name, String, :required => true, :unique_index => :name_per_company
+  property :id,          Serial
+  property :name,        String, :required => true, :unique_index => :name_per_company
   property :primary_url, String, :length => 255, :unique_index => true
-  property :description, String, :length => 255
+  property :description, Text
   
   belongs_to :company
     property :company_id, Integer, :required => true, :unique_index => :name_per_company

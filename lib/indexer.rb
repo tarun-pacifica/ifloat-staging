@@ -289,7 +289,8 @@ module Indexer
   end
   
   def self.compile_tag_frequencies(records)
-    pd_ids = PropertyDefinition.all(:name => %w(reference:class_super reference:class_senior)).map { |pd| pd.id }.to_set
+    property_names = %w(reference:class_senior reference:tag marketing:find_word_gift)
+    pd_ids = PropertyDefinition.all(:name => property_names).map { |pd| pd.id }.to_set
     
     frequencies = Hash.new(0)
     records.each do |record|

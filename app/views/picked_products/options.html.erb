@@ -23,9 +23,9 @@
 					</div>
 				</td>
 				<% @facility_urls.each do |url| %>
-				<% description = @facility_descriptions_by_url[url].to_s %>
+				<% description = @facility_descriptions_by_url[url].to_s.superscript %>
 				<td class="facility">
-					<%= tooltip_list("<img src=\"/images/partner/facilities/#{url}.png\" alt=#{url.inspect} />", description, :left) %>
+					<%= tooltip_list("<img src=\"/images/partner/facilities/#{url}.png\" alt=#{url.inspect} />", [description], :left) %>
 				</td>
 				<% end %>
 			</tr>

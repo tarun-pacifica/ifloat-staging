@@ -13,18 +13,19 @@ class Attachment
   include DataMapper::Resource
   
   ROLES = {
-    "image"             => "Image",
-    "image_hi_res"      => "High Resolution Image",
-    "brochure"          => "Brochure",
-    "specification"     => "Specification Set",
-    "dimensions"        => "Dimension Set",
-    "installation"      => "Installation Guide",
-    "operation"         => "Operation Guide",
-    "maintenance"       => "Maintenance Guide",
-    "parts"             => "Parts Listing",
-    "review"            => "Review",
-    "user_experience"   => "User Experience Review",
-    "safety_data_sheet" => "Safety Data Sheet"
+    "image"              => "Image",
+    "image_hi_res"       => "High Resolution Image",
+    "brochure"           => "Brochure",
+    "specification"      => "Specification Set",
+    "dimensions"         => "Dimension Set",
+    "installation"       => "Installation Guide",
+    "operation"          => "Operation Guide",
+    "maintenance"        => "Maintenance Guide",
+    "parts"              => "Parts Listing",
+    "review"             => "Review",
+    "user_experience"    => "User Experience Review",
+    "safety_data_sheet"  => "Safety Data Sheet",
+    "product_data_sheet" => "Product Data Sheet"
   }
   
   property :id, Serial

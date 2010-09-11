@@ -88,9 +88,7 @@
 
 			<% unless description.blank? %>
 			<h3>Description</h3>
-			<% description.split("\n").each do |paragraph| %>
-			<p><%= paragraph %></p>
-			<% end %>
+			<%= BlueCloth.new(description).to_html %>
 			<% end %>
 		</div>
 

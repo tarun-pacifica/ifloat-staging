@@ -10,8 +10,10 @@ gems %w(merb-core merb-action-args merb-helpers), "1.1.3"
 gems %w(merb_datamapper), "1.1.2"
 
 # Others
+gem "bluecloth",  "2.0.7"
 gem "cloudfiles", "1.4.8"
 gem "fastercsv",  "1.5.3" unless RUBY_VERSION =~ /^1\.9\./
+gem "i18n",       "0.4.1"
 gem "json",       "1.4.6"
 gem "mail",       "2.2.5"
 gem "rspec",      "1.3.0"

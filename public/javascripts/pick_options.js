@@ -122,9 +122,10 @@ function pick_options_update(data) {
 		if(prices_by_url == undefined) prices_by_url = {}
 		for(var j in fac_urls) {
 			var url = fac_urls[j];
+			var fac_id = fac_ids_by_url[url]
 			var price = prices_by_url[url];
 			if(price == undefined) html.push('<td class="price">Not in stock</td>');
-			else html.push('<td class="price">' + price + '</td>');
+			else html.push('<td class="price"> ' + price + ' <a href="/picked_products/buy/' + fac_id + '?product_id=' + info.product_id + '">Buy Now</a> </td>');
 		}
 		
 		html.push('</tr>');

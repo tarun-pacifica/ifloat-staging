@@ -215,6 +215,27 @@
 	width: 1%;
 }
 
+#po_buy_now table td.price a {
+	background: url(/images/pick_options/buttons/buy_from_blue.png) no-repeat;
+	color: black;
+	display: block;
+	height: 19px;
+	margin: 5px 15px 0 15px;
+	padding-top: 4px;
+	text-align: center;
+	text-decoration: none;
+	width: 90px;
+}
+
+#po_buy_now table td.price a:hover {
+	background-position: 0 -23px;
+	color: white;
+}
+
+#po_buy_now table td.price a:active {
+	background-position: 0 -46px;
+}
+
 #po_buy_now table td.product {
 	border-top: 1px solid silver;
 	max-width: 410px;
@@ -238,6 +259,10 @@
 
 #po_buy_now table tr.even td.buttons div:active {
 	background-position: 0 -46px;
+}
+
+#po_buy_now table tr.even td.price a {
+	background: url(/images/pick_options/buttons/buy_from_grey.png) no-repeat;
 }
 
 #po_buy_now table tr.facilities {

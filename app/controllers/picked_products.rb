@@ -19,7 +19,8 @@ class PickedProducts < Application
       @partner_product_urls[product_id] = partner_product_url(facility, facility_product.reference)
     end
     
-    first_available_product = fac_prods_by_prod_id.values_at(*prod_ids_by_group["buy_now"]).compact.first
+    first_available_product = fac_prods_by_prod_id[params[:product_id].to_i]
+    first_available_product ||= fac_prods_by_prod_id.values_at(*prod_ids_by_group["buy_now"]).compact.first
     @partner_url = partner_url(facility, first_available_product)
     return redirect("/picked_products/options") if @partner_url.nil?
     

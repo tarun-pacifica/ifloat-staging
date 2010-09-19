@@ -5,7 +5,7 @@ function product_link(product) {
 	title_lines = [];
 	for(var i in titles) title_lines.push('<h2>' + util_superscript('text', titles[i]) + '</h2>');
 	
-	return '<a class="product" href="/products/' + product.id + '">' + product_image_make(image_urls[0], image_urls[1]) + title_lines.join(" ") + '<p>' + util_superscript('text', product.summary) + '</p> <hr class="terminator" /> </a>';
+	return '<a class="product" href="' + product.url + '">' + product_image_make(image_urls[0], image_urls[1]) + title_lines.join(" ") + '<p>' + util_superscript('text', product.summary) + '</p> <hr class="terminator" /> </a>';
 }
 
 var $ifloat_product_links_cache = {};

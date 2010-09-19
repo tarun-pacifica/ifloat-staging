@@ -1,10 +1,12 @@
 module Indexer
   COMPILED_PATH = "caches/indexer.marshal"
+  SITEMAP_PATH = "public/sitemap.txt"
   
   @@class_property_id = nil
   @@image_checksum_index = {}
   @@last_loaded_md5 = nil
   @@numeric_filtering_index = {}
+  @@product_url_cache = {}
   @@property_display_cache = {}
   @@sale_price_min_property_id = nil
   @@skip_load = false
@@ -22,6 +24,7 @@ module Indexer
       indexes = {
         :image_checksums         => compile_image_checksum_index,
         :numeric_filtering       => compile_numeric_filtering_index,
+        :product_url_cache       => compile_product_url_cache,
         :property_display_cache  => compile_property_display_cache,
         :tag_frequencies         => compile_tag_frequencies(records),
         :text_filtering          => compile_filtering_index(records.select { |r| r.filterable }, :language_code, :text_value),
@@ -39,6 +42,7 @@ module Indexer
     records = text_records
     @@image_checksum_index = compile_image_checksum_index
     @@numeric_filtering_index = compile_numeric_filtering_index
+    @@product_url_cache = compile_product_url_cache
     @@property_display_cache = compile_property_display_cache
     @@tag_frequencies = compile_tag_frequencies
     @@text_filtering_index = compile_filtering_index(records.select { |r| r.filterable }, :language_code, :text_value)
@@ -127,6 +131,7 @@ module Indexer
       indexes = Marshal.load(f)
       @@image_checksum_index = indexes[:image_checksums]
       @@numeric_filtering_index = indexes[:numeric_filtering]
+      @@product_url_cache = indexes[:product_url_cache]
       @@property_display_cache = indexes[:property_display_cache]
       @@tag_frequencies = indexes[:tag_frequencies]
       @@text_filtering_index = indexes[:text_filtering]
@@ -135,6 +140,10 @@ module Indexer
     
     @@class_property_id = PropertyDefinition.first(:name => "reference:class").id
     @@sale_price_min_property_id = PropertyDefinition.first(:name => "sale:price_min").id
+    
+    File.open(SITEMAP_PATH, "w") do |f|
+      f.puts @@product_url_cache.values.map { |stem| "http://www.ifloat.biz" + stem }.join("\n")
+    end
     
     @@last_loaded_md5 = source_md5
   end
@@ -162,6 +171,11 @@ module Indexer
     phrase.downcase.split(/\W+/).map do |word|
        (index[word] || Set.new).to_set
     end.inject { |union, product_ids| union & product_ids } & @@image_checksum_index.keys
+  end
+  
+  def self.product_url(product_id)
+    return {} unless ensure_loaded
+    @@product_url_cache[product_id] || "/products/#{product_id}"
   end
   
   # TODO: extend to support multiple languages
@@ -261,6 +275,24 @@ module Indexer
     
     records = repository.adapter.select(query, true, "GBR-02934378")
     compile_filtering_index(records, :unit, :min_value, :max_value)
+  end
+  
+  def self.compile_product_url_cache
+    query =<<-SQL
+      SELECT product_id, text_value
+      FROM property_values
+      WHERE property_definition_id = ?
+        AND language_code = 'ENG'
+        AND text_value IS NOT NULL
+        AND sequence_number = 4
+    SQL
+    
+    urls_by_product_id = {}
+    repository.adapter.select(query, PropertyDefinition.first(:name => "auto:title").id).each do |record|
+      title = record.text_value.downcase.gsub(/[^a-z0-9]+/, "-")[0, 256]
+      urls_by_product_id[record.product_id] = "/products/#{title}-#{record.product_id}"
+    end
+    urls_by_product_id
   end
   
   # TODO: extend to support other languages

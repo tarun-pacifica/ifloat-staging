@@ -161,19 +161,27 @@ class ImportSet
   def verify_integrity
     pias_by_product = stopwatch("derived primary image list") { primary_image_attachments }
     
-    stopwatch("ensured all products have a primary image") do
-      (@objects.select { |object| object.klass == Product } - pias_by_product.keys).each do |product|
+    all_products = @objects.select { |object| object.klass == Product }
+    error(Product, nil, nil, nil, "> 50,000 products (sitemap would be invalid)") if all_products.size > 50000
+    
+    stopwatch("ensured all products have a 400x400 primary image") do
+      (all_products - pias_by_product.keys).each do |product|
         error(Product, product.path, product.row, nil, "no primary image specified")
       end
-    end
-    
-    stopwatch("ensured all primary images are 400x400 in size") do
+      
       pias_by_product.values.map { |attachment| attachment.attributes[:asset] }.uniq.each do |asset|
         pk = asset.primary_key
         size = asset.attributes[:pixel_size]
         error(Asset, asset.path, asset.row, nil, "not 400x400 (#{size}): #{friendly_pk(pk)}") unless size == "400x400"
       end
     end
+    
+    # TODO: can't use ProductRelationship.related_products as we're in-memory only
+    # stopwatch("ensured a product's related product IDs form a unique set") do
+    #   all_products.each do |product|
+    #     
+    #   end
+    # end
     
     stopwatch("ensured no orphaned PickedProducts") do
       PickedProduct.all_primary_keys.each do |company_ref, product_ref|
@@ -485,8 +493,7 @@ def build_asset_csv
       if wm_exists
         wm_path = info[3] = ASSET_VARIANT_DIR / "#{checksum}#{ext}"
         unless File.exist?(wm_path)
-          hi_res = size.split("x").all? { |dim| dim.to_i > 400 }
-          placement = (hi_res ? "-gravity Center" : "-geometry +10+10 -gravity SouthEast")
+          placement = (size == "400x400" ? "-geometry +10+10 -gravity SouthEast" : "-gravity Center")
           report = `gm composite #{placement} #{ASSET_WATERMARK_PATH.inspect} #{path.inspect} #{wm_path.inspect} 2>&1`
           unless $?.success?
             errors << [path, "GM.composite failed: #{report.inspect}"]

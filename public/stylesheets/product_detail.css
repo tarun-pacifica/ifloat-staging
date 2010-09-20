@@ -84,28 +84,13 @@
 	margin: 15px 0 5px 5px;
 }
 
-#product_detail .price_actions table.prices {
-	border: 1px solid silver;
-	border-collapse: collapse;
-	margin-top: 10px;
-	width: 100%;
-}
-
-#product_detail .price_actions table.prices img {
-	width: 100px;
-}
-
-#product_detail .price_actions table.prices td {
-	padding: 2px;
-	text-align: center;
-}
-
-#product_detail .price_actions table.prices td.no_stock {
-	background: #F3F3F3;
-}
-
-#product_detail .price_actions table.prices td.price {
+#product_detail .price_actions p#price {
 	background: #DCE9F7;
+	border: 1px solid silver;
+	margin: 10px 5px;
+	padding: 5px;
+	text-align: center;
+	width: 242px;
 }
 
 #product_detail .price_actions table.related_media {

@@ -30,7 +30,7 @@ class Products < Application
     
     gather_assets(@product)
     
-    @prices_by_url = @product.prices_by_url(session.currency)
+    @min_price = @product.prices_by_url(session.currency).values.min
     @price_unit, @price_divisor = UnitOfMeasure.unit_and_divisor_by_product_id([product_id])[product_id]
     
     @related_products_by_rel_name = ProductRelationship.related_products(@product)

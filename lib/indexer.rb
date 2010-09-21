@@ -1,6 +1,6 @@
 module Indexer
   COMPILED_PATH = "caches/indexer.marshal"
-  SITEMAP_PATH = "public/sitemap.txt"
+  SITEMAP_PATH = "public/sitemap.xml"
   
   @@class_property_id = nil
   @@image_checksum_index = {}
@@ -142,7 +142,10 @@ module Indexer
     @@sale_price_min_property_id = PropertyDefinition.first(:name => "sale:price_min").id
     
     File.open(SITEMAP_PATH, "w") do |f|
-      f.puts @@product_url_cache.values.map { |stem| "http://www.ifloat.biz" + stem }.join("\n")
+      f.puts '<?xml version="1.0" encoding="UTF-8"?>'
+      f.puts '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+      f.puts @@product_url_cache.values.map { |stem| "<url> <loc>http://www.ifloat.biz#{stem}</loc> </url>" }
+      f.puts '</urlset>'
     end
     
     @@last_loaded_md5 = source_md5

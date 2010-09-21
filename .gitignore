@@ -9,5 +9,5 @@ doc/*
 log/
 public/assets
 public/javascripts/compiled.js
-public/sitemap.txt
+public/sitemap.xml
 public/stylesheets/compiled.css

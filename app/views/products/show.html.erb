@@ -53,7 +53,7 @@
 		<hr class="terminator" />
 	
 		<div class="description">
-			<% (@body_values_by_name["auto:title"] || []).each do |title| %>
+			<% (@body_values_by_name["auto:title"] || [])[0, 3].each do |title| %>
 			<h2><%= title.superscript %></h2>
 			<% end %>
 			

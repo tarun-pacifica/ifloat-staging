@@ -46,7 +46,7 @@ class PickedProducts < Application
     @product_ids = @picks_by_product_id.keys
     
     return redirect("/") if @product_ids.empty?
-    return redirect(Indexer.product_url(product_ids.first)) if @product_ids.size == 1
+    return redirect(Indexer.product_url(@product_ids.first)) if @product_ids.size == 1
     
     forced_diff_props = %w(marketing:summary marketing:feature_list).to_set
     @common_values, diff_values = Product.marshal_values(@product_ids, session.language, RANGE_SEPARATOR, forced_diff_props)

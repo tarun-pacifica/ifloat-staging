@@ -6,10 +6,11 @@ class AssociatedWordParser < AbstractParser
   
   def generate_objects(parsed_fields)
     word = parsed_fields.delete(:word)
+    return [] if parsed_fields.empty?
     
     rules = {}
     parsed_fields.each do |property, value|
-      rules[property.attributes[:name]] = value
+      rules[property.attributes[:name]] = value unless value.nil?
     end
       
     [ImportObject.new(AssociatedWord, :word => word, :rules => rules)]

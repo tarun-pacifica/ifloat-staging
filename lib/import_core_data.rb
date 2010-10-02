@@ -16,7 +16,7 @@ CSV_REPO = "../ifloat_csvs"
 
 ERRORS_PATH = "/tmp/errors.csv"
 
-CLASSES = [PropertyType, PropertyDefinition, PropertyValueDefinition, TitleStrategy, UnitOfMeasure, Company, Facility, Asset, Brand, Product]
+CLASSES = [PropertyType, PropertyDefinition, PropertyValueDefinition, AssociatedWord, TitleStrategy, UnitOfMeasure, Company, Facility, Asset, Brand, Product]
 
 class ImportObject
   attr_accessor :primary_key, :resource_id
@@ -39,6 +39,7 @@ class ImportSet
     PropertyDefinition      => [:name],
     Translation             => [:property_definition, :language_code],
     PropertyValueDefinition => [:property_type, :value],
+    AssociatedWord          => [:word, :rules],
     TitleStrategy           => [:name],
     UnitOfMeasure           => [:class_name],
     Company                 => [:reference],
@@ -54,7 +55,7 @@ class ImportSet
     TextPropertyValue       => [:product, :definition, :sequence_number, :language_code]
   }
   
-  BULK_CLASSES = [Attachment, ProductMapping, ProductRelationship, DatePropertyValue, NumericPropertyValue, TextPropertyValue].to_set
+  BULK_CLASSES = [AssociatedWord, Attachment, ProductMapping, ProductRelationship, DatePropertyValue, NumericPropertyValue, TextPropertyValue].to_set
   
   def initialize
     @errors = []
@@ -132,7 +133,7 @@ class ImportSet
     
     @objects.each do |object|
       klass = object.klass
-      classes << klass unless classes.include?(klass)
+      classes << klass
       (objects_by_class[klass] ||= []) << object
     end
     
@@ -144,7 +145,7 @@ class ImportSet
       transaction.begin
       @adapter.push_transaction(transaction)
       
-      classes.each do |klass|
+      classes.uniq.each do |klass|
         stopwatch(klass) { class_stats << [klass, import_class(klass, objects_by_class.delete(klass))] }
         break unless @errors.empty?
       end
@@ -258,7 +259,7 @@ class ImportSet
         value = "%.6f" % value if attribute == :min_value or attribute == :max_value
         
         case value
-        when Array then Base64.encode64(Marshal.dump(value))
+        when Array, Hash then Base64.encode64(Marshal.dump(value))
         when FalseClass, TrueClass then value ? 1 : 0
         else value
         end
@@ -295,7 +296,7 @@ class ImportSet
         slice.each do |pk_md5, object, attributes|
           attributes[:type] = klass
           attributes.values_at(*column_names).each do |v|
-            bind_values << (v.is_a?(Array) ? Base64.encode64(Marshal.dump(v)) : v)
+            bind_values << ((v.is_a?(Array) or v.is_a?(Hash)) ? Base64.encode64(Marshal.dump(v)) : v)
           end
         end
         

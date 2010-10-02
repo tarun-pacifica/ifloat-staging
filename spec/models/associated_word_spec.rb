@@ -4,7 +4,7 @@ describe AssociatedWord do
 
   describe "creation" do   
     before(:each) do
-      @aw = AssociatedWord.new(:word => "silly", :implied_by => {5 => "fatuous", 6 => "spurious"})
+      @aw = AssociatedWord.new(:word => "silly", :rules => {"sometimes" => "fatuous", "usually" => "spurious"})
     end
     
     it "should succeed with valid data" do
@@ -17,22 +17,27 @@ describe AssociatedWord do
     end
     
     it "should fail without a rule" do
-      @aw.implied_by = nil
+      @aw.rules = nil
+      @aw.should_not be_valid
+    end
+    
+    it "should fail with any blank rule keys" do
+      @aw.rules[""] = "bar"
+      @aw.should_not be_valid
+    end
+    
+    it "should fail with any non-string rule keys" do
+      @aw.rules[6] = "bar"
       @aw.should_not be_valid
     end
     
     it "should fail with any blank rule words" do
-      @aw.implied_by[6] = ""
+      @aw.rules["sometimes"] = ""
       @aw.should_not be_valid
     end
     
     it "should fail with any non-string rule words" do
-      @aw.implied_by[6] = nil
-      @aw.should_not be_valid
-    end
-    
-    it "should fail with any non-integer rule keys" do
-      @aw.implied_by["foo"] = "bar"
+      @aw.rules["sometimes"] = nil
       @aw.should_not be_valid
     end
   end

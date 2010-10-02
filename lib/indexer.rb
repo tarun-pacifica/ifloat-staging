@@ -20,15 +20,17 @@ module Indexer
   
   def self.compile
     Tempfile.open(File.basename(COMPILED_PATH)) do |f|
-      records = text_records      
+      properties = PropertyDefinition.all
+      records = text_records
+      
       indexes = {
         :image_checksums         => compile_image_checksum_index,
         :numeric_filtering       => compile_numeric_filtering_index,
         :product_url_cache       => compile_product_url_cache,
-        :property_display_cache  => compile_property_display_cache,
-        :tag_frequencies         => compile_tag_frequencies(records),
+        :property_display_cache  => compile_property_display_cache(properties),
+        :tag_frequencies         => compile_tag_frequencies(properties, records),
         :text_filtering          => compile_filtering_index(records.select { |r| r.filterable }, :language_code, :text_value),
-        :text_finding            => compile_text_finding_index(records)
+        :text_finding            => compile_text_finding_index(properties, records)
       }
       
       FileUtils.mkpath(File.dirname(COMPILED_PATH))
@@ -242,16 +244,17 @@ module Indexer
   
   def self.compile_image_checksum_index
     # TODO: remove MS hack once we are vending all products rather than just MarineStore's
-    #       first two INNER JOINS and second WHERE condition
+    #       sub-select    
     query =<<-SQL
       SELECT p.id, a.checksum
       FROM products p
-        INNER JOIN product_mappings pm ON p.id = pm.product_id
-        INNER JOIN companies c ON pm.company_id = c.id
         INNER JOIN attachments at ON p.id = at.product_id
         INNER JOIN assets a ON at.asset_id = a.id
-      WHERE c.reference = ?
-        AND at.role = 'image'
+      WHERE at.role = 'image'
+        AND p.id IN ( SELECT pm.product_id
+                      FROM product_mappings pm
+                        INNER JOIN companies c ON pm.company_id = c.id
+                      WHERE c.reference = ? )
       ORDER BY at.sequence_number
     SQL
     
@@ -299,8 +302,7 @@ module Indexer
   end
   
   # TODO: extend to support other languages
-  def self.compile_property_display_cache
-    properties = PropertyDefinition.all
+  def self.compile_property_display_cache(properties)
     friendly_names = PropertyDefinition.friendly_name_sections(properties, "ENG")
     icon_urls = PropertyDefinition.icon_urls_by_property_id(properties)
     
@@ -323,10 +325,10 @@ module Indexer
     cache
   end
   
-  def self.compile_tag_frequencies(records)
-    property_names = %w(reference:class_senior reference:tag marketing:find_word_gift)
+  def self.compile_tag_frequencies(properties, records)
+    property_names = %w(reference:class_senior reference:tag marketing:find_word_gift).to_set
     gift_id = nil
-    pd_ids = PropertyDefinition.all(:name => property_names).map do |pd|
+    pd_ids = properties.select { |pd| property_names.include?(pd) }.map do |pd|
       gift_id = pd.id if pd.name == "marketing:find_word_gift"
       pd.id
     end.to_set
@@ -340,14 +342,29 @@ module Indexer
     frequencies
   end
   
-  def self.compile_text_finding_index(records)
+  def self.compile_text_finding_index(properties, records)
     index = {}
+    values_by_product_id = {}
+    
     records.each do |record|
+      (values_by_product_id[record.product_id] ||= Set.new) << "#{record.property_definition_id}\0#{record.text_value}"
       next unless record.findable
       
       record.text_value.downcase.split(/[^a-z0-9']+/).uniq.each do |word|
         language = (index[record.language_code] ||= {})
         (language[word] ||= []) << record.product_id        
+      end
+    end
+    
+    # TODO: contemplate how to make associate words multilingual
+    eng_index = (index["ENG"] ||= {})
+    properties_by_name = properties.hash_by(:name)
+    AssociatedWord.all.each do |aword|
+      p aword
+      rules = aword.rules.map { |property_name, value| "#{properties_by_name[property_name].id}\0#{value}" }.to_set
+      word_index = (eng_index[aword.word] ||= [])
+      values_by_product_id.each do |product_id, values|
+        word_index << product_id unless (rules & values).empty?
       end
     end
     

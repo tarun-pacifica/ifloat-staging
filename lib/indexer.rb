@@ -328,7 +328,7 @@ module Indexer
   def self.compile_tag_frequencies(properties, records)
     property_names = %w(reference:class_senior reference:tag marketing:find_word_gift).to_set
     gift_id = nil
-    pd_ids = properties.select { |pd| property_names.include?(pd) }.map do |pd|
+    pd_ids = properties.select { |pd| property_names.include?(pd.name) }.map do |pd|
       gift_id = pd.id if pd.name == "marketing:find_word_gift"
       pd.id
     end.to_set

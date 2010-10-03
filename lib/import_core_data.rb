@@ -248,6 +248,7 @@ class ImportSet
       end
       
       pk = attributes.values_at(*pk_fields)
+      pk.map! { |k| k.is_a?(Hash) ? Base64.encode64(Marshal.dump(k)) : k }
       pk_md5 = Digest::MD5.hexdigest(pk.join("::"))
       existing_value_md5, existing_id = existing_catalogue[pk_md5]
       to_create << [pk_md5, object, attributes] and next if existing_id.nil?

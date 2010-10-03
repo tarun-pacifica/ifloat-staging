@@ -344,10 +344,12 @@ module Indexer
   
   def self.compile_text_finding_index(properties, records)
     index = {}
-    values_by_product_id = {}
+    prod_ids_by_values_by_prop_ids = {}
     
     records.each do |record|
-      (values_by_product_id[record.product_id] ||= Set.new) << "#{record.property_definition_id}\0#{record.text_value}"
+      prod_ids_by_values = (prod_ids_by_values_by_prop_ids[record.property_definition_id] ||= {})
+      (prod_ids_by_values[record.text_value] ||= Set.new) << record.product_id
+            
       next unless record.findable
       
       record.text_value.downcase.split(/[^a-z0-9']+/).uniq.each do |word|
@@ -356,16 +358,15 @@ module Indexer
       end
     end
     
-    # TODO: contemplate how to make associate words multilingual
+    # TODO: contemplate how to make associated words multilingual
     eng_index = (index["ENG"] ||= {})
     properties_by_name = properties.hash_by(:name)
     AssociatedWord.all.each do |aword|
-      p aword
-      rules = aword.rules.map { |property_name, value| "#{properties_by_name[property_name].id}\0#{value}" }.to_set
-      word_index = (eng_index[aword.word] ||= [])
-      values_by_product_id.each do |product_id, values|
-        word_index << product_id unless (rules & values).empty?
-      end
+      word_index = (eng_index[aword.word] ||= [])      
+      word_index += aword.rules.map do |property_name, value|
+        prop_id = properties_by_name[property_name].id
+        (prod_ids_by_values_by_prop_ids[prop_id] || {})[value] || []
+      end.inject { |union, product_ids| union & product_ids }
     end
     
     index.each do |language, words|

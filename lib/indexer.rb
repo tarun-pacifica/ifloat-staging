@@ -348,7 +348,7 @@ module Indexer
     
     records.each do |record|
       prod_ids_by_values = (prod_ids_by_values_by_prop_ids[record.property_definition_id] ||= {})
-      (prod_ids_by_values[record.text_value] ||= Set.new) << record.product_id
+      (prod_ids_by_values[record.text_value] ||= []) << record.product_id
             
       next unless record.findable
       
@@ -362,7 +362,7 @@ module Indexer
     eng_index = (index["ENG"] ||= {})
     properties_by_name = properties.hash_by(:name)
     AssociatedWord.all.each do |aword|
-      word_index = (eng_index[aword.word] ||= [])      
+      word_index = (eng_index[aword.word] ||= [])
       word_index += aword.rules.map do |property_name, value|
         prop_id = properties_by_name[property_name].id
         (prod_ids_by_values_by_prop_ids[prop_id] || {})[value] || []

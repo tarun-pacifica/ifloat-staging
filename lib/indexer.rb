@@ -361,7 +361,7 @@ module Indexer
     # TODO: contemplate how to make associated words multilingual
     eng_index = (index["ENG"] ||= {})
     properties_by_name = properties.hash_by(:name)
-    AssociatedWord.all(:word => "humidity").each do |aword|
+    AssociatedWord.all.each do |aword|
       eng_index[aword.word] = (eng_index[aword.word] || []) + aword.rules.map do |property_name, value|
         prop_id = properties_by_name[property_name].id
         (prod_ids_by_values_by_prop_ids[prop_id] || {})[value] || []

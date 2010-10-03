@@ -104,6 +104,7 @@ class CachedFinds < Application
   end
   
   def new
+    @tags = []
     min, max = Indexer.tag_frequencies.values.minmax
     unless min.nil?
       normalised_max = (max - min) / 4.0 

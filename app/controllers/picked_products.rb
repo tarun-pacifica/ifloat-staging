@@ -24,7 +24,9 @@ class PickedProducts < Application
     @partner_url = partner_url(facility, first_available_product)
     return redirect("/picked_products/options") if @partner_url.nil?
     
-    session.add_purchase(Purchase.new(:facility => facility, :created_ip => request.remote_ip))
+    purchase = Purchase.new(:facility => facility, :created_ip => request.remote_ip)
+    session.add_purchase(purchase)
+    Mailer.deliver(:purchase_started, :purchase => purchase)
     
     @background_css = "white"
     @skip_copyright = true

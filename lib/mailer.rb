@@ -86,6 +86,15 @@ module Mailer
         Mailer.envelope(mail, action, :admin, :admin)
         body report.join("\n")
       end
+    
+    when :purchase_started
+      purchase = params[:purchase]
+      return if purchase.nil?
+      
+      Mail.deliver do |mail|
+        Mailer.envelope(mail, action, :admin, :admin)
+        body "Purchase #{purchase.id} started at #{purchase.facility.primary_url} from #{purchase.created_ip} (user ID: #{purchase.user_id.inspect})"
+      end
       
     when :registration
       user = params[:user]

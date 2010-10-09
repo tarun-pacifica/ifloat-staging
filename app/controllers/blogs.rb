@@ -8,6 +8,7 @@ class Blogs < Application
     @blog_image_src = image_src(name)
     @images = Article.images(@articles)
     
+    @page_title = @articles.first.title
     render
   end
   

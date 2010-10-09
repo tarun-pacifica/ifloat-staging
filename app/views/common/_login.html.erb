@@ -2,14 +2,14 @@
 	<p class="message"> </p>
 
 	<form class="login" action="/users/login" method="POST" onsubmit="return login_submit(event)">
-		<h1>Login</h1>
+		<h3>Login</h3>
 		<p> <label>E-mail: <input type="text" name="login" /></label> </p>
 		<p> <label>Password: <input type="password" name="password" /></label> </p>
 		<p class="submit"> <%= submit "Login", :onclick => "login_operation('login')" %> <%= submit "Reset Password", :onclick => "login_operation('reset')" %> </p>
 	</form>
 
 	<form class="register" action="/users" method="POST" onsubmit="return login_submit(event)">
-		<h1>Register</h1>
+		<h3>Register</h3>
 		<p> <label>Name: <input type="text" name="name" /></label> </p>
 		<p> <label>Nickname: <input type="text" name="nickname" /></label> </p>
 		<p> <label>E-mail: <input type="text" name="login" /></label> </p>

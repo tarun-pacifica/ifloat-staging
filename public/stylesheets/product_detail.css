@@ -24,6 +24,12 @@
 	text-decoration: underline;
 }
 
+#product_detail .description h1 {
+	color: #159FFC;
+	font-size: 16px;
+	margin: 0 0 4px 0;
+}
+
 #product_detail .description h2 {
 	color: #159FFC;
 	font-size: 16px;

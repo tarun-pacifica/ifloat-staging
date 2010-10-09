@@ -14,7 +14,7 @@
 	
 	<div class="body">
 		<div class="images">
-			<img class="main" src=<%= @image_urls.first.inspect %> />
+			<img class="main" src=<%= @image_urls.first.inspect %> alt=<%= @page_title.inspect %> />
 			<% if @image_urls.size > 1 %>			
 				<% @image_urls.each do |url|%>
 				<img class="thumb" src=<%= url.inspect %> onmouseover="product_detail_select_image(event)" />

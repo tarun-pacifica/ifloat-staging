@@ -1,5 +1,9 @@
 module Merb
   module GlobalHelpers
+    def hidden_field(*args)
+      "<div>#{super}</div>"
+    end
+    
     def money(amount, currency, per_unit = nil)
       return nil if amount.nil?
       

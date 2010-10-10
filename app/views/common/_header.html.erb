@@ -1,44 +1,44 @@
 <div id="header">
-	<div id="header_body">
-		<span class="global_links">
-			<a href="/blogs/tom_cunliffe">Blog</a> |
-			<a href="mailto:admin@ifloat.biz">Contact Us</a> |
-			<a href="/terms.pdf">Terms</a> |
-			<% if session.authenticated? %>
-			<a href="#" onclick="login_logout()">Log Out (<%= session.user.nickname || session.user.name %>)</a>
-			<% else %>
-			<a href="#" onclick="login_open()">Log In</a>
-			<% end %>
-		</span>
-		<img src="/images/common/logo.png" alt="ifloat logo" />
-		<div class="find_bar">
-			<%= partial "common/finder" %>
-		
-			<div id="pl_buy_now" class="pick_list">
-				<div class="menu">
-					<span class="name">Basket</span>
-					<span class="total"></span>
-				</div>
-				<div class="items"></div>
-			</div>
-		
-			<div id="pl_buy_later" class="pick_list">
-				<div class="menu">
-					<span class="name">Future Buys</span>
-					<span class="total"></span>
-				</div>
-				<div class="items"></div>
-			</div>
-		
-			<div id="pl_compare" class="pick_list">
-				<div class="menu">
-					<span class="name">Differentiate</span>
-					<span class="total"></span>
-				</div>
-				<div class="items"></div>
-			</div>
-		</div>
-	</div>
+  <div id="header_body">
+    <span class="global_links">
+      <a href="/blogs/tom_cunliffe">Blog</a> |
+      <a href="mailto:admin@ifloat.biz">Contact Us</a> |
+      <a href="/terms.pdf">Terms</a> |
+      <% if session.authenticated? %>
+      <a href="#" onclick="login_logout()">Log Out (<%= session.user.nickname || session.user.name %>)</a>
+      <% else %>
+      <a href="#" onclick="login_open()">Log In</a>
+      <% end %>
+    </span>
+    <a href="/"><img src="/images/common/logo.png" alt="ifloat logo" /></a>
+    <div class="find_bar">
+      <%= partial "common/finder" %>
+      
+      <div id="pl_buy_now" class="pick_list">
+        <div class="menu">
+          <span class="name">Basket</span>
+          <span class="total"></span>
+        </div>
+        <div class="items"></div>
+      </div>
+      
+      <div id="pl_buy_later" class="pick_list">
+        <div class="menu">
+          <span class="name">Future Buys</span>
+          <span class="total"></span>
+        </div>
+        <div class="items"></div>
+      </div>
+      
+      <div id="pl_compare" class="pick_list">
+        <div class="menu">
+          <span class="name">Differentiate</span>
+          <span class="total"></span>
+        </div>
+        <div class="items"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <%= partial "common/login" %>
@@ -46,9 +46,8 @@
 <div id="tooltip"> </div>
 
 <script type="text/javascript" charset="utf-8">
-	var $ifloat_header = {authenticated: <%= session.authenticated? %>};
-	var $ifloat_body = {};
-	
-	$(document).ready(pick_lists_update);
+  var $ifloat_header = {authenticated: <%= session.authenticated? %>};
+  var $ifloat_body = {};
+  
+  $(document).ready(pick_lists_update);
 </script>
-	

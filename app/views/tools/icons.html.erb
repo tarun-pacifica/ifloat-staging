@@ -12,7 +12,7 @@
 		<% end %>
 		
 		<tr>
-			<td><img src=<%= info[:icon_url].inspect %> /></td>
+			<td><img src=<%= info[:icon_url].inspect %> alt=<%= info[:raw_name].inspect %> /></td>
 			<% shown = (info[:dad] or info[:fil]) %>
 			<td class="<%= shown ? (info[:icon_url] == @blank_icon_url ? "blank" : "") : "not_needed" %>">
 				<%= info[:raw_name] %> <br/>
@@ -27,7 +27,7 @@
 		<tr> <th colspan="2"><h1>Unassociated</h1></th> </tr>
 		<% @unused_icons.each do |asset| %>
 		<tr>
-			<td><img src=<%= asset.url.inspect %> /></td>
+			<td><img src=<%= asset.url.inspect %> alt=<%= info[:raw_name].inspect %> /></td>
 			<td><%= asset.name %></td>
 		</tr>
 		<% end %>

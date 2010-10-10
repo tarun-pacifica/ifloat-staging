@@ -5,7 +5,7 @@
 <div id="blog_info" class="panel minor">
 	<div class="title"> <h2><%= @blog.user.name %></h2> </div>
 	<div class="sections">
-		<% unless @blog_image_src.nil? %> <img src=<%= @blog_image_src.inspect %> /> <% end %>
+		<% unless @blog_image_src.nil? %> <img src=<%= @blog_image_src.inspect %> alt=<%= @blog.user.name.inspect %> /> <% end %>
 		<hr />
 		
 		<p><%= @blog.description %></p>
@@ -59,7 +59,7 @@
 				<% if image.nil? %>
 				<p>Attach image: <%= file_field :name => "image"%></p>
 				<% else %>
-				<img src=<%= image.url.inspect %> />
+				<img src=<%= image.url.inspect %> alt="article image" />
 				<p>Replace image with: <%= file_field :name => "image"%></p>
 				<% end %>
 				<p><%= submit "Update", :id => "update_article_submit" %></p>
@@ -71,7 +71,7 @@
 			<h2>Posted on <%= article.created_at.strftime("%B %d, %Y") %> by <%= article.user.name %></h2>
 		
 			
-			<% unless image.nil? %> <img src=<%= image.url.inspect %> /> <% end %>
+			<% unless image.nil? %> <img src=<%= image.url.inspect %> alt="article image" /> <% end %>
 		
 			<% article.body.split("\n").each_with_index do |paragraph, i| %>
 			<p><%= paragraph %></p>

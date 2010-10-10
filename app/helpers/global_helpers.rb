@@ -39,7 +39,7 @@ module Merb
       
       brands = values.map { |info| info[:raw_name] == "marketing:brand" ? info[:values] : [] }.flatten.uniq
       logos = Brand.logos(brands)
-      html << "<div class=\"advert\"> <img src=#{logos[rand(logos.size)].url.inspect} /> </div>" unless logos.empty?
+      html << "<div class=\"advert\"> <img src=#{logos[rand(logos.size)].url.inspect} alt=\"brand logo\" /> </div>" unless logos.empty?
       	
       html << '<div class="sections">'
       
@@ -76,7 +76,7 @@ module Merb
     
     def product_image(image)
       url, popup_url = product_image_urls(image)
-      "<img class=\"product\" src=#{url.inspect} onmouseover=\"product_image_popup(event, '#{popup_url}')\" onmouseout=\"product_image_unpopup(event)\" />"
+      "<img class=\"product\" src=#{url.inspect} onmouseover=\"product_image_popup(event, '#{popup_url}')\" onmouseout=\"product_image_unpopup(event)\" alt=\"product\" />"
     end
     
     def product_image_urls(image)
@@ -116,11 +116,11 @@ module Merb
       
       if info[:raw_name] == "reference:class"
         <<-HTML
-          <img class="property_icon disabled" src="#{src}" onmouseover="tooltip_show(event, '#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
+          <img class="property_icon disabled" src="#{src}" alt="#{info[:name]}" onmouseover="tooltip_show(event, '#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
         HTML
       else
         <<-HTML
-          <img class="property_icon" src="#{src}" onclick="filter_configure(#{prop_id})" onmouseover="tooltip_show(event, '#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
+          <img class="property_icon" src="#{src}" alt="#{info[:name]}" onclick="filter_configure(#{prop_id})" onmouseover="tooltip_show(event, '#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
         HTML
       end
     end

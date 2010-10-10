@@ -7,7 +7,7 @@ function spinner_hide() {
 function spinner_show(message) {
 	var spinner = $('#spinner');
 	if(spinner.length == 0) {
-		$('body').append('<div id="spinner"> <img src="/images/common/spinner.gif" /> <p> </p> </div>');
+		$('body').append('<div id="spinner"> <img alt="spinner" src="/images/common/spinner.gif" /> <p> </p> </div>');
 		spinner = $('#spinner');
 		spinner.hide();
 	}

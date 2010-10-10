@@ -17,7 +17,7 @@
 			<img class="main" src=<%= @image_urls.first.inspect %> alt=<%= @page_title.inspect %> />
 			<% if @image_urls.size > 1 %>			
 				<% @image_urls.each do |url|%>
-				<img class="thumb" src=<%= url.inspect %> onmouseover="product_detail_select_image(event)" />
+				<img class="thumb" src=<%= url.inspect %> alt="thumbnail" onmouseover="product_detail_select_image(event)" />
 				<% end %>
 			<% end %>
 		</div>
@@ -42,7 +42,7 @@
 			<table class="related_media" summary="related media">
 				<% @related_media.each do |name, url, icon_url| %>
 				<tr>
-					<td class="icon"> <img src=<%= icon_url.inspect %> /> </td>
+					<td class="icon"> <img src=<%= icon_url.inspect %> alt="media icon" /> </td>
 					<td> <a href=<%= url.inspect %> target="_blank_"><%= name %></a> </td>
 				</tr>
 				<% end %>

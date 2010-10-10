@@ -6,15 +6,15 @@ function product_image_make(url, popup_url, relative_position, titles) {
 	if(relative_position == undefined) relative_position = 'left';
 	
 	if(popup_url) {
-		return '<img class="product" src="' + url + '" onmouseover="product_image_popup(event, \'' + popup_url + '\', \'' + relative_position + '\', ' + product_image_caption(titles) + ')" onmouseout="product_image_unpopup(event)" />';
+		return '<img class="product" src="' + url + '" alt="product" onmouseover="product_image_popup(event, \'' + popup_url + '\', \'' + relative_position + '\', ' + product_image_caption(titles) + ')" onmouseout="product_image_unpopup(event)" />';
 	}
 	
-	return '<img class="product" src="' + url + '" />';
+	return '<img class="product" src="' + url + '" alt="product" />';
 }
 
 function product_image_popup(event, image_url, relative_position, caption) {
 	caption = (caption ? '<p>' + caption + '</p>' : '');
-	$('body').append('<div id="image_popup"> <img src="' + image_url + '" /> ' + caption + ' </div>');
+	$('body').append('<div id="image_popup"> <img alt="closeup" src="' + image_url + '" /> ' + caption + ' </div>');
 	var popup = $('#image_popup');
 	
 	var image = util_target(event);

@@ -23,7 +23,7 @@
 			<%= hidden_field :language_code, :value => session.language %>
 			<%= hidden_field :specification, :value => @blog.user.name %>
 			<%= hidden_field :unfiltered, :value => true %>
-			<p class="link"> <%= submit @blog.call_to_action, :id => "submit" %> </p>
+			<p class="link"> <%= submit @blog.call_to_action, :id => "call_to_action_submit" %> </p>
 		<% end =%>
 		<% end %>
 	</div>
@@ -42,7 +42,7 @@
 			<p><%= text_field :title, :value => "Title", :size => 50, :maxlength => 50 %></p>
 			<p><%= text_area :name => "body" %></p>
 			<p>Attach image: <%= file_field :name => "image"%></p>
-			<p><%= submit "Create" %></p>
+			<p><%= submit "Create", :id => "create_article_submit" %></p>
 		<% end =%>
 		<% end %>
 		
@@ -62,7 +62,7 @@
 				<img src=<%= image.url.inspect %> />
 				<p>Replace image with: <%= file_field :name => "image"%></p>
 				<% end %>
-				<p><%= submit "Update" %></p>
+				<p><%= submit "Update", :id => "update_article_submit" %></p>
 				<hr class="terminator" />
 			<% end =%>
 			<% end %>

@@ -3,7 +3,7 @@
 	<%= form :action => resource(:cached_finds), :onsubmit => "return finder_validate()" do %>
 		<%= hidden_field :language_code, :value => session.language %>
 		<p> <%= text_field :specification, :id => "finder_specification" %> </p>
-		<p> <%= submit "Find", :id => "submit" %> </p>
+		<p> <%= submit "Find", :id => "finder_submit" %> </p>
 	<% end =%>
 	<div class="right"></div>
 </div>

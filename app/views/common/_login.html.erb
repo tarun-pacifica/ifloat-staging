@@ -5,7 +5,10 @@
 		<h3>Login</h3>
 		<p> <label>E-mail: <input type="text" name="login" /></label> </p>
 		<p> <label>Password: <input type="password" name="password" /></label> </p>
-		<p class="submit"> <%= submit "Login", :onclick => "login_operation('login')" %> <%= submit "Reset Password", :onclick => "login_operation('reset')" %> </p>
+		<p class="submit">
+		  <%= submit "Login", :onclick => "login_operation('login')", :id => "login_submit" %>
+		  <%= submit "Reset Password", :onclick => "login_operation('reset')", :id => "reset_password_submit" %>
+		</p>
 	</form>
 
 	<form class="register" action="/users" method="post" onsubmit="return login_submit(event)">
@@ -16,7 +19,9 @@
 		<p> <label>Password: <input type="password" name="password" /></label> </p>
 		<p> <label>Confirmation: <input type="password" name="confirmation" /></label> </p>
 		<p class="marketing">From time to time, we like to involve our users in marketing activities that make suppliers and retailers more effective for their customers. Please tick here <input type="checkbox" name="send_marketing" /> if you would like to participate in these activities.</p>
-		<p class="submit"> <%= submit "Register", :onclick => "login_operation('register')" %> </p>
+		<p class="submit">
+			<%= submit "Register", :onclick => "login_operation('register')", :id => "register_submit" %>
+		</p>
 	</form>
 </div>
 

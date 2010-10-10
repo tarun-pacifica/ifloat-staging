@@ -1,54 +1,55 @@
 <!DOCTYPE html PUBLIC
-<% if @transitional %>
-	"-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+  <% if @transitional %>
+"-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <% else %>
-	"-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+"-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <% end %>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
   <head>
-	<% unless @hide_title %>
     <title><%= @page_title.nil? ? "ifloat® - find, buy, float" : "#{@page_title} - ifloat®" %></title>
-    <% end %>
-
+    
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-
-	<link rel="stylesheet" href="/stylesheets/compiled.css" type="text/css" media="screen" charset="utf-8" />
-	<!--[if IE 7]>
-	<link rel="stylesheet" href="/stylesheets_ie/ie7.css" type="text/css" media="screen" charset="utf-8" />
-	<![endif]-->
-	<!--[if IE 8]>
-	<link rel="stylesheet" href="/stylesheets_ie/ie8.css" type="text/css" media="screen" charset="utf-8" />
-	<![endif]-->
-	
-	<% unless @skip_javascript %>
-	
-	<link rel="stylesheet" href="/stylesheets/ui/ui.css" type="text/css" media="screen" charset="utf-8" />
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js"></script>
-	<script src="/javascripts/compiled.js" type="text/javascript" charset="utf-8"></script>
-	
-	<script type="text/javascript">
-	  var _gaq = _gaq || [];
-	  _gaq.push(['_setAccount', 'UA-18470174-1']);
-	  _gaq.push(['_trackPageview']);
-	  
-	  (function() {
-   	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-   		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-   		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-	  })();
-	</script>
-	
-	<% end %>
+    
+    <% unless @page_description.nil? %>
+    <meta name="description" content=<%= @page_description.gsub(/"/) { "&quot;" }.inspect %> />
+    <% end %>
+    
+    <link rel="stylesheet" href="/stylesheets/compiled.css" type="text/css" media="screen" charset="utf-8" />
+    <!--[if IE 7]>
+    <link rel="stylesheet" href="/stylesheets_ie/ie7.css" type="text/css" media="screen" charset="utf-8" />
+    <![endif]-->
+    <!--[if IE 8]>
+    <link rel="stylesheet" href="/stylesheets_ie/ie8.css" type="text/css" media="screen" charset="utf-8" />
+    <![endif]-->
+    
+    <% unless @skip_javascript %>
+    
+    <link rel="stylesheet" href="/stylesheets/ui/ui.css" type="text/css" media="screen" charset="utf-8" />
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js"></script>
+    <script src="/javascripts/compiled.js" type="text/javascript" charset="utf-8"></script>
+    
+    <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-18470174-1']);
+    _gaq.push(['_trackPageview']);
+    
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+    </script>
+    
+    <% end %>
   </head>
-
+  
   <body <%= "style=\"background: #{@background_css};\"" unless @background_css.nil? %>>
-
-<%= catch_content :for_layout %>
-	
-	<% unless @skip_copyright %>
-	<hr class="terminator" />
-	<p class="copyright">© 2010 ifloat LLP</p>
-	<% end %>
+    <%= catch_content :for_layout %>
+    
+    <% unless @skip_copyright %>
+    <hr class="terminator" />
+    <p class="copyright">© 2010 ifloat LLP</p>
+    <% end %>
   </body>
 </html>

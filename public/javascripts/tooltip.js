@@ -1,8 +1,9 @@
 function tooltip_hide() {
-	$('#tooltip').stop(true, true).hide();;
+	$('#tooltip').remove();
 }
 
 function tooltip_show(event, text, relative_position) {
+	$('body').append('<div id="tooltip"> </div>')
 	var tooltip = $('#tooltip');
 	tooltip.html(text);
 	

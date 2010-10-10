@@ -40,5 +40,5 @@ function product_detail_pick_buttons_update(group, pick_id) {
 }
 
 function product_detail_select_image(event) {
-	$('#product_detail').find('img.main').attr('src', event.target.src);
+	$('#product_detail').find('img.main').attr('src', util_target(event).attr('src'));
 }

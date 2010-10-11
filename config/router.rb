@@ -16,6 +16,7 @@ Merb::Router.prepare do
   match('/cached_finds/:id/images').to(:controller => 'cached_finds', :action => 'images', :format => 'js')
   match('/cached_finds/:id/products_for/:image_checksum').to(:controller => 'cached_finds', :action => 'compare_by_image')
   match('/cached_finds/:id/reset').to(:controller => 'cached_finds', :action => 'reset')
+  match('/cached_finds/create', :method => 'get').to(:controller => 'cached_finds', :action => 'create')
   resources :cached_finds
   
   match('/picked_products/buy/:facility_id').to(:controller => 'picked_products', :action => 'buy')

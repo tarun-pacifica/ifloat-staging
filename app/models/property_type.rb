@@ -76,7 +76,7 @@ class PropertyType
     units.permutation(2).each do |pair|
       from, to = pair
       begin
-        Conversion.convert(1, from, to) if from < to
+        Conversion.convert(1, from, to) if from < to and not Conversion::EXCEPTIONS.include?(from)
       rescue
         missing_conversions << "#{from} -> #{to}"
       end

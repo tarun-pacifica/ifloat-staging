@@ -1,4 +1,6 @@
 module Conversion
+  EXCEPTIONS = %w(EU US_women US_men UK).to_set
+  
   # conversion of v (unit 1) to V (unit 2): V = av + b
   # each mapping value is of the form [a, b]
   MAPPINGS = {

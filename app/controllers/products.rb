@@ -27,7 +27,7 @@ class Products < Application
       raw_name = info[:raw_name]
       @body_values_by_name[raw_name] = info[:values] if names.include?(raw_name)
     end
-    @page_title = @body_values_by_name["auto:title"].last
+    @page_title = @body_values_by_name["auto:title"].pop
     @page_description = (@body_values_by_name["marketing:summary"] || []).first
     
     gather_assets(@product)

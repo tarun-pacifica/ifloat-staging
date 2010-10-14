@@ -48,7 +48,6 @@ class CachedFinds < Application
   end
   
   def create(language_code, specification)
-    specification = specification.downcase
     find = session.add_cached_find(CachedFind.new(:language_code => language_code, :specification => specification))
     
     if find.valid?
@@ -105,10 +104,11 @@ class CachedFinds < Application
   
   def new
     @tags = []
-    min, max = Indexer.tag_frequencies.values.minmax
+    frequencies_by_tag = Indexer.tag_frequencies(session.language)
+    min, max = frequencies_by_tag.values.minmax
     unless min.nil?
       normalised_max = (max - min) / 4.0 
-      @tags = Indexer.tag_frequencies.sort.map! do |tag, frequency|
+      @tags = frequencies_by_tag.sort.map! do |tag, frequency|
         [tag, ((frequency - min) / normalised_max).round]
       end
     end

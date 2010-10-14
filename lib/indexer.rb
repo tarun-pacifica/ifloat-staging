@@ -10,7 +10,7 @@ module Indexer
   @@property_display_cache = {}
   @@sale_price_min_property_id = nil
   @@skip_load = false
-  @@tag_frequencies = {}
+  @@tag_index = {}
   @@text_filtering_index = {}
   @@text_finding_index = {}
   
@@ -28,7 +28,7 @@ module Indexer
         :numeric_filtering       => compile_numeric_filtering_index,
         :product_url_cache       => compile_product_url_cache,
         :property_display_cache  => compile_property_display_cache(properties),
-        :tag_frequencies         => compile_tag_frequencies(properties, records),
+        :tag_index               => compile_tag_index(properties, records),
         :text_filtering          => compile_filtering_index(records.select { |r| r.filterable }, :language_code, :text_value),
         :text_finding            => compile_text_finding_index(properties, records)
       }
@@ -46,7 +46,7 @@ module Indexer
     @@numeric_filtering_index = compile_numeric_filtering_index
     @@product_url_cache = compile_product_url_cache
     @@property_display_cache = compile_property_display_cache
-    @@tag_frequencies = compile_tag_frequencies
+    @@tag_index = compile_tag_index
     @@text_filtering_index = compile_filtering_index(records.select { |r| r.filterable }, :language_code, :text_value)
     @@text_finding_index = compile_text_finding_index(records)
     @@skip_load = true
@@ -135,7 +135,7 @@ module Indexer
       @@numeric_filtering_index = indexes[:numeric_filtering]
       @@product_url_cache = indexes[:product_url_cache]
       @@property_display_cache = indexes[:property_display_cache]
-      @@tag_frequencies = indexes[:tag_frequencies]
+      @@tag_index = indexes[:tag_index]
       @@text_filtering_index = indexes[:text_filtering]
       @@text_finding_index = indexes[:text_finding]
     end
@@ -178,6 +178,11 @@ module Indexer
     end.inject { |union, product_ids| union & product_ids } & @@image_checksum_index.keys
   end
   
+  def self.product_ids_for_tag(phrase, language_code)
+    return [] if phrase.blank? or not ensure_loaded
+    ((@@tag_index[language_code] || {})[phrase] || []).to_set
+  end
+  
   def self.product_url(product_id)
     return {} unless ensure_loaded
     @@product_url_cache[product_id] || "/products/#{product_id}"
@@ -213,9 +218,9 @@ module Indexer
     @@sale_price_min_property_id if ensure_loaded
   end
   
-  def self.tag_frequencies
+  def self.tag_frequencies(language_code)
     return {} unless ensure_loaded
-    @@tag_frequencies
+    @@tag_frequencies ||= @@tag_index[language_code].inject({}) { |freq, kv| freq.update(kv[0] => kv[1].size) }
   end
   
   
@@ -325,16 +330,21 @@ module Indexer
     cache
   end
   
-  def self.compile_tag_frequencies(properties, records)
-    property_names = %w(reference:class_senior reference:tag marketing:find_word_gift).to_set
+  def self.compile_tag_index(properties, records)
+    property_names = %w(reference:class_senior reference:tag).to_set
     pd_ids = properties.select { |pd| property_names.include?(pd.name) }.map { |pd| pd.id }.to_set
     
-    frequencies = Hash.new(0)
+    index = {}
     records.each do |record|
       next unless pd_ids.include?(record.property_definition_id)
-      frequencies[record.text_value] += 1
+      language = (index[record.language_code] ||= {})
+      (language[record.text_value] ||= []) << record.product_id
     end
-    frequencies
+    
+    index.each do |language, phrases|
+      phrases.each { |phrases, product_ids| product_ids.uniq! }
+    end
+    index
   end
   
   def self.compile_text_finding_index(properties, records)

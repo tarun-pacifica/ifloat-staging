@@ -49,6 +49,12 @@ describe CachedFind do
       @find.specification.should == "spaced out terms"
     end
     
+    it "should honour tag finds precisely" do
+      @find.specification = "{   spaced  \t\t\n out  out   terms spaced  }"
+      @find.should be_valid
+      @find.specification.should == "{   spaced  \t\t\n out  out   terms spaced  }"
+    end
+    
     it "should fail without an invalidated value" do
       @find.invalidated = nil
       @find.should_not be_valid
@@ -76,6 +82,8 @@ describe CachedFind do
   end
   
   describe "execution" do
+    it "should have specs covering tag finds like '{running rigging}'"
+    
     before(:all) do
       @text_type = PropertyType.create(:core_type => "text", :name => "text")
       @weight_type = PropertyType.create(:core_type => "numeric", :name => "weight", :units => ["kg", "lb"])

@@ -6,6 +6,8 @@
 #
 # CachedFind operations (and filter value caching) are based on the Indexer and thus every time the global catalogue is updated (at product import time), all CachedFinds are marked as 'invalidated' and reset when they are next accessed.
 #
+# A specification surrounded by '{...}' is taken as a literal tag match. This custom syntax is needed to support the one filtering-style use case where we do not want to mark the relevant properties as filterable.
+#
 # = Processes
 #
 # === 1. Anonimize Unused CachedFinds
@@ -40,7 +42,7 @@ class CachedFind
   end
   
   before :valid? do
-    self.specification = (specification || "").split.uniq.join(" ") if new?
+    self.specification = (specification || "").split.uniq.join(" ") if new? and not specification =~ /^\{.+?\}$/
     self.description = specification if description.blank?
     self.filters ||= {}
   end
@@ -50,7 +52,10 @@ class CachedFind
   end
   
   def all_product_ids
-    @all_product_ids ||= Indexer.product_ids_for_phrase(specification, language_code)
+    @all_product_ids ||=
+      if specification =~ /^\{(.+?)\}$/ then Indexer.product_ids_for_tag($1, language_code)
+      else Indexer.product_ids_for_phrase(specification, language_code)
+      end
   end
   
   def ensure_valid

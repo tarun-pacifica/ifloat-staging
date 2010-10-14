@@ -295,7 +295,7 @@ module Indexer
     
     urls_by_product_id = {}
     repository.adapter.select(query, PropertyDefinition.first(:name => "auto:title").id).each do |record|
-      title = record.text_value.downcase.gsub(/[^a-z0-9]+/, "-")[0, 256]
+      title = record.text_value.downcase.delete("'").gsub(/[^a-z0-9]+/, "-")[0, 256]
       urls_by_product_id[record.product_id] = "/products/#{title}-#{record.product_id}"
     end
     urls_by_product_id
@@ -327,17 +327,12 @@ module Indexer
   
   def self.compile_tag_frequencies(properties, records)
     property_names = %w(reference:class_senior reference:tag marketing:find_word_gift).to_set
-    gift_id = nil
-    pd_ids = properties.select { |pd| property_names.include?(pd.name) }.map do |pd|
-      gift_id = pd.id if pd.name == "marketing:find_word_gift"
-      pd.id
-    end.to_set
+    pd_ids = properties.select { |pd| property_names.include?(pd.name) }.map { |pd| pd.id }.to_set
     
     frequencies = Hash.new(0)
     records.each do |record|
       next unless pd_ids.include?(record.property_definition_id)
-      value = (record.property_definition_id == gift_id ? "Giftware" : record.text_value)
-      frequencies[value] += 1
+      frequencies[record.text_value] += 1
     end
     frequencies
   end

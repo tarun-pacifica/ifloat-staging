@@ -40,10 +40,11 @@ class ProductParser < AbstractParser
     
     TitleStrategy::TITLE_PROPERTIES.each_with_index do |title, i|
       rendered_parts = []
+      separator = (i == 3 ? "-" : "&mdash;")
       
       strategy[title].each do |part|
         if part == "-"
-          rendered_parts << "&mdash;" unless rendered_parts.empty? or rendered_parts.last == "&mdash;"
+          rendered_parts << separator unless rendered_parts.empty? or rendered_parts.last == separator
         elsif part == "product.reference"
           rendered_parts << product.attributes[:reference]
         else
@@ -55,19 +56,22 @@ class ProductParser < AbstractParser
           
           if klass == TextPropertyValue
             rendered_parts << value_attributes.map { |attribs| attribs[:text_value] }.join(", ")
+            rendered_parts.last.gsub(/\b\w/) { $&.upcase } if i == 3
           else
             min_seq_num = value_attributes.first[:sequence_number]
             value_attributes = value_attributes.select { |attribs| attribs[:sequence_number] == min_seq_num }
-            value_attributes = value_attributes.sort_by { |attribs| attribs[:unit].to_s }            
+            value_attributes = value_attributes.sort_by { |attribs| attribs[:unit].to_s }
+            range_sep = (i == 3 ? "-" : " <em>to</em> ")
             formatted_values = value_attributes.map do |attribs|
-              klass.format(attribs[:min_value], attribs[:max_value], " <em>to</em> ", attribs[:unit]).superscript_numeric
+              klass.format(attribs[:min_value], attribs[:max_value], range_sep, attribs[:unit]).superscript_numeric
             end
             rendered_parts << formatted_values.join(" / ")
           end
         end
       end
       
-      rendered_parts.pop while rendered_parts.last == "&mdash;"
+      rendered_parts.pop while rendered_parts.last == separator
+      
       attributes = {
         :definition => (i < 4 ? @auto_title_property : @auto_title_image_property),
         :product => product,

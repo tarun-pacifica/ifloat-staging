@@ -20,7 +20,7 @@ class PropertyType
   
   property :id, Serial
   property :core_type, String, :required => true
-  property :name, String, :required => true, :format => /^[a-z_\-]{3,}$/, :unique_index => :true
+  property :name, String, :required => true, :format => /^[a-z_]{3,}$/, :unique_index => :true
   property :units, Object
   
   has n, :definitions, :model => "PropertyDefinition"
@@ -70,7 +70,7 @@ class PropertyType
     
     return error unless units.is_a?(Array)
     return error unless units.repeated.empty?
-    return error unless units.all? { |unit| unit.to_s =~ /^[\w\/%#]+$/ }
+    return error unless units.all? { |unit| unit.to_s =~ /^[\w\-\/%#]+$/ }
     
     missing_conversions = []
     units.permutation(2).each do |pair|

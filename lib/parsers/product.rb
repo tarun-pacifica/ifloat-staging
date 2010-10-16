@@ -76,7 +76,7 @@ class ProductParser < AbstractParser
       attributes = {
         :definition => (i < 4 ? @auto_title_property : @auto_title_image_property),
         :product => product,
-        :auto_generated => false,
+        :auto_generated => true,
         :sequence_number => (i % 4) + 1,
         :language_code => "ENG",
         :text_value => rendered_parts.join(" ")

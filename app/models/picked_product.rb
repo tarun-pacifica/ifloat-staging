@@ -40,7 +40,7 @@ class PickedProduct
   def self.handle_orphaned(product_ids)
     anonymous_picks_by_id = {}
     
-    PickedProduct.all(:product_id => product_ids) do |pick|
+    PickedProduct.all(:product_id => product_ids).each do |pick|
       if pick.user_id.nil?
         anonymous_picks_by_id[pick.id] = pick
       else
@@ -51,21 +51,21 @@ class PickedProduct
     Merb::DataMapperSessionStore.all.each do |session|
       (session.data["picked_product_ids"] || []).each do |session_pick_id|
         pick = anonymous_picks_by_id[session_pick_id]
-        sesssion.queue_message(pick.orphaned_message) unless pick.nil? 
+        next if pick.nil?
+        messages = (session.data["messages"] || []) + [pick.orphaned_message]
+        session.update(:data => session.data.merge("messages" => messages))
       end
     end
     
     PickedProduct.all(:product_id => product_ids).destroy!
   end
   
-  def title_parts
-    [cached_brand, cached_class]
-  end
-  
-  
-  private
-  
+  # TODO: spec
   def orphaned_message
     "Discontinued #{cached_brand} #{cached_class} removed from your #{GROUPS[group]}."
+  end
+  
+  def title_parts
+    [cached_brand, cached_class]
   end
 end

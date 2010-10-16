@@ -47,5 +47,8 @@
   var $ifloat_header = {authenticated: <%= session.authenticated? %>};
   var $ifloat_body = {};
   
-  $(document).ready(pick_lists_update);
+  $(document).ready(function() {
+    pick_lists_update();
+    show_messages(<%= session.unqueue_messages.to_json %>);
+  });
 </script>

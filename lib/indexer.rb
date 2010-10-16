@@ -379,7 +379,6 @@ module Indexer
     query =<<-SQL
       SELECT pd.findable, pd.filterable, pv.product_id, pv.property_definition_id, pv.language_code, pv.text_value
       FROM property_values pv
-        INNER JOIN products p ON pv.product_id = p.id
         INNER JOIN property_definitions pd ON pv.property_definition_id = pd.id
       WHERE pv.text_value IS NOT NULL
     SQL

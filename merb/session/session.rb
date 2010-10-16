@@ -121,6 +121,10 @@ module Merb
       Purchase.all(:id => purchase_ids)
     end
     
+    def queue_message(value)
+      (self[:messages] ||= []) << value
+    end
+    
     def remove_picked_products(picks)
       ids = picked_product_ids
       pick_ids = picks.map { |pick| pick.id }
@@ -132,6 +136,10 @@ module Merb
       ids = purchase_ids
       ids.delete(purchase.id)
       self[:purchase_ids] = ids
+    end
+    
+    def unqueue_messages
+      self.delete(:messages)
     end
     
     def user

@@ -45,6 +45,7 @@ class User
   has n, :contacts
   has n, :picked_products, :order => [:created_at]
   has n, :locations
+  has n, :messages
   has n, :purchases
   
   before :valid? do

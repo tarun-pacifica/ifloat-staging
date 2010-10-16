@@ -79,7 +79,6 @@ module Merb
       raise Unauthenticated, "Unknown account / password" if user.nil?
       raise Unauthenticated, "Disabled account" unless user.enabled?
       self[:user_id] = user.id
-      self[:messages] = nil
       
       [[:cached_finds, :specification], [:picked_products, :product_id]].each do |set, discriminator|
         session_set = send(set)
@@ -95,6 +94,8 @@ module Merb
         
         self["#{set.to_s[0..-2]}_ids"] = user_set.map { |item| item.id }
       end
+      
+      self[:messages] = nil
     end
     
     def logout

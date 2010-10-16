@@ -63,7 +63,8 @@ class ProductParser < AbstractParser
             value_attributes = value_attributes.sort_by { |attribs| attribs[:unit].to_s }
             range_sep = (i == 3 ? "-" : " <em>to</em> ")
             formatted_values = value_attributes.map do |attribs|
-              klass.format(attribs[:min_value], attribs[:max_value], range_sep, attribs[:unit]).superscript_numeric
+              v = klass.format(attribs[:min_value], attribs[:max_value], range_sep, attribs[:unit])
+              (i == 3 ? v : v.superscript_numeric)
             end
             rendered_parts << formatted_values.join(" / ")
           end

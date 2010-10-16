@@ -8,7 +8,7 @@ class Products < Application
     Product.values_by_property_name_by_product_id(product_ids, session.language, names).map do |product_id, values_by_property_name|
       { :id         => product_id,
         :image_urls => product_image_urls(images_by_product_id[product_id]),
-        :titles     => (values_by_property_name["auto:title"] || [])[0, 3].map { |t| t.to_s },
+        :titles     => (values_by_property_name["auto:title"] || [])[0..-2].map { |t| t.to_s },
         :summary    => (values_by_property_name["marketing:summary"] || []).first.to_s,
         :url        => Indexer.product_url(product_id) }
     end.to_json

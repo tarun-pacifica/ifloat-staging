@@ -147,7 +147,7 @@ module Merb
       else
         messages = Message.all(:user_id => user_id)
         values = messages.map { |m| m.value }
-        messages.destroy!
+        messages.destroy! unless values.empty?
         values
       end
     end

@@ -88,7 +88,8 @@ class ProductParser < AbstractParser
   end
   
   def generate_objects(parsed_fields)
-    return [] if parsed_fields.delete([:import]) == "N"
+    import = parsed_fields.delete([:import])
+    return [] if import == "N"
     
     attributes = {}
     [:company, :reference].each do |attribute|
@@ -116,8 +117,8 @@ class ProductParser < AbstractParser
       objects.push(*values)
     end
     
-    # TODO: Remove this temporary hack when ready
-    return [] unless objects.any? { |o| o.attributes[:company] == @marine_store }
+    # TODO: Remove this temporary hack when ready (and can remove import variable above)
+    return [] unless import == "Y" or objects.any? { |o| o.attributes[:company] == @marine_store }
     objects + generate_auto_titles(value_objects_by_property_name, objects[0])
   end
   

@@ -184,15 +184,20 @@ class ImportSet
     #   end
     # end
     
-    stopwatch("ensured no orphaned PickedProducts") do
+    stopwatch("deal with orphaned PickedProducts") do
+      db_companies = Company.all.hash_by(:reference)
+      orphaned_product_ids = []
+      
       PickedProduct.all_primary_keys.each do |company_ref, product_ref|
         company = get(Company, company_ref)
         if company.nil?
-          error(Company, nil, nil, nil, "unable to delete company with user-referenced product: #{company_ref} / #{product_ref}")
-        else
-          error(Product, nil, nil, nil, "unable to delete user-referenced product: #{company_ref} / #{product_ref}") if get(Product, company, product_ref).nil?
+          error(Company, nil, nil, nil, "unable to delete company with user-referenced product: #{company_ref} / #{product_ref}")          
+        elsif get(Product, company, product_ref).nil?
+          orphaned_product_ids << db_companies[company_ref].products.first(:reference => product_ref).id
         end
       end
+      
+      PickedProduct.handle_orphaned(orphaned_product_ids)
     end
     
     stopwatch("ensured no orphaned Purchases") do
@@ -200,8 +205,8 @@ class ImportSet
         company = get(Company, company_ref)
         if company.nil?
           error(Company, nil, nil, nil, "unable to delete company with facility with user-referenced purchases: #{company_ref} / #{facility_url}")
-        else
-          error(Facility, nil, nil, nil, "unable to delete facility with user-referenced purchases: #{company_ref} / #{facility_url}") if get(Facility, company, facility_url).nil?
+        elsif get(Facility, company, facility_url).nil?
+          error(Facility, nil, nil, nil, "unable to delete facility with user-referenced purchases: #{company_ref} / #{facility_url}")
         end
       end
     end

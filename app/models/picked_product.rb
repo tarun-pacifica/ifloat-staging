@@ -11,7 +11,7 @@
 class PickedProduct
   include DataMapper::Resource
   
-  GROUPS = %w(buy_later buy_now compare)
+  GROUPS = {"buy_later" => "Future Buys", "buy_now" => "Basket", "compare" => "Differentiate List"}
   
   property :id,           Serial
   property :created_at,   DateTime, :default => proc { DateTime.now }
@@ -23,7 +23,7 @@ class PickedProduct
   belongs_to :product
   belongs_to :user, :required => false
   
-  validates_within :group, :set => GROUPS
+  validates_within :group, :set => GROUPS.keys
   
   def self.all_primary_keys
     query =<<-SQL
@@ -36,7 +36,36 @@ class PickedProduct
     repository(:default).adapter.select(query).map { |record| [record.cref, record.pref] }
   end
   
+  # TODO: spec
+  def self.handle_orphaned(product_ids)
+    anonymous_picks_by_id = {}
+    
+    PickedProduct.all(:product_id => product_ids) do |pick|
+      if pick.user_id.nil?
+        anonymous_picks_by_id[pick.id] = pick
+      else
+        Message.create(:user_id => pick.user_id, :value => pick.orphaned_message)
+      end
+    end
+    
+    Merb::DataMapperSessionStore.all.each do |session|
+      (session.data["picked_product_ids"] || []).each do |session_pick_id|
+        pick = anonymous_picks_by_id[session_pick_id]
+        sesssion.queue_message(pick.orphaned_message) unless pick.nil? 
+      end
+    end
+    
+    PickedProduct.all(:product_id => product_ids).destroy!
+  end
+  
   def title_parts
     [cached_brand, cached_class]
+  end
+  
+  
+  private
+  
+  def orphaned_message
+    "Discontinued #{cached_brand} #{cached_class} removed from your #{GROUPS[group]}."
   end
 end

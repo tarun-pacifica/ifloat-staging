@@ -9,8 +9,9 @@
 class Message
   include DataMapper::Resource
   
-  property :id,    Serial
-  property :value, Text, :required => true
+  property :id,         Serial
+  property :value,      Text, :required => true
+  property :created_at, DateTime, :default => proc { DateTime.now }
   
   belongs_to :user
 end

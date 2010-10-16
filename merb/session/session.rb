@@ -79,6 +79,7 @@ module Merb
       raise Unauthenticated, "Unknown account / password" if user.nil?
       raise Unauthenticated, "Disabled account" unless user.enabled?
       self[:user_id] = user.id
+      self[:messages] = nil
       
       [[:cached_finds, :specification], [:picked_products, :product_id]].each do |set, discriminator|
         session_set = send(set)
@@ -139,7 +140,15 @@ module Merb
     end
     
     def unqueue_messages
-      self.delete(:messages)
+      user_id = self[:user_id]
+      if user_id.nil?
+        self.delete(:messages) || []
+      else
+        messages = Message.all(:user_id => user_id)
+        values = messages.map { |m| m.value }
+        messages.destroy!
+        values
+      end
     end
     
     def user

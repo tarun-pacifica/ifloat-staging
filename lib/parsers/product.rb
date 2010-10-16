@@ -88,10 +88,13 @@ class ProductParser < AbstractParser
   end
   
   def generate_objects(parsed_fields)
+    return [] if parsed_fields.delete([:import]) == "N"
+    
     attributes = {}
     [:company, :reference].each do |attribute|
       attributes[attribute] = parsed_fields.delete([attribute])
     end
+    
     objects = [ImportObject.new(Product, attributes)]
     
     value_objects_by_property_name = {}
@@ -140,10 +143,9 @@ class ProductParser < AbstractParser
     when :company
       @import_set.get!(Company, value)
       
-    # TODO: remove review_stage when it has been expunged from all product CSVs
-    when :id, :review_stage
-      raise "invalid #{domain} (expected an integer): #{value.inspect}" unless value =~ /^(\d+)$/
-      value.to_i
+    when :import
+      raise "invalid import value (not Y/N): #{value.inspect}" unless value == "Y" or value == "N"
+      value
       
     when :mappings
       raise "invalid mapping: #{value.inspect}" unless value =~ Product::REFERENCE_FORMAT
@@ -175,12 +177,14 @@ class ProductParser < AbstractParser
   def parse_header(header)
     case header
       
+    when "IMPORT"
+      [:import]
+      
     when "company.reference"
       [:company]
       
-    when /^product\.(.+?)$/
-      warn "WARNING: product.review_stage is deprecated" if $1 == "review_stage" # TODO: remove when ready
-      [$1.to_sym]
+    when "product.reference"
+      [:reference]
       
     when /^mapping\.reference\.(.+?)$/
       company_ref = $1
@@ -305,6 +309,9 @@ class ProductParser < AbstractParser
         end
       end
     end
+    
+    # TODO: remove when ready
+    warn "IMPORT header missing" unless headers.has_key?("IMPORT")
     
     errors
   end

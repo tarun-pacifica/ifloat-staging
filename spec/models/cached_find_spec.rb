@@ -44,15 +44,15 @@ describe CachedFind do
     end
     
     it "should rationalise whitespace and repeated terms in its specification" do
-      @find.specification = "   spaced  \t\t\n out  out   terms spaced  "
+      @find.specification = "   spaced  \t\t out  out   terms spaced  "
       @find.should be_valid
       @find.specification.should == "spaced out terms"
     end
     
     it "should honour tag finds precisely" do
-      @find.specification = "{   spaced  \t\t\n out  out   terms spaced  }"
+      @find.specification = "{   spaced  \t\t out  out   terms spaced  }"
       @find.should be_valid
-      @find.specification.should == "{   spaced  \t\t\n out  out   terms spaced  }"
+      @find.specification.should == "{   spaced  \t\t out  out   terms spaced  }"
     end
     
     it "should fail without an invalidated value" do
@@ -147,49 +147,6 @@ describe CachedFind do
         end
       end
       
-      Indexer.stub(:compile_image_checksum_index).and_return do
-        # TODO: remove once MS hack is removed from indexer
-        query =<<-SQL
-          SELECT p.id, a.checksum
-          FROM products p
-            INNER JOIN attachments at ON p.id = at.product_id
-            INNER JOIN assets a ON at.asset_id = a.id
-          WHERE at.role = 'image'
-          ORDER BY at.sequence_number
-        SQL
-
-        index = {}
-        repository.adapter.select(query).each do |record|
-          index[record.id] ||= record.checksum
-        end
-        index
-      end
-      
-      Indexer.stub(:compile_numeric_filtering_index).and_return do
-        # TODO: remove once MS hack is removed from indexer
-        query =<<-SQL
-          SELECT pv.product_id, pv.property_definition_id, pv.unit, pv.min_value, pv.max_value
-          FROM property_values pv
-            INNER JOIN property_definitions pd ON pv.property_definition_id = pd.id
-          WHERE pd.filterable = ?
-            AND (pv.min_value IS NOT NULL OR pv.max_value IS NOT NULL)
-        SQL
-
-        records = repository.adapter.select(query, true)
-        Indexer.compile_filtering_index(records, :unit, :min_value, :max_value)
-      end
-      
-      Indexer.stub(:text_records).and_return do
-        # TODO: remove once MS hack is removed from indexer
-        query =<<-SQL
-          SELECT pd.findable, pd.filterable, pv.product_id, pv.property_definition_id, pv.language_code, pv.text_value
-          FROM property_values pv
-            INNER JOIN products p ON pv.product_id = p.id
-            INNER JOIN property_definitions pd ON pv.property_definition_id = pd.id
-          WHERE pv.text_value IS NOT NULL
-        SQL
-        repository.adapter.select(query)
-      end
       Indexer.compile_to_memory
     end
     

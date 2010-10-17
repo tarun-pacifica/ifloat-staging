@@ -191,13 +191,13 @@ class ImportSet
       PickedProduct.all_primary_keys.each do |company_ref, product_ref|
         company = get(Company, company_ref)
         if company.nil?
-          error(Company, nil, nil, nil, "unable to delete company with user-referenced product: #{company_ref} / #{product_ref}")          
+          error(Company, nil, nil, nil, "unable to delete company with user-referenced product: #{company_ref} / #{product_ref}")
         elsif get(Product, company, product_ref).nil?
           orphaned_product_ids << db_companies[company_ref].products.first(:reference => product_ref).id
         end
       end
       
-      PickedProduct.handle_orphaned(orphaned_product_ids)
+      PickedProduct.handle_orphaned(orphaned_product_ids) if @errors.empty
     end
     
     stopwatch("ensured no orphaned Purchases") do

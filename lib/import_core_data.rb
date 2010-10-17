@@ -197,7 +197,7 @@ class ImportSet
         end
       end
       
-      PickedProduct.handle_orphaned(orphaned_product_ids) if @errors.empty
+      PickedProduct.handle_orphaned(orphaned_product_ids) if orphaned_product_ids.any? and @errors.empty?
     end
     
     stopwatch("ensured no orphaned Purchases") do

@@ -194,6 +194,13 @@ class ProductParser < AbstractParser
 
     when /^(.+?:.+?):(.*?):(\d+)(:(tolerance))?$/
       property_name, unit, seq_num, component = $1, $2, $3, $5
+      
+      # TODO: remove when ready
+      if unit == "per_pack"
+        warn "header contains per_pack: #{header}"
+        unit = "per-pack"
+      end
+      
       property = @import_set.get!(PropertyDefinition, property_name)
       property_type = property.attributes[:property_type]
       unit = nil if unit.blank?

@@ -110,7 +110,7 @@ class Product
       names_by_property_id[property_id] = name if names_or_ids.include?(property_id) or names_or_ids.include?(name)
     end
     
-    attributes = {:product_id => product_ids, :property_definition_id => names_by_property_id.keys }
+    attributes = {:product_id => product_ids, :property_definition_id => names_by_property_id.keys, :order => [:sequence_number]}
     db_values = NumericPropertyValue.all(attributes).map
     db_values += TextPropertyValue.all(attributes.merge(:language_code => language_code))
     

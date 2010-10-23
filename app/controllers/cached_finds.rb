@@ -112,7 +112,8 @@ class CachedFinds < Application
         [tag, ((frequency - min) / normalised_max).round]
       end
     end
-   
+    
+    @page_description = "ifloat® is an innovative marine leisure products website. The site offers a sophisticated and powerful approach to finding marine leisure and boating products from a comprehensive database and aims to provide the single most valuable boating products resource on the internet."
     render
   end
   

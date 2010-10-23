@@ -56,7 +56,7 @@ class ProductParser < AbstractParser
           
           if klass == TextPropertyValue
             rendered_parts << value_attributes.map { |attribs| attribs[:text_value] }.join(", ")
-            rendered_parts.last.gsub!(/(^|\s)\S/) { $&.upcase } { $&.upcase } if [0, 3, 4].include?(i)
+            rendered_parts.last.gsub!(/(^|\s)\S/) { $&.upcase } if [0, 3, 4].include?(i)
           else
             min_seq_num = value_attributes.first[:sequence_number]
             value_attributes = value_attributes.select { |attribs| attribs[:sequence_number] == min_seq_num }

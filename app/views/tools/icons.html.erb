@@ -27,7 +27,7 @@
 		<tr> <th colspan="2"><h1>Unassociated</h1></th> </tr>
 		<% @unused_icons.each do |asset| %>
 		<tr>
-			<td><img src=<%= asset.url.inspect %> alt=<%= info[:raw_name].inspect %> /></td>
+			<td><img src=<%= asset.url.inspect %> alt=<%= asset.name.inspect %> /></td>
 			<td><%= asset.name %></td>
 		</tr>
 		<% end %>

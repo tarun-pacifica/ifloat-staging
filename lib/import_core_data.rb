@@ -15,6 +15,7 @@ FileUtils.mkpath(CSV_DUMP_DIR)
 CSV_REPO = "../ifloat_csvs"
 
 ERRORS_PATH = "/tmp/errors.csv"
+TITLE_REPORT_PATH = "/tmp/titles.csv"
 
 CLASSES = [PropertyType, PropertyDefinition, PropertyValueDefinition, AssociatedWord, TitleStrategy, UnitOfMeasure, Company, Facility, Asset, Brand, Product]
 
@@ -207,6 +208,42 @@ class ImportSet
           error(Company, nil, nil, nil, "unable to delete company with facility with user-referenced purchases: #{company_ref} / #{facility_url}")
         elsif get(Facility, company, facility_url).nil?
           error(Facility, nil, nil, nil, "unable to delete facility with user-referenced purchases: #{company_ref} / #{facility_url}")
+        end
+      end
+    end
+    
+    # TODO: turn into a non-replication check when ready
+    # TODO: generalize to non-English titles when ready
+    stopwatch("generated title report") do
+      at, ati, rc = %w(auto:title auto:title_image reference:class).map! { |key| get!(PropertyDefinition, key) }
+      properties = [at, ati, rc].to_set
+      
+      values_by_heading_by_product = {}
+      
+      @objects.each do |object|
+        next unless object.klass == TextPropertyValue
+        property = object.attributes[:definition]
+        next unless properties.include?(property)
+        
+        product = object.attributes[:product]
+        values_by_heading = (values_by_heading_by_product[product] ||= {
+          "company.reference" => product.attributes[:company].attributes[:reference],
+          "product.reference" => product.attributes[:reference]
+        })
+        heading =
+          case property
+          when at  then "title_#{object.attributes[:sequence_number]}"
+          when ati then "title_#{object.attributes[:sequence_number] + 4}" # TODO: +1 when adding new T5
+          when rc  then "reference:class"
+          end
+        values_by_heading[heading] = object.attributes[:text_value]
+      end
+      
+      headings = %w(reference:class company.reference product.reference) + 1.upto(6).map { |i| "title_#{i}" }
+      FasterCSV.open(TITLE_REPORT_PATH, "w") do |title_report|
+        title_report << headings
+        values_by_heading_by_product.each do |product, values_by_heading|
+          title_report << values_by_heading.values_at(*headings)
         end
       end
     end

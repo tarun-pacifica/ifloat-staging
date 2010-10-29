@@ -11,6 +11,7 @@ module Indexer
   @@sale_price_min_property_id = nil
   @@skip_load = false
   @@tag_index = {}
+  @@tag_frequencies = nil
   @@text_filtering_index = {}
   @@text_finding_index = {}
   
@@ -134,6 +135,7 @@ module Indexer
       @@product_url_cache = indexes[:product_url_cache]
       @@property_display_cache = indexes[:property_display_cache]
       @@tag_index = indexes[:tag_index]
+      @@tag_frequencies = nil
       @@text_filtering_index = indexes[:text_filtering]
       @@text_finding_index = indexes[:text_finding]
     end

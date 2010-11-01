@@ -13,7 +13,6 @@ class ProductParser < AbstractParser
     super
     
     @auto_title_property = @import_set.get(PropertyDefinition, "auto:title")
-    @auto_title_image_property = @import_set.get(PropertyDefinition, "auto:title_image")
     
     @title_strategies_by_class = {}
     @import_set.get(TitleStrategy).each do |name, strategy|
@@ -40,11 +39,10 @@ class ProductParser < AbstractParser
     
     TitleStrategy::TITLE_PROPERTIES.each_with_index do |title, i|
       rendered_parts = []
-      separator = (i == 3 ? "-" : "&mdash;")
       
       strategy[title].each do |part|
         if part == "-"
-          rendered_parts << separator unless rendered_parts.empty? or rendered_parts.last == separator
+          rendered_parts << "-" unless rendered_parts.empty? or rendered_parts.last == "-"
         elsif part == "product.reference"
           rendered_parts << product.attributes[:reference]
         else
@@ -56,32 +54,30 @@ class ProductParser < AbstractParser
           
           if klass == TextPropertyValue
             rendered_parts << value_attributes.map { |attribs| attribs[:text_value] }.join(", ")
-            rendered_parts.last.gsub!(/(^|\s)\S/) { $&.upcase } if [0, 3, 4].include?(i)
+            rendered_parts.last.gsub!(/(^|\s)\S/) { $&.upcase } unless title == "description"
           else
             min_seq_num = value_attributes.first[:sequence_number]
             value_attributes = value_attributes.select { |attribs| attribs[:sequence_number] == min_seq_num }
             value_attributes = value_attributes.sort_by { |attribs| attribs[:unit].to_s }
-            range_sep = (i == 3 ? "-" : " <em>to</em> ")
             formatted_values = value_attributes.map do |attribs|
-              v = klass.format(attribs[:min_value], attribs[:max_value], range_sep, attribs[:unit])
-              (i == 3 ? v : v.superscript_numeric)
+              klass.format(attribs[:min_value], attribs[:max_value], "-", attribs[:unit]).superscript_numeric
             end
             rendered_parts << formatted_values.join(" / ")
           end
         end
       end
       
-      rendered_parts.pop while rendered_parts.last == separator
+      rendered_parts.pop while rendered_parts.last == "-"
       
       attributes = {
-        :definition => (i < 4 ? @auto_title_property : @auto_title_image_property),
+        :definition => @auto_title_property,
         :product => product,
         :auto_generated => true,
-        :sequence_number => (i % 4) + 1,
+        :sequence_number => i + 1,
         :language_code => "ENG",
         :text_value => rendered_parts.join(" ")
       }
-      title_objects << ImportObject.new(TextPropertyValue, attributes) unless rendered_parts.empty?
+      title_objects << ImportObject.new(TextPropertyValue, attributes)
     end
     
     title_objects
@@ -271,7 +267,6 @@ class ProductParser < AbstractParser
   def preflight_check
     errors = []
     errors << 'missing PropertyDefinition "auto:title"' if @auto_title_property.nil?
-    errors << 'missing PropertyDefinition "auto:title_image"' if @auto_title_image_property.nil?
     errors
   end
   

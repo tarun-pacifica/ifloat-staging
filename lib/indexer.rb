@@ -283,7 +283,7 @@ module Indexer
       WHERE property_definition_id = ?
         AND language_code = 'ENG'
         AND text_value IS NOT NULL
-        AND sequence_number = 4
+        AND sequence_number = 1
     SQL
     
     title_property = PropertyDefinition.first(:name => "auto:title")
@@ -291,7 +291,7 @@ module Indexer
     
     urls_by_product_id = {}
     repository.adapter.select(query, title_property.id).each do |record|
-      title = record.text_value.downcase.delete("'").gsub(/[^a-z0-9]+/, "-")[0, 256]
+      title = record.text_value.desuperscript.downcase.delete("'").gsub(/[^a-z0-9]+/, "-")[0, 256]
       urls_by_product_id[record.product_id] = "/products/#{title}-#{record.product_id}"
     end
     urls_by_product_id

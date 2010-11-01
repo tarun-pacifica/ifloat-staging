@@ -8,29 +8,26 @@
 #
 # name:: 'Deckgear-01'
 # class_names:: ['block', 'fiddle block', ...]
-# title_1:: ['reference:class']
-# title_2:: [...]
-# title_3:: [...]
-# title_4:: ['marketing:brand', 'marketing:range', 'marketing:model', 'marketing:edition']
+# canonical:: ['reference:class']
+# description:: [...]
+# image:: [...]
 #
 class TitleStrategy
   include DataMapper::Resource
   
-  property :id, Serial
-  property :name, String, :required => true, :unique_index => true
-  property :class_names, Object, :lazy => false, :required => true, :default => []
-  
-  TITLE_PROPERTIES = (1..6).to_a.map { |i| "title_#{i}".to_sym }
-  TITLE_PROPERTIES.each do |title|
-    property title, Object, :lazy => false, :default => []
-  end
+  property :id,          Serial
+  property :name,        String, :required => true, :unique_index => true
+  property :class_names, Object, :lazy => false, :required => true
   
   validates_with_block :class_names, :if => :class_names do
     class_names.is_a?(Array) and class_names.all? { |name| name.is_a?(String) and name.size > 0 } ||
       [false, "Class names should be an array of class names"]
   end
   
+  TITLE_PROPERTIES = [:canonical, :description, :image]
   TITLE_PROPERTIES.each do |title|
+    property title, Object, :lazy => false, :required => true
+    
     validates_with_block title do
       validate_title(attribute_get(title))
     end

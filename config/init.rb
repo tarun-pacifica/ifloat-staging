@@ -51,6 +51,10 @@ Merb::BootLoader.before_app_loads do
   end
   
   class String
+    def desuperscript
+      gsub(%r{<sup>(.*?)</sup>}, '\1')
+    end
+    
     def pluralize_count(count)
       "#{count} #{self}#{count == 1 ? '' : 's'}"
     end

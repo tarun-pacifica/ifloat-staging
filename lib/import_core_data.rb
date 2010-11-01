@@ -215,31 +215,41 @@ class ImportSet
     # TODO: turn into a non-replication check when ready
     # TODO: generalize to non-English titles when ready
     stopwatch("generated title report") do
-      at, ati, rc = %w(auto:title auto:title_image reference:class).map! { |key| get!(PropertyDefinition, key) }
-      properties = [at, ati, rc].to_set
-      
+      at, rc = %w(auto:title reference:class).map! { |key| get!(PropertyDefinition, key) }
       values_by_heading_by_product = {}
       
       @objects.each do |object|
         next unless object.klass == TextPropertyValue
         property = object.attributes[:definition]
-        next unless properties.include?(property)
+        next unless property == at or property == rc
         
         product = object.attributes[:product]
         values_by_heading = (values_by_heading_by_product[product] ||= {
           "company.reference" => product.attributes[:company].attributes[:reference],
           "product.reference" => product.attributes[:reference]
         })
-        heading =
-          case property
-          when at  then "title_#{object.attributes[:sequence_number]}"
-          when ati then "title_#{object.attributes[:sequence_number] + 4}" # TODO: +1 when adding new T5
-          when rc  then "reference:class"
-          end
+        heading = (property == rc ? "reference:class" : TITLE::PROPERTIES[object.attributes[:sequence_number] - 1])
         values_by_heading[heading] = object.attributes[:text_value]
       end
       
-      headings = %w(reference:class company.reference product.reference) + 1.upto(6).map { |i| "title_#{i}" }
+      first_product_by_value_by_heading = {}
+      values_by_heading_by_product.each do |product, values_by_heading|
+        TITLE::PROPERTIES.each do |title|
+          value = values_by_heading[title]
+          if value.blank?
+            error(Product, product.path, product.row, nil, "empty #{title} title")
+            next
+          end
+          
+          first_product_by_value = (first_product_by_value_by_heading[title] ||= {})
+          collision = first_product_by_value[value]
+          if collision.nil? then first_product_by_value[value] = product
+          else error(Product, product.path, product.row, nil, "duplicates #{title} title from #{collision.path} row #{collision.row}: #{friendly_pk(collision.primary_key)}")
+          end
+        end
+      end
+      
+      headings = %w(reference:class company.reference product.reference) + TITLE::PROPERTIES
       FasterCSV.open(TITLE_REPORT_PATH, "w") do |title_report|
         title_report << headings
         values_by_heading_by_product.each do |product, values_by_heading|

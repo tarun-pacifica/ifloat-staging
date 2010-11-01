@@ -3,117 +3,113 @@
 <div id="body">
 
 <div id="product_data_panel" class="panel minor">
-	<div class="title"> <h2>Product Data</h2> </div>
-	<%= product_data_panel(@common_values) %>
+  <div class="title"> <h2>Product Data</h2> </div>
+  <%= product_data_panel(@common_values) %>
 </div>
 
 <div id="product_detail" class="panel major">
-	<div class="title">
-		<h2><%= panel_title_back_to_find(@find) %></h2>
-	</div>
-	
-	<div class="body">
-		<div class="images">
-			<img class="main" src=<%= @image_urls.first.inspect %> alt=<%= @page_title.inspect %> />
-			<% if @image_urls.size > 1 %>			
-				<% @image_urls.each do |url|%>
-				<img class="thumb" src=<%= url.inspect %> alt="thumbnail" onmouseover="product_detail_select_image(event)" />
-				<% end %>
-			<% end %>
-		</div>
-			
-		<div class="price_actions">
-			<div id="pick_buttons">
-				<div class="compare"> </div>
-				<div class="buy_later"> </div>
-				<div class="buy_now"> </div>
-				<div class="reset"> </div>
-				<hr class="terminator" />
-			</div>
-			
-			<p id="price">
-				<% if @min_price.nil? %> none of our partners have this item in stock
-				<% else %> from <strong><%= money_uom(@min_price, session.currency, @price_unit, @price_divisor) %></strong>
-				<% end %>
-			</p>
-			
-			<% unless @related_media.empty? %>
-			<h3>Related Media</h3>
-			<table class="related_media" summary="related media">
-				<% @related_media.each do |name, url, icon_url| %>
-				<tr>
-					<td class="icon"> <img src=<%= icon_url.inspect %> alt="media icon" /> </td>
-					<td> <a href=<%= url.inspect %> target="_blank_"><%= name %></a> </td>
-				</tr>
-				<% end %>
-			</table>
-			<% end %>
-		</div>
-		
-		<hr class="terminator" />
-	
-		<div class="description">
-			<% (@body_values_by_name["auto:title"] || [])[0, 3].each_with_index do |title, i| %>
-			<% if i == 0 %> <h1><%= title.superscript %></h1>
-			<% else %> <h2><%= title.superscript %></h2>
-			<% end %>
-			<% end %>
-			
-			<% unless @related_products_by_rel_name.empty? %>
-			<a href="#relations">View Related Products</a>
-			<% end %>
-
-			<% summary, features, description = @body_values_by_name.values_at("marketing:summary", "marketing:feature_list", "marketing:description").map { |values| (values || []).first.to_s.superscript } %>
-
-			<% unless summary.blank? %>
-			<h3>Summary</h3>
-			<p><%= summary %></p>
-			<% end %>
-
-			<% unless features.blank? %>
-			<h3>Features</h3>
-			<ul>
-				<% features.split("\n").each do |feature| %>
-				<li><%= feature %></li>
-				<% end %>
-			</ul>
-			<% end %>
-
-			<% unless description.blank? %>
-			<h3>Description</h3>
-			<%= BlueCloth.new(description).to_html %>
-			<% end %>
-		</div>
-
-		<% unless @related_products_by_rel_name.empty? %>
-		<div class="relations">
-			<a name="relations"> </a>
-			<% @related_products_by_rel_name.each do |name, products| %>
-			<div>
-				<h3>This product <%= name.tr("_", " ") %>...</h3>
-				<%= products.map { |prod| "<div class=\"product\" id=\"prod_#{prod.id}\"></div>" }.join %>
-				<% hidden = products.size - 3 %>
-				<% if hidden > 0 %>
-				<div class="more" onclick="product_detail_more_relations(event)">
-					(show <%= hidden %> more product<%= hidden == 1 ? "" : "s" %>)
-				</div>
-				<% end %>
-			</div>
-			<% end %>
-		</div>	
-		<% end %>
-	</div>
+  <div class="title">
+    <h2><%= panel_title_back_to_find(@find) %></h2>
+  </div>
+  
+  <div class="body">
+    <div class="images">
+      <img class="main" src=<%= @image_urls.first.inspect %> alt=<%= @page_title.inspect %> />
+      <% if @image_urls.size > 1 %>     
+        <% @image_urls.each do |url|%>
+        <img class="thumb" src=<%= url.inspect %> alt="thumbnail" onmouseover="product_detail_select_image(event)" />
+        <% end %>
+      <% end %>
+    </div>
+      
+    <div class="price_actions">
+      <div id="pick_buttons">
+        <div class="compare"> </div>
+        <div class="buy_later"> </div>
+        <div class="buy_now"> </div>
+        <div class="reset"> </div>
+        <hr class="terminator" />
+      </div>
+      
+      <p id="price">
+        <% if @min_price.nil? %> none of our partners have this item in stock
+        <% else %> from <strong><%= money_uom(@min_price, session.currency, @price_unit, @price_divisor) %></strong>
+        <% end %>
+      </p>
+      
+      <% unless @related_media.empty? %>
+      <h3>Related Media</h3>
+      <table class="related_media" summary="related media">
+        <% @related_media.each do |name, url, icon_url| %>
+        <tr>
+          <td class="icon"> <img src=<%= icon_url.inspect %> alt="media icon" /> </td>
+          <td> <a href=<%= url.inspect %> target="_blank_"><%= name %></a> </td>
+        </tr>
+        <% end %>
+      </table>
+      <% end %>
+    </div>
+    
+    <hr class="terminator" />
+    
+    <div class="description">
+      <h1><%= @body_values_by_name["auto:title"].first.superscript %></h1>
+      
+      <% unless @related_products_by_rel_name.empty? %>
+      <a href="#relations">View Related Products</a>
+      <% end %>
+      
+      <% summary, features, description = @body_values_by_name.values_at("marketing:summary", "marketing:feature_list", "marketing:description").map { |values| (values || []).first.to_s.superscript } %>
+      
+      <% unless summary.blank? %>
+      <h3>Summary</h3>
+      <p><%= summary %></p>
+      <% end %>
+      
+      <% unless features.blank? %>
+      <h3>Features</h3>
+      <ul>
+        <% features.split("\n").each do |feature| %>
+        <li><%= feature %></li>
+        <% end %>
+      </ul>
+      <% end %>
+      
+      <% unless description.blank? %>
+      <h3>Description</h3>
+      <%= BlueCloth.new(description).to_html %>
+      <% end %>
+    </div>
+    
+    <% unless @related_products_by_rel_name.empty? %>
+    <div class="relations">
+      <a name="relations"> </a>
+      <% @related_products_by_rel_name.each do |name, products| %>
+      <div>
+        <h3>This product <%= name.tr("_", " ") %>...</h3>
+        <%= products.map { |prod| "<div class=\"product\" id=\"prod_#{prod.id}\"></div>" }.join %>
+        <% hidden = products.size - 3 %>
+        <% if hidden > 0 %>
+        <div class="more" onclick="product_detail_more_relations(event)">
+          (show <%= hidden %> more product<%= hidden == 1 ? "" : "s" %>)
+        </div>
+        <% end %>
+      </div>
+      <% end %>
+    </div>  
+    <% end %>
+  </div>
 </div>
 
 </div>
 
 <script type="text/javascript" charset="utf-8">
-	$ifloat_body = { product_id: <%= @product.id %> };
-	$('img.property_icon').unbind('click');
-	
-	<% unless @related_products_by_rel_name.empty? %>
-	<% product_ids = @related_products_by_rel_name.values.map { |products| products.map { |product| product.id } }.flatten.uniq %>
-	product_links_load(<%= product_ids.to_json %>);
-	$('#product_detail .relations div').each(function() { $(this).children('.product:gt(2)').hide(); });
-	<% end %>	
+  $ifloat_body = { product_id: <%= @product.id %> };
+  $('img.property_icon').unbind('click');
+  
+  <% unless @related_products_by_rel_name.empty? %>
+  <% product_ids = @related_products_by_rel_name.values.map { |products| products.map { |product| product.id } }.flatten.uniq %>
+  product_links_load(<%= product_ids.to_json %>);
+  $('#product_detail .relations div').each(function() { $(this).children('.product:gt(2)').hide(); });
+  <% end %> 
 </script>

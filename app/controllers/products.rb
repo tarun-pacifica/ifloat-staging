@@ -8,7 +8,7 @@ class Products < Application
     Product.values_by_property_name_by_product_id(product_ids, session.language, names).map do |product_id, values_by_property_name|
       { :id         => product_id,
         :image_urls => product_image_urls(images_by_product_id[product_id]),
-        :titles     => (values_by_property_name["auto:title"] || [])[0..-2].map { |t| t.to_s },
+        :title      => (values_by_property_name["auto:title"] || []).first.to_s,
         :summary    => (values_by_property_name["marketing:summary"] || []).first.to_s,
         :url        => Indexer.product_url(product_id) }
     end.to_json
@@ -27,8 +27,7 @@ class Products < Application
       raw_name = info[:raw_name]
       @body_values_by_name[raw_name] = info[:values] if names.include?(raw_name)
     end
-    @page_title = @body_values_by_name["auto:title"].pop
-    @page_description = (@body_values_by_name["marketing:summary"] || []).first
+    @page_title, @page_description = @body_values_by_name["auto:title"][0..1].map { |v| v.desuperscript }
     
     gather_assets(@product)
     

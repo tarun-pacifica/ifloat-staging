@@ -164,11 +164,11 @@ class CachedFinds < Application
       title_checksums_by_product_id[product_id] = checksum
     end
     
-    title_properties = %w(auto:title_image marketing:summary)
+    title_properties = %w(auto:title marketing:summary)
     titles_by_checksum = {}
     Product.values_by_property_name_by_product_id(title_checksums_by_product_id.keys, session.language, title_properties).map do |product_id, values_by_property_name|
       checksum = title_checksums_by_product_id[product_id]
-      titles_by_checksum[checksum] = values_by_property_name.values_at(*title_properties).flatten.map { |t| t.to_s }
+      titles_by_checksum[checksum] = title_properties.map { |tp| values_by_property_name[tp].last.to_s }
     end
     
     checksums.map do |checksum|

@@ -15,9 +15,12 @@ class Products < Application
   end
   
   def show(id)
+    path = Indexer.product_url(id)
+    return redirect(path, :status => 301) unless path.nil? or path == request.path
+    
     product_id = id.to_i
     @product = Product.get(product_id)
-    return redirect("/") if @product.nil?
+    return render("../cached_finds/new".to_sym, :status => 404) if @product.nil?
     
     @common_values, diff_values = @product.marshal_values(session.language, RANGE_SEPARATOR)
     

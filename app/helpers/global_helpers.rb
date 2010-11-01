@@ -1,5 +1,16 @@
 module Merb
   module GlobalHelpers
+    def compile_tags
+      frequencies_by_tag = Indexer.tag_frequencies(session.language)
+      min, max = frequencies_by_tag.values.minmax
+      return if min.nil?
+      
+      normalised_max = (max - min) / 4.0 
+      frequencies_by_tag.sort.map! do |tag, frequency|
+        [tag, ((frequency - min) / normalised_max).round]
+      end
+    end
+    
     def hidden_field(*args)
       "<div>#{super}</div>"
     end

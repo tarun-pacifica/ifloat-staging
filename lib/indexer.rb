@@ -184,7 +184,7 @@ module Indexer
   
   def self.product_url(product_id)
     return {} unless ensure_loaded
-    @@product_url_cache[product_id] || "/products/#{product_id}"
+    @@product_url_cache[product_id]
   end
   
   # TODO: extend to support multiple languages

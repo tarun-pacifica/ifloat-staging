@@ -103,17 +103,6 @@ class CachedFinds < Application
   end
   
   def new
-    @tags = []
-    frequencies_by_tag = Indexer.tag_frequencies(session.language)
-    min, max = frequencies_by_tag.values.minmax
-    unless min.nil?
-      normalised_max = (max - min) / 4.0 
-      @tags = frequencies_by_tag.sort.map! do |tag, frequency|
-        [tag, ((frequency - min) / normalised_max).round]
-      end
-    end
-    
-    @page_description = "ifloat® is an innovative marine leisure products website. The site offers a sophisticated and powerful approach to finding marine leisure and boating products from a comprehensive database and aims to provide the single most valuable boating products resource on the internet."
     render
   end
   

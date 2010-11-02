@@ -11,7 +11,7 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     
     <% @page_description ||= "ifloat® is an innovative marine leisure products website. The site offers a sophisticated and powerful approach to finding marine leisure and boating products from a comprehensive database and aims to provide the single most valuable boating products resource on the internet." %>
-    <meta name="description" content=<%= @page_description.gsub(/"/) { "&quot;" }.inspect %> />
+    <meta name="description" content=<%= @page_description.attribute_escape.inspect %> />
     
     <link rel="stylesheet" href="/stylesheets/compiled.css" type="text/css" media="screen" charset="utf-8" />
     <!--[if IE 7]>

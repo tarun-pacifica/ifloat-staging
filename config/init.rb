@@ -51,6 +51,12 @@ Merb::BootLoader.before_app_loads do
   end
   
   class String
+    def attribute_escape(inner_escape_single_quotes = false)
+      escaped = Merb::Parse.escape_xml(self)
+      escaped.gsub!(/(')/) { "\\'" } if inner_escape_single_quotes
+      escaped
+    end
+    
     def desuperscript
       gsub(%r{<sup>(.*?)</sup>}, '\1')
     end

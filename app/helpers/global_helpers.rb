@@ -123,7 +123,7 @@ module Merb
     
     def property_icon(info, position = :right)
       prop_id, src = info.values_at(:id, :icon_url)
-      tooltip = info[:name].gsub(/(')/) { "\\'" }
+      tooltip = info[:name].attribute_escape(true)
       
       if info[:raw_name] == "reference:class"
         <<-HTML
@@ -137,9 +137,8 @@ module Merb
     end
     
     def tooltip(value, tip, position = :right)
-      t = tip.gsub(/"/) { "&quot;" }.gsub("'") { "\\'" }
       <<-HTML
-  	    <span class="defined" onmouseover="tooltip_show(event, '#{t}', '#{position}')" onmouseout="tooltip_hide()">#{value}</span>
+  	    <span class="defined" onmouseover="tooltip_show(event, '#{tip.attribute_escape(true)}', '#{position}')" onmouseout="tooltip_hide()">#{value}</span>
   	  HTML
     end
     

@@ -50,7 +50,7 @@ function util_defined(value, definition, position) {
 }
 
 function util_escape_attr(string) {
-	return string.replace(RegExp('"', 'g'), '&quot;')
+	return string.replace(RegExp('&', 'g'), '&amp;').replace(RegExp('"', 'g'), '&quot;').replace(RegExp('<', 'g'), '&lt;').replace(RegExp('>', 'g'), '&gt;');
 }
 
 function util_escape_attr_js(string) {

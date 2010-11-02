@@ -7,7 +7,7 @@
 	<div id="tag_cloud_cta"></div>
 	<p class="tag_cloud">
 		<% compile_tags.each do |tag, weight| %>
-		<span class="weight_<%= weight%>" onclick="tag_cloud_click('{<%= tag.gsub(/(')/) { "\\'" } %>}')"><%= tag.gsub(/\s+/, "&nbsp;") %></span>
+		<span class="weight_<%= weight%>" onclick="tag_cloud_click('{<%= tag.attribute_escape(true) %>}')"><%= tag.gsub(/\s+/, "&nbsp;") %></span>
 		<% end %>
 	</p>
 </div>

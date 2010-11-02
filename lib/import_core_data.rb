@@ -228,13 +228,16 @@ class ImportSet
           "company.reference" => product.attributes[:company].attributes[:reference],
           "product.reference" => product.attributes[:reference]
         })
-        heading = (property == rc ? "reference:class" : TITLE::PROPERTIES[object.attributes[:sequence_number] - 1])
+        heading =
+          if property == rc then "reference:class"
+          else TitleStrategy::TITLE_PROPERTIES[object.attributes[:sequence_number] - 1]
+          end
         values_by_heading[heading] = object.attributes[:text_value]
       end
       
       first_product_by_value_by_heading = {}
       values_by_heading_by_product.each do |product, values_by_heading|
-        TITLE::PROPERTIES.each do |title|
+        TitleStrategy::TITLE_PROPERTIES.each do |title|
           value = values_by_heading[title]
           if value.blank?
             error(Product, product.path, product.row, nil, "empty #{title} title")
@@ -244,12 +247,12 @@ class ImportSet
           first_product_by_value = (first_product_by_value_by_heading[title] ||= {})
           collision = first_product_by_value[value]
           if collision.nil? then first_product_by_value[value] = product
-          else error(Product, product.path, product.row, nil, "duplicates #{title} title from #{collision.path} row #{collision.row}: #{friendly_pk(collision.primary_key)}")
+          else error(Product, product.path, product.row, nil, "duplicates #{title} title from #{collision.path} row #{collision.row} (#{friendly_pk(collision.primary_key)}): #{value}")
           end
         end
       end
       
-      headings = %w(reference:class company.reference product.reference) + TITLE::PROPERTIES
+      headings = %w(reference:class company.reference product.reference) + TitleStrategy::TITLE_PROPERTIES
       FasterCSV.open(TITLE_REPORT_PATH, "w") do |title_report|
         title_report << headings
         values_by_heading_by_product.each do |product, values_by_heading|

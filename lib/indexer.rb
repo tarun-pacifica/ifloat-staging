@@ -2,6 +2,7 @@ module Indexer
   COMPILED_PATH = "caches/indexer.marshal"
   SITEMAP_PATH = "public/sitemap.xml"
   
+  @@category_tree = {}
   @@class_property_id = nil
   @@image_checksum_index = {}
   @@last_loaded_md5 = nil
@@ -15,6 +16,11 @@ module Indexer
   @@text_filtering_index = {}
   @@text_finding_index = {}
   
+  def self.category_children_for_node(property_names)
+    return [] unless ensure_loaded
+    property_names.inject(@@category_tree) { |tree, name| tree.nil? ? nil : tree[name] } || []
+  end
+  
   def self.class_property_id
     @@class_property_id if ensure_loaded
   end
@@ -25,6 +31,7 @@ module Indexer
       records = text_records
       
       indexes = {
+        :category_tree           => compile_category_tree(properties, records),
         :image_checksums         => compile_image_checksum_index,
         :numeric_filtering       => compile_numeric_filtering_index,
         :product_url_cache       => compile_product_url_cache,
@@ -45,6 +52,7 @@ module Indexer
     properties = PropertyDefinition.all
     records = text_records
     
+    @@category_tree = compile_category_tree(properties, records)
     @@image_checksum_index = compile_image_checksum_index
     @@numeric_filtering_index = compile_numeric_filtering_index
     @@product_url_cache = compile_product_url_cache
@@ -130,6 +138,7 @@ module Indexer
     
     File.open(COMPILED_PATH) do |f|
       indexes = Marshal.load(f)
+      @@category_tree = indexes[:category_tree]
       @@image_checksum_index = indexes[:image_checksums]
       @@numeric_filtering_index = indexes[:numeric_filtering]
       @@product_url_cache = indexes[:product_url_cache]
@@ -224,6 +233,40 @@ module Indexer
   
   
   private
+  
+  def self.compile_category_tree(properties, records)
+    property_names = %w(reference:class_senior reference:class product:type marketing:brand)
+    properties = properties.select { |pd| property_names.include?(pd.name) }
+    properties_by_id = properties.hash_by(:id)
+    properties_by_name = properties.hash_by(:name)
+    
+    values_by_prop_id_by_prod_id = {}
+    records.each do |record|
+      next unless properties_by_id.has_key?(record.property_definition_id)
+      values_by_prop_id = (values_by_prop_id_by_prod_id[record.product_id] ||= {})
+      values_by_prop_id[record.property_definition_id] = record.text_value
+    end
+    
+    tree = {}
+    brand_pid = properties_by_name["marketing:brand"].id
+    values_by_prop_id_by_prod_id.sort_by do |prod_id, values_by_prop_id|
+      values_by_prop_id[brand_pid] || ""
+    end.each do |prod_id, values_by_prop_id|a
+      node = tree
+      
+      property_names[0..-3].each do |prop_name|
+        prop_id = properties_by_name[prop_name].id
+        prod_value = values_by_prop_id[prop_id]
+        node = (node[prod_value] ||= {})
+      end
+      
+      prop_id = property_ids_by_name[property_names[-2]]
+      prod_value = values_by_prop_id[prop_id]
+      (node[prod_value] ||= []) << prod_id
+    end
+    
+    tree
+  end
   
   def self.compile_filtering_index(records, root_key, *value_keys)
     index = {}

@@ -212,27 +212,43 @@ class ImportSet
       end
     end
     
-    # TODO: turn into a non-replication check when ready
+    text_values = @objects.select { |o| o.klass == TextPropertyValue }
+    
+    stopwatch("ensured no blank category values") do
+      properties = %w(reference:class_senior reference:class product:type).map! { |key| get!(PropertyDefinition, key) }.to_set
+      
+      properties_by_product = {}
+      text_values.each do |tv|
+        property = tv.attributes[:definition]
+        (properties_by_product[tv.attributes[:product]] ||= []) << property if properties.include?(property)
+      end
+      
+      properties_by_product.each do |product, prod_props|
+        (properties - prod_props).each do |property|
+          error(Product, product.path, product.row, nil, "blank #{property.attributes[:name]}")
+        end
+      end
+    end
+    
     # TODO: generalize to non-English titles when ready
-    stopwatch("generated title report") do
+    stopwatch("ensured no blank / duplicated titles and produced report") do
       at, rc = %w(auto:title reference:class).map! { |key| get!(PropertyDefinition, key) }
       values_by_heading_by_product = {}
       
-      @objects.each do |object|
-        next unless object.klass == TextPropertyValue
-        property = object.attributes[:definition]
+      text_values.each do |tv|
+        property = tv.attributes[:definition]
         next unless property == at or property == rc
         
-        product = object.attributes[:product]
+        product = tv.attributes[:product]
         values_by_heading = (values_by_heading_by_product[product] ||= {
           "company.reference" => product.attributes[:company].attributes[:reference],
           "product.reference" => product.attributes[:reference]
         })
         heading =
           if property == rc then "reference:class"
-          else TitleStrategy::TITLE_PROPERTIES[object.attributes[:sequence_number] - 1]
+          else TitleStrategy::TITLE_PROPERTIES[tv.attributes[:sequence_number] - 1]
           end
-        values_by_heading[heading] = object.attributes[:text_value]
+        values_by_heading[heading] = tv.attributes[:text_value]
       end
       
       first_product_by_value_by_heading = {}
@@ -243,6 +259,8 @@ class ImportSet
             error(Product, product.path, product.row, nil, "empty #{title} title")
             next
           end
+          
+          next if title == :image
           
           first_product_by_value = (first_product_by_value_by_heading[title] ||= {})
           collision = first_product_by_value[value]

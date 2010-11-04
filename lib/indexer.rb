@@ -16,9 +16,16 @@ module Indexer
   @@text_filtering_index = {}
   @@text_finding_index = {}
   
-  def self.category_children_for_node(property_names)
+  def self.category_children_for_node(path_names = [])
     return [] unless ensure_loaded
-    property_names.inject(@@category_tree) { |tree, name| tree.nil? ? nil : tree[name] } || []
+    return @@category_tree.keys.sort if path_names.empty?
+    
+    node = @@category_tree
+    while path_names.any?
+      node = node[path_names.shift]
+      return [] if node.nil?
+    end
+    node.is_a?(Hash) ? node.keys : node
   end
   
   def self.class_property_id
@@ -251,7 +258,7 @@ module Indexer
     brand_pid = properties_by_name["marketing:brand"].id
     values_by_prop_id_by_prod_id.sort_by do |prod_id, values_by_prop_id|
       values_by_prop_id[brand_pid] || ""
-    end.each do |prod_id, values_by_prop_id|a
+    end.each do |prod_id, values_by_prop_id|
       node = tree
       
       property_names[0..-3].each do |prop_name|
@@ -260,7 +267,7 @@ module Indexer
         node = (node[prod_value] ||= {})
       end
       
-      prop_id = property_ids_by_name[property_names[-2]]
+      prop_id = properties_by_name[property_names[-2]].id
       prod_value = values_by_prop_id[prop_id]
       (node[prod_value] ||= []) << prod_id
     end

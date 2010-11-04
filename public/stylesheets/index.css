@@ -1,3 +1,30 @@
+.category_tree .category {
+	border-top: 1px dashed gray;
+	margin: 5px;
+	padding: 5px;
+}
+
+.category_tree .category h2 {
+	color: #345EB7;
+	margin: 0 0 5px 0;
+}
+
+.category_tree .category ul {
+	color: #404040;
+	margin: 0;
+	padding-left: 20px;
+}
+
+.category_tree .category ul a {
+	color: #404040;
+	text-decoration: none;
+}
+
+.category_tree .category ul a:hover {
+	color: black;
+	text-decoration: underline;
+}
+
 p.noscript {
 	background: #FFFFE0;
 	border: 1px solid gray;

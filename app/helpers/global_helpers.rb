@@ -1,5 +1,10 @@
 module Merb
   module GlobalHelpers
+    def category_link(path_names)
+      url = "/categories/" + path_names.join("/")
+      "<a href=#{URI.escape('/categories/' + path_names.join('/')).inspect}>#{path_names.last}</a>"
+    end
+    
     def compile_tags
       frequencies_by_tag = Indexer.tag_frequencies(session.language)
       min, max = frequencies_by_tag.values.minmax

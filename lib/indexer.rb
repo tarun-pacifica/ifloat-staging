@@ -25,7 +25,7 @@ module Indexer
       node = node[path_names.shift]
       return [] if node.nil?
     end
-    node.is_a?(Hash) ? node.keys : node
+    node.is_a?(Hash) ? node.keys.sort : node
   end
   
   def self.class_property_id

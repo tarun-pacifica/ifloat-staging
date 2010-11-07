@@ -53,17 +53,17 @@
     <hr class="terminator" />
     
     <div class="description">
-      <h1><%= @body_values_by_name["auto:title"].first.superscript %></h1>
+      <h1><%= @title.superscript %></h1>
       
       <% unless @related_products_by_rel_name.empty? %>
       <a href="#relations">View Related Products</a>
       <% end %>
       
-      <% summary, features, description = @body_values_by_name.values_at("marketing:summary", "marketing:feature_list", "marketing:description").map { |values| (values || []).first.to_s.superscript } %>
+      <% features, description = @body_values_by_name.values_at("marketing:feature_list", "marketing:description").map { |values| (values || []).first.to_s.superscript } %>
       
-      <% unless summary.blank? %>
+      <% unless @summary.blank? %>
       <h3>Summary</h3>
-      <p><%= summary %></p>
+      <p><%= @summary %></p>
       <% end %>
       
       <% unless features.blank? %>

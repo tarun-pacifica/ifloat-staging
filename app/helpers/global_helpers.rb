@@ -2,16 +2,20 @@ module Merb
   module GlobalHelpers
     def category_link(path_names)
       url = "/categories/" + path_names.join("/")
-      "<a href=#{URI.escape('/categories/' + path_names.join('/')).inspect}>#{path_names.last}</a>"
+      url.tr!(" ", "+")
+      "<a href=#{url.inspect}>#{path_names.last}</a>"
     end
     
     def compile_tags
+      return @compiled_tags unless @compiled_tags.nil? or @compiled_tags_md5 != Indexer.last_loaded_md5
+      
       frequencies_by_tag = Indexer.tag_frequencies(session.language)
       min, max = frequencies_by_tag.values.minmax
       return if min.nil?
       
-      normalised_max = (max - min) / 4.0 
-      frequencies_by_tag.sort.map! do |tag, frequency|
+      normalised_max = (max - min) / 4.0
+      @compiled_tags_md5 = Indexer.last_loaded_md5
+      @compiled_tags = frequencies_by_tag.sort.map do |tag, frequency|
         [tag, ((frequency - min) / normalised_max).round]
       end
     end
@@ -47,7 +51,7 @@ module Merb
       return "&nbsp;" if find.nil?      
       <<-HTML
         <a href="#{resource(find)}">« back to your <strong>#{find.specification.inspect}</strong> results</a>
-			HTML
+      HTML
     end
         
     def product_data_panel(values)
@@ -56,7 +60,7 @@ module Merb
       brands = values.map { |info| info[:raw_name] == "marketing:brand" ? info[:values] : [] }.flatten.uniq
       logos = Brand.logos(brands)
       html << "<div class=\"advert\"> <img src=#{logos[rand(logos.size)].url.inspect} alt=\"brand logo\" /> </div>" unless logos.empty?
-      	
+        
       html << '<div class="sections">'
       
       seq_nums_by_section = {}
@@ -70,7 +74,7 @@ module Merb
       
       seq_nums_by_section.keys.sort_by { |section| seq_nums_by_section[section] }.each_with_index do |section, i|
         html << ((i == 0 and logos.empty?) ? "<h3 class=\"topmost\">#{section}</h3>" : "<h3>#{section}</h3>")
-
+        
         values_by_section[section].each do |info|
           html << <<-HTML
             <table class="property" summary="property">
@@ -143,8 +147,8 @@ module Merb
     
     def tooltip(value, tip, position = :right)
       <<-HTML
-  	    <span class="defined" onmouseover="tooltip_show(event, '#{tip.attribute_escape(true)}', '#{position}')" onmouseout="tooltip_hide()">#{value}</span>
-  	  HTML
+        <span class="defined" onmouseover="tooltip_show(event, '#{tip.attribute_escape(true)}', '#{position}')" onmouseout="tooltip_hide()">#{value}</span>
+      HTML
     end
     
     def tooltip_list(name, values, position = :right)

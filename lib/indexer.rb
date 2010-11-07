@@ -7,7 +7,7 @@ module Indexer
   @@image_checksum_index = {}
   @@last_loaded_md5 = nil
   @@numeric_filtering_index = {}
-  @@product_url_cache = {}
+  @@product_title_cache = {}
   @@property_display_cache = {}
   @@sale_price_min_property_id = nil
   @@skip_load = false
@@ -16,14 +16,13 @@ module Indexer
   @@text_filtering_index = {}
   @@text_finding_index = {}
   
-  def self.category_children_for_node(path_names = [])
+  def self.category_children_for_node(path_names)
     return [] unless ensure_loaded
-    return @@category_tree.keys.sort if path_names.empty?
     
-    node = @@category_tree
-    while path_names.any?
-      node = node[path_names.shift]
-      return [] if node.nil?
+    node = path_names.inject(@@category_tree) do |node, name|
+      if (node.is_a?(Hash) and node.has_key?(name)) then node[name]
+      else return []
+      end
     end
     node.is_a?(Hash) ? node.keys.sort : node
   end
@@ -41,7 +40,7 @@ module Indexer
         :category_tree           => compile_category_tree(properties, records),
         :image_checksums         => compile_image_checksum_index,
         :numeric_filtering       => compile_numeric_filtering_index,
-        :product_url_cache       => compile_product_url_cache,
+        :product_title_cache     => compile_product_title_cache,
         :property_display_cache  => compile_property_display_cache(properties),
         :tag_index               => compile_tag_index(properties, records),
         :text_filtering          => compile_filtering_index(records.select { |r| r.filterable }, :language_code, :text_value),
@@ -62,7 +61,7 @@ module Indexer
     @@category_tree = compile_category_tree(properties, records)
     @@image_checksum_index = compile_image_checksum_index
     @@numeric_filtering_index = compile_numeric_filtering_index
-    @@product_url_cache = compile_product_url_cache
+    @@product_title_cache = compile_product_title_cache
     @@property_display_cache = compile_property_display_cache(properties)
     @@tag_index = compile_tag_index(properties, records)
     @@text_filtering_index = compile_filtering_index(records.select { |r| r.filterable }, :language_code, :text_value)
@@ -148,7 +147,7 @@ module Indexer
       @@category_tree = indexes[:category_tree]
       @@image_checksum_index = indexes[:image_checksums]
       @@numeric_filtering_index = indexes[:numeric_filtering]
-      @@product_url_cache = indexes[:product_url_cache]
+      @@product_title_cache = indexes[:product_title_cache]
       @@property_display_cache = indexes[:property_display_cache]
       @@tag_index = indexes[:tag_index]
       @@tag_frequencies = nil
@@ -162,7 +161,7 @@ module Indexer
     File.open(SITEMAP_PATH, "w") do |f|
       f.puts '<?xml version="1.0" encoding="UTF-8"?>'
       f.puts '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
-      f.puts @@product_url_cache.values.map { |stem| "<url> <loc>http://www.ifloat.biz#{stem}</loc> <changefreq>daily</changefreq> </url>" }
+      f.puts @@product_title_cache[:url].values.map { |stem| "<url> <loc>http://www.ifloat.biz#{stem}</loc> <changefreq>daily</changefreq> </url>" }
       f.puts '</urlset>'
     end
     
@@ -198,9 +197,13 @@ module Indexer
     ((@@tag_index[language_code] || {})[phrase] || []).to_set
   end
   
+  # TODO: support language code
+  def self.product_title(domain, product_id)
+    (@@product_title_cache[domain] || {})[product_id] if ensure_loaded
+  end
+  
   def self.product_url(product_id)
-    return {} unless ensure_loaded
-    @@product_url_cache[product_id]
+    product_title(:url, product_id)
   end
   
   # TODO: extend to support multiple languages
@@ -326,25 +329,39 @@ module Indexer
     compile_filtering_index(records, :unit, :min_value, :max_value)
   end
   
-  def self.compile_product_url_cache
+  def self.compile_product_title_cache
     query =<<-SQL
-      SELECT product_id, text_value
+      SELECT product_id, property_definition_id, text_value, sequence_number
       FROM property_values
-      WHERE property_definition_id = ?
+      WHERE property_definition_id IN ?
         AND language_code = 'ENG'
         AND text_value IS NOT NULL
-        AND sequence_number = 1
     SQL
     
-    title_property = PropertyDefinition.first(:name => "auto:title")
-    return {} if title_property.nil?
+    property_names = %w(auto:title marketing:summary)
+    properties = PropertyDefinition.all(:name => property_names)
+    return {} unless properties.size == property_names.size
     
-    urls_by_product_id = {}
-    repository.adapter.select(query, title_property.id).each do |record|
-      title = record.text_value.desuperscript.downcase.delete("'").gsub(/[^a-z0-9]+/, "-")[0, 256]
-      urls_by_product_id[record.product_id] = "/products/#{title}-#{record.product_id}"
+    summary_prop_id = properties.find { |prop| prop.name == "marketing:summary" }.id
+    domains = [:summary, :canonical, :description, :image]
+    
+    values_by_product_id_by_domain = {}
+    repository.adapter.select(query, properties.map { |prop| prop.id }).each do |record|
+      seq_num = (record.property_definition_id == summary_prop_id ? 0 : record.sequence_number)
+      domain = domains[seq_num]
+      insertions = {domain => record.text_value}
+      
+      if domain == :canonical
+        simplified = record.text_value.desuperscript.downcase.delete("'").gsub(/[^a-z0-9]+/, "-")[0, 250]
+        insertions[:url] = "/products/#{simplified}-#{record.product_id}"
+      end
+      
+      insertions.each do |domain, value|
+        values_by_product_id = (values_by_product_id_by_domain[domain] ||= {})
+        values_by_product_id[record.product_id] = value
+      end
     end
-    urls_by_product_id
+    values_by_product_id_by_domain
   end
   
   # TODO: extend to support other languages

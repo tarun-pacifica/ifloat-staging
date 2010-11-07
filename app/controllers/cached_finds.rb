@@ -153,11 +153,9 @@ class CachedFinds < Application
       title_checksums_by_product_id[product_id] = checksum
     end
     
-    title_properties = %w(auto:title marketing:summary)
     titles_by_checksum = {}
-    Product.values_by_property_name_by_product_id(title_checksums_by_product_id.keys, session.language, title_properties).map do |product_id, values_by_property_name|
-      checksum = title_checksums_by_product_id[product_id]
-      titles_by_checksum[checksum] = title_properties.map { |tp| values_by_property_name[tp].last.to_s }
+    title_checksums_by_product_id.each do |product_id, checksum|
+      titles_by_checksum[checksum] = [:image, :summary].map { |domain| Indexer.product_title(domain, product_id) }.compact
     end
     
     checksums.map do |checksum|

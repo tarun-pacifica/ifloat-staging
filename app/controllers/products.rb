@@ -4,12 +4,11 @@ class Products < Application
     
     images_by_product_id = Product.primary_images_by_product_id(product_ids)
     
-    names = %w(auto:title marketing:summary)
-    Product.values_by_property_name_by_product_id(product_ids, session.language, names).map do |product_id, values_by_property_name|
+    product_ids.map do |product_id|
       { :id         => product_id,
         :image_urls => product_image_urls(images_by_product_id[product_id]),
-        :title      => (values_by_property_name["auto:title"] || []).first.to_s,
-        :summary    => (values_by_property_name["marketing:summary"] || []).first.to_s,
+        :title      => Indexer.product_title(:canonical, product_id),
+        :summary    => Indexer.product_title(:summary, product_id),
         :url        => Indexer.product_url(product_id) }
     end.to_json
   end
@@ -24,13 +23,15 @@ class Products < Application
     
     @common_values, diff_values = @product.marshal_values(session.language, RANGE_SEPARATOR)
     
-    names = %w(auto:title marketing:description marketing:feature_list marketing:summary reference:wikipedia).to_set
+    names = %w(marketing:description marketing:feature_list reference:wikipedia).to_set
     @body_values_by_name = {}
     @common_values.each do |info|
       raw_name = info[:raw_name]
       @body_values_by_name[raw_name] = info[:values] if names.include?(raw_name)
     end
-    @page_title, @page_description = @body_values_by_name["auto:title"][0..1].map { |v| v.desuperscript }
+    @title, @summary, @page_description =
+      [:canonical, :summary, :description].map { |domain| Indexer.product_title(domain, product_id) }
+    @page_title = @title.desuperscript
     
     gather_assets(@product)
     

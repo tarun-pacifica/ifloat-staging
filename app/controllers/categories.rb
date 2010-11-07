@@ -8,7 +8,7 @@ class Categories < Application
       if child.is_a?(String) then category_link(path_names + [child])
       else "<a href=#{Indexer.product_url(child).inspect}>#{Indexer.product_title(:canonical, child).superscript}</a>"
       end
-    end
+    end.sort
     
     @showing_products = children.first.is_a?(Integer)
     children.empty? ? render("../cached_finds/new".to_sym, :status => 404) : render

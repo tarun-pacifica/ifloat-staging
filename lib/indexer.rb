@@ -5,7 +5,9 @@ module Indexer
   @@category_tree = {}
   @@class_property_id = nil
   @@image_checksum_index = {}
+  @@last_loaded_lock = Mutex.new
   @@last_loaded_md5 = nil
+  @@last_loaded_time = nil
   @@numeric_filtering_index = {}
   @@product_title_cache = {}
   @@property_display_cache = {}
@@ -24,7 +26,7 @@ module Indexer
       else return []
       end
     end
-    node.is_a?(Hash) ? node.keys.sort : node
+    node.is_a?(Hash) ? node.keys : node
   end
   
   def self.class_property_id
@@ -72,11 +74,13 @@ module Indexer
   def self.ensure_loaded
     return true if @@skip_load
     
-    begin
-      load
-      true
-    rescue
-      false
+    @@last_loaded_lock.synchronize do
+      begin
+        load if @@last_loaded_time.nil? or @@last_loaded_time + 15 < Time.now
+        true
+      rescue
+        false
+      end
     end
   end
   
@@ -140,7 +144,10 @@ module Indexer
     raise "file unreadable: #{COMPILED_PATH}" unless File.readable?(COMPILED_PATH)
     
     source_md5 = Digest::MD5.file(COMPILED_PATH).hexdigest
-    return if source_md5 == @@last_loaded_md5
+    if source_md5 == @@last_loaded_md5
+      @@last_loaded_time = Time.now
+      return
+    end
     
     File.open(COMPILED_PATH) do |f|
       indexes = Marshal.load(f)
@@ -166,6 +173,7 @@ module Indexer
     end
     
     @@last_loaded_md5 = source_md5
+    @@last_loaded_time = Time.now
   end
   
   def self.product_ids_for_property_ids(property_ids, language_code)
@@ -245,7 +253,7 @@ module Indexer
   private
   
   def self.compile_category_tree(properties, records)
-    property_names = %w(reference:class_senior reference:class product:type marketing:brand)
+    property_names = %w(reference:class_senior reference:class product:type)
     properties = properties.select { |pd| property_names.include?(pd.name) }
     properties_by_id = properties.hash_by(:id)
     properties_by_name = properties.hash_by(:name)
@@ -258,10 +266,7 @@ module Indexer
     end
     
     tree = {}
-    brand_pid = properties_by_name["marketing:brand"].id
-    values_by_prop_id_by_prod_id.sort_by do |prod_id, values_by_prop_id|
-      values_by_prop_id[brand_pid] || ""
-    end.each do |prod_id, values_by_prop_id|
+    values_by_prop_id_by_prod_id.each do |prod_id, values_by_prop_id|
       node = tree
       
       property_names[0..-3].each do |prop_name|

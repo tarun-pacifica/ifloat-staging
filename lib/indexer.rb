@@ -1,5 +1,5 @@
 module Indexer
-  COMPILED_PATH = "caches/indexer.marshal"
+  COMPILED_PATH = (Merb.env == "test" ? "caches/indexer.test.marshal" : "caches/indexer.marshal" )
   SITEMAP_PATH = "public/sitemap.xml"
   
   @@category_tree = {}
@@ -9,10 +9,10 @@ module Indexer
   @@last_loaded_md5 = nil
   @@last_loaded_time = nil
   @@numeric_filtering_index = {}
+  @@product_relationship_cache = {}
   @@product_title_cache = {}
   @@property_display_cache = {}
   @@sale_price_min_property_id = nil
-  @@skip_load = false
   @@tag_index = {}
   @@tag_frequencies = nil
   @@text_filtering_index = {}
@@ -39,14 +39,15 @@ module Indexer
       records = text_records
       
       indexes = {
-        :category_tree           => compile_category_tree(properties, records),
-        :image_checksums         => compile_image_checksum_index,
-        :numeric_filtering       => compile_numeric_filtering_index,
-        :product_title_cache     => compile_product_title_cache,
-        :property_display_cache  => compile_property_display_cache(properties),
-        :tag_index               => compile_tag_index(properties, records),
-        :text_filtering          => compile_filtering_index(records.select { |r| r.filterable }, :language_code, :text_value),
-        :text_finding            => compile_text_finding_index(properties, records)
+        :category_tree              => compile_category_tree(properties, records),
+        :image_checksums            => compile_image_checksum_index,
+        :numeric_filtering          => compile_numeric_filtering_index,
+        :product_relationship_cache => compile_product_relationship_cache,
+        :product_title_cache        => compile_product_title_cache,
+        :property_display_cache     => compile_property_display_cache(properties),
+        :tag_index                  => compile_tag_index(properties, records),
+        :text_filtering             => compile_filtering_index(records.select { |r| r.filterable }, :language_code, :text_value),
+        :text_finding               => compile_text_finding_index(properties, records)
       }
       
       FileUtils.mkpath(File.dirname(COMPILED_PATH))
@@ -56,24 +57,7 @@ module Indexer
     end
   end
   
-  def self.compile_to_memory
-    properties = PropertyDefinition.all
-    records = text_records
-    
-    @@category_tree = compile_category_tree(properties, records)
-    @@image_checksum_index = compile_image_checksum_index
-    @@numeric_filtering_index = compile_numeric_filtering_index
-    @@product_title_cache = compile_product_title_cache
-    @@property_display_cache = compile_property_display_cache(properties)
-    @@tag_index = compile_tag_index(properties, records)
-    @@text_filtering_index = compile_filtering_index(records.select { |r| r.filterable }, :language_code, :text_value)
-    @@text_finding_index = compile_text_finding_index(properties, records)
-    @@skip_load = true
-  end
-  
   def self.ensure_loaded
-    return true if @@skip_load
-    
     @@last_loaded_lock.synchronize do
       begin
         load if @@last_loaded_time.nil? or @@last_loaded_time + 15 < Time.now
@@ -154,6 +138,7 @@ module Indexer
       @@category_tree = indexes[:category_tree]
       @@image_checksum_index = indexes[:image_checksums]
       @@numeric_filtering_index = indexes[:numeric_filtering]
+      @@product_relationship_cache = indexes[:product_relationship_cache]
       @@product_title_cache = indexes[:product_title_cache]
       @@property_display_cache = indexes[:property_display_cache]
       @@tag_index = indexes[:tag_index]
@@ -203,6 +188,10 @@ module Indexer
   def self.product_ids_for_tag(phrase, language_code)
     return [] if phrase.blank? or not ensure_loaded
     ((@@tag_index[language_code] || {})[phrase] || []).to_set
+  end
+  
+  def self.product_relationships(product_id)
+    (@@product_relationship_cache[product_id] || {}) if ensure_loaded
   end
   
   # TODO: support language code
@@ -332,6 +321,14 @@ module Indexer
     
     records = repository.adapter.select(query, true)
     compile_filtering_index(records, :unit, :min_value, :max_value)
+  end
+  
+  def self.compile_product_relationship_cache
+    product_ids_by_relationship_by_product_id = {}
+    Product.all.each do |product|
+      product_ids_by_relationship_by_product_id[product.id] = ProductRelationship.related_products(product)
+    end
+    product_ids_by_relationship_by_product_id
   end
   
   def self.compile_product_title_cache

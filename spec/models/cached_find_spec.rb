@@ -147,7 +147,7 @@ describe CachedFind do
         end
       end
       
-      Indexer.compile_to_memory
+      Indexer.compile
     end
     
     after(:all) do

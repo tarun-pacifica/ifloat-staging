@@ -1,0 +1,29 @@
+#category_nav p.prompt {
+  font-size: 14px;
+  margin: 0;
+  padding: 17px 0;
+  text-align: center;
+}
+
+#category_contents .title h2 span {
+  float: left;
+  margin: 0 10px;
+}
+
+#category_contents .body {
+  padding: 17px;
+  padding-bottom: 7px;
+}
+
+#category_contents .body a {
+  color: #404040;
+  display: block;
+  font-size: 14px;
+  margin-bottom: 5px;
+  text-decoration: none;
+}
+
+#category_contents .body a:hover {
+  color: black;
+  text-decoration: underline;
+}

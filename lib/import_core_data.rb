@@ -214,18 +214,19 @@ class ImportSet
     
     text_values = @objects.select { |o| o.klass == TextPropertyValue }
     
-    stopwatch("ensured no blank category values") do
+    stopwatch("ensured no blank / invalid category values") do
       properties = %w(reference:class_senior reference:class product:type).map! { |key| get!(PropertyDefinition, key) }.to_set
       
       properties_by_product = {}
       text_values.each do |tv|
-        property = tv.attributes[:definition]
-        (properties_by_product[tv.attributes[:product]] ||= []) << property if properties.include?(property)
+        product, property, value = tv.attributes.values_at(:product, :definition, :text_value)
+        (properties_by_product[product] ||= []) << property if properties.include?(property)
+        error(Product, product.path, product.row, property.attributes[:name], "value may only contain (a-z, hyphens or spaces): #{value.inspect}") unless values =~ /^[a-z\- ]$/
       end
       
       properties_by_product.each do |product, prod_props|
         (properties - prod_props).each do |property|
-          error(Product, product.path, product.row, nil, "blank #{property.attributes[:name]}")
+          error(Product, product.path, product.row, property.attributes[:name], "value required")
         end
       end
     end

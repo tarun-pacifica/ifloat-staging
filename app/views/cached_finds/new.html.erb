@@ -8,16 +8,8 @@
   <div id="tag_cloud_cta"></div>
   <p class="tag_cloud">
     <% compile_tags.each do |tag, weight| %>
-    <span class="weight_<%= weight%>" onclick="tag_cloud_click('{<%= tag.attribute_escape(true) %>}')"><%= tag.gsub(/\s+/, "&nbsp;") %></span>
+    <span class="weight_<%= weight %>" onclick="tag_cloud_click('{<%= tag.attribute_escape(true) %>}')"><%= tag.gsub(/\s+/, "&nbsp;") %></span>
     <% end %>
+    <a href="/categories">show all categories</a>
   </p>
-  
-  <div class="category_tree">
-    <% Indexer.category_children_for_node.each do |root| %>
-    <div class="category">
-      <h2><%= [root] %></h2>
-      <ul><%= Indexer.category_children_for_node([root]).map { |child| "<li>#{category_link([root, child])}</li>" } %></ul>
-    </div>
-    <% end %>
-  </div>
 </div>

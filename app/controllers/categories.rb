@@ -1,7 +1,6 @@
 class Categories < Application
   def show(root = nil, suba = nil, subb = nil)
     path_names = [root, suba, subb].compact.map { |name| name.tr("+", " ") }
-    p path_names
     @links = path_names.length.times.map { |i| category_link(path_names[0, i + 1]) }
     
     children = Indexer.category_children_for_node(path_names)

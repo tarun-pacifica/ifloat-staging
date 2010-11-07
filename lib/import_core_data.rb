@@ -222,7 +222,7 @@ class ImportSet
         product, property, value = tv.attributes.values_at(:product, :definition, :text_value)
         next unless properties.include?(property)
         (properties_by_product[product] ||= []) << property
-        error(Product, product.path, product.row, property.attributes[:name], "value may only contain (a-z, hyphens or spaces): #{value.inspect}") unless value =~ /^[a-z\- ]$/
+        error(Product, product.path, product.row, property.attributes[:name], "value may only contain (a-z, hyphens or spaces): #{value.inspect}") unless value =~ /^[A-Za-z\- ]+$/
       end
       
       properties_by_product.each do |product, prod_props|

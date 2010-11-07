@@ -16,5 +16,6 @@ gem "fastercsv",  "1.5.3" unless RUBY_VERSION =~ /^1\.9\./
 gem "i18n",       "0.4.1"
 gem "json",       "1.4.6"
 gem "mail",       "2.2.5"
+gem "nokogiri",   "1.4.3.1"
 gem "rspec",      "1.3.0"
 gem "thin",       "1.2.7"

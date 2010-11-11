@@ -30,6 +30,7 @@ Merb::Router.prepare do
   resources :picked_products
   
   match('/products/batch/:ids').to(:controller => 'products', :action => 'batch')
+  match('/products/:id/buy_now/:facility_id').to(:controller => 'products', :action => 'buy_now')
   match('/products/:junk-:id').to(:controller => 'products', :action => 'show')
   resources :products
   

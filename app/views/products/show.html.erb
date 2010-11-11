@@ -31,11 +31,20 @@
         <hr class="terminator" />
       </div>
       
-      <p id="price">
-        <% if @min_price.nil? %> none of our partners have this item in stock
-        <% else %> from <strong><%= money_uom(@min_price, session.currency, @price_unit, @price_divisor) %></strong>
+      <table class="prices" summary="prices">
+        <% @prices_by_url.each do |url, amount| %>
+        <tr>
+          <td> <img src="/images/partner/facilities/<%= url %>.png" alt=<%= url.inspect %> /> </td>
+          <td class="price">
+            <%= money_uom(amount, session.currency, @price_unit, @price_divisor) %> <br/>
+            <div class="buy_now" onclick="window.location = '/products/<%= @product.id %>/buy_now/<%= (Indexer.facilities[url] || {})[:id] %>'">Buy Now</div>
+          </td>
+        </tr>
         <% end %>
-      </p>
+        <% if @prices_by_url.empty? %>
+        <tr> <td class="no_stock">None of our partners have this item in stock</td> </tr>
+        <% end %>
+      </table>
       
       <% unless @related_media.empty? %>
       <h3>Related Media</h3>

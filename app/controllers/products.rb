@@ -13,6 +13,12 @@ class Products < Application
     end.to_json
   end
   
+  def buy_now(id, facility_id)
+    raise NotFound unless Product.get(id)
+    session.add_picked_product(PickedProduct.new(:product_id => id, :group => "buy_now"))
+    redirect("/picked_products/buy/#{facility_id}?product_id=#{id}")
+  end
+  
   def show(id)
     path = Indexer.product_url(id)
     return redirect(path, :status => 301) unless path.nil? or path == request.path
@@ -35,7 +41,7 @@ class Products < Application
     
     gather_assets(@product)
     
-    @min_price = @product.prices_by_url(session.currency).values.min
+    @prices_by_url = @product.prices_by_url(session.currency)
     @price_unit, @price_divisor = UnitOfMeasure.unit_and_divisor_by_product_id([product_id])[product_id]
     
     @related_products_by_rel_name = Indexer.product_relationships(@product.id)

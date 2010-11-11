@@ -4,6 +4,7 @@ module Indexer
   
   @@category_tree = {}
   @@class_property_id = nil
+  @@facility_cache = {}
   @@image_checksum_index = {}
   @@last_loaded_lock = Mutex.new
   @@last_loaded_md5 = nil
@@ -40,6 +41,7 @@ module Indexer
       
       indexes = {
         :category_tree              => compile_category_tree(properties, records),
+        :facility_cache             => compile_facility_cache,
         :image_checksums            => compile_image_checksum_index,
         :numeric_filtering          => compile_numeric_filtering_index,
         :product_relationship_cache => compile_product_relationship_cache,
@@ -96,6 +98,10 @@ module Indexer
     product_ids.uniq
   end
   
+  def self.facilities
+    @@facility_cache if ensure_loaded
+  end
+  
   def self.filterable_values_for_property_id(property_id, all_prod_ids, relevant_prod_ids, language_code = nil)
     return {} if all_prod_ids.empty? or not ensure_loaded
     
@@ -136,6 +142,7 @@ module Indexer
     File.open(COMPILED_PATH) do |f|
       indexes = Marshal.load(f)
       @@category_tree = indexes[:category_tree]
+      @@facility_cache = indexes[:facility_cache]
       @@image_checksum_index = indexes[:image_checksums]
       @@numeric_filtering_index = indexes[:numeric_filtering]
       @@product_relationship_cache = indexes[:product_relationship_cache]
@@ -270,6 +277,14 @@ module Indexer
     end
     
     tree
+  end
+  
+  def self.compile_facility_cache
+    facility_info_by_url = {}
+    Facility.all.each do |facility|
+      facility_info_by_url[facility.primary_url] = facility.attributes
+    end
+    facility_info_by_url
   end
   
   def self.compile_filtering_index(records, root_key, *value_keys)

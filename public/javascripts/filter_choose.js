@@ -48,7 +48,7 @@ function filter_choose_load_handle(filters) {
     }
   }
     
-  var html = ['<p class="prompt"><strong>Choose a property below</strong> to create a filter based on it...</p>'];
+  var html = ['<p class="prompt"><strong>Choose a property</strong> to create a filter...</p>'];
   for(var i in rows) {
     var row = rows[i];
     html.push('<div class="row ' + (i % 2 ? 'even' : 'odd') + '">');

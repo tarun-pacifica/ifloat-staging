@@ -16,7 +16,12 @@ module Merb
     end
     
     def add_picked_product(pick)
-      return if picked_products.any? { |p| p.product_id == pick.product_id }
+      existing = picked_products.find { |p| p.product_id == pick.product_id }
+      unless existing.nil?
+        existing.group = pick.group
+        existing.save
+        return
+      end
       
       pick.user = user
       update_picked_product_title_values([pick])

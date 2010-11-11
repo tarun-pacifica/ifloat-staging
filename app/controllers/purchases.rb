@@ -4,10 +4,10 @@ class Purchases < Application
     return "" if purchases.empty?
     
     facility = Facility.first(:primary_url => facility)
-    raise NotFound unless facility
+    raise NotFound if facility.nil?
     
     purchase = purchases.find { |purc| purc.facility_id == facility.id }
-    raise NotFound unless purchase
+    raise NotFound if purchase.nil?
     
     references = purchase.complete!(params, request.remote_ip)
     Mailer.deliver(:purchase_completed, :purchase => purchase)

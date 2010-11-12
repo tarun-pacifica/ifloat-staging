@@ -71,5 +71,7 @@
   $('img.property_icon').not('.disabled').css('cursor', 'pointer');
   util_carousel_table('#compare_by_image table', [0], [1, 2, 3, 4, 5, 6], true);
   
-  $('#compare_by_image p.prompt').animate({color: 'yellow'}).animate({color: 'black'});
+  $(document).ready(function() {
+    $('#compare_by_image p.prompt').animate({color: 'yellow'}).animate({color: 'black'});
+  }
 </script>

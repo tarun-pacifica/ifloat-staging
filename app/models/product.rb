@@ -67,12 +67,13 @@ class Product
   # TODO: may be able to factor out the mapping bit to ProductMapping
   def self.prices_by_url_by_product_id(product_ids, currency)
     query =<<-EOS
-      SELECT DISTINCT pm.product_id, f.primary_url, fp.price
+      SELECT DISTINCT pm.product_id, pm.reference, f.primary_url, fp.price
       FROM product_mappings pm
         INNER JOIN companies c ON pm.company_id = c.id
         INNER JOIN facilities f ON c.id = f.company_id
         INNER JOIN facility_products fp ON f.id = fp.facility_id AND fp.reference IN (pm.reference, SUBSTRING_INDEX(pm.reference, ';', 1))
       WHERE pm.product_id IN ?
+      ORDER BY pm.reference
     EOS
     
     prices_by_url_by_prod_id = {}

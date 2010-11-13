@@ -12,7 +12,7 @@ class ProductMapping
   include DataMapper::Resource
   
   property :id, Serial
-  property :reference, String, :required => true, :format => /^[A-Z_\d\-\.\/]+$/, :unique_index => :prod_per_company_per_ref
+  property :reference, String, :required => true, :format => /^[A-Z_\d\-\.\/;=]+$/, :unique_index => :prod_per_company_per_ref
 
   belongs_to :company
     property :company_id, Integer, :unique_index => :prod_per_company_per_ref

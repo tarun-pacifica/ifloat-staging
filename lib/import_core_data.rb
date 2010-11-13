@@ -314,6 +314,8 @@ class ImportSet
   end
   
   def import_class(klass, objects)
+    GC.enable if [TextPropertyValue, NumericPropertyValue].include?(klass) # TODO: remove once GC trickery is defunct
+    
     relationships = {}
     klass.relationships.each do |attribute, relationship|
       relationships[attribute.to_sym] = relationship.child_key.first.name
@@ -763,6 +765,7 @@ begin; stopwatch("destroyed obsolete assets") { AssetStore.delete_obsolete }; re
 
 puts "=== Compiling Indexes ==="
 stopwatch(Indexer::COMPILED_PATH) do
+  GC.enabled # TODO: remove once GC trickery is defunct
   Indexer.compile
   CachedFind.all.update!(:invalidated => true)
   PickedProduct.all.update!(:invalidated => true)

@@ -12,7 +12,7 @@ ASSET_WATERMARK_PATH_LARGE = "public/images/common/watermark_large.png"
 
 CSV_DUMP_DIR = "/tmp/ifloat_csv_dumps"
 FileUtils.mkpath(CSV_DUMP_DIR)
-CSV_REPO = "../ifloat_csvs"
+CSV_REPO  = "../ifloat_csvs"
 
 ERRORS_PATH = "/tmp/errors.csv"
 TITLE_REPORT_PATH = "/tmp/titles.csv"
@@ -185,7 +185,7 @@ class ImportSet
     #   end
     # end
     
-    stopwatch("deal with orphaned PickedProducts") do
+    stopwatch("handled orphaned PickedProducts") do
       db_companies = Company.all.hash_by(:reference)
       orphaned_product_ids = []
       
@@ -279,6 +279,17 @@ class ImportSet
           title_report << values_by_heading.values_at(*headings)
         end
       end
+    end
+    
+    stopwatch("ensured no missing marinestore.co.uk product variants") do
+      require "lib" / "partners" / "marine_store"
+      marine_store = get!(Company, "GBR-02934378")
+      mappings = @objects.select { |o| o.klass == ProductMapping and o.attributes[:company] == marine_store }
+      references = mappings.map { |m| m.attributes[:reference] }.to_set
+      from_xml_path = CSV_REPO / "partners" / "marinestore.co.uk" / "provide.xml"
+      to_csv_path = "/tmp/ms_variant_refs_missing.csv"
+      missing = Partners::MarineStore.dump_report(from_xml_path, to_csv_path) { |ref| not references.include?(ref) }
+      warn "#{missing} marinestore.co.uk references missing: #{to_csv_path}" if missing > 0
     end
   end
   
@@ -749,7 +760,7 @@ begin; stopwatch("destroyed obsolete assets") { AssetStore.delete_obsolete }; re
 
 puts "=== Compiling Indexes ==="
 stopwatch(Indexer::COMPILED_PATH) do
-  Indexer.compile
+  # Indexer.compile
   CachedFind.all.update!(:invalidated => true)
   PickedProduct.all.update!(:invalidated => true)
 end

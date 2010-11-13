@@ -146,6 +146,7 @@ class ProductParser < AbstractParser
       value
       
     when :mappings
+      value = value.split(";").first # TODO: remove when ready to support product variants
       raise "invalid mapping: #{value.inspect}" unless value =~ Product::REFERENCE_FORMAT
       ImportObject.new(ProductMapping, :company => domain_info[0], :reference => value)
       

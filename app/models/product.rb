@@ -71,7 +71,7 @@ class Product
       FROM product_mappings pm
         INNER JOIN companies c ON pm.company_id = c.id
         INNER JOIN facilities f ON c.id = f.company_id
-        INNER JOIN facility_products fp ON f.id = fp.facility_id AND pm.reference = fp.reference
+        INNER JOIN facility_products fp ON f.id = fp.facility_id AND fp.reference IN (pm.reference, SUBSTRING_INDEX(pm.reference, ';', 1))
       WHERE pm.product_id IN ?
     EOS
     

@@ -14,7 +14,7 @@ module Partners
       classes_by_ms_ref = {}
       classes_by_product_id = TextPropertyValue.all("definition.name" => "reference:class").hash_by(:product_id)
       ProductMapping.all("company.reference" => "GBR-02934378").each do |mapping|
-        (@@classes_by_ms_ref[mapping.reference] ||= []) << classes_by_product_id[mapping.product_id].to_s
+        (classes_by_ms_ref[mapping.reference] ||= []) << classes_by_product_id[mapping.product_id].to_s
       end
       
       lines_written = 0
@@ -62,7 +62,7 @@ module Partners
       
       option_code, prompts_by_value = options[0]
       prompts_by_value.each do |value, prompt|
-        traverse_or_append(product_code, options.drop(1), option_stack + ["#{option_code}=#{value}"], prompt_stack + [prompt], &reporter)
+        traverse_or_report(product_code, options.drop(1), option_stack + ["#{option_code}=#{value}"], prompt_stack + [prompt], &reporter)
       end
     end
   end

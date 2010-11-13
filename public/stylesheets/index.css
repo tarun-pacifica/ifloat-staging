@@ -46,7 +46,7 @@ p.tag_cloud {
   -moz-box-shadow: 2px 2px 2px gray;
   -webkit-box-shadow: 2px 2px 2px gray;
   margin-top: 0;
-  padding: 20px;
+  padding: 10px 20px;
   text-align: justify;
 }
 

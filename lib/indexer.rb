@@ -369,7 +369,7 @@ module Indexer
       insertions = {domain => record.text_value}
       
       if domain == :canonical
-        simplified = record.text_value.desuperscript.downcase.delete("'").gsub(/[^a-z0-9]+/, "-")[0, 250]
+        simplified = record.text_value.desuperscript.downcase.delete("'").gsub(/[^a-z0-9\.]+/, "-")[0, 250]
         insertions[:url] = "/products/#{simplified}-#{record.product_id}"
       end
       

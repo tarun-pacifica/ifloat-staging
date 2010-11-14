@@ -15,19 +15,17 @@ function find_results_update_handle(data) {
   var frps = $('#find_results_products');
   var insertion_point = frps.find('.terminator');
   
-  var displayed_count = 0;
   var products = [];
   for(var i in data) {
     var d = data[i];
     products.push(find_results_make(d[0], d[1], d[2], d[3], d[4]));
-    displayed_count += d[1];
   }
   
   frps.find('p').remove();
   frps.find('.product').remove();
   
   var terminator = frps.find('.terminator');
-  if($ifloat_body.prompt_to_add_filter && filtered_prod_count > displayed_count) {
+  if($ifloat_body.prompt_to_add_filter) {
     terminator.before('<p class="add">&larr; <strong>add a filter</strong> to narrow your results</p>');
     frps.find('p').animate({marginLeft: '10px', opacity: 1}).animate({color: 'yellow'}).animate({color: 'black'});
     $ifloat_body.prompt_to_add_filter = false;

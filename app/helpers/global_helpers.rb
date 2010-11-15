@@ -106,14 +106,7 @@ module Merb
     def product_value_summary(info, tooltip_position = :right)
       return nil if info.nil?
       
-      definitions = (info[:definitions] || [])
-      
-      values = []
-      info[:values].each_with_index do |value, i|
-        definition = definitions[i]        
-        values << (definition.nil? ? value : tooltip(value, definition, tooltip_position))
-      end
-      
+      values = info[:values].dup      
       if info[:type] == 'text' then values.map! { |value| value.superscript }
       else values.map! { |value| value.superscript_numeric }
       end
@@ -125,6 +118,10 @@ module Merb
         end
       when "marketing:feature_list"
         return tooltip_list('Features', values, tooltip_position)
+      end
+      
+      info[:definitions].each_with_index do |definition, i|
+        values[i] = tooltip(values[i], definition, tooltip_position)
       end
       
       values.join("<br />")

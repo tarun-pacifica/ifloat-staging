@@ -765,7 +765,7 @@ begin; stopwatch("destroyed obsolete assets") { AssetStore.delete_obsolete }; re
 
 puts "=== Compiling Indexes ==="
 stopwatch(Indexer::COMPILED_PATH) do
-  GC.enabled # TODO: remove once GC trickery is defunct
+  GC.enable # TODO: remove once GC trickery is defunct
   Indexer.compile
   CachedFind.all.update!(:invalidated => true)
   PickedProduct.all.update!(:invalidated => true)

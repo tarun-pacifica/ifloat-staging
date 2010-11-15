@@ -120,8 +120,8 @@ module Merb
         return tooltip_list('Features', values, tooltip_position)
       end
       
-      info[:definitions].each_with_index do |definition, i|
-        values[i] = tooltip(values[i], definition, tooltip_position)
+      (info[:definitions] || []).each_with_index do |definition, i|
+        values[i] = tooltip(values[i], definition.superscript, tooltip_position) unless definition.nil?
       end
       
       values.join("<br />")

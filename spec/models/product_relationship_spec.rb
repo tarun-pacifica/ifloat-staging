@@ -4,7 +4,7 @@ describe ProductRelationship do
   
   before(:all) do
     @text_type = PropertyType.create(:core_type => "text", :name => "text")
-    @numeric_type = PropertyType.create(:core_type => "numeric", :name => "clothing_size", :valid_units => [nil])
+    @numeric_type = PropertyType.create(:core_type => "numeric", :name => "clothing_size")
     
     @text_property = @text_type.definitions.create(:name => "marketing:model", :sequence_number => 1)
     @numeric_property = @numeric_type.definitions.create(:name => "clothing:size", :sequence_number => 2)
@@ -153,6 +153,12 @@ describe ProductRelationship do
     it "should yield the necklace (goes well) for the earring" do
       ProductRelationship.related_products(@products[2]).should == {
         "goes_well_with" => [ @products[0] ]
+      }
+    end
+    
+    it "should be completely described by compile_index" do
+      ProductRelationship.compile_index.should == {
+        
       }
     end
   end

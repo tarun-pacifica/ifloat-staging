@@ -44,7 +44,7 @@ module Indexer
         :facility_cache             => compile_facility_cache,
         :image_checksums            => compile_image_checksum_index,
         :numeric_filtering          => compile_numeric_filtering_index,
-        :product_relationship_cache => compile_product_relationship_cache,
+        :product_relationship_cache => ProductRelationship.compile_index,
         :product_title_cache        => compile_product_title_cache,
         :property_display_cache     => compile_property_display_cache(properties),
         :tag_index                  => compile_tag_index(properties, records),
@@ -198,7 +198,7 @@ module Indexer
   end
   
   def self.product_relationships(product_id)
-    (@@product_relationship_cache[product_id] || {}) if ensure_loaded
+    @@product_relationship_cache[product_id] if ensure_loaded
   end
   
   # TODO: support language code

@@ -65,7 +65,7 @@
     <div class="description">
       <h1><%= @title.superscript %></h1>
       
-      <% unless @related_products_by_rel_name.empty? %>
+      <% unless @related_product_ids_by_rel_name.nil? %>
       <a href="#relations">View Related Products</a>
       <% end %>
       
@@ -91,14 +91,14 @@
       <% end %>
     </div>
     
-    <% unless @related_products_by_rel_name.empty? %>
+    <% unless @related_product_ids_by_rel_name.nil? %>
     <div class="relations">
       <a name="relations"> </a>
-      <% @related_products_by_rel_name.each do |name, products| %>
+      <% @related_product_ids_by_rel_name.each do |name, product_ids| %>
       <div>
         <h3>This product <%= name.tr("_", " ") %>...</h3>
-        <%= products.map { |prod| "<div class=\"product\" id=\"prod_#{prod.id}\"></div>" }.join %>
-        <% hidden = products.size - 3 %>
+        <%= product_ids.map { |prod_id| "<div class=\"product\" id=\"prod_#{prod_id}\"></div>" }.join %>
+        <% hidden = product_ids.size - 3 %>
         <% if hidden > 0 %>
         <div class="more" onclick="product_detail_more_relations(event)">
           (show <%= hidden %> more product<%= hidden == 1 ? "" : "s" %>)
@@ -117,8 +117,8 @@
   $ifloat_body = { product_id: <%= @product.id %> };
   $('img.property_icon').unbind('click');
   
-  <% unless @related_products_by_rel_name.empty? %>
-  <% product_ids = @related_products_by_rel_name.values.map { |products| products.map { |product| product.id } }.flatten.uniq %>
+  <% unless @related_product_ids_by_rel_name.nil? %>
+  <% product_ids = @related_product_ids_by_rel_name.values.flatten.uniq %>
   product_links_load(<%= product_ids.to_json %>);
   $('#product_detail .relations div').each(function() { $(this).children('.product:gt(2)').hide(); });
   <% end %> 

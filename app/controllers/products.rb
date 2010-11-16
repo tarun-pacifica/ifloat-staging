@@ -20,10 +20,10 @@ class Products < Application
   end
   
   def show(id)
-    path = Indexer.product_url(id)
+    product_id = id.to_i
+    path = Indexer.product_url(product_id)
     return redirect(path, :status => 301) unless path.nil? or path == request.path
     
-    product_id = id.to_i
     @product = Product.get(product_id)
     return render("../cached_finds/new".to_sym, :status => 404) if @product.nil?
     
@@ -44,8 +44,7 @@ class Products < Application
     @prices_by_url = @product.prices_by_url(session.currency)
     @price_unit, @price_divisor = UnitOfMeasure.unit_and_divisor_by_product_id([product_id])[product_id]
     
-    @related_products_by_rel_name = Indexer.product_relationships(@product.id)
-    @related_products_by_rel_name.delete_if { |name, products| products.empty? } # TODO: work out why we have to do this
+    @related_product_ids_by_rel_name = Indexer.product_relationships(product_id)
     
     @find = session.most_recent_cached_find
     render

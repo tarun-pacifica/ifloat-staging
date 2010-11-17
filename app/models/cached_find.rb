@@ -62,7 +62,8 @@ class CachedFind
   def alternative_specs
     return [] if tag_find?
     
-    words = specification.split
+    words = specification.split.map { |word| Indexer.correct_spelling(word, language_code) }.compact
+    return words if words.size <= 1
     
     (words.size - 1).downto(1) do |i|
       hits = words.combination(i).map do |combo|

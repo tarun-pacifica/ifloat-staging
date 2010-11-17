@@ -14,6 +14,7 @@ module Indexer
   @@product_title_cache = {}
   @@property_display_cache = {}
   @@sale_price_min_property_id = nil
+  @@spellers = {}
   @@tag_index = {}
   @@tag_frequencies = nil
   @@text_filtering_index = {}
@@ -57,6 +58,11 @@ module Indexer
       File.delete(COMPILED_PATH) if File.exists?(COMPILED_PATH)
       File.link(f.path, COMPILED_PATH)
     end
+  end
+  
+  def self.correct_spelling(word, language_code)
+    return nil unless ensure_loaded and @@spellers.has_key?(language_code)
+    @@spellers[language_code].correct(word)
   end
   
   def self.ensure_loaded
@@ -162,6 +168,13 @@ module Indexer
       f.puts '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
       f.puts @@product_title_cache[:url].values.map { |stem| "<url> <loc>http://www.ifloat.biz#{stem}</loc> <changefreq>daily</changefreq> </url>" }
       f.puts '</urlset>'
+    end
+    
+    # TODO: we may need bespoke alphabets per language
+    alphabet = ('a'..'z').to_a + ('0'..'9').to_a + %w(')
+    @@text_filtering_index.each do |language_code, index|
+      frequencies_by_words = Hash[index.map { |word, prod_ids| [word, prod_ids.size] }]
+      @@spellers[language_code] = Speller.new(frequencies_by_words, alphabet)
     end
     
     @@last_loaded_md5 = source_md5

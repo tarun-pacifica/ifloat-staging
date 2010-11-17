@@ -11,6 +11,7 @@ require "lib" / "conversion"
 require "lib" / "indexer"
 require "lib" / "mailer"
 require "lib" / "password"
+require "lib" / "speller"
  
 use_orm :datamapper
 use_test :rspec

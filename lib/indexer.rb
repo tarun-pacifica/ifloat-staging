@@ -172,7 +172,7 @@ module Indexer
     
     # TODO: we may need bespoke alphabets per language
     alphabet = ('a'..'z').to_a + ('0'..'9').to_a + %w(')
-    @@text_filtering_index.each do |language_code, index|
+    @@text_finding_index.each do |language_code, index|
       frequencies_by_words = Hash[index.map { |word, prod_ids| [word, prod_ids.size] }]
       @@spellers[language_code] = Speller.new(frequencies_by_words, alphabet)
     end

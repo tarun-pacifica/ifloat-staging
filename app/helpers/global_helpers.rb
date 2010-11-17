@@ -20,6 +20,17 @@ module Merb
       end
     end
     
+    def finder_link(spec, klass = "", tag = false)
+      finder_spec = (tag ? "{#{spec}}" : spec).attribute_escape(true)
+      "<span class=#{klass.inspect} onclick=\"finder_do('#{finder_spec}')\">#{spec.gsub(/\s+/, "&nbsp;")}</span>"
+    end
+    
+    def friendly_list(items, andor)
+      return fallback if items.empty?
+      return items.first if items.size == 1
+      items[0..-2].join(", ") + " #{andor} #{items.last}"
+    end
+    
     def hidden_field(*args)
       "<div>#{super}</div>"
     end

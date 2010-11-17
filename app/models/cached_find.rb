@@ -42,7 +42,7 @@ class CachedFind
   end
   
   before :valid? do
-    self.specification = (specification || "").split.uniq.join(" ") if new? and not specification =~ /^\{.+?\}$/
+    self.specification = (specification || "").split.uniq.join(" ") if new? and not tag_find?
     self.description = specification if description.blank?
     self.filters ||= {}
   end
@@ -53,9 +53,26 @@ class CachedFind
   
   def all_product_ids
     @all_product_ids ||=
-      if specification =~ /^\{(.+?)\}$/ then Indexer.product_ids_for_tag($1, language_code)
+      if tag_find? then Indexer.product_ids_for_tag(specification[1..-2], language_code)
       else Indexer.product_ids_for_phrase(specification, language_code)
       end
+  end
+  
+  # TODO: spec
+  def alternative_specs
+    return [] if tag_find?
+    
+    words = specification.split
+    
+    (words.size - 1).downto(1) do |i|
+      hits = words.combination(i).map do |combo|
+        spec = combo.join(" ")
+        (Indexer.product_ids_for_phrase(spec, language_code).size > 0) ? spec : nil
+      end.compact
+      return hits unless hits.empty?
+    end
+    
+    []
   end
   
   def ensure_valid
@@ -191,6 +208,11 @@ class CachedFind
   def unfilter_all!
     self.filters = {}
     save
+  end
+  
+  # TODO: spec
+  def tag_find?
+    specification =~ /^\{.+?\}$/
   end
   
   

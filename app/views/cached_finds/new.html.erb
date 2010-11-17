@@ -8,7 +8,7 @@
   <div id="tag_cloud_cta"></div>
   <p class="tag_cloud">
     <% compile_tags.each do |tag, weight| %>
-    <span class="weight_<%= weight %>" onclick="tag_cloud_click('{<%= tag.attribute_escape(true) %>}')"><%= tag.gsub(/\s+/, "&nbsp;") %></span>
+    <%= finder_link(tag, "weight_#{weight}", true) %>
     <% end %>
     <a href="/categories">show all categories</a>
   </p>

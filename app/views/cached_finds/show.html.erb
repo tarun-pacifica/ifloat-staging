@@ -4,10 +4,13 @@
 
 <% if @find.all_product_ids.empty? %>
 
-<p class="noresults">
-  Sorry, we couldn't find any products matching <strong><%= @find.specification.inspect %></strong>.
-</p>
-
+<div class="noresults">
+  <p>Sorry, we couldn't find any products matching "<strong><%= @find.specification %></strong>".</p>
+  <% alternatives = @find.alternative_specs %>
+  <% unless alternatives.empty? %>
+  <p>How about <%= friendly_list(alternatives.map { |spec| '"' + finder_link(spec) + '"' }, "or") %>?</p>
+  <% end %>
+</div>
 
 <% else %>
 

@@ -32,17 +32,6 @@ p.copyright {
   text-align: center;
 }
 
-p.noresults {
-  background: white;
-  border: 1px solid gray;
-  border-radius: 10px;
-  -moz-border-radius: 10px;
-  -webkit-border-radius: 10px;
-  font-size: 14px;
-  padding: 10px;
-  text-align: center;
-}
-
 span.defined {
   color: blue;
 }

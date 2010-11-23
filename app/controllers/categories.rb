@@ -11,6 +11,12 @@ class Categories < Application
     end.sort
     
     @showing_products = children.first.is_a?(Integer)
-    children.empty? ? render("../cached_finds/new".to_sym, :status => 404) : render
+    
+    if children.empty?
+      render("../cached_finds/new".to_sym, :status => 404)
+    else
+      @page_title = (path_names.empty? ? "All categories" : path_names.join(" - "))
+      render
+    end
   end
 end

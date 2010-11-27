@@ -518,35 +518,35 @@ def build_asset_csv
   stopwatch("catalogued assets") do
     Dir[ASSET_REPO / "**" / "*"].each do |path|
       next unless File.file?(path)
-    
+      
       raise "unable to extract relative path from #{path.inspect}" unless path =~ /^#{ASSET_REPO}\/(.+)/
       relative_path = $1
       path_parts = relative_path.split("/")
-    
+      
       unless (3..4).include?(path_parts.size)
         errors << [relative_path, "not in a bucket/company or bucket/company/class directory"]
         next
       end
-    
+      
       errors << [relative_path, "empty file"] if File.size(path) == 0
-    
+      
       bucket = path_parts.shift
       errors << [relative_path, "unknown bucket"] unless Asset::BUCKETS.include?(bucket)
-
+      
       company_ref = path_parts.shift
       company_ref = $1 if company_ref =~ /^(.+?)___/
       errors << [relative_path, "invalid company reference format"] unless company_ref =~ Company::REFERENCE_FORMAT
-
+      
       name = path_parts.pop
       errors << [relative_path, "invalid asset name format"] unless name =~ Asset::NAME_FORMAT
       errors << [relative_path, "extension not jpg, pdf or png"] unless name =~ /(jpg|pdf|png)$/
-    
+      
       paths_by_name = (paths_by_names_by_company_refs[company_ref] ||= {})
       existing_path = paths_by_name[name]
       if existing_path.nil? then paths_by_name[name] = relative_path
       else errors << [relative_path, "duplicate of #{existing_path}"]
       end
-    
+      
       checksum = Digest::MD5.file(path).hexdigest
       assets << [bucket, company_ref, name, path, checksum]
     end

@@ -13,9 +13,7 @@ class Purchases < Application
     Mailer.deliver(:purchase_completed, :purchase => purchase)
     session.remove_purchase(purchase)
     
-    prod_ids_by_ref = facility.map_references(references)
-    product_ids = prod_ids_by_ref.values.flatten.to_set
-    
+    product_ids = facility.product_ids_for_refs(references)
     picks = session.picked_products.select { |pick| product_ids.include?(pick.product_id) }
     session.remove_picked_products(picks)
     

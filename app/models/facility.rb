@@ -27,13 +27,15 @@ class Facility
   has n, :products, :model => "FacilityProduct"
   has n, :purchases
   
-  # TODO: revise to cope with variant references
-  def map_references(references)
-    pids_by_fp_ref = {}
-    ProductMapping.all(:company_id => company_id, :reference => references).each do |mapping|
-      (pids_by_fp_ref[mapping.reference] ||= []).push(mapping.product_id)
-    end
-    pids_by_fp_ref
+  # TODO: spec
+  def product_ids_for_refs(references)
+    query =<<-SQL
+      SELECT product_id
+      FROM product_mappings
+      WHERE company_id = ?
+        AND (reference IN ? OR SUBSTRING_INDEX(reference, ';', 1) IN ?)
+    SQL
+    repository.adapter.select(query, copmany_id, references, references)
   end
   
   # TODO: spec

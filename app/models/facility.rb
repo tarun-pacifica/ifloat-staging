@@ -27,27 +27,68 @@ class Facility
   has n, :products, :model => "FacilityProduct"
   has n, :purchases
   
-  def map_products(product_ids)
-    pids_by_fp_ref = {}
-    ProductMapping.all(:company_id => company_id, :product_id => product_ids).each do |mapping|
-      (pids_by_fp_ref[mapping.reference] ||= []).push(mapping.product_id)
-    end
-    
-    fps_by_pid = {}
-    products.all(:reference => pids_by_fp_ref.keys).each do |product|
-      pids_by_fp_ref[product.reference].each do |product_id|
-        fps_by_pid[product_id] = product
-      end
-    end
-    fps_by_pid
-  end
-  
+  # TODO: revise to cope with variant references
   def map_references(references)
     pids_by_fp_ref = {}
     ProductMapping.all(:company_id => company_id, :reference => references).each do |mapping|
       (pids_by_fp_ref[mapping.reference] ||= []).push(mapping.product_id)
     end
     pids_by_fp_ref
+  end
+  
+  # TODO: spec
+  def product_mappings(product_ids)
+    mappings = ProductMapping.all(:company_id => company_id, :product_id => product_ids)
+    return {} if mappings.empty?
+    
+    query = "SELECT reference FROM facility_products WHERE facility_id = ? AND reference IN ?"
+    all_refs = mappings.map { |m| m.reference_parts.first }
+    available_refs = repository.adapter.select(query, id, all_refs).to_set
+    mappings.select { |m| available_refs.include?(m.reference_parts.first) }
+  end
+  
+  # TODO: spec
+  def product_url(mapping)
+    case primary_url
+    when "marinestore.co.uk"
+      query_url("Screen" => "PROD", "Store_Code" => "mrst", "Product_Code" => mapping.reference_parts.first)
+    end
+  end
+  
+  # TODO: spec
+  def product_urls(mappings)
+    Hash[mappings.map { |m| [m.product_id, product_url(m)] }]
+  end
+  
+  # TODO: spec
+  def purchase_urls(mappings)
+    return [] if mappings.empty?
+    
+    case primary_url
+    when "marinestore.co.uk" # TODO: clear basket first?
+      endpoint = "http://marinestore.co.uk/Merchant2/merchant.mvc"
+      mappings.map do |mapping|
+        query = {"Action" => "ADPR", "Screen" => "BASK", "Store_Code" => "mrst", "Quantity" => "1"}
+        query["Product_Code"], variations = mapping.reference_parts
+        variations.each_with_index do |kv, i|
+          query["Product_Attributes[#{i}]:code"] = kv[0]
+          query["Product_Attributes[#{i}]:value"] = kv[1]
+        end
+        query_url(query)
+      end << query_url("Screen" => "BASK", "Store_Code" => "mrst")
+    end
+  end
+  
+  # TODO: spec
+  def query_url(params)
+    uri_params =
+      case primary_url
+      when "marinestore.co.uk"
+        {:scheme => "http", :host => "marinestore.co.uk", :path => "/Merchant2/merchant.mvc"}
+      end
+    uri = Addressable::URI.new(uri_params)
+    uri.query_values = params
+    uri
   end
   
   def update_products(product_info_by_ref)

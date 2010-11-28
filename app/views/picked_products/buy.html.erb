@@ -1,41 +1,47 @@
 <div id="partner_panel">
-	<a class="back" href="/picked_products/options">« back to ifloat</a>
-	
-	<img src="/images/partner/logo.png" alt="ifloat logo" />
-	
-	<%= partial "common/finder" %>
-	
-	<div id="pl_buy_now" class="pick_list">
-		<div class="menu">
-			<span class="name">Basket</span>
-		</div>
-		<div class="items"></div>
-	</div>
+  <a class="back" href="/picked_products/options">« back to ifloat</a>
+  
+  <img src="/images/partner/logo.png" alt="ifloat logo" />
+  
+  <%= partial "common/finder" %>
+  
+  <div id="pl_buy_now" class="pick_list">
+    <div class="menu">
+      <span class="name">Basket</span>
+    </div>
+    <div class="items"></div>
+  </div>
 
-	<div id="pl_buy_later" class="pick_list">
-		<div class="menu">
-			<span class="name">Future Buys</span>
-		</div>
-		<div class="items"></div>
-	</div>
+  <div id="pl_buy_later" class="pick_list">
+    <div class="menu">
+      <span class="name">Future Buys</span>
+    </div>
+    <div class="items"></div>
+  </div>
 </div>
 
 <iframe id="partner_store" name="partner_store"></iframe>
 
 <script type="text/javascript">
-	$ifloat_body = {}
-	
-	var partner_panel = $('#partner_panel');
-	partner_panel.data('partner_urls', <%= @partner_product_urls.to_json %>);
-	pick_lists_update();
-	
-	var partner_store = $('#partner_store');
-	var find_bar_width = partner_panel.width();
-	function auto_size_partner_store() { partner_store.width($(window).width() - find_bar_width + 'px'); }
-	auto_size_partner_store();
-	$(window).resize(auto_size_partner_store);
-	partner_store.css('left', find_bar_width + 'px');
-	partner_store.attr('src', <%= @partner_url.inspect %>);
+  $ifloat_body = {}
+  
+  var partner_panel = $('#partner_panel');
+  partner_panel.data('partner_urls', <%= @partner_product_urls.to_json %>);
+  pick_lists_update();
+  
+  var partner_store = $('#partner_store');
+  var find_bar_width = partner_panel.width();
+  function auto_size_partner_store() { partner_store.width($(window).width() - find_bar_width + 'px'); }
+  auto_size_partner_store();
+  $(window).resize(auto_size_partner_store);
+  partner_store.css('left', find_bar_width + 'px');
+  
+  var callback_urls = <%= @purchase_urls[0..-2].to_json %>;
+  var callback_count = callback_urls.length;
+  function handle_partner_callback(event) {
+    callback_count -= 1;
+    if(callback_count == 0) partner_store.attr('src', <%= @purchase_urls.last.to_json %>);
+  }
+  for(var i in callback_urls)
+    $(new Image()).error(handle_partner_callback).load(handle_partner_callback).attr('src', callback_urls[i]);
 </script>
-
-

@@ -11,18 +11,14 @@ class PickedProducts < Application
     return redirect("/picked_products/options") unless prod_ids_by_group.has_key?("buy_now")
     
     prod_ids_by_group.delete("compare")
-    product_ids = prod_ids_by_group.values.flatten
-    fac_prods_by_prod_id = facility.map_products(product_ids)
-            
-    @partner_product_urls = {}
-    fac_prods_by_prod_id.each do |product_id, facility_product|
-      @partner_product_urls[product_id] = partner_product_url(facility, facility_product.reference)
-    end
     
-    first_available_product = fac_prods_by_prod_id[params[:product_id].to_i]
-    first_available_product ||= fac_prods_by_prod_id.values_at(*prod_ids_by_group["buy_now"]).compact.first
-    @partner_url = partner_url(facility, first_available_product)
-    return redirect("/picked_products/options") if @partner_url.nil?
+    mappings = facility.product_mappings(prod_ids_by_group.values.flatten)
+    @partner_product_urls = facility.product_urls(mappings)
+    
+    one_off_product_id = params[:product_id].to_i
+    purchase_product_ids = (one_off_product_id > 0 ? [one_off_product_id] : prod_ids_by_group["buy_now"]).to_set
+    @purchase_urls = facility.purchase_urls(mappings.select { |m| purchase_product_ids.include?(m.product_id) })
+    return redirect("/picked_products/options") if @purchase_urls.empty?
     
     purchase = Purchase.new(:facility => facility, :created_ip => request.remote_ip)
     session.add_purchase(purchase)
@@ -160,26 +156,5 @@ class PickedProducts < Application
     pick.group = group
     pick.save
     index
-  end
-  
-  
-  private
-  
-  def partner_product_url(facility, reference)
-    case facility.primary_url
-    when "marinestore.co.uk"
-      "http://marinestore.co.uk/Merchant2/merchant.mvc?Screen=PROD&Product_Code=#{reference}"
-    else nil
-    end
-  end
-  
-  def partner_url(facility, first_available_product)
-    case facility.primary_url
-    when "marinestore.co.uk"
-      url = "http://marinestore.co.uk/Merchant2/merchant.mvc"
-      url += "?Screen=PROD&Product_Code=#{first_available_product.reference}" unless first_available_product.nil?
-      url
-    else nil
-    end
   end
 end

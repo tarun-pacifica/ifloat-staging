@@ -27,15 +27,16 @@ class Facility
   has n, :products, :model => "FacilityProduct"
   has n, :purchases
   
-  # TODO: spec
   def product_ids_for_refs(references)
+    return [] if references.empty?
+    
     query =<<-SQL
       SELECT product_id
       FROM product_mappings
       WHERE company_id = ?
         AND (reference IN ? OR SUBSTRING_INDEX(reference, ';', 1) IN ?)
     SQL
-    repository.adapter.select(query, copmany_id, references, references)
+    repository.adapter.select(query, company_id, references, references)
   end
   
   # TODO: spec
@@ -49,7 +50,6 @@ class Facility
     mappings.select { |m| available_refs.include?(m.reference_parts.first) }
   end
   
-  # TODO: spec
   def product_url(mapping)
     case primary_url
     when "marinestore.co.uk"
@@ -57,17 +57,15 @@ class Facility
     end
   end
   
-  # TODO: spec
   def product_urls(mappings)
     Hash[mappings.map { |m| [m.product_id, product_url(m)] }]
   end
   
-  # TODO: spec
   def purchase_urls(mappings)
     return [] if mappings.empty?
     
     case primary_url
-    when "marinestore.co.uk" # TODO: clear basket first?
+    when "marinestore.co.uk"
       endpoint = "http://marinestore.co.uk/Merchant2/merchant.mvc"
       mappings.map do |mapping|
         query = {"Action" => "ADPR", "Screen" => "BASK", "Store_Code" => "mrst", "Quantity" => "1"}
@@ -78,18 +76,18 @@ class Facility
         end
         query_url(query)
       end << query_url("Screen" => "BASK", "Store_Code" => "mrst")
+    else []
     end
   end
   
-  # TODO: spec
   def query_url(params)
     uri_params =
       case primary_url
       when "marinestore.co.uk"
         {:scheme => "http", :host => "marinestore.co.uk", :path => "/Merchant2/merchant.mvc"}
       end
-    uri = Addressable::URI.new(uri_params)
-    uri.query_values = params
+    uri = Addressable::URI.new(uri_params || {})
+    uri.query_values = params unless uri_params.nil?
     uri
   end
   

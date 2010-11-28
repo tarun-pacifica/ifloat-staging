@@ -1,7 +1,7 @@
 require File.join( File.dirname(__FILE__), '..', "spec_helper" )
 
 describe Facility do
-
+  
   describe "creation" do
     before(:each) do
       @facility = Facility.new(:company_id => 1, :location_id => 1, :name => "HQ", :primary_url => "hq.example.com", :description => "foo")
@@ -37,36 +37,117 @@ describe Facility do
     end
   end
   
-  describe "mapping products / references" do
+  describe "product_mappings" do
     before(:all) do
-      @companies = [1, 2].map { |n| Company.create(:name => n, :reference => "GBR-#{n}") }
-      @products = (1..9).to_a.map { |n| Product.create(:company => @companies[0], :reference => n) }
-      @facilities = [1, 2].map { |n| @companies[1].facilities.create(:name => n, :primary_url => n) }
-      @fac_products = (1..9).to_a.map do |n|
-        FacilityProduct.create(:facility => @facilities[n % 2], :reference => n, :price => 42.42, :currency => "GBP")
-      end
-      @mappings = (1..9).to_a.map { |n| ProductMapping.create(:company => @companies[1], :reference => n, :product => @products[n - 1]) }
+      @fac_prod = FacilityProduct.create(:facility_id => 1, :reference => "ABCDE", :price => "52.61", :currency => "GBP")
+      @mappings = [
+        {:company_id => 1, :product_id => 1, :reference => "ABCDE"},
+        {:company_id => 1, :product_id => 2, :reference => "ABCDE;k1=v1;k2=v2"},
+        {:company_id => 1, :product_id => 3, :reference => "EDCBA"},
+        {:company_id => 2, :product_id => 1, :reference => "ABCDE"},
+        {:company_id => 2, :product_id => 2, :reference => "ABCDE;k1=v1;k2=v2"},
+        {:company_id => 2, :product_id => 3, :reference => "EDCBA"}
+      ].map { |params| ProductMapping.create(params) }
     end
     
     after(:all) do
-      (@mappings + @fac_products + @facilities + @products + @companies).flatten.each { |object| object.destroy }
+      ([@fac_prod] + @mappings).each { |o| o.destroy! }
     end
     
-    it "should return the facility product for each product ID specified" do
-      product_ids = @products.map { |product| product.id }
-      map = @facilities[0].map_products(product_ids)
-      map.keys.sort.should == product_ids.values_at(1, 3, 5, 7)
-      fac_prods = map.values
-      fac_prods.all? { |v| v.class.should == FacilityProduct }
-      fac_prods.uniq.size.should == fac_prods.size
+    it "should return the set of matching mappings only where facility products exist for them " do
+      Facility.new(:id => 1, :company_id => 1).product_mappings([1, 2, 3]).should == @mappings[0, 2]
     end
     
-    it "should return the product IDs for each reference specified" do
-      @facilities[0].map_references([1, 2]).keys.sort.should == @products[0..1].map { |product| product.reference }
+    it "should return an empty hash if no product IDs are specified" do
+      Facility.new(:id => 1, :company_id => 1).product_mappings([]).should == {}
     end
   end
-
-  describe "updating products" do
+  
+  describe "product_ids_for_refs" do
+    before(:all) do
+      @mappings = [
+        {:company_id => 1, :product_id => 1, :reference => "ABCDE"},
+        {:company_id => 1, :product_id => 2, :reference => "ABCDE;k1=v1;k2=v2"},
+        {:company_id => 1, :product_id => 3, :reference => "EDCBA"},
+        {:company_id => 2, :product_id => 4, :reference => "ABCDE"},
+        {:company_id => 2, :product_id => 5, :reference => "ABCDE;k1=v1;k2=v2"},
+        {:company_id => 2, :product_id => 6, :reference => "EDCBA"}
+      ].map { |params| ProductMapping.create(params) }
+    end
+    
+    after(:all) do
+      @mappings.each { |m| m.destroy! }
+    end
+    
+    it "should return the set of matching product IDs from the parent company, including variants" do
+      Facility.new(:company_id => 1).product_ids_for_refs(["ABCDE"]).should == [1, 2]
+    end
+    
+    it "should retrun an empty array if no references are specfied" do
+      Facility.new(:company_id => 1).product_ids_for_refs([]).should == []
+    end
+  end
+  
+  describe "product_url" do
+    before(:all) { @mapping = ProductMapping.new(:reference => "ABCDE;k1=v1;k2=v2") }
+    
+    it "should return a well-formed MarineStore product URL" do
+      Facility.new(:primary_url => "marinestore.co.uk").product_url(@mapping).to_s.should == "http://marinestore.co.uk/Merchant2/merchant.mvc?Product_Code=ABCDE&Screen=PROD&Store_Code=mrst"
+    end
+    
+    it "should return an empty URL otherwise" do
+      Facility.new.product_url(@mapping).to_s.should == ""
+    end
+  end
+  
+  describe "product_urls" do
+    before(:all) do
+      @mappings = %w(ABCDE;k1=v1;k2=v2 EBCDA).map do |ref|
+        ProductMapping.new(:product_id => rand(100), :reference => ref)
+      end
+    end
+    
+    after(:each) do
+      result = @facility.product_urls(@mappings)
+      @mappings.each { |m| result[m.product_id].should == @facility.product_url(m) }
+    end
+    
+    it "should return the set of MarineStore product URLs, indexed by product ID" do
+      @facility = Facility.new(:primary_url => "marinestore.co.uk")
+    end
+    
+    it "should return a set of empty URLs, indexed by product ID, otherwise" do
+      @facility = Facility.new
+    end
+  end
+  
+  describe "purchase_urls" do
+    before(:all) do
+      @mappings = %w(ABCDE;k1=v1;k2=v2 EBCDA).map do |ref|
+        ProductMapping.new(:product_id => rand(100), :reference => ref)
+      end
+    end
+    
+    it "should return the set of MarineStore purchase URLs" do
+      Facility.new(:primary_url => "marinestore.co.uk").purchase_urls(@mappings).map { |u| u.to_s }.should ==  %w(http://marinestore.co.uk/Merchant2/merchant.mvc?Action=ADPR&Product_Attributes%5B0%5D%3Acode=k1&Product_Attributes%5B0%5D%3Avalue=v1&Product_Attributes%5B1%5D%3Acode=k2&Product_Attributes%5B1%5D%3Avalue=v2&Product_Code=ABCDE&Quantity=1&Screen=BASK&Store_Code=mrst http://marinestore.co.uk/Merchant2/merchant.mvc?Action=ADPR&Product_Code=EBCDA&Quantity=1&Screen=BASK&Store_Code=mrst http://marinestore.co.uk/Merchant2/merchant.mvc?Screen=BASK&Store_Code=mrst)
+    end
+    
+    it "should return an empty array otherwise" do
+      Facility.new.purchase_urls(@mappings).should == []
+    end
+  end
+  
+  describe "query_url" do
+    it "should return a well-formed MarineStore URL" do
+      Facility.new(:primary_url => "marinestore.co.uk").query_url("me&you" => "foo=bar").to_s.should == "http://marinestore.co.uk/Merchant2/merchant.mvc?me%26you=foo%3Dbar"
+    end
+    
+    it "should return an empty URL otherwise" do
+      Facility.new.query_url("foo" => "bar").to_s.should == ""
+    end
+  end
+  
+  describe "update_products" do
     before(:all) do
       @text_type = PropertyType.create(:core_type => "text", :name => "text")
       @ref_class = @text_type.definitions.create(:name => "reference:class", :sequence_number => 1)

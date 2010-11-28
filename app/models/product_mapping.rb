@@ -15,9 +15,14 @@ class ProductMapping
   
   property :id, Serial
   property :reference, String, :required => true, :format => REFERENCE_FORMAT, :unique_index => :prod_per_company_per_ref
-
+  
   belongs_to :company
-    property :company_id, Integer, :unique_index => :prod_per_company_per_ref
+    property :company_id, Integer, :required => true, :unique_index => :prod_per_company_per_ref
   belongs_to :product
-    property :product_id, Integer, :unique_index => :prod_per_company_per_ref
+    property :product_id, Integer, :required => true, :unique_index => :prod_per_company_per_ref
+  
+  def reference_parts
+    base, fields = reference.split(";", 2)
+    [base, fields.to_s.split(";").map { |field| field.split("=") }]
+  end
 end

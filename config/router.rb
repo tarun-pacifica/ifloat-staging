@@ -43,5 +43,6 @@ Merb::Router.prepare do
   
   match('/').to(:controller => 'cached_finds', :action =>'new')
   
+  match("/sitemap.txt").defer_to { [404, {}, ""] }
   match(/.*/).redirect("/")
 end

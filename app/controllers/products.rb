@@ -8,7 +8,7 @@ class Products < Application
       { :id         => product_id,
         :image_urls => product_image_urls(images_by_product_id[product_id]),
         :title      => Indexer.product_title(:canonical, product_id),
-        :summary    => Indexer.product_title(:summary, product_id),
+        :summary    => Indexer.product_title(:summary, product_id) || "",
         :url        => Indexer.product_url(product_id) }
     end.to_json
   end

@@ -33,7 +33,7 @@ class CachedFinds < Application
       end
     end
     
-    @title_parts = [:image, :summary].map { |domain| Indexer.product_title(domain, product_ids.first.to_i) }
+    @title_parts = [:image, :summary].map { |domain| Indexer.product_title(domain, product_ids.first.to_i) }.compact # TODO: remove nil handling once summaries are guaranteed
     
     class_infos = (@common_values + diff_values).select { |info| info[:raw_name] == "reference:class" }
     classes = class_infos.map { |info| info[:values] }.flatten.uniq
@@ -150,7 +150,7 @@ class CachedFinds < Application
     
     titles_by_checksum = {}
     title_checksums_by_product_id.each do |product_id, checksum|
-      titles_by_checksum[checksum] = [:image, :summary].map { |domain| Indexer.product_title(domain, product_id) }.compact
+      titles_by_checksum[checksum] = [:image, :summary].map { |domain| Indexer.product_title(domain, product_id) }.compact # TODO: remove nil handling once summaries are guaranteed
     end
     
     checksums.map do |checksum|

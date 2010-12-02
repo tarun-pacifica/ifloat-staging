@@ -1,7 +1,7 @@
 class ProductParser < AbstractParser
   HEADERS = %w(company.reference product.reference)
   
-  REQUIRED_PROPERTY_NAMES = %w(reference:class)
+  REQUIRED_PROPERTY_NAMES = %w(reference:class marketing:summary)
   
   SPECIAL_VALUE_VALIDITIES = {
     "AUTO" => [:values].to_set,

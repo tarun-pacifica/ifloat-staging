@@ -1,8 +1,6 @@
 class ProductParser < AbstractParser
   HEADERS = %w(company.reference product.reference)
   
-  REQUIRED_PROPERTY_NAMES = %w(reference:class marketing:summary)
-  
   SPECIAL_VALUE_VALIDITIES = {
     "AUTO" => [:values].to_set,
     "N/A"  => [:attachments, :mappings, :relationships, :values].to_set,
@@ -124,7 +122,7 @@ class ProductParser < AbstractParser
     
     validity = SPECIAL_VALUE_VALIDITIES[value]
     unless validity.nil?
-      raise "invalid #{domain}: #{value}" unless validity.include?(domain)
+      raise "invalid #{domain}: #{value.inspect}" unless validity.include?(domain)
       return nil if value == "N/A" or value == "NIL"
     end
     
@@ -299,10 +297,6 @@ class ProductParser < AbstractParser
       all_property_names << property.attributes[:name]
       property_type = property.attributes[:property_type]
       @all_units_by_property[property] = property_type.attributes[:units]
-    end
-    
-    (REQUIRED_PROPERTY_NAMES - all_property_names).each do |name|
-      errors << "required property missing: #{name}"
     end
     
     units_by_seq_nums_by_property.each do |property, units_by_seq_nums|

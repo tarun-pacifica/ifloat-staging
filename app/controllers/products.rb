@@ -25,7 +25,7 @@ class Products < Application
     return redirect(path, :status => 301) unless path.nil? or path == request.path
     
     @product = Product.get(product_id)
-    return render("../cached_finds/new".to_sym, :status => 404) if @product.nil?
+    return render("../cached_finds/new".to_sym, :status => (product_id < Indexer.max_product_id ? 410 : 404)) if @product.nil?
     
     @common_values, diff_values = @product.marshal_values(session.language, RANGE_SEPARATOR)
     

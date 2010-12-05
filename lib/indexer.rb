@@ -9,6 +9,7 @@ module Indexer
   @@last_loaded_lock = Mutex.new
   @@last_loaded_md5 = nil
   @@last_loaded_time = nil
+  @@max_product_id = nil
   @@numeric_filtering_index = {}
   @@product_relationship_cache = {}
   @@product_title_cache = {}
@@ -162,6 +163,7 @@ module Indexer
     end
     
     @@class_property_id = PropertyDefinition.first(:name => "reference:class").id
+    @@max_product_id = repository.adapter.select("SELECT max(id) FROM products").first
     @@sale_price_min_property_id = PropertyDefinition.first(:name => "sale:price_min").id
     
     File.open(SITEMAP_PATH, "w") do |f|
@@ -180,6 +182,10 @@ module Indexer
     
     @@last_loaded_md5 = source_md5
     @@last_loaded_time = Time.now
+  end
+  
+  def self.max_product_id
+    @@max_product_id if ensure_loaded
   end
   
   def self.product_ids_for_image_checksum(checksum)

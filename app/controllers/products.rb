@@ -53,8 +53,9 @@ class Products < Application
     product_ids_by_checksum = Indexer.image_checksums_for_product_ids(product_ids)
     @images_by_rel_name = {}
     marshal_images(product_ids).each do |info|
-      (product_ids_by_checksum[info[0]] || []).each do |pid|
-        rel_names_by_product_ids[pid].each { |name| (@images_by_rel_name[name] ||= []) << info }
+      product_ids = (product_ids_by_checksum[info[0]] || [])
+      rel_names_by_product_ids.values_at(*product_ids).flatten.uniq.each do |name|
+        (@images_by_rel_name[name] ||= []) << info
       end
     end
     

@@ -8,7 +8,7 @@ class Blogs < Application
     @blog_image_src = image_src(name)
     @images = Article.images(@articles)
     
-    @page_title = "#{@articles.first.title} - #{@blog.user.name}"
+    @page_title = "#{@articles.first.title rescue 'no articles'} - #{@blog.user.name}"
     render
   end
   

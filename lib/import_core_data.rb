@@ -83,7 +83,7 @@ class ImportSet
   end
   
   def add_from_dump(name)
-    objects = Marshal.load(File.open(CSV_DUMP_DIR / name)).each do |object|
+    objects = Marshal.load(File.open(dump_path(name))).each do |object|
       object, error = marshal_unisolate(object)
       
       if error.nil? then add(object)
@@ -98,12 +98,16 @@ class ImportSet
   end
   
   def dump_exists?(name)
-    File.exist?(CSV_DUMP_DIR / name)
+    File.exist?(dump_path(name))
   end
   
   def dump_from_checkpoint(name)
     objects = @objects[@objects_checkpoint..-1]
-    Marshal.dump(objects.map { |object| marshal_isolate(object) }, File.open(CSV_DUMP_DIR / name, "w"))
+    Marshal.dump(objects.map { |object| marshal_isolate(object) }, File.open(dump_path(name), "w"))
+  end
+  
+  def dump_path(name)
+    CSV_DUMP_DIR / name
   end
   
   def error(klass, path, row, column, message)
@@ -715,6 +719,7 @@ end
 # Parse each class
 
 puts "=== Parsing CSVs ==="
+dump_paths = []
 freshly_parsed_classes = Set.new
 import_set = ImportSet.new
 CLASSES.each do |klass|
@@ -728,6 +733,7 @@ CLASSES.each do |klass|
     
     checksum = Digest::MD5.file(path).hexdigest
     dump_name = "#{nice_path}_#{checksum}.dump".tr("/", "_")
+    dump_paths << import_set.dump_path(dump_name)
     
     load_from_cache = import_set.dump_exists?(dump_name)
     load_from_cache = false if klass == Product and not (freshly_parsed_classes & [PropertyType, TitleStrategy]).empty?
@@ -772,4 +778,6 @@ stopwatch(Indexer::COMPILED_PATH) do
   PickedProduct.all.update!(:invalidated => true)
 end
 
-# TODO: foreach unique prefix in the CSV dump dir, clear out all but the newest file
+stopwatch("destroyed obsolete CSV dumps") do
+  (Dir[CSV_DUMP_DIR / "*.dump"] - dump_paths).each { |path| File.delete(path) }
+end

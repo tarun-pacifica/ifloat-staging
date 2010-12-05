@@ -44,7 +44,19 @@ class Products < Application
     @prices_by_url = @product.prices_by_url(session.currency)
     @price_unit, @price_divisor = UnitOfMeasure.unit_and_divisor_by_product_id([product_id])[product_id]
     
-    @related_product_ids_by_rel_name = Indexer.product_relationships(product_id)
+    rel_names_by_product_ids = {}
+    (Indexer.product_relationships(product_id) || []).each do |name, product_ids|
+      product_ids.each { |product_id| (rel_names_by_product_ids[product_id] ||= []) << name }
+    end
+    
+    product_ids = rel_names_by_product_ids.keys
+    product_ids_by_checksum = Indexer.image_checksums_for_product_ids(product_ids)
+    @images_by_rel_name = {}
+    marshal_images(product_ids).each do |info|
+      (product_ids_by_checksum[info[0]] || []).each do |pid|
+        rel_names_by_product_ids[pid].each { |name| (@images_by_rel_name[name] ||= []) << info }
+      end
+    end
     
     @find = session.most_recent_cached_find
     render

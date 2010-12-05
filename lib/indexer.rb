@@ -151,6 +151,7 @@ module Indexer
       @@facility_cache = indexes[:facility_cache]
       @@image_checksum_index = indexes[:image_checksums]
       @@numeric_filtering_index = indexes[:numeric_filtering]
+      @@product_ids_by_checksum = nil
       @@product_relationship_cache = indexes[:product_relationship_cache]
       @@product_title_cache = indexes[:product_title_cache]
       @@property_display_cache = indexes[:property_display_cache]
@@ -179,6 +180,11 @@ module Indexer
     
     @@last_loaded_md5 = source_md5
     @@last_loaded_time = Time.now
+  end
+  
+  def self.product_ids_for_image_checksum(checksum)
+    return nil unless ensure_loaded
+    (@@product_ids_by_checksum ||= @@image_checksum_index.keys.group_by { |id| @@image_checksum_index[id] })[checksum]
   end
   
   def self.product_ids_for_property_ids(property_ids, language_code)

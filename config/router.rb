@@ -34,6 +34,8 @@ Merb::Router.prepare do
   match('/products/:junk-:id', :junk => /[\w\-.]+/).to(:controller => 'products', :action => 'show')
   resources :products
   
+  match('/products_for/:image_checksum').to(:controller => 'cached_finds', :action => 'compare_by_image', :id => 0)
+  
   match('/purchases/track').to(:controller => 'purchases', :action => 'track')
   
   match('/users/:id/confirm/:confirm_key').to(:controller => 'users', :action => 'confirm').name(:user_confirm)

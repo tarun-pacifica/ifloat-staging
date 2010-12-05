@@ -1,14 +1,22 @@
 class CachedFinds < Application
   def compare_by_image(id, image_checksum)
-    @find = session.ensure_cached_find(id.to_i)
-    @find.ensure_valid
+    product_ids =
+      if id == 0
+        Indexer.product_ids_for_image_checksum(image_checksum)
+      else
+        @find = session.ensure_cached_find(id.to_i)
+        @find.ensure_valid
+        @find.filtered_product_ids_by_image_checksum[image_checksum]
+      end
     
-    product_ids = @find.filtered_product_ids_by_image_checksum[image_checksum]
-    return redirect(resource(@find)) if product_ids.nil? or product_ids.empty?
+    related_to = params[:related_to]
+    product_ids &= Indexer.product_relationships(related_to.to_i).values.flatten unless related_to.nil?
+    
+    retreat if product_ids.nil?
     return redirect(Indexer.product_url(product_ids.first)) if product_ids.size == 1
     
     @image = Asset.first(:checksum => image_checksum)
-    return redirect(resource(find)) if @image.nil?
+    retreat if @image.nil?
     
     @common_values, diff_values = Product.marshal_values(product_ids, session.language, RANGE_SEPARATOR)
     
@@ -39,6 +47,7 @@ class CachedFinds < Application
     classes = class_infos.map { |info| info[:values] }.flatten.uniq
     @primary_class = classes.first
     
+    @find ||= session.most_recent_cached_find
     render
   end
   
@@ -78,7 +87,7 @@ class CachedFinds < Application
     
     return nil.to_json unless params["inline_response"] == "true"
     
-    result = [find.filters_used(RANGE_SEPARATOR), find.filters_unused, gather_images(find)]
+    result = [find.filters_used(RANGE_SEPARATOR), find.filters_unused, marshal_images(find.filtered_product_ids, 36)]
     (find.ensure_valid.empty? ? result : nil).to_json
   end
   
@@ -93,7 +102,7 @@ class CachedFinds < Application
   def images(id)
     provides :js
     find = session.ensure_cached_find(id.to_i)
-    result = gather_images(find)
+    result = marshal_images(find.filtered_product_ids, 36)
     (find.ensure_valid.empty? ? result : nil).to_json
   end
   
@@ -104,7 +113,7 @@ class CachedFinds < Application
   def reset(id)
     find = session.ensure_cached_find(id.to_i)
     return nil.to_json unless find.unfilter_all!
-    result = [find.filters_used(RANGE_SEPARATOR), find.filters_unused, gather_images(find)]
+    result = [find.filters_used(RANGE_SEPARATOR), find.filters_unused, marshal_images(find.filtered_product_ids, 36)]
     (find.ensure_valid.empty? ? result : nil).to_json
   end
   
@@ -130,32 +139,7 @@ class CachedFinds < Application
   
   private
   
-  def gather_images(find)
-    product_ids_by_checksum = find.filtered_product_ids_by_image_checksum
-    total = product_ids_by_checksum.values.inject(0) { |sum, product_ids| sum + product_ids.size }
-    checksums = product_ids_by_checksum.keys[0, 36]
-    
-    totals_by_checksum = {}
-    checksums.each do |checksum|
-      totals_by_checksum[checksum] = product_ids_by_checksum[checksum].size
-    end
-    
-    assets_by_checksum = Asset.all(:checksum => checksums).hash_by(:checksum)
-    
-    title_checksums_by_product_id = {}
-    checksums.each do |checksum|
-      product_id = product_ids_by_checksum[checksum].first
-      title_checksums_by_product_id[product_id] = checksum
-    end
-    
-    titles_by_checksum = {}
-    title_checksums_by_product_id.each do |product_id, checksum|
-      titles_by_checksum[checksum] = [:image, :summary].map { |domain| Indexer.product_title(domain, product_id) }.compact # TODO: remove nil handling once summaries are guaranteed
-    end
-    
-    checksums.map do |checksum|
-      asset = assets_by_checksum[checksum]
-      [checksum, totals_by_checksum[checksum], asset.url(:tiny), asset.url(:small), titles_by_checksum[checksum]]
-    end.unshift(total)
+  def retreat
+    @find.nil? ? render("../cached_finds/new".to_sym, :status => 404) : redirect(resource(@find))
   end
 end

@@ -35,6 +35,25 @@ module Merb
       "<div>#{super}</div>"
     end
     
+    def marshal_images(product_ids, limit = nil)
+      product_ids_by_checksum = Indexer.image_checksums_for_product_ids(product_ids)
+      total = product_ids_by_checksum.values.map { |pids| pids.size }.inject(0, :+)
+
+      checksums = product_ids_by_checksum.keys[0, limit || product_ids_by_checksum.size]
+      assets_by_checksum = Asset.all(:checksum => checksums).hash_by(:checksum)
+      totals_by_checksum = Hash[checksums.map { |c| [c, product_ids_by_checksum[c].size] }]
+
+      titles_by_checksum = {}
+      product_ids_by_checksum.each do |checksum, product_ids|
+        titles_by_checksum[checksum] = [:image, :summary].map { |domain| Indexer.product_title(domain, product_ids.first) }.compact # TODO: remove nil handling once summaries are guaranteed
+      end
+
+      checksums.map do |checksum|
+        asset = assets_by_checksum[checksum]
+        [checksum, totals_by_checksum[checksum], asset.url(:tiny), asset.url(:small), titles_by_checksum[checksum]]
+      end.unshift(total)
+    end
+    
     def money(amount, currency, per_unit = nil)
       return nil if amount.nil?
       

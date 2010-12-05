@@ -164,47 +164,31 @@
 
 #product_detail .relations h3 {
   color: #404040;
-  margin: 15px 0 0 0;
+  margin: 15px 0 5px 0;
 }
 
-#product_detail .relations .more {
-  color: #404040;
-  cursor: pointer;
-  text-align: center;
-}
-
-#product_detail .relations .more:hover {
-  color: black;
-  text-decoration: underline;
-}
-
-#product_detail .relations a.product {
-  border-top: 1px dotted silver;
-  display: block;
-  margin-top: 5px;
-  padding: 5px 0;
+#product_detail a.product {
+  color: #17A1FF;
+  float: left;
+  font-size: 10px;
+  font-weight: bold;
+  margin: 2px 0 0 5px;
+  position: relative;
   text-decoration: none;
 }
 
-#product_detail .relations a.product:hover {
-  background: #F9BD48;
+#product_detail a.product .tally {
+  background: white;
+  border-left: 1px solid #D0D0D0;
+  border-top: 1px solid #D0D0D0;
+  bottom: 3px;
+  padding: 1px 2px;
+  position: absolute;
+  right: 1px;
 }
 
-#product_detail .relations a.product > * {
-  color: black;
-  font-size: 10px;
-  font-weight: normal;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-#product_detail .relations a.product img {
+#product_detail a.product img {
   border: 1px solid #D0D0D0;
-  float: left;
   height: 50px;
-  margin: 0 10px 0 5px;
   width: 50px;
 }

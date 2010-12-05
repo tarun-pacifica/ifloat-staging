@@ -65,8 +65,8 @@
     <div class="description">
       <h1><%= @title.superscript %></h1>
       
-      <% unless @related_product_ids_by_rel_name.nil? %>
-      <a href="#relations">View Related Products</a>
+      <% unless @images_by_rel_name.empty? %>
+      <a href="#relations" onclick="product_detail_flash_related()">View Related Products</a>
       <% end %>
       
       <% features, description = @body_values_by_name.values_at("marketing:feature_list", "marketing:description").map { |values| (values || []).first.to_s.superscript } %>
@@ -91,19 +91,12 @@
       <% end %>
     </div>
     
-    <% unless @related_product_ids_by_rel_name.nil? %>
+    <% unless @images_by_rel_name.empty? %>
     <div class="relations">
       <a name="relations"> </a>
-      <% @related_product_ids_by_rel_name.each do |name, product_ids| %>
-      <div>
+      <% @images_by_rel_name.each do |name, image| %>
+      <div id="rel_<%= name %>">
         <h3>This product <%= name.tr("_", " ") %>...</h3>
-        <%= product_ids.map { |prod_id| "<div class=\"product\" id=\"prod_#{prod_id}\"></div>" }.join %>
-        <% hidden = product_ids.size - 3 %>
-        <% if hidden > 0 %>
-        <div class="more" onclick="product_detail_more_relations(event)">
-          (show <%= hidden %> more product<%= hidden == 1 ? "" : "s" %>)
-        </div>
-        <% end %>
       </div>
       <% end %>
     </div>  
@@ -116,10 +109,5 @@
 <script type="text/javascript" charset="utf-8">
   $ifloat_body = { product_id: <%= @product.id %> };
   $('img.property_icon').unbind('click');
-  
-  <% unless @related_product_ids_by_rel_name.nil? %>
-  <% product_ids = @related_product_ids_by_rel_name.values.flatten.uniq %>
-  product_links_load(<%= product_ids.to_json %>);
-  $('#product_detail .relations div').each(function() { $(this).children('.product:gt(2)').hide(); });
-  <% end %> 
+  product_detail_load_related(<%= @images_by_rel_name.to_json %>);
 </script>

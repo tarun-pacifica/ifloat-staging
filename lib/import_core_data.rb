@@ -178,13 +178,6 @@ class ImportSet
       end
     end
     
-    # TODO: can't use ProductRelationship.related_products as we're in-memory only
-    # stopwatch("ensured a product's related product IDs form a unique set") do
-    #   all_products.each do |product|
-    #     
-    #   end
-    # end
-    
     stopwatch("handled orphaned PickedProducts") do
       db_companies = Company.all.hash_by(:reference)
       orphaned_product_ids = []

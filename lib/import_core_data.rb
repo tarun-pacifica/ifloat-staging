@@ -214,6 +214,14 @@ class ImportSet
     
     text_values = @objects.select { |o| o.klass == TextPropertyValue }
     
+    stopwatch("ensured no blank summaries") do
+      property = get!(PropertyDefinition, "marketing:summary")
+      products_with_summaries = text_values.map { |tv| tv.attributes[:definition] == property ? tv.attributes[:product] : nil }.compact.uniq
+      (all_products - products_with_summaries).each do |product|
+        error(Product, product.path, product.row, "marketing:summary", "value required")
+      end
+    end
+    
     stopwatch("ensured no blank / invalid category values") do
       properties = %w(reference:class_senior reference:class product:type).map! { |key| get!(PropertyDefinition, key) }.to_set
       

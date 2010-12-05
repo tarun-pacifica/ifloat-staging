@@ -635,7 +635,7 @@ end
 
 # TODO: remove GC directives if they no longer give a 3x-4x speed boost in 1.9
 def stopwatch(message)
-  GC.disable
+  GC.disable unless Merb.env == "staging"
   start = Time.now
   result = yield
   puts "#{'%6.2f' % (Time.now - start)}s : #{message}"

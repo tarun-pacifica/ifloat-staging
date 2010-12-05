@@ -88,12 +88,34 @@ module Mailer
       end
     
     when :purchase_started
-      purchase = params[:purchase]
-      return if purchase.nil?
+      one_off, picks, purchase = params.values_at(:one_off, :picks, :purchase)
+      return if picks.nil? or purchase.nil?
+      
+      product_ids = picks.map { |pick| pick.product_id }
+      product_ids << one_off.to_i unless one_off.nil?
+      products_by_id = Product.all(:id => product_ids).hash_by(:id)
+      companies_by_id = Company.all(:id => products_by_id.values.map { |product| product.company_id }).hash_by(:id)
+      
+      report = ["Purchase #{purchase.id} started at #{purchase.facility.primary_url} from #{purchase.created_ip} (user ID: #{purchase.user_id.inspect})"]
+      report << ""
+      
+      unless one_off.nil?
+        product = products_by_id[one_off.to_i]
+        company = companies_by_id[product.company_id]
+        report << "User performed a one-off 'buy now' on #{company.reference} / #{product.reference}"
+        report << ""
+      end
+      
+      report << "Picks..."
+      report += picks.map do |pick|
+        product = products_by_id[pick.product_id]
+        company = companies_by_id[product.company_id]
+        "(#{pick.group}) #{company.reference} / #{product.reference}"
+      end.sort
       
       Mail.deliver do |mail|
         Mailer.envelope(mail, action, :admin, :admin)
-        body "Purchase #{purchase.id} started at #{purchase.facility.primary_url} from #{purchase.created_ip} (user ID: #{purchase.user_id.inspect})"
+        body report.join("\n")
       end
       
     when :registration

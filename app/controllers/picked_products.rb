@@ -22,7 +22,10 @@ class PickedProducts < Application
     
     purchase = Purchase.new(:facility => facility, :created_ip => request.remote_ip)
     session.add_purchase(purchase)
-    Mailer.deliver(:purchase_started, :purchase => purchase)
+    Mailer.deliver(:purchase_started,
+      :one_off  => params[:product_id],
+      :picks    => session.picked_products,
+      :purchase => purchase)
     
     @background_css = "white"
     @skip_copyright = true

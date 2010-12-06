@@ -8,7 +8,7 @@
   <div id="tag_cloud_cta"></div>
   <p class="tag_cloud">
     <% compile_tags.each do |tag, weight| %>
-    <%= finder_link(tag, "weight_#{weight}", true) %>
+    <%= finder_link(tag, "weight_#{weight}", true, Indexer.category_definition(tag), :above) %>
     <% end %>
     <a href="/categories">show all categories</a>
   </p>

@@ -10,6 +10,11 @@ class Categories < Application
       end
     end.sort
     
+    @definitions = path_names.map do |name|
+      definition = Indexer.category_definition(name)
+      definition.nil? ? nil : [name, definition]
+    end.compact
+    
     @showing_products = children.first.is_a?(Integer)
     
     if children.empty?

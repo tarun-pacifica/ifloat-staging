@@ -3,7 +3,10 @@ module Merb
     def category_link(path_names)
       url = "/categories/" + path_names.join("/")
       url.tr!(" ", "+")
-      "<a href=#{url.inspect}>#{path_names.last}</a>"
+      category = path_names.last
+      definition = Indexer.category_definition(category)
+      on_hover = (definition.nil? ? nil : "onmouseover=\"tooltip_show(event, '#{definition.attribute_escape(true)}')\"")
+      "<a href=#{url.inspect} #{on_hover} onmouseout=\"tooltip_hide()\">#{category}</a>"
     end
     
     def compile_tags
@@ -20,9 +23,10 @@ module Merb
       end
     end
     
-    def finder_link(spec, klass = "", tag = false)
+    def finder_link(spec, klass = "", tag = false, tooltip = nil, tooltip_position = :right)
       finder_spec = (tag ? "{#{spec}}" : spec).attribute_escape(true)
-      "<span class=#{klass.inspect} onclick=\"finder_do('#{finder_spec}')\">#{spec.gsub(/\s+/, "&nbsp;")}</span>"
+      on_hover = (tooltip.nil? ? nil : "onmouseover=\"tooltip_show(event, '#{tooltip.attribute_escape(true)}', '#{tooltip_position}')\"")
+      "<span class=#{klass.inspect} onclick=\"finder_do('#{finder_spec}')\" #{on_hover} onmouseout=\"tooltip_hide()\">#{spec.gsub(/\s+/, "&nbsp;")}</span>"
     end
     
     def friendly_list(items, andor)

@@ -1,3 +1,8 @@
+#category_nav p.definition {
+  margin: 10px 10px;
+  text-align: justify;
+}
+
 #category_nav p.prompt {
   font-size: 14px;
   margin: 0;
@@ -17,13 +22,16 @@
 
 #category_contents .body a {
   color: #404040;
-  display: block;
   font-size: 14px;
-  margin-bottom: 5px;
+  padding-right: 10px;
   text-decoration: none;
 }
 
 #category_contents .body a:hover {
   color: black;
   text-decoration: underline;
+}
+
+#category_contents .body div {
+  margin-bottom: 5px;
 }

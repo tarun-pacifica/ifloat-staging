@@ -2,6 +2,7 @@ module Indexer
   COMPILED_PATH = (Merb.env == "test" ? "caches/indexer.test.marshal" : "caches/indexer.marshal" )
   SITEMAP_PATH = "public/sitemap.xml"
   
+  @@category_definitions = {}
   @@category_tree = {}
   @@class_property_id = nil
   @@facility_cache = {}
@@ -32,6 +33,10 @@ module Indexer
     node.is_a?(Hash) ? node.keys : node
   end
   
+  def self.category_definition(category)
+    @@category_definitions[category] if ensure_loaded
+  end
+  
   def self.class_property_id
     @@class_property_id if ensure_loaded
   end
@@ -42,6 +47,7 @@ module Indexer
       records = text_records
       
       indexes = {
+        :category_definitions       => compile_category_definitions(properties),
         :category_tree              => compile_category_tree(properties, records),
         :facility_cache             => compile_facility_cache,
         :image_checksums            => compile_image_checksum_index,
@@ -148,6 +154,7 @@ module Indexer
     
     File.open(COMPILED_PATH) do |f|
       indexes = Marshal.load(f)
+      @@category_definitions = indexes[:category_definitions]
       @@category_tree = indexes[:category_tree]
       @@facility_cache = indexes[:facility_cache]
       @@image_checksum_index = indexes[:image_checksums]
@@ -272,6 +279,14 @@ module Indexer
   
   
   private
+  
+  # TODO: extend to support multiple languages
+  def self.compile_category_definitions(properties)
+    property_names = %w(reference:class_senior reference:class product:type)
+    property_ids = properties.map { |pd| property_names.include?(pd.name) ? pd.id : nil }.compact
+    defs_by_value_by_property_id = PropertyValueDefinition.by_property_id(property_ids, "ENG")
+    defs_by_value_by_property_id.values.inject(:update)
+  end
   
   def self.compile_category_tree(properties, records)
     property_names = %w(reference:class_senior reference:class product:type)

@@ -56,7 +56,7 @@ class CachedFinds < Application
     
     if find.valid?
       recalled = (not find.accessed_at.nil?)
-      CachedFindEvent.log!(specification, recalled, request.remote_ip)
+      CachedFindEvent.log!(find.specification, recalled, request.remote_ip)
       find.unfilter_all! if params[:unfiltered] == "true" and recalled
       redirect(resource(find))
     else

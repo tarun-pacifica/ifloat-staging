@@ -1,0 +1,16 @@
+<div id="cached_find_events">
+  <a href="/tools/cached_find_events.csv">download a CSV version of this table</a>
+  
+  <table summary="events">
+    <tr> <th>Count</th> <th>Specification</th> <th>Most Recent Event</th> </tr>
+    
+    <% @events_by_spec.each do |spec, events| %>
+    <tr>
+      <td class="count"><%= events.size %></td>
+      <td><%= spec.attribute_escape %></td>
+      <td><%= events.last.created_at %></td>
+    </tr>
+    <% end %>
+    
+  </table>
+</div>

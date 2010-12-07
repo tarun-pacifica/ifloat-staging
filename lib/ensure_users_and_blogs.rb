@@ -16,11 +16,11 @@ users = [
   {:name => "Andre Ben Hamou", :nickname => "Andre", :login => "andre@bluetheta.com", :password => "fl04t3r", :admin => true},
   {:name => "Tom Cunliffe", :nickname => "Tom", :login => "snugberth@aol.com", :password => "ab5fd34"},
   {:name => "Graeme Clark", :nickname => "Graeme", :login => "graeme.clark@att.biz", :password => "TND7%$58", :admin => true},
-  {:name => "William Mackay", :nickname => "William", :login => "w.mackay@clear.net.nz", :password => "ff51641ea"},
+  # {:name => "William Mackay", :nickname => "William", :login => "w.mackay@clear.net.nz", :password => "ff51641ea"},
   {:name => "Michael Allan", :nickname => "Michael", :login => "mhjallan@googlemail.com", :password => "tr33fr0g", :admin => true},
-  {:name => "Nigel Calder", :nickname => "Nigel", :login => "ncalder@earthlink.net", :password => "gt45tx17"},
-  {:name => "Glyn Foulk", :nickname => "Glyn", :login => "glyn.foulk@googlemail.com", :password => "yr69dd12"},
-  {:name => "John Lodge", :nickname => "John", :login => "john.lodge@marinestore.co.uk", :password => "hg30bn14"}
+  # {:name => "Nigel Calder", :nickname => "Nigel", :login => "ncalder@earthlink.net", :password => "gt45tx17"},
+  # {:name => "Glyn Foulk", :nickname => "Glyn", :login => "glyn.foulk@googlemail.com", :password => "yr69dd12"},
+  # {:name => "John Lodge", :nickname => "John", :login => "john.lodge@marinestore.co.uk", :password => "hg30bn14"}
 ]
 
 users.each do |info|

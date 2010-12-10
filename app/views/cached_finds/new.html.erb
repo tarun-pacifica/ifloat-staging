@@ -13,6 +13,18 @@
     <a href="/categories">show all categories</a>
   </p>
   
+  <div id="focus">
+    <img src="/images/common/nautical_gifts.jpg" />
+    <h2><%= finder_link("Nautical gifts", "", true) %></h2>
+    <p>We have thousands of products in our database that make fine <%= finder_link("Nautical gifts", "", true) %>. Use our advanced find tools to sort through these product groups: Books, Clocks, Weather instruments, Ships bells, Interior decoration, Personal equipment and gear, Brass signs, Model boats, Domesticwear plus a very large range of Clothing for the marine environment.</p>
+    <%= form :action => resource(:cached_finds) do %>
+      <%= hidden_field :language_code, :value => session.language, :id => "finder_language_code_idx" %>
+      <%= hidden_field :specification, :value => "{Nautical gifts}", :id => "finder_specification_idx" %>
+      <p> <%= submit "Show Me &gt;&gt;&gt;", :id => "finder_submit_idx" %> </p>
+    <% end =%>
+    <hr class="terminator" />
+  </div>
+  
   <div id="intro">
     <div>
       <h2>Welcome to ifloat<sup>®</sup></h2>

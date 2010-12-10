@@ -1,5 +1,6 @@
 module Merb
   module GlobalHelpers
+    # TODO: refactor to use tooltip_attributes
     def category_link(path_names)
       url = "/categories/" + path_names.join("/")
       url.tr!(" ", "+")
@@ -23,6 +24,7 @@ module Merb
       end
     end
     
+    # TODO: refactor to use tooltip_attributes
     def finder_link(spec, klass = "", tag = false, tooltip = nil, tooltip_position = :right)
       finder_spec = (tag ? "{#{spec}}" : spec).attribute_escape(true)
       on_hover = (tooltip.nil? ? nil : "onmouseover=\"tooltip_show(event, '#{tooltip.attribute_escape(true)}', '#{tooltip_position}')\"")
@@ -161,6 +163,7 @@ module Merb
       values.join("<br />")
     end
     
+    # TODO: refactor to use tooltip_attributes
     def property_icon(info, position = :right)
       prop_id, src = info.values_at(:id, :icon_url)
       tooltip = info[:name].attribute_escape(true)
@@ -176,12 +179,19 @@ module Merb
       end
     end
     
+    # TODO: refactor to use tooltip_attributes or even replace all uses with a direct call to that method
     def tooltip(value, tip, position = :right)
       <<-HTML
         <span class="defined" onmouseover="tooltip_show(event, '#{tip.attribute_escape(true)}', '#{position}')" onmouseout="tooltip_hide()">#{value}</span>
       HTML
     end
     
+    def tooltip_attributes(tip, position = :right)
+      on_hover = (tip.nil? ? nil : "onmouseover=\"tooltip_show(event, '#{tip.attribute_escape(true)}', '#{position}')\"")
+      "#{on_hover} onmouseout=\"tooltip_hide()\""
+    end
+    
+    # TODO: refactor to use tooltip_attributes or even replace all uses with a direct call to that method
     def tooltip_list(name, values, position = :right)
       items = values.map { |value| value.split("\n") }.flatten.map { |value| "<li>#{value}</li>" }
       tooltip(name, "<ul>#{items.join}</ul>", position)

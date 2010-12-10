@@ -35,10 +35,12 @@
         <% @prices_by_url.each do |url, amount| %>
         <% fac = (Indexer.facilities[url] || {})%>
         <tr>
-          <td> <%= tooltip_list("<img src=\"/images/partner/facilities/#{url}.png\" alt=#{url.inspect} />", [fac[:description].to_s.superscript], :left) %> </td>
+          <td>
+            <%= money_uom(amount, session.currency, @price_unit, @price_divisor) %> <br />
+            (best partner price)
+          </td>
           <td class="price">
-            <%= money_uom(amount, session.currency, @price_unit, @price_divisor) %> <br/>
-            <div class="buy_now" onclick="window.location = '/products/<%= @product.id %>/buy_now/<%= fac[:id] %>'">Buy Now</div>
+            <div class="buy_now" onclick="window.location = '/products/<%= @product.id %>/buy_now/<%= fac[:id] %>'" <%= tooltip_attributes("This partner is MarineStore. One of the largest United Kingdom chandlers and UK 2008 Chandlery of the Year.", :left) %>>Buy Now</div>
           </td>
         </tr>
         <% end %>

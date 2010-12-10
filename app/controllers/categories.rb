@@ -21,6 +21,7 @@ class Categories < Application
       render("../cached_finds/new".to_sym, :status => 404)
     else
       @page_title = (path_names.empty? ? "All categories" : path_names.join(" - "))
+      @page_description = Indexer.category_definition(path_names.last)
       render
     end
   end

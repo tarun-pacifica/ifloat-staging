@@ -639,8 +639,10 @@ def repo_summary(path)
 end
 
 # TODO: remove GC directives if they no longer give a 3x-4x speed boost in 1.9
+def memory_usage_kb; `ps -o rss= -p #{Process.pid}`.to_i; end
+
 def stopwatch(message)
-  GC.disable unless Merb.env == "staging"
+  GC.disable if memory_usage_kb < 2 ** 20
   start = Time.now
   result = yield
   puts "#{'%6.2f' % (Time.now - start)}s : #{message}"

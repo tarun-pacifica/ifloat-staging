@@ -78,44 +78,44 @@
   width: 50px;
 }
 
-#product_detail .price_actions {
+#product_detail .sidebar {
   float: left;
   margin-left: 10px;
   width: 264px;
 }
 
-#product_detail .price_actions h3 {
+#product_detail .sidebar h3 {
   color: #404040;
   font-size: 14px;
   margin: 15px 0 5px 5px;
 }
 
-#product_detail .price_actions table.prices {
+#product_detail .sidebar table.prices {
   border: 1px solid silver;
   border-collapse: collapse;
   margin-top: 10px;
   width: 100%;
 }
 
-#product_detail .price_actions table.prices img {
+#product_detail .sidebar table.prices img {
   width: 100px;
 }
 
-#product_detail .price_actions table.prices td {
+#product_detail .sidebar table.prices td {
   padding: 2px;
   text-align: center;
 }
 
-#product_detail .price_actions table.prices td.no_stock {
+#product_detail .sidebar table.prices td.no_stock {
   background: #F3F3F3;
 }
 
-#product_detail .price_actions table.prices td.price {
+#product_detail .sidebar table.prices td.price {
   background: #DCE9F7;
   padding-top: 5px;
 }
 
-#product_detail .price_actions table.prices div.buy_now {
+#product_detail .sidebar table.prices div.buy_now {
   background: url(/images/pick_options/buttons/buy_from_blue.png) no-repeat;
   cursor: pointer;
   height: 19px;
@@ -126,34 +126,55 @@
   width: 90px;
 }
 
-#product_detail .price_actions table.prices div.buy_now:hover {
+#product_detail .sidebar table.prices div.buy_now:hover {
   background-position: 0 -23px;
   color: white;
 }
 
-#product_detail .price_actions table.prices div.buy_now:active {
+#product_detail .sidebar table.prices div.buy_now:active {
   background-position: 0 -46px;
 }
 
-#product_detail .price_actions table.related_media {
+#product_detail .sidebar table.related_media {
   border: none;
   border-collapse: collapse;
   width: 100%;
 }
 
-#product_detail .price_actions table.related_media a {
+#product_detail .sidebar table.related_media a {
   color: #404040;
   text-decoration: none;
 }
 
-#product_detail .price_actions table.related_media a:hover {
+#product_detail .sidebar table.related_media a:hover {
   color: black;
   text-decoration: underline;
 }
 
-#product_detail .price_actions table.related_media td.icon {
+#product_detail .sidebar table.related_media td.icon {
   text-align: center;
   width: 35px;
+}
+
+#product_detail .sidebar ul.more {
+  color: #404040;
+  font-size: 14px;
+  padding-left: 30px;
+  margin: 10px 0 0 0;
+}
+
+#product_detail .sidebar ul.more li {
+  margin-bottom: 10px;
+}
+
+#product_detail .sidebar ul.more li span {
+  margin-left: 7px;
+}
+
+#product_detail .sidebar ul.more li span:hover {
+  color: black;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 #product_detail .relations {

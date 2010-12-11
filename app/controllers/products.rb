@@ -29,7 +29,7 @@ class Products < Application
     
     @common_values, diff_values = @product.marshal_values(session.language, RANGE_SEPARATOR)
     
-    names = %w(marketing:description marketing:feature_list reference:wikipedia).to_set
+    names = %w(marketing:description marketing:feature_list reference:class reference:wikipedia).to_set
     @body_values_by_name = {}
     @common_values.each do |info|
       raw_name = info[:raw_name]
@@ -58,6 +58,8 @@ class Products < Application
         (@images_by_rel_name[name] ||= []) << info
       end
     end
+    
+    @more_tags = (Indexer.tags_for_product_id(product_id, session.language) || [])
     
     @find = session.most_recent_cached_find
     render

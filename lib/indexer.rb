@@ -19,6 +19,7 @@ module Indexer
   @@spellers = {}
   @@tag_index = {}
   @@tag_frequencies = nil
+  @@tags_by_product_id = nil
   @@text_filtering_index = {}
   @@text_finding_index = {}
   
@@ -165,6 +166,7 @@ module Indexer
       @@property_display_cache = indexes[:property_display_cache]
       @@tag_index = indexes[:tag_index]
       @@tag_frequencies = nil
+      @@tags_by_product_id = nil
       @@text_filtering_index = indexes[:text_filtering]
       @@text_finding_index = indexes[:text_finding]
     end
@@ -274,7 +276,31 @@ module Indexer
   
   def self.tag_frequencies(language_code)
     return {} unless ensure_loaded
-    @@tag_frequencies ||= @@tag_index[language_code].inject({}) { |freq, kv| freq.update(kv[0] => kv[1].size) }
+    
+    if @@tag_frequencies.nil?
+      @@tag_frequencies = {}
+      @@tag_index.each do |lcode, index|
+        @@tag_frequencies[lcode] = Hash[index.map { |phrase, product_ids| [phrase, product_ids.size] }]
+      end
+    end
+    
+    @@tag_frequencies[language_code]
+  end
+  
+  def self.tags_for_product_id(product_id, language_code)
+    return [] unless ensure_loaded
+    
+    if @@tags_by_product_id.nil?
+      @@tags_by_product_id = {}
+      @@tag_index.map do |lcode, index|
+        tags_by_product_id = @@tags_by_product_id[lcode] = {}
+        index.each do |phrase, product_ids|
+          product_ids.each { |pid| (tags_by_product_id[pid] ||= []) << phrase }
+        end
+      end
+    end
+    
+    (@@tags_by_product_id[language_code] || {})[product_id]
   end
   
   

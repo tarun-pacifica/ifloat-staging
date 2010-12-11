@@ -22,7 +22,7 @@
       <% end %>
     </div>
       
-    <div class="price_actions">
+    <div class="sidebar">
       <div id="pick_buttons">
         <div class="compare"> </div>
         <div class="buy_later"> </div>
@@ -49,8 +49,15 @@
         <% end %>
       </table>
       
+      <h3>Show me more...</h3>
+      <ul class="more">
+        <% klass = @body_values_by_name["reference:class"].first %>
+        <li><%= finder_link(klass, :text => "#{klass} products") %></li>
+        <%= @more_tags.map { |tag| "<li>#{finder_link(tag, :tag => true)}</li>"} %>
+      </ul>
+      
       <% unless @related_media.empty? %>
-      <h3>Related Media</h3>
+      <h3>Related media...</h3>
       <table class="related_media" summary="related media">
         <% @related_media.each do |name, url, icon_url| %>
         <tr>

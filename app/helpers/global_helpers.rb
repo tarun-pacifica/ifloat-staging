@@ -24,11 +24,13 @@ module Merb
       end
     end
     
-    # TODO: refactor to use tooltip_attributes
-    def finder_link(spec, klass = "", tag = false, tooltip = nil, tooltip_position = :right)
-      finder_spec = (tag ? "{#{spec}}" : spec).attribute_escape(true)
-      on_hover = (tooltip.nil? ? nil : "onmouseover=\"tooltip_show(event, '#{tooltip.attribute_escape(true)}', '#{tooltip_position}')\"")
-      "<span class=#{klass.inspect} onclick=\"finder_do('#{finder_spec}')\" #{on_hover} onmouseout=\"tooltip_hide()\">#{spec.gsub(/\s+/, "&nbsp;")}</span>"
+    def finder_link(spec, params = {})
+      text = (params[:text] || spec.gsub(/\s+/, "&nbsp;"))
+      spec = (params[:tag] ? "{#{spec}}" : spec).attribute_escape(true)
+      klass = params[:class].to_s
+      tip, tip_pos = params.values_at(:tip, :tip_pos)
+      on_hover = tooltip_attributes(tip, tip_pos)
+      "<span class=#{klass.inspect} onclick=\"finder_do('#{spec}')\" #{on_hover}>#{text}</span>"
     end
     
     def friendly_list(items, andor)

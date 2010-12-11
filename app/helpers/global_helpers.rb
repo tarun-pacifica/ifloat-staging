@@ -51,7 +51,8 @@ module Merb
       
       titles_by_checksum = {}
       product_ids_by_checksum.each do |checksum, product_ids|
-        titles_by_checksum[checksum] = [:image, :summary].map { |domain| Indexer.product_title(domain, product_ids.first) }.compact # TODO: remove nil handling once summaries are guaranteed
+        titles_by_checksum[checksum] =
+          [:image, :summary].map { |domain| Indexer.product_title(domain, product_ids.first) }
       end
       
       checksums.map do |checksum|

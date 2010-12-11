@@ -8,7 +8,7 @@ class Products < Application
       { :id         => product_id,
         :image_urls => product_image_urls(images_by_product_id[product_id]),
         :title      => Indexer.product_title(:canonical, product_id),
-        :summary    => Indexer.product_title(:summary, product_id) || "", # TODO: remove nil handling once summaries are guaranteed
+        :summary    => Indexer.product_title(:summary, product_id),
         :url        => Indexer.product_url(product_id) }
     end.to_json
   end
@@ -36,7 +36,7 @@ class Products < Application
       @body_values_by_name[raw_name] = info[:values] if names.include?(raw_name)
     end
     @title, @summary, @page_description =
-      [:canonical, :summary, :description].map { |domain| Indexer.product_title(domain, product_id) || "" } # TODO: remove nil handling once summaries are guaranteed
+      [:canonical, :summary, :description].map { |domain| Indexer.product_title(domain, product_id) }
     @page_title = @title.desuperscript
     
     gather_assets(@product)

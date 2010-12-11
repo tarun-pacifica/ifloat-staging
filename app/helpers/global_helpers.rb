@@ -163,19 +163,14 @@ module Merb
       values.join("<br />")
     end
     
-    # TODO: refactor to use tooltip_attributes
     def property_icon(info, position = :right)
       prop_id, src = info.values_at(:id, :icon_url)
-      tooltip = info[:name].attribute_escape(true)
+      on_hover = tooltip_attributes(info[:name], position)
       
       if info[:raw_name] == "reference:class"
-        <<-HTML
-          <img class="property_icon disabled" src="#{src}" alt="#{info[:name]}" onmouseover="tooltip_show(event, '#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
-        HTML
+        "<img class=\"property_icon disabled\" src=\"#{src}\" alt=\"#{info[:name]}\" #{on_hover} />"
       else
-        <<-HTML
-          <img class="property_icon" src="#{src}" alt="#{info[:name]}" onclick="filter_configure(#{prop_id})" onmouseover="tooltip_show(event, '#{tooltip}', '#{position}')" onmouseout="tooltip_hide()" />
-        HTML
+        "<img class=\"property_icon\" src=\"#{src}\" alt=\"#{info[:name]}\" onclick=\"filter_configure(#{prop_id})\" #{on_hover} />"
       end
     end
     

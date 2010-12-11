@@ -44,16 +44,16 @@ module Merb
     def marshal_images(product_ids, limit = nil)
       product_ids_by_checksum = Indexer.image_checksums_for_product_ids(product_ids)
       total = product_ids_by_checksum.values.map { |pids| pids.size }.inject(0, :+)
-
+      
       checksums = product_ids_by_checksum.keys[0, limit || product_ids_by_checksum.size]
       assets_by_checksum = Asset.all(:checksum => checksums).hash_by(:checksum)
       totals_by_checksum = Hash[checksums.map { |c| [c, product_ids_by_checksum[c].size] }]
-
+      
       titles_by_checksum = {}
       product_ids_by_checksum.each do |checksum, product_ids|
         titles_by_checksum[checksum] = [:image, :summary].map { |domain| Indexer.product_title(domain, product_ids.first) }.compact # TODO: remove nil handling once summaries are guaranteed
       end
-
+      
       checksums.map do |checksum|
         asset = assets_by_checksum[checksum]
         [checksum, totals_by_checksum[checksum], asset.url(:tiny), asset.url(:small), titles_by_checksum[checksum]]
@@ -84,19 +84,19 @@ module Merb
     end
     
     def panel_title_back_to_find(find)
-      return "&nbsp;" if find.nil?      
+      return "&nbsp;" if find.nil?
       <<-HTML
         <a href="#{resource(find)}">« back to your <strong>#{find.specification.inspect}</strong> results</a>
       HTML
     end
-        
+    
     def product_data_panel(values)
-      html = []  
+      html = []
       
       brands = values.map { |info| info[:raw_name] == "marketing:brand" ? info[:values] : [] }.flatten.uniq
       logos = Brand.logos(brands)
       html << "<div class=\"advert\"> <img src=#{logos[rand(logos.size)].url.inspect} alt=\"brand logo\" /> </div>" unless logos.empty?
-        
+      
       html << '<div class="sections">'
       
       seq_nums_by_section = {}
@@ -142,7 +142,7 @@ module Merb
     def product_value_summary(info, tooltip_position = :right)
       return nil if info.nil?
       
-      values = info[:values].dup      
+      values = info[:values].dup
       if info[:type] == 'text' then values.map! { |value| value.superscript }
       else values.map! { |value| value.superscript_numeric }
       end

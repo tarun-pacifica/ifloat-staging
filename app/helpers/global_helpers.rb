@@ -1,13 +1,10 @@
 module Merb
   module GlobalHelpers
-    # TODO: refactor to use tooltip_attributes
     def category_link(path_names)
-      url = "/categories/" + path_names.join("/")
-      url.tr!(" ", "+")
+      url = ("/categories/" + path_names.join("/")).tr(" ", "+")
       category = path_names.last
-      definition = Indexer.category_definition(category)
-      on_hover = (definition.nil? ? nil : "onmouseover=\"tooltip_show(event, '#{definition.attribute_escape(true)}')\"")
-      "<a href=#{url.inspect} #{on_hover} onmouseout=\"tooltip_hide()\">#{category}</a>"
+      on_hover = tooltip_attributes(Indexer.category_definition(category))
+      "<a href=#{url.inspect} #{on_hover}>#{category}</a>"
     end
     
     def compile_tags

@@ -1,7 +1,7 @@
 module Mailer
   ADDRESSES = {
     :admin     => "admin@ifloat.biz",
-    :prodadmin => "graemec13@yahoo.com",
+    :prodadmin => "admin@ifloat.biz",
     :sysadmin  => "andre@bluetheta.com"
   }
   

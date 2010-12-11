@@ -98,11 +98,11 @@ class Facility
     transaction = DataMapper::Transaction.new(adapter)
     transaction.begin
     adapter.push_transaction(transaction)
-
+    
     existing_products_by_ref = products.all.hash_by { |product| product.reference }
     new_refs = product_info_by_ref.keys.to_set
     products.all(:reference => existing_products_by_ref.keys.to_set - new_refs).destroy!
-  
+    
     product_info_by_ref.each do |ref, info|
       product = existing_products_by_ref[ref] || products.new(:reference => ref)
       product.price = BigDecimal.new(info[:price]) # explicit conversion required to avoid triggering dirty-detection
@@ -114,14 +114,14 @@ class Facility
         product.attribute_set(a, new_val)
         reports << [ref, "updated: #{a}", "from #{old_val.inspect}", "to #{new_val.inspect}"]
       end
-
+      
       product.save
     end
-
+    
     adapter.pop_transaction
     transaction.commit
     
-    mappings_by_fp_ref = ProductMapping.all(:company_id => company_id).group_by { |mapping| mapping.reference }
+    mappings_by_fp_ref = ProductMapping.all(:company_id => company_id).group_by { |pm| pm.reference_parts.first }
     product_ids = mappings_by_fp_ref.values.flatten.map { |mapping| mapping.product_id }
     classes_by_product_id = {}
     Product.values_by_property_name_by_product_id(product_ids, "ENG", "reference:class").each do |product_id, vbpn|

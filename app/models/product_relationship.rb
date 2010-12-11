@@ -21,7 +21,7 @@ class ProductRelationship
   # sibling *works_with* sibling:: [bidirectional]
   NAMES = {
     "includes"          => "is_included_in",
-    "is_alternative_to" => "is_originator_of",
+    "is_alternative_to" => "is_alternative_to",
     "goes_well_with"    => "goes_well_with",
     "used_on"           => "uses",
     "uses"              => "used_on",

@@ -84,10 +84,22 @@
   width: 264px;
 }
 
+#product_detail .sidebar div.more {
+  background: #DCE9F7;
+  border: 1px solid silver;
+  margin-top: 10px;
+  padding: 5px;
+}
+
+#product_detail .sidebar div.related_media {
+  padding: 5px;
+}
+
 #product_detail .sidebar h3 {
   color: #404040;
   font-size: 14px;
-  margin: 15px 0 5px 5px;
+  margin: 0;
+  padding: 5px;
 }
 
 #product_detail .sidebar table.prices {
@@ -160,11 +172,11 @@
   color: #404040;
   font-size: 14px;
   padding-left: 30px;
-  margin: 10px 0 0 0;
+  margin: 3px 0 0 0;
 }
 
 #product_detail .sidebar ul.more li {
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 #product_detail .sidebar ul.more li span {

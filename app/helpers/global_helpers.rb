@@ -174,11 +174,9 @@ module Merb
       end
     end
     
-    # TODO: refactor to use tooltip_attributes or even replace all uses with a direct call to that method
     def tooltip(value, tip, position = :right)
-      <<-HTML
-        <span class="defined" onmouseover="tooltip_show(event, '#{tip.attribute_escape(true)}', '#{position}')" onmouseout="tooltip_hide()">#{value}</span>
-      HTML
+      on_hover = tooltip_attributes(tip, position)
+      "<span class=\"defined\" #{on_hover}>#{value}</span>"
     end
     
     def tooltip_attributes(tip, position = :right)
@@ -186,7 +184,6 @@ module Merb
       "#{on_hover} onmouseout=\"tooltip_hide()\""
     end
     
-    # TODO: refactor to use tooltip_attributes or even replace all uses with a direct call to that method
     def tooltip_list(name, values, position = :right)
       items = values.map { |value| value.split("\n") }.flatten.map { |value| "<li>#{value}</li>" }
       tooltip(name, "<ul>#{items.join}</ul>", position)

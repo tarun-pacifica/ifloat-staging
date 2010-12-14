@@ -52,9 +52,8 @@
       <div class="more">
         <h3>Show me more...</h3>
         <ul class="more">
-          <% klass = @body_values_by_name["reference:class"].first %>
-          <li><%= finder_link(klass, :text => "#{klass} products") %></li>
-          <%= @more_tags.map { |tag| "<li>#{finder_link(tag, :tag => true)}</li>"} %>
+          <li><%= finder_link(@more_class, :text => "#{@more_class} products (#{@more_counts[@more_class]})") %></li>
+          <%= @more_tags.map { |tag| "<li>#{finder_link(tag, :tag => true, :text => "#{tag} (#{@more_counts[tag]})")}</li>"} %>
         </ul>
       </div>
       

@@ -59,7 +59,10 @@ class Products < Application
       end
     end
     
+    @more_class = @body_values_by_name["reference:class"].first
     @more_tags = (Indexer.tags_for_product_id(product_id, session.language) || [])
+    @more_counts = Hash[@more_tags.map { |tag| [tag, Indexer.product_ids_for_tag(tag, session.language).size] }]
+    @more_counts[@more_class] = Indexer.product_ids_for_phrase(@more_class, session.language).size
     
     @find = session.most_recent_cached_find
     render

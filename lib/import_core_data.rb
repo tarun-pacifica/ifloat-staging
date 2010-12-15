@@ -220,7 +220,7 @@ class ImportSet
     end
     
     stopwatch("ensured no blank / invalid category values") do
-      properties = %w(reference:class_senior reference:class product:type).map! { |key| get!(PropertyDefinition, key) }.to_set
+      properties = %w(reference:class_senior reference:class).map! { |key| get!(PropertyDefinition, key) }.to_set
       
       properties_by_product = {}
       text_values.each do |tv|

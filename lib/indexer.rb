@@ -308,14 +308,14 @@ module Indexer
   
   # TODO: extend to support multiple languages
   def self.compile_category_definitions(properties)
-    property_names = %w(reference:class_senior reference:class product:type)
+    property_names = %w(reference:class_senior reference:class)
     property_ids = properties.map { |pd| property_names.include?(pd.name) ? pd.id : nil }.compact
     defs_by_value_by_property_id = PropertyValueDefinition.by_property_id(property_ids, "ENG")
     defs_by_value_by_property_id.values.inject(:update)
   end
   
   def self.compile_category_tree(properties, records)
-    property_names = %w(reference:class_senior reference:class product:type)
+    property_names = %w(reference:class_senior reference:class)
     properties = properties.select { |pd| property_names.include?(pd.name) }
     properties_by_id = properties.hash_by(:id)
     properties_by_name = properties.hash_by(:name)
@@ -331,13 +331,13 @@ module Indexer
     values_by_prop_id_by_prod_id.each do |prod_id, values_by_prop_id|
       node = tree
       
-      property_names[0..-3].each do |prop_name|
+      property_names[0..-2].each do |prop_name|
         prop_id = properties_by_name[prop_name].id
         prod_value = values_by_prop_id[prop_id]
         node = (node[prod_value] ||= {})
       end
       
-      prop_id = properties_by_name[property_names[-2]].id
+      prop_id = properties_by_name[property_names[-1]].id
       prod_value = values_by_prop_id[prop_id]
       (node[prod_value] ||= []) << prod_id
     end

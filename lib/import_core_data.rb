@@ -771,6 +771,7 @@ mail_fail("updating the database") if import_set.write_errors(ERRORS_PATH)
 Mailer.deliver(:import_success, :ars => repo_summary(ASSET_REPO), :crs => repo_summary(CSV_REPO), :stats => class_stats)  unless Merb.environment == "development"
 
 begin; stopwatch("destroyed obsolete assets") { AssetStore.delete_obsolete }; rescue; end
+stopwatch("destroyed obsolete CSV dumps") { File.delete(*(Dir[CSV_DUMP_DIR / "*.dump"] - dump_paths)) }
 
 puts "=== Compiling Indexes ==="
 stopwatch(Indexer::COMPILED_PATH) do
@@ -778,8 +779,4 @@ stopwatch(Indexer::COMPILED_PATH) do
   Indexer.compile
   CachedFind.all.update!(:invalidated => true)
   PickedProduct.all.update!(:invalidated => true)
-end
-
-stopwatch("destroyed obsolete CSV dumps") do
-  (Dir[CSV_DUMP_DIR / "*.dump"] - dump_paths).each { |path| File.delete(path) }
 end

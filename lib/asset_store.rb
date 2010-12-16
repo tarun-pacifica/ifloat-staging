@@ -117,7 +117,7 @@ module AssetStore
       container do |c|
         c.objects.each do |path|
           dir, name = path.split("/")
-          names_by_bucket[dir] = name
+          (names_by_bucket[dir] ||= []) << name
         end
       end
       names_by_bucket

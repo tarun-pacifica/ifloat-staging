@@ -1,3 +1,5 @@
+# coding: utf-8
+
 module Merb
   module GlobalHelpers
     def category_link(path_names)

@@ -83,7 +83,7 @@ class ImportSet
   end
   
   def add_from_dump(name)
-    objects = Marshal.load(File.open(dump_path(name))).each do |object|
+    Marshal.load(File.open(dump_path(name))).each do |object|
       object, error = marshal_unisolate(object)
       
       if error.nil? then add(object)
@@ -117,7 +117,7 @@ class ImportSet
   def errors_since_checkpoint?
     @errors.size > @errors_checkpoint
   end
-    
+  
   def get(klass, *pk_value)
     objects = (@objects_by_pk_by_class[klass] || {})
     pk_value.empty? ? objects : objects[pk_value]
@@ -306,8 +306,8 @@ class ImportSet
     end
     true
   end
-
-
+  
+  
   private
   
   def friendly_pk(pk_value)
@@ -450,7 +450,7 @@ class ImportSet
     attributes = {}
     error = nil
     begin
-      isolated_attributes.each do |key, value|        
+      isolated_attributes.each do |key, value|
         value = marshal_unisolate_parent(*value) if value.is_a?(Array) and value.first.is_a?(Class)
         attributes[key] = value
       end

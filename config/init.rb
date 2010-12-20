@@ -1,4 +1,7 @@
+# coding: utf-8
+
 if RUBY_VERSION =~ /^1\.9\./
+  $: << "."
   require "csv"
   FasterCSV = CSV
 end
@@ -12,18 +15,18 @@ require "lib" / "indexer"
 require "lib" / "mailer"
 require "lib" / "password"
 require "lib" / "speller"
- 
+
 use_orm :datamapper
 use_test :rspec
 use_template_engine :erb
- 
+
 Merb::Config.use do |c|
   c[:use_mutex] = false
   c[:session_store] = "datamapper"
 end
- 
+
 Merb::BootLoader.before_app_loads do
-    
+  
   # These methods are handy to have available in general
   
   class Array
@@ -58,6 +61,18 @@ Merb::BootLoader.before_app_loads do
       escaped
     end
     
+    # temporary mechanism to cope with encoding problems in 1.9
+    # alias_method :orig_concat, :concat
+    # def concat(other)
+    #   begin
+    #     orig_concat(other)
+    #   rescue Encoding::CompatibilityError
+    #     p [encoding, self]
+    #     p [other.encoding, other]
+    #     encode("utf-8").concat(other.endcode("utf-8"))
+    #   end
+    # end
+    
     def desuperscript
       gsub(%r{<sup>(.*?)</sup>}, '\1')
     end
@@ -82,7 +97,7 @@ Merb::BootLoader.before_app_loads do
       ($1.size + 3) < self.size ? "#{$1}..." : self
     end
   end
-    
+  
   # Merge all JS files - TODO: lint + minify
   path = "public/javascripts/compiled.js"
   File.delete(path) if File.exist?(path)

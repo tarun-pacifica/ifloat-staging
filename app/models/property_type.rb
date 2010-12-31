@@ -12,7 +12,6 @@ class PropertyType
   include DataMapper::Resource
   
   CORE_TYPES = {
-    "currency"    => "NumericPropertyValue",
     "date"        => "DatePropertyValue",
     "numeric"     => "NumericPropertyValue",
     "text"        => "TextPropertyValue"
@@ -37,10 +36,7 @@ class PropertyType
   
   # TODO: rearrange spec
   def self.validate_unit(unit, name, core_type, valid_units)
-    case core_type
-    when "currency"
-      unit =~ /^[A-Z]{3}$/ || [false, "Unit should always be an ISO-4217 code for a #{name}[#{core_type}] property"]
-    when "numeric"
+    if core_type == "numeric"
       valid_units = [nil] if valid_units.blank?
       valid_units.include?(unit) || [false, "Unit invalid for a #{name}[#{core_type}] property"]
     else

@@ -55,6 +55,8 @@ class Users < Application
   end
   
   def me
-    (session.authenticated? ? session.user.attributes.keep(:name, :nickname) : {}).to_json
+    response = {:messages => session.unqueue_messages}
+    response.update(session.user.attributes.keep(:name, :nickname)) if session.authenticated?
+    response.to_json
   end
 end

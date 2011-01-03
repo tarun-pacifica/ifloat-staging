@@ -63,4 +63,6 @@ function login_update_handle(data) {
   var link = $("#header_body .login");
   if(name == undefined) link.click(login_open).text("Log In");
   else link.click(login_logout).text("Log Out (" + name + ")");
+  
+  show_messages(data.messages);
 }

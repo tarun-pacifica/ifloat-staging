@@ -1,274 +1,273 @@
 #po_buy_later .pick_buttons div {
-	cursor: pointer;
-	float: left;
-	height: 23px;
+  cursor: pointer;
+  float: left;
+  height: 23px;
 }
 
 #po_buy_later .pick_buttons div.buy_now {
-	background: url(/images/pick_options/buttons/buy_now_blue.png) no-repeat;
-	width: 59px;
+  background: url(/images/pick_options/buttons/buy_now_blue.png) no-repeat;
+  width: 59px;
 }
 
 #po_buy_later .pick_buttons div.reset {
-	background: url(/images/pick_options/buttons/reset_blue.png) no-repeat;
-	width: 58px;
+  background: url(/images/pick_options/buttons/reset_blue.png) no-repeat;
+  width: 58px;
 }
 
 #po_buy_later .pick_buttons div:hover {
-	background-position: 0 -23px;
+  background-position: 0 -23px;
 }
 
 #po_buy_later .pick_buttons div:active {
-	background-position: 0 -46px;
+  background-position: 0 -46px;
 }
 
 #po_buy_later a {
-	color: #404040;
-	text-decoration: none;
+  color: #404040;
+  text-decoration: none;
 }
 
 #po_buy_later a:hover {
-	color: black;
-	text-decoration: underline;
+  color: black;
+  text-decoration: underline;
 }
 
 #po_buy_later div.product {
-	padding-top: 10px;
+  padding-top: 10px;
 }
 
 #po_buy_later hr.final {
-	margin: 10px 0;
+  margin: 10px 0;
 }
 
 #po_buy_later img {
-	border: 1px solid #D0D0D0;
-	float: left;
-	height: 50px;
-	margin: 0 7px;
-	width: 50px;
+  border: 1px solid #D0D0D0;
+  float: left;
+  height: 50px;
+  margin: 0 7px;
+  width: 50px;
 }
 
 #po_buy_later p.empty {
-	font-size: 14px;
-	margin: 0;
-	padding: 17px 0;
-	text-align: center;
+  font-size: 14px;
+  margin: 0;
+  padding: 17px 0;
+  text-align: center;
 }
 
 
 #po_buy_now a.product {
-	display: block;
-	padding: 5px 0;
-	text-decoration: none;
+  display: block;
+  padding: 5px 0;
+  text-decoration: none;
 }
 
 #po_buy_now a.product:hover {
-	background: #F9BD48;
+  background: #F9BD48;
 }
 
 #po_buy_now a.product > * {
-	color: #404040;
-	font-size: 10px;
-	font-weight: normal;
-	margin: 0;
-	padding: 0;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+  color: #404040;
+  font-size: 10px;
+  font-weight: normal;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 #po_buy_now a.product img {
-	border: 1px solid #D0D0D0;
-	float: left;
-	height: 50px;
-	margin: 0 10px 0 5px;
-	width: 50px;
+  border: 1px solid #D0D0D0;
+  float: left;
+  height: 50px;
+  margin: 0 10px 0 5px;
+  width: 50px;
 }
 
 #po_buy_now div.button {
-	cursor: pointer;
-	height: 18px;
-	padding: 5px 0 0 25px;
-	width: 60px; /* 137px */
+  cursor: pointer;
+  height: 18px;
+  padding: 5px 0 0 25px;
+  width: 60px; /* 137px */
 }
 
 #po_buy_now div.move {
-	background: url(/images/product_detail/buttons/move.png) no-repeat;
+  background: url(/images/product_detail/buttons/move.png) no-repeat;
 }
 
 #po_buy_now div.button:hover {
-	background-position: 0 -23px;
-	color: white;
+  background-position: 0 -23px;
+  color: white;
 }
 
 #po_buy_now div.button:active {
-	background-position: 0 -46px;
+  background-position: 0 -46px;
 }
 
 #po_buy_now p.empty {
-	display: none;
-	font-size: 14px;
-	margin: 0;
-	padding: 16px 0;
-	text-align: center;
+  display: none;
+  font-size: 14px;
+  margin: 0;
+  padding: 16px 0;
+  text-align: center;
 }
 
 #po_buy_now table {
-	border-collapse: collapse;
-	width: 100%;
+  border-collapse: collapse;
+  width: 100%;
 }
 
 #po_buy_now table td.buttons {
-	border-top: 1px solid silver;
-	padding: 0 5px 0 0;
-	white-space: nowrap;
-	width: 117px;
+  border-top: 1px solid silver;
+  padding: 0 5px 0 0;
+  white-space: nowrap;
+  width: 117px;
 }
 
 #po_buy_now table td.buttons div {
-	cursor: pointer;
-	float: left;
-	height: 23px;
+  cursor: pointer;
+  float: left;
+  height: 23px;
 }
 
 #po_buy_now table td.buttons div.buy_later {
-	background: url(/images/pick_options/buttons/buy_later_blue.png) no-repeat;
-	width: 59px;
+  background: url(/images/pick_options/buttons/buy_later_blue.png) no-repeat;
+  width: 59px;
 }
 
 #po_buy_now table td.buttons div.reset {
-	background: url(/images/pick_options/buttons/reset_blue.png) no-repeat;
-	width: 58px;
+  background: url(/images/pick_options/buttons/reset_blue.png) no-repeat;
+  width: 58px;
 }
 
 #po_buy_now table td.buttons div:hover {
-	background-position: 0 -23px;
+  background-position: 0 -23px;
 }
 
 #po_buy_now table td.buttons div:active {
-	background-position: 0 -46px;
+  background-position: 0 -46px;
 }
 
 #po_buy_now table td.howto {
-	padding: 10px;
-	text-align: right;
+  padding: 10px;
+  text-align: right;
 }
 
 #po_buy_now table td.howto div {
-	background: #B0E0FF;
-	border-radius: 10px;
-	-moz-border-radius: 10px;
-	-webkit-border-radius: 10px;
-	box-shadow: 2px 2px 2px gray;
-	-moz-box-shadow: 2px 2px 2px gray;
-	-webkit-box-shadow: 2px 2px 2px gray;
-	float: right;
-	padding: 5px;
+  background: #B0E0FF;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  box-shadow: 2px 2px 2px gray;
+  -moz-box-shadow: 2px 2px 2px gray;
+  -webkit-box-shadow: 2px 2px 2px gray;
+  float: right;
+  padding: 5px;
 }
 
-
 #po_buy_now table td.howto p {
-	margin: 5px;
+  margin: 5px;
 }
 
 #po_buy_now table td.facility {
-	border-left: 1px solid silver;
-	padding: 5px;
-	text-align: center;
-	width: 1%;
+  border-left: 1px solid silver;
+  padding: 5px;
+  text-align: center;
+  width: 1%;
 }
 
 #po_buy_now table td.facility a {
-	background: url(/images/pick_options/buttons/buy_from.png) no-repeat;
-	color: black;
-	display: block;
-	height: 19px;
-	margin: 5px 10px;
-	padding-top: 4px;
-	text-align: center;
-	text-decoration: none;
-	width: 90px;
+  background: url(/images/pick_options/buttons/buy_from.png) no-repeat;
+  color: black;
+  display: block;
+  height: 19px;
+  margin: 5px 10px;
+  padding-top: 4px;
+  text-align: center;
+  text-decoration: none;
+  width: 90px;
 }
 
 #po_buy_now table td.facility a:hover {
-	background-position: 0 -23px;
-	color: white;
+  background-position: 0 -23px;
+  color: white;
 }
 
 #po_buy_now table td.facility a:active {
-	background-position: 0 -46px;
+  background-position: 0 -46px;
 }
 
 #po_buy_now table td.facility img {
-	padding: 0 5px;
-	width: 100px;
+  padding: 0 5px;
+  width: 100px;
 }
 
 #po_buy_now table td.facility p {
-	color: gray;
+  color: gray;
 }
 
 #po_buy_now table td.price {
-	border-left: 1px solid silver;
-	border-top: 1px solid silver;
-	text-align: center;
-	width: 1%;
+  border-left: 1px solid silver;
+  border-top: 1px solid silver;
+  text-align: center;
+  width: 1%;
 }
 
 #po_buy_now table td.price a {
-	background: url(/images/pick_options/buttons/buy_from_blue.png) no-repeat;
-	color: black;
-	display: block;
-	height: 19px;
-	margin: 5px 15px 0 15px;
-	padding-top: 4px;
-	text-align: center;
-	text-decoration: none;
-	width: 90px;
+  background: url(/images/pick_options/buttons/buy_from_blue.png) no-repeat;
+  color: black;
+  display: block;
+  height: 19px;
+  margin: 5px 15px 0 15px;
+  padding-top: 4px;
+  text-align: center;
+  text-decoration: none;
+  width: 90px;
 }
 
 #po_buy_now table td.price a:hover {
-	background-position: 0 -23px;
-	color: white;
+  background-position: 0 -23px;
+  color: white;
 }
 
 #po_buy_now table td.price a:active {
-	background-position: 0 -46px;
+  background-position: 0 -46px;
 }
 
 #po_buy_now table td.product {
-	border-top: 1px solid silver;
-	max-width: 410px;
+  border-top: 1px solid silver;
+  max-width: 410px;
 }
 
 #po_buy_now table tr.even td {
-	background: #F3F3F3;
+  background: #F3F3F3;
 }
 
 #po_buy_now table tr.even td.buttons div.buy_later {
-	background: url(/images/pick_options/buttons/buy_later_grey.png) no-repeat;
+  background: url(/images/pick_options/buttons/buy_later_grey.png) no-repeat;
 }
 
 #po_buy_now table tr.even td.buttons div.reset {
-	background: url(/images/pick_options/buttons/reset_grey.png) no-repeat;
+  background: url(/images/pick_options/buttons/reset_grey.png) no-repeat;
 }
 
 #po_buy_now table tr.even td.buttons div:hover {
-	background-position: 0 -23px;
+  background-position: 0 -23px;
 }
 
 #po_buy_now table tr.even td.buttons div:active {
-	background-position: 0 -46px;
+  background-position: 0 -46px;
 }
 
 #po_buy_now table tr.even td.price a {
-	background: url(/images/pick_options/buttons/buy_from_grey.png) no-repeat;
+  background: url(/images/pick_options/buttons/buy_from_grey.png) no-repeat;
 }
 
 #po_buy_now table tr.facilities {
-	display: none;
+  display: none;
 }
 
 #po_buy_now table tr.odd td {
-	background: #DCE9F7;
+  background: #DCE9F7;
 }

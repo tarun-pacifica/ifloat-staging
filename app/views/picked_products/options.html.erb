@@ -23,9 +23,8 @@
           </div>
         </td>
         <% @facility_urls.each do |url| %>
-        <% description = @facility_descriptions_by_url[url].to_s.superscript %>
         <td class="facility">
-          <%= tooltip("<img src=\"/images/partner/facilities/#{url}.png\" alt=#{url.inspect} />", description, :left) %>
+          <%= "<img src=\"/images/partner/facilities/#{url}.png\" alt=#{url.inspect} />" %>
         </td>
         <% end %>
       </tr>
@@ -37,6 +36,7 @@
 
 <script type="text/javascript" charset="utf-8">
   var $ifloat_body = {
+    facility_descriptions_by_url: <%= @facility_descriptions_by_url.to_json %>,
     facility_ids_by_url: <%= @facility_ids_by_url.to_json %>,
     facility_urls: <%= @facility_urls.to_json %>,
     prices_by_url_by_product_id: <%= @prices_by_url_by_product_id.to_json %>

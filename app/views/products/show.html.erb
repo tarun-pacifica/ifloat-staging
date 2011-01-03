@@ -21,7 +21,7 @@
         <% end %>
       <% end %>
     </div>
-      
+    
     <div class="sidebar">
       <div id="pick_buttons">
         <div class="compare"> </div>
@@ -40,7 +40,7 @@
             (best partner price)
           </td>
           <td class="price">
-            <div class="buy_now" onclick="window.location = '/products/<%= @product.id %>/buy_now/<%= fac[:id] %>'" <%= tooltip_attributes("This partner is MarineStore. One of the largest United Kingdom chandlers and UK 2008 Chandlery of the Year.", :left) %>>Buy Now</div>
+            <div class="buy_now" onclick="window.location = '/products/<%= @product.id %>/buy_now/<%= fac[:id] %>'" <%= tooltip_attributes(fac[:description], :left) %>>Buy Now</div>
           </td>
         </tr>
         <% end %>

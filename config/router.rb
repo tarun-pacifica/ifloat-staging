@@ -41,6 +41,7 @@ Merb::Router.prepare do
   match('/users/:id/confirm/:confirm_key').to(:controller => 'users', :action => 'confirm').name(:user_confirm)
   match('/users/login').to(:controller => 'users', :action => 'login')
   match('/users/logout').to(:controller => 'users', :action => 'logout')
+  match('/users/me').to(:controller => 'users', :action => 'me')
   resources :users
   
   match('/').to(:controller => 'cached_finds', :action =>'new')

@@ -4,11 +4,7 @@
       <a href="/blogs/tom_cunliffe">Blog</a> |
       <a href="mailto:admin@ifloat.biz">Contact Us</a> |
       <a href="/terms.pdf">Terms</a> |
-      <% if session.authenticated? %>
-      <a href="#" onclick="login_logout()">Log Out (<%= session.user.nickname || session.user.name %>)</a>
-      <% else %>
-      <a href="#" onclick="login_open()">Log In</a>
-      <% end %>
+      <a class="login" href="#">Log In</a>
     </span>
     <a href="/"><img src="/images/common/logo.png" alt="ifloat logo" /></a>
     <div class="find_bar">
@@ -44,10 +40,11 @@
 <%= partial "common/login" %>
 
 <script type="text/javascript" charset="utf-8">
-  var $ifloat_header = {authenticated: <%= session.authenticated? %>};
+  var $ifloat_header = {};
   var $ifloat_body = {};
   
   $(document).ready(function() {
+    login_update();
     pick_lists_update();
     show_messages(<%= session.unqueue_messages.to_json %>);
   });

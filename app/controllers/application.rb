@@ -5,7 +5,7 @@ class Application < Merb::Controller
   
   def self._filter_params(params)
     redacted = params.dup
-    (@redacted_params || []).each { |key| redacted[key] = "[REDACTED]" }
+    (@redacted_params || []).each { |key| redacted[key] = "[REDACTED]" if params.has_key?(key) }
     redacted
   end
   

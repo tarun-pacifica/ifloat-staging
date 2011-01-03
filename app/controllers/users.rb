@@ -16,7 +16,7 @@ class Users < Application
     user = User.new(:name => name, :nickname => nickname, :login => login, :password => password, :confirmation => confirmation, :created_from => request.remote_ip)
     user.valid?
     errors = user.errors.full_messages
-
+    
     if errors.empty?
       if user.save
         Mailer.deliver(:registration, :user => user)
@@ -52,5 +52,9 @@ class Users < Application
   def logout
     session.logout
     ""
+  end
+  
+  def me
+    (session.authenticated? ? session.user.attributes.keep(:name, :nickname) : {}).to_json
   end
 end

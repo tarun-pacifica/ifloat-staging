@@ -113,7 +113,7 @@ end
 Merb::BootLoader.after_app_loads do
   # Monkey-patch DM session storage to persist an update time _and_ base expiry thereon
   class Merb::DataMapperSessionStore
-    EXPIRY_TIME = Merb::Const::WEEK
+    EXPIRY_TIME = 180 * Merb::Const::DAY
     
     property :updated_at, DateTime
     before(:save) { self.updated_at = DateTime.now }

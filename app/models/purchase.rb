@@ -49,6 +49,7 @@ class Purchase
     all(:created_at.lt => OBSOLESCENCE_TIME.ago, :completed_at => nil)
   end
   
+  # TODO: spec
   def self.parse_response(params)
     parsed_data = {:items => []}
     
@@ -69,8 +70,9 @@ class Purchase
     parsed_data
   end
   
-  def complete!(params, ip_address)    
-    self.response = Purchase.parse_response(params)
+  # TODO: spec
+  def complete!(parsed_response, ip_address)    
+    self.response = parsed_response
     self.completed_at = DateTime.now
     self.completed_ip = ip_address
     save

@@ -8,8 +8,6 @@ Merb::Router.prepare do
   
   resources :articles
   
-  match('/blogs/:name').to(:controller => 'blogs', :action => 'show').name(:blogs)
-  
   match('/cached_finds/:id/filter/:property_id', :method => 'get').to(:controller => 'cached_finds', :action => 'filter_get')
   match('/cached_finds/:id/filter/:property_id', :method => 'post').to(:controller => 'cached_finds', :action => 'filter_set')
   match('/cached_finds/:id/filters/:list').to(:controller => 'cached_finds', :action => 'filters', :format => 'js')

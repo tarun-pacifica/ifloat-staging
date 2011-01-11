@@ -48,6 +48,7 @@ class CachedFinds < Application
     @primary_class = classes.first
     
     @find ||= session.most_recent_cached_find
+    session.log!("GET", "cached_finds_compare_by_image:#{image_checksum}:#{@find.specification}", request.remote_ip)
     render
   end
   
@@ -55,9 +56,7 @@ class CachedFinds < Application
     find = session.add_cached_find(CachedFind.new(:language_code => language_code, :specification => specification))
     
     if find.valid?
-      recalled = (not find.accessed_at.nil?)
-      CachedFindEvent.log!(find.specification, recalled, request.remote_ip)
-      find.unfilter_all! if params[:unfiltered] == "true" and recalled
+      find.unfilter_all! if params[:unfiltered] == "true" and not find.accessed_at.nil?
       redirect(resource(find))
     else
       redirect("/")
@@ -133,6 +132,7 @@ class CachedFinds < Application
     @find.ensure_valid
     @find.save
     
+    session.log!("GET", "cached_finds:#{@find.specification}", request.remote_ip)
     render
   end
   

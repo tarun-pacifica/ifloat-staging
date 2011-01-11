@@ -79,6 +79,14 @@ module Merb
       [language, "ENG"].uniq
     end
     
+    def last_event
+      SessionEvent.last(:session_id => self.session_id)
+    end
+    
+    def log!(type, value, ip_address)
+      SessionEvent.create(:session_id => self.session_id, :type => type, :value => value, :ip_address => ip_address)
+    end
+    
     def login!(login, pass)
       user = User.authenticate(login, pass)
       raise Unauthenticated, "Unknown account / password" if user.nil?

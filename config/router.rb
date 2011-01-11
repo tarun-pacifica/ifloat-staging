@@ -42,6 +42,7 @@ Merb::Router.prepare do
   match('/users/login').to(:controller => 'users', :action => 'login')
   match('/users/logout').to(:controller => 'users', :action => 'logout')
   match('/users/me').to(:controller => 'users', :action => 'me')
+  match('/users/track').to(:controller => 'users', :action => 'track')
   resources :users
   
   match('/').to(:controller => 'cached_finds', :action =>'new')

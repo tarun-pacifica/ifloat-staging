@@ -59,4 +59,18 @@ class Users < Application
     response.update(session.user.attributes.keep(:name, :nickname)) if session.authenticated?
     response.to_json
   end
+  
+  def track(url)
+    session.log!("GET", url, request.remote_ip) if
+      case url
+      when "/" then true
+      when %r(^/categories/?$) then true
+      when %r(^/categories/(.+?)$)
+        Indexer.category_children_for_node($1.split("/").map { |name| name.tr("+", " ") }).any?
+      when %r(^/products/.*?(\d+)$)
+        Indexer.product_url($1.to_i) == url
+      else false
+      end
+    ""
+  end
 end

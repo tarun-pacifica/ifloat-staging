@@ -44,5 +44,6 @@
   $(document).ready(function() {
     login_update();
     pick_lists_update();
+    <% if @async_tracking %> $.get("/users/track", {url: window.location.pathname, r: Math.random()});<% end %>
   });
 </script>

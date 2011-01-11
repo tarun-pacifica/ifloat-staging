@@ -99,8 +99,8 @@ module Mailer
       report = ["Purchase #{purchase.id} started at #{purchase.facility.primary_url} from #{purchase.created_ip} (user ID: #{purchase.user_id.inspect})"]
       report << ""
       
-      unless one_off.nil?
-        product = products_by_id[one_off.to_i]
+      unless one_off == 0
+        product = products_by_id[one_off]
         company = companies_by_id[product.company_id]
         report << "User performed a one-off 'buy now' on #{company.reference} / #{product.reference}"
         report << ""

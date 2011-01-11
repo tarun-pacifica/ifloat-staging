@@ -23,13 +23,14 @@ class PickedProducts < Application
     purchase = Purchase.new(:facility => facility, :created_ip => request.remote_ip)
     session.add_purchase(purchase)
     Mailer.deliver(:purchase_started,
-      :one_off  => params[:product_id],
+      :one_off  => one_off_product_id,
       :picks    => session.picked_products,
       :purchase => purchase)
     
     @background_css = "white"
     @skip_copyright = true
     @transitional = true
+    session.log!("GET", "picked_products_buy:#{one_off_product_id}:#{facility.primary_url}", request.remote_ip)
     render
   end
   
@@ -78,6 +79,7 @@ class PickedProducts < Application
     @sale_price_property_info = Indexer.property_display_cache[Indexer.sale_price_min_property_id]
     
     @find = session.most_recent_cached_find
+    session.log!("GET", "picked_products_compare_by_class:#{klass}", request.remote_ip)
     render
   end
   
@@ -150,6 +152,8 @@ class PickedProducts < Application
     end
     @facility_urls = Indexer.facilities.keys
     
+    picked_products_buy
+    session.log!("GET", "picked_products_options", request.remote_ip)
     render
   end
   

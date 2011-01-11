@@ -4,7 +4,7 @@ describe Facility do
   
   describe "creation" do
     before(:each) do
-      @facility = Facility.new(:company_id => 1, :location_id => 1, :name => "HQ", :primary_url => "hq.example.com", :description => "foo")
+      @facility = Facility.new(:company_id => 1, :location_id => 1, :name => "HQ", :primary_url => "hq.example.com", :description => "foo", :purchase_ttl => 60)
     end
     
     it "should succeed with valid data" do
@@ -34,6 +34,11 @@ describe Facility do
     it "should succeed without a description" do
       @facility.description = nil
       @facility.should be_valid
+    end
+    
+    it "should fail without a purchase TTL" do
+      @facility.purchase_ttl = nil
+      @facility.should_not be_valid
     end
   end
   
@@ -154,7 +159,7 @@ describe Facility do
       @sale_price = @text_type.definitions.create(:name => "sale:price_min", :sequence_number => 2)
       
       @company = Company.create(:name => "Ford", :reference => "GBR-12345")
-      @facility = @company.facilities.create(:name => "Estore", :primary_url => "ford.com")
+      @facility = @company.facilities.create(:name => "Estore", :primary_url => "ford.com", :purchase_ttl => 60)
       @product = @company.products.create(:reference => "UNUSED-P")
       @prod_class = TextPropertyValue.create(:definition => @ref_class, :product => @product, :text_value => "Fish", :language_code => "ENG", :auto_generated => false, :sequence_number => 1)
       @prod_class.should be_valid

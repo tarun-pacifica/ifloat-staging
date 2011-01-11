@@ -2,7 +2,7 @@
 #
 # Facility objects track the various outlets and places of business a Company may have. They model real premises as well as virtual outlets like e-stores. Note that an Employee who frequents multiple facilities on behalf of their Company would best be allocated to the 'HQ' facility (or similar).
 #
-# Primary URLs act as a unique identifier for tracking purchases (and jumpout behaviour) with e-stores. They must be set to the actual URL location of an e-store minus any session specific data.
+# Primary URLs act as a unique identifier for tracking purchases (and jumpout behaviour) with e-stores. They must be set to the actual URL location of an e-store minus any session specific data. In addition, a purchase TTL (in days) is set to control how long after the last interaction with the site a claim should be made on a pure trackback purchase.
 #
 # Facilities act as co-ordinating objects for a Company's inventory of FacilityProducts, any tracked Purchase and the Employees of a Company. They may have a Location.
 #
@@ -11,14 +11,16 @@
 # name:: 'The Big Boats On-line Store'
 # primary_url:: 'store.bigboats.co.uk'
 # description:: 'A marvelous array of fishy things.'
+# purchase_ttl:: 60
 #
 class Facility
   include DataMapper::Resource
   
-  property :id,          Serial
-  property :name,        String, :required => true, :unique_index => :name_per_company
-  property :primary_url, String, :length => 255, :unique_index => true
-  property :description, Text,   :lazy => false
+  property :id,           Serial
+  property :name,         String,  :required => true, :unique_index => :name_per_company
+  property :primary_url,  String,  :length => 255, :unique_index => true
+  property :description,  Text,    :lazy => false
+  property :purchase_ttl, Integer, :required => true
   
   belongs_to :company
     property :company_id, Integer, :required => true, :unique_index => :name_per_company

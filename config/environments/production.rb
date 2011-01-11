@@ -20,7 +20,7 @@ Merb::BootLoader.after_app_loads do
                            :port                 => 2525,
                            :domain               => "www.ifloat.biz",
                            :user_name            => "ac47472",
-                           :password             => "vkzb6eyrv",
+                           :password             => "UOE869",
                            :authentication       => :cram_md5,
                            :enable_starttls_auto => false
   end

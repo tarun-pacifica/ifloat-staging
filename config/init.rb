@@ -23,6 +23,7 @@ use_template_engine :erb
 Merb::Config.use do |c|
   c[:use_mutex] = false
   c[:session_store] = "datamapper"
+  c[:session_expiry] = 100 * 365 * Merb::Const::DAY
 end
 
 Merb::BootLoader.before_app_loads do

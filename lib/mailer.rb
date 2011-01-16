@@ -22,7 +22,7 @@ module Mailer
     when :facility_import_success
       whilst, attachment_path = params.values_at(:whilst, :attach)
       return if whilst.nil? or attachment_path.nil?
-
+      
       report = ["Context: #{Mailer.context(whilst)}", ""]
       Mail.deliver do |mail|
         Mailer.envelope(mail, action, :admin, :prodadmin)
@@ -70,13 +70,13 @@ module Mailer
       end
     
     when :purchase_completed
-      purchase = params[:purchase]
-      return if purchase.nil?
-      response = purchase.response
+      purchase, userish = params.values_at(:purchase, :userish)
+      return if purchase.nil? or userish.nil?
+      facility, response = purchase.facility, purchase.response
       
-      report = ["Purchase #{purchase.id} completed at #{purchase.facility.primary_url} from #{purchase.completed_ip}"]
+      report = ["Purchase #{purchase.id} completed at #{facility.primary_url} from #{purchase.ip_address} (#{userish})"]
       report << "Date: #{purchase.completed_at.strftime('%B %d, %Y at %H:%M:%S')}"
-      report << "#{purchase.facility.name} reference: #{response['reference'].inspect}"
+      report << "#{facility.name} reference: #{response['reference'].inspect}"
       report << "Total: #{response.values_at('total', 'currency').join(' ').inspect}"
       report << ""
       report << "Items..."
@@ -88,15 +88,16 @@ module Mailer
       end
     
     when :purchase_started
-      one_off, picks, purchase = params.values_at(:one_off, :picks, :purchase)
-      return if picks.nil? or purchase.nil?
+      values = params.values_at(:url, :one_off, :picks, :from_ip, :userish)
+      return if values.any? { |v| v.nil? }
+      url, one_off, picks, from_ip, userish = values
       
       product_ids = picks.map { |pick| pick.product_id }
-      product_ids << one_off.to_i unless one_off.nil?
+      product_ids << one_off unless one_off == 0
       products_by_id = Product.all(:id => product_ids).hash_by(:id)
       companies_by_id = Company.all(:id => products_by_id.values.map { |product| product.company_id }).hash_by(:id)
       
-      report = ["Purchase #{purchase.id} started at #{purchase.facility.primary_url} from #{purchase.created_ip} (user ID: #{purchase.user_id.inspect})"]
+      report = ["Purchase started at #{url} from #{from_ip} (#{userish})"]
       report << ""
       
       unless one_off == 0
@@ -125,7 +126,7 @@ module Mailer
       confirmation_link =
         Merb::Config[:registration_host] +
         Merb::Router.url(:user_confirm, :id => user.id, :confirm_key => user.confirm_key)
-
+      
       Mail.deliver do |mail|
         Mailer.envelope(mail, action, :admin, user.login)
         Mailer.user_body(mail, user, ["Thanks for registering with ifloat. Please visit the following link within #{User::UNCONFIRMED_EXPIRY_HOURS} hours to make your account permanent...", confirmation_link].join("\n\n"))
@@ -154,11 +155,11 @@ module Mailer
   def self.user_body(mail, user, message)
     content = <<-TEXT
       Dear #{user.name},
-
+      
       #{message}
-
+      
       Best regards,
-
+      
       The ifloat Support Team
       #{ADDRESSES[:admin]}
     TEXT

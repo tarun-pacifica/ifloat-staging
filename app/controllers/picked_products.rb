@@ -20,12 +20,12 @@ class PickedProducts < Application
     @purchase_urls = facility.purchase_urls(mappings.select { |m| purchase_product_ids.include?(m.product_id) })
     return redirect("/picked_products/options") if @purchase_urls.empty?
     
-    purchase = Purchase.new(:facility => facility, :created_ip => request.remote_ip)
-    session.add_purchase(purchase)
     Mailer.deliver(:purchase_started,
-      :one_off  => one_off_product_id,
-      :picks    => session.picked_products,
-      :purchase => purchase)
+      :url     => facility.primary_url,
+      :one_off => one_off_product_id,
+      :picks   => session.picked_products,
+      :from_ip => request.remote_ip,
+      :userish => session.userish)
     
     @background_css = "white"
     @skip_copyright = true

@@ -29,11 +29,9 @@ module Merb
     end
     
     def add_purchase(purchase)
-      purchase.user = user
-      if purchase.save
-        previous_purchase_ids = purchases.map { |p| (p.facility_id == purchase.facility_id) ? p.id : nil }.compact
-        self[:purchase_ids] = ((purchase_ids - previous_purchase_ids) << purchase.id)
-      end
+      purchase.session_id = session_id
+      purchase.user_id = self[:user_id]
+      purchase.save
     end
     
     def admin?
@@ -41,7 +39,7 @@ module Merb
     end
     
     def authenticated?
-      not user.nil?
+      not self[:user_id].nil?
     end
     
     def cached_finds
@@ -80,11 +78,11 @@ module Merb
     end
     
     def last_event
-      SessionEvent.last(:session_id => self.session_id)
+      SessionEvent.last(:session_id => session_id, :order => [:created_at])
     end
     
     def log!(type, value, ip_address)
-      SessionEvent.create(:session_id => self.session_id, :type => type, :value => value, :ip_address => ip_address)
+      SessionEvent.create(:session_id => session_id, :type => type, :value => value, :ip_address => ip_address)
     end
     
     def login!(login, pass)
@@ -107,6 +105,8 @@ module Merb
         
         self["#{set.to_s[0..-2]}_ids"] = user_set.map { |item| item.id }
       end
+      
+      Purchase.all(:session_id => session_id, :user_id => nil).update!(:user_id => session[:user_id]) if authenticated?
       
       self[:messages] = nil
     end
@@ -131,11 +131,6 @@ module Merb
       picks
     end
     
-    def purchases
-      return [] if purchase_ids.empty?
-      Purchase.all(:id => purchase_ids)
-    end
-    
     def queue_message(value)
       (self[:messages] ||= []) << value
     end
@@ -147,21 +142,14 @@ module Merb
       self[:picked_product_ids] = (ids - pick_ids)
     end
     
-    def remove_purchase(purchase)
-      ids = purchase_ids
-      ids.delete(purchase.id)
-      self[:purchase_ids] = ids
-    end
-    
     def unqueue_messages
-      user_id = self[:user_id]
-      if user_id.nil?
-        self.delete(:messages) || []
-      else
-        messages = Message.all(:user_id => user_id)
+      if authenticated?
+        messages = Message.all(:user_id => self[:user_id])
         values = messages.map { |m| m.value }
         messages.destroy! unless values.empty?
         values
+      else
+        self.delete(:messages) || []
       end
     end
     
@@ -169,6 +157,11 @@ module Merb
       user_id = self[:user_id]
       return nil if user_id.nil?
       User.get(user_id)
+    end
+    
+    def userish
+      u = user
+      u.nil? ? "session #{session_id}" : "user #{u.id} (#{u.name} / #{u.login})"
     end
     
     
@@ -180,10 +173,6 @@ module Merb
     
     def picked_product_ids
       self[:picked_product_ids] || []
-    end
-    
-    def purchase_ids
-      self[:purchase_ids] || []
     end
     
     def update_picked_product_title_values(picks, commit = false)

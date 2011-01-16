@@ -11,8 +11,8 @@ describe SessionEvent do
       @event.should be_valid
     end
     
-    it "should fail without a session ID" do
-      @event.session_id = nil
+    it "should fail without a session" do
+      @event.session = nil
       @event.should_not be_valid
     end
     

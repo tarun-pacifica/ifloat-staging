@@ -1,7 +1,7 @@
 # === General Housekeeping ===
 
 begin
-  Merb::DataMapperSessionStore.expired.destroy!
+  Merb::DataMapperSessionStore.expired.destroy
   
   cached_find_ids = Set.new
   picked_product_ids = Set.new
@@ -16,9 +16,7 @@ begin
   ControllerError.obsolete.destroy!
   
   PickedProduct.all(:user_id => nil, :id.not => picked_product_ids).destroy!
-  
-  Purchase.obsolete.destroy!
-  
+    
   User.expired.destroy!
   
 rescue Exception => e

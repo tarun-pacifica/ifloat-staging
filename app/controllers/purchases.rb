@@ -1,20 +1,22 @@
 class Purchases < Application
   def track(facility)
-    purchases = session.purchases
-    return "" if purchases.empty?
+    return "" if request.session_cookie_value.nil? # NOTE: private / unstable API
     
+    last_event = session.last_event
+    return "" if last_event.nil?
+    
+    raise NotFound unless Indexer.facilities.has_key?(facility)
     facility = Facility.first(:primary_url => facility)
-    raise NotFound if facility.nil?
+    return "" if last_event.created_at + facility.purchase_ttl < DateTime.now
     
-    purchase = purchases.find { |purc| purc.facility_id == facility.id }
-    raise NotFound if purchase.nil?
+    response = Purchase.parse_response(params)
+    purchase = facility.purchases.new(:ip_address => request.remote_ip, :response => response)
+    session.add_purchase(purchase)
+    Mailer.deliver(:purchase_completed, :purchase => purchase, :userish => session.userish)
     
-    references = purchase.complete!(params, request.remote_ip)
-    Mailer.deliver(:purchase_completed, :purchase => purchase)
-    session.remove_purchase(purchase)
-    
-    product_ids = facility.product_ids_for_refs(references)
-    picks = session.picked_products.select { |pick| product_ids.include?(pick.product_id) }
+    references = response[:items].map { |item| item["reference"] }.compact.uniq
+    implied_product_ids = facility.product_ids_for_refs(references).to_set
+    picks = session.picked_products.select { |pick| implied_product_ids.include?(pick.product_id) }
     session.remove_picked_products(picks)
     
     ""

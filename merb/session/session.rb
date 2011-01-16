@@ -106,7 +106,7 @@ module Merb
         self["#{set.to_s[0..-2]}_ids"] = user_set.map { |item| item.id }
       end
       
-      Purchase.all(:session_id => session_id, :user_id => nil).update!(:user_id => session[:user_id]) if authenticated?
+      Purchase.all(:session_id => session_id, :user_id => nil).update!(:user_id => self[:user_id]) if authenticated?
       
       self[:messages] = nil
     end

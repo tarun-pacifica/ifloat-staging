@@ -2,6 +2,8 @@ class Tools < Application
   before :ensure_authenticated
   
   def cached_find_events(ext)
+    return "TO BE RE-IMPLEMENTED"
+    
     @events_by_spec = CachedFindEvent.all(:order => [:created_at]).group_by { |cfe| cfe.specification }.sort_by { |spec, events| [events.size, spec] }.reverse
     
     if ext == "csv"

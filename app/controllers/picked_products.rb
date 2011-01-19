@@ -152,7 +152,6 @@ class PickedProducts < Application
     end
     @facility_urls = Indexer.facilities.keys
     
-    picked_products_buy
     session.log!("GET", "picked_products_options", request.remote_ip)
     render
   end

@@ -36,7 +36,6 @@ class PickedProduct
     repository(:default).adapter.select(query).map { |record| [record.cref, record.pref] }
   end
   
-  # TODO: spec
   def self.handle_orphaned(product_ids)
     anonymous_picks_by_id = {}
     

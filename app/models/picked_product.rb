@@ -41,10 +41,8 @@ class PickedProduct
     anonymous_picks_by_id = {}
     
     PickedProduct.all(:product_id => product_ids).each do |pick|
-      if pick.user_id.nil?
-        anonymous_picks_by_id[pick.id] = pick
-      else
-        Message.create(:user_id => pick.user_id, :value => pick.orphaned_message)
+      if pick.user_id.nil? then anonymous_picks_by_id[pick.id] = pick
+      else Message.create(:user_id => pick.user_id, :value => pick.orphaned_message)
       end
     end
     
@@ -60,7 +58,6 @@ class PickedProduct
     PickedProduct.all(:product_id => product_ids).destroy!
   end
   
-  # TODO: spec
   def orphaned_message
     "Discontinued #{cached_brand} #{cached_class} removed from your #{GROUPS[group]}."
   end

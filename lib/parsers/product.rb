@@ -3,8 +3,8 @@ class ProductParser < AbstractParser
   
   SPECIAL_VALUE_VALIDITIES = {
     "AUTO" => [:values].to_set,
-    "N/A"  => [:attachments, :mappings, :relationships, :values].to_set,
-    "NIL"  => [:attachments, :mappings, :relationships, :values].to_set
+    "N/A"  => [:reference_group, :attachments, :mappings, :relationships, :values].to_set,
+    "NIL"  => [:reference_group, :attachments, :mappings, :relationships, :values].to_set
   }
   
   def initialize(*args)
@@ -179,7 +179,7 @@ class ProductParser < AbstractParser
     when "company.reference"
       [:company]
       
-    when /^product.(reference(_group)?)$/
+    when /^product\.(reference(_group)?)$/
       [$1.to_sym]
       
     when /^mapping\.reference\.(.+?)$/

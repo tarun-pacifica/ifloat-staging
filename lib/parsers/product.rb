@@ -87,7 +87,7 @@ class ProductParser < AbstractParser
     return [] if import == "N"
     
     attributes = {}
-    [:company, :reference].each do |attribute|
+    [:company, :reference, :reference_group].each do |attribute|
       attributes[attribute] = parsed_fields.delete([attribute])
     end
     
@@ -147,7 +147,7 @@ class ProductParser < AbstractParser
       raise "invalid mapping: #{value.inspect}" unless value =~ ProductMapping::REFERENCE_FORMAT
       ImportObject.new(ProductMapping, :company => domain_info[0], :reference => value)
       
-    when :reference
+    when :reference, :reference_group
       raise "invalid reference: #{value.inspect}" unless value =~ Product::REFERENCE_FORMAT
       value
       
@@ -179,8 +179,8 @@ class ProductParser < AbstractParser
     when "company.reference"
       [:company]
       
-    when "product.reference"
-      [:reference]
+    when /^product.(reference(_group)?)$/
+      [$1.to_sym]
       
     when /^mapping\.reference\.(.+?)$/
       company_ref = $1

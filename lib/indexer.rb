@@ -176,6 +176,7 @@ module Indexer
     @@sale_price_min_property_id = PropertyDefinition.first(:name => "sale:price_min").id
     
     # TODO: this needs to be done by one thread only - at init (if not in console mode) and then as a background thread
+    #       or possibly from the Importer housekeeping actions
     File.open(SITEMAP_PATH, "w") do |f|
       f.puts '<?xml version="1.0" encoding="UTF-8"?>'
       f.puts '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'

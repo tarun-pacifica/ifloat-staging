@@ -4,7 +4,7 @@ describe Product do
 
   describe "creation" do
     before(:each) do
-      @product = Product.new(:company_id => 1, :reference => "AF11235")
+      @product = Product.new(:company_id => 1, :reference => "AF11235", :reference_group => "AF12")
     end
     
     it "should fail without a company" do
@@ -19,6 +19,16 @@ describe Product do
     
     it "should fail with an invalid reference" do
       @product.reference = " abc "
+      @product.should_not be_valid
+    end
+    
+    it "should fail without a reference group" do
+      @product.reference_group = nil
+      @product.should be_valid
+    end
+    
+    it "should fail with an invalid reference group" do
+      @product.reference_group = " abc "
       @product.should_not be_valid
     end
   end

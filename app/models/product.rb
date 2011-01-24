@@ -9,11 +9,12 @@ class Product
   
   REFERENCE_FORMAT = /^[A-Z_\d\-\.\/]+$/
   
-  property :id,           Serial
-  property :reference,    String,  :required => true, :format => REFERENCE_FORMAT, :unique_index => :ref_per_company
+  property :id,              Serial
+  property :reference,       String,  :required => true, :format => REFERENCE_FORMAT, :unique_index => :ref_per_company
+  property :reference_group, String,  :format => REFERENCE_FORMAT, :index => true
   
   belongs_to :company
-    property :company_id, Integer, :required => true, :unique_index => :ref_per_company
+    property :company_id,    Integer, :required => true, :unique_index => :ref_per_company
   
   has n, :attachments
   has n, :mappings, :model => "ProductMapping"

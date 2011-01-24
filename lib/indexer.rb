@@ -175,10 +175,12 @@ module Indexer
     @@max_product_id = repository.adapter.select("SELECT max(id) FROM products").first
     @@sale_price_min_property_id = PropertyDefinition.first(:name => "sale:price_min").id
     
+    # TODO: this needs to be done by one thread only - at init (if not in console mode) and then as a background thread
     File.open(SITEMAP_PATH, "w") do |f|
       f.puts '<?xml version="1.0" encoding="UTF-8"?>'
       f.puts '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
-      f.puts @@product_title_cache[:url].values.map { |stem| "<url> <loc>http://www.ifloat.biz#{stem}</loc> <changefreq>daily</changefreq> </url>" }
+      titles = (@@product_title_cache[:url] || {}).values
+      f.puts titles.map { |stem| "<url> <loc>http://www.ifloat.biz#{stem}</loc> <changefreq>daily</changefreq> </url>" }
       f.puts '</urlset>'
     end
     

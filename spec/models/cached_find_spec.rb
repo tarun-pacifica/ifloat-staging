@@ -95,7 +95,9 @@ describe CachedFind do
         "marketing:model"     => @text_type,
         "misc:unused"         => @text_type,
         "physical:weight_dry" => @weight_type,
-        "physical:weight_wet" => @weight_type }.each do |name, type|
+        "physical:weight_wet" => @weight_type,
+        "reference:class"     => @text_type,
+        "sale:price_min"      => @text_type }.each do |name, type|
         findable = (type == @text_type)
         filterable = (name.include?("marketing") or name.include?("physical"))
         property = type.definitions.create(:name => name, :findable => findable, :filterable => filterable, :sequence_number => (sequence_number += 1))

@@ -13,7 +13,7 @@ class Product
   property :reference,    String,  :required => true, :format => REFERENCE_FORMAT, :unique_index => :ref_per_company
   
   belongs_to :company
-    property :company_id, Integer, :unique_index => :ref_per_company
+    property :company_id, Integer, :required => true, :unique_index => :ref_per_company
   
   has n, :attachments
   has n, :mappings, :model => "ProductMapping"

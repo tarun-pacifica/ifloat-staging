@@ -23,30 +23,13 @@ describe Product do
     end
   end
   
-  describe "creation with existing product" do
-    before(:all) do
-      @product = Product.create(:company_id => 1, :reference => "AF11235")
-    end
-    
-    after(:all) do
-      @product.destroy
-    end
-    
-    it "should succeed with a different reference for the same company" do
-      Product.new(:company_id => 1, :reference => "BF11235").should be_valid
-    end
-    
-    it "should succeed with a different reference for a different company" do
-      Product.new(:company_id => 2, :reference => "BF11235").should be_valid
-    end
-    
-    it "should fail with the same reference for the same company" do
-      Product.new(:company_id => 1, :reference => "AF11235").should_not be_valid
-    end
-    
-    it "should succeed with the same reference for a different company" do
-      Product.new(:company_id => 2, :reference => "BF11235").should be_valid
-    end
-  end
+  # TODO: verify all these methods are used
+  it "should have specs for marshal_values (instance and class)"
+  it "should have specs for prices_by_url_by_product_id"
+  it "should have specs for prices_by_url"
+  it "should have specs for primary_images_by_product_id"
+  it "should have specs for values_by_property_name_by_product_id"
+  it "should have specs for values_by_property_name"
+  it "should have specs for assets_by_role"
   
 end

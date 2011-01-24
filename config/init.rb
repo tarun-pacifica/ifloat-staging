@@ -99,6 +99,8 @@ Merb::BootLoader.before_app_loads do
     end
   end
   
+  # TODO: both compile steps should happen in server mode only
+  
   # Merge all JS files - TODO: lint + minify
   path = "public/javascripts/compiled.js"
   File.delete(path) if File.exist?(path)

@@ -12,6 +12,7 @@ module Indexer
   @@last_loaded_time = nil
   @@max_product_id = nil
   @@numeric_filtering_index = {}
+  @@product_groups = {}
   @@product_relationship_cache = {}
   @@product_title_cache = {}
   @@property_display_cache = {}
@@ -53,6 +54,7 @@ module Indexer
         :facility_cache             => compile_facility_cache,
         :image_checksums            => compile_image_checksum_index,
         :numeric_filtering          => compile_numeric_filtering_index,
+        :product_groups             => compile_product_groups,
         :product_relationship_cache => ProductRelationship.compile_index,
         :product_title_cache        => compile_product_title_cache,
         :property_display_cache     => compile_property_display_cache(properties),
@@ -160,6 +162,7 @@ module Indexer
       @@facility_cache = indexes[:facility_cache]
       @@image_checksum_index = indexes[:image_checksums]
       @@numeric_filtering_index = indexes[:numeric_filtering]
+      @@product_groups = indexes[:product_groups]
       @@product_ids_by_checksum = nil
       @@product_relationship_cache = indexes[:product_relationship_cache]
       @@product_title_cache = indexes[:product_title_cache]
@@ -198,6 +201,12 @@ module Indexer
   
   def self.max_product_id
     @@max_product_id if ensure_loaded
+  end
+  
+  def self.product_group_ids_for_product(product)
+    ids = (@@product_groups[[product.company_id, product.reference_group]] || [])
+    ids.delete(product.id)
+    ids
   end
   
   def self.product_ids_for_image_checksum(checksum)
@@ -407,12 +416,12 @@ module Indexer
     compile_filtering_index(records, :unit, :min_value, :max_value)
   end
   
-  def self.compile_product_relationship_cache
-    product_ids_by_relationship_by_product_id = {}
-    Product.all.each do |product|
-      product_ids_by_relationship_by_product_id[product.id] = ProductRelationship.related_products(product)
+  def self.compile_product_groups
+    Product.all(:reference_group.not => nil).group_by do |product|
+      [product.company_id, product.reference_group]
+    end.each do |key, products|
+      products.map! { |product| product.id }
     end
-    product_ids_by_relationship_by_product_id
   end
   
   def self.compile_product_title_cache

@@ -10,6 +10,7 @@ class ProductParser < AbstractParser
   def initialize(*args)
     super
     
+    @auto_group_diff_property = @import_set.get(PropertyDefinition, "auto:group_diff")
     @auto_title_property = @import_set.get(PropertyDefinition, "auto:title")
     
     @title_strategies_by_class = {}
@@ -28,44 +29,74 @@ class ProductParser < AbstractParser
   
   private
   
+  def generate_auto_part(value_objects, capitalize, superscript_units)
+    klass = value_objects.first.klass
+    value_attributes = value_objects.map { |o| o.attributes }.sort_by { |attribs| attribs[:sequence_number] }
+    
+    if klass == TextPropertyValue
+      part = value_attributes.map { |attribs| attribs[:text_value] }.join(", ")
+      capitalize ? part.gsub!(/(^|\s)\S/) { $&.upcase } : part
+    else
+      min_seq_num = value_attributes.first[:sequence_number]
+      value_attributes = value_attributes.select { |attribs| attribs[:sequence_number] == min_seq_num }
+      value_attributes = value_attributes.sort_by { |attribs| attribs[:unit].to_s }
+      formatted_values = value_attributes.map do |attribs|
+        value = klass.format(attribs[:min_value], attribs[:max_value], "-", attribs[:unit])
+        superscript_units ? value.superscript_numeric : value
+      end
+      formatted_values.join(" / ")
+    end
+  end
+  
+  def generate_auto_group_diffs(value_objects_by_property_name, product)
+    return [] if product.attributes[:reference_group].nil?
+    
+    diff_objects = []
+    klass = (value_objects_by_property_name["reference:class"].first.attributes[:text_value] rescue nil)
+    
+    seq_num = 0
+    while seq_num += 1 do
+      hierarchy = @import_set.get(PropertyHierarchy, klass, seq_num)
+      break if hierarchy.nil?
+      
+      rendered_parts = []
+      hierarchy.attributes[:property_names].map do |name|
+        value_objects = value_objects_by_property_name[name]
+        rendered_parts << generate_auto_part(value_objects, false, false) unless value_objects.nil?
+      end
+      
+      attributes = {
+        :definition => @auto_group_diff_property,
+        :product => product,
+        :auto_generated => true,
+        :sequence_number => seq_num,
+        :language_code => "ENG",
+        :text_value => rendered_parts.join(" - ")
+      }
+      diff_objects << ImportObject.new(TextPropertyValue, attributes)
+    end
+    
+    diff_objects
+  end
+  
   def generate_auto_titles(value_objects_by_property_name, product)
     klass = (value_objects_by_property_name["reference:class"].first.attributes[:text_value] rescue nil)
     strategy = @title_strategies_by_class[klass]
     return [] if strategy.nil?
     
-    title_objects = []
-    
-    TitleStrategy::TITLE_PROPERTIES.each_with_index do |title, i|
+    TitleStrategy::TITLE_PROPERTIES.each_with_index.map do |title, i|
       rendered_parts = []
-      
       strategy[title].each do |part|
         if part == "-"
           rendered_parts << "-" unless rendered_parts.empty? or rendered_parts.last == "-"
         elsif part == "product.reference"
           rendered_parts << product.attributes[:reference]
         else
-          value_objects = (value_objects_by_property_name[part] || [])
-          next if value_objects.empty?
-          
-          klass = value_objects.first.klass
-          value_attributes = value_objects.map { |o| o.attributes }.sort_by { |attribs| attribs[:sequence_number] }
-          
-          if klass == TextPropertyValue
-            rendered_parts << value_attributes.map { |attribs| attribs[:text_value] }.join(", ")
-            rendered_parts.last.gsub!(/(^|\s)\S/) { $&.upcase } unless title == "description"
-          else
-            min_seq_num = value_attributes.first[:sequence_number]
-            value_attributes = value_attributes.select { |attribs| attribs[:sequence_number] == min_seq_num }
-            value_attributes = value_attributes.sort_by { |attribs| attribs[:unit].to_s }
-            formatted_values = value_attributes.map do |attribs|
-              value = klass.format(attribs[:min_value], attribs[:max_value], "-", attribs[:unit])
-              (title == :description) ? value : value.superscript_numeric
-            end
-            rendered_parts << formatted_values.join(" / ")
-          end
+          value_objects = value_objects_by_property_name[part]
+          notDescription = (title != :description)
+          rendered_parts << generate_auto_part(value_objects, notDescription, notDescription) unless value_objects.nil?
         end
       end
-      
       rendered_parts.pop while rendered_parts.last == "-"
       
       attributes = {
@@ -76,10 +107,8 @@ class ProductParser < AbstractParser
         :language_code => "ENG",
         :text_value => rendered_parts.join(" ")
       }
-      title_objects << ImportObject.new(TextPropertyValue, attributes)
+      ImportObject.new(TextPropertyValue, attributes)
     end
-    
-    title_objects
   end
   
   def generate_objects(parsed_fields)
@@ -91,7 +120,8 @@ class ProductParser < AbstractParser
       attributes[attribute] = parsed_fields.delete([attribute])
     end
     
-    objects = [ImportObject.new(Product, attributes)]
+    product = ImportObject.new(Product, attributes)
+    objects = [product]
     
     value_objects_by_property_name = {}
     
@@ -108,13 +138,15 @@ class ProductParser < AbstractParser
       end
         
       values = (object.is_a?(Array) ? object : [object])
-      values.each { |o| o.attributes[:product] = objects[0] }
+      values.each { |o| o.attributes[:product] = product }
       objects.push(*values)
     end
     
     # TODO: Remove this temporary hack when ready (and can remove import variable above)
     return [] unless import == "Y" or objects.any? { |o| o.attributes[:company] == @marine_store }
-    objects + generate_auto_titles(value_objects_by_property_name, objects[0])
+    objects +
+      generate_auto_group_diffs(value_objects_by_property_name, product) +
+      generate_auto_titles(value_objects_by_property_name, product)
   end
   
   def parse_field(head, value, fields)

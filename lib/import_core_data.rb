@@ -17,7 +17,7 @@ CSV_REPO  = "../ifloat_csvs"
 ERRORS_PATH = "/tmp/errors.csv"
 TITLE_REPORT_PATH = "/tmp/titles.csv"
 
-CLASSES = [PropertyType, PropertyDefinition, PropertyValueDefinition, AssociatedWord, TitleStrategy, UnitOfMeasure, Company, Facility, Asset, Brand, Product]
+CLASSES = [PropertyType, PropertyDefinition, PropertyValueDefinition, AssociatedWord, PropertyHierarchy, TitleStrategy, UnitOfMeasure, Company, Facility, Asset, Brand, Product]
 
 class ImportObject
   attr_accessor :primary_key, :resource_id
@@ -41,6 +41,7 @@ class ImportSet
     Translation             => [:property_definition, :language_code],
     PropertyValueDefinition => [:property_type, :value],
     AssociatedWord          => [:word, :rules],
+    PropertyHierarchy       => [:class_name, :sequence_number],
     TitleStrategy           => [:name],
     UnitOfMeasure           => [:class_name],
     Company                 => [:reference],
@@ -282,6 +283,32 @@ class ImportSet
         title_report << headings
         values_by_heading_by_product.each do |product, values_by_heading|
           title_report << values_by_heading.values_at(*headings)
+        end
+      end
+    end
+    
+    stopwatch("ensured all grouped products are adequately differentiated") do
+      property = get!(PropertyDefinition, "auto:group_diff")
+      
+      values_by_product_by_group = {}
+      
+      text_values.each do |tv|
+        next unless tv.attributes[:definition] == property
+        product = tv.attributes[:product]
+        group = product.attributes.values_at(:company, :reference_group)
+        values_by_product = (values_by_product_by_group[group] ||= {})
+        (values_by_product[product] ||= []) << tv.attributes[:text_value]
+      end
+      
+      values_by_product_by_group.each do |group, values_by_product|
+        values_by_product.each do |product, values|
+          error(Product, product.path, product.row, nil, "differentiating values #{values.inspect} include one or more blanks") if values.any? { |v| v.blank? }
+        end
+        
+        values_by_product.to_a.combination(2) do |a, b|
+          prod1, values1 = a
+          prod2, values2 = b
+          error(Product, prod2.path, prod2.row, nil, "duplicates differentiating values #{values1.inspect} from #{prod1.path} row #{prod1.row} (group: #{group[0].attributes[:reference]} / #{group[1]})") if values1 == values2
         end
       end
     end
@@ -738,7 +765,7 @@ CLASSES.each do |klass|
     dump_paths << import_set.dump_path(dump_name)
     
     load_from_cache = import_set.dump_exists?(dump_name)
-    load_from_cache = false if klass == Product and not (freshly_parsed_classes & [PropertyType, TitleStrategy]).empty?
+    load_from_cache = false if klass == Product and (freshly_parsed_classes & [PropertyType, PropertyHierarchy, TitleStrategy]).any?
     load_from_cache = false if klass == TitleStrategy and freshly_parsed_classes.include?(PropertyDefinition)
     
     if load_from_cache

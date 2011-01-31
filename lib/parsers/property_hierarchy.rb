@@ -9,8 +9,9 @@ class PropertyHierarchyParser < AbstractParser
     class_name = parsed_fields.delete("reference:class")
     
     parsed_fields.map do |head, value|
+      next if value.blank?
       next unless head =~ /^property_set_(\d+)$/
-      ImportObject.new(PropertyHierarchy, :class_name => class_name, :sequence_number => $1, :property_names => value)
+      ImportObject.new(PropertyHierarchy, :class_name => class_name, :sequence_number => $1.to_i, :property_names => value)
     end.compact
   end
   

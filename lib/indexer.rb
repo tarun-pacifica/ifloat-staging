@@ -12,7 +12,7 @@ module Indexer
   @@last_loaded_time = nil
   @@max_product_id = nil
   @@numeric_filtering_index = {}
-  @@product_groups = {}
+  @@product_group_diffs = {}
   @@product_relationship_cache = {}
   @@product_title_cache = {}
   @@property_display_cache = {}
@@ -54,7 +54,7 @@ module Indexer
         :facility_cache             => compile_facility_cache,
         :image_checksums            => compile_image_checksum_index,
         :numeric_filtering          => compile_numeric_filtering_index,
-        :product_groups             => compile_product_groups,
+        :product_group_diffs        => compile_product_group_diffs,
         :product_relationship_cache => ProductRelationship.compile_index,
         :product_title_cache        => compile_product_title_cache,
         :property_display_cache     => compile_property_display_cache(properties),
@@ -157,21 +157,21 @@ module Indexer
     
     File.open(COMPILED_PATH) do |f|
       indexes = Marshal.load(f)
-      @@category_definitions = indexes[:category_definitions]
-      @@category_tree = indexes[:category_tree]
-      @@facility_cache = indexes[:facility_cache]
-      @@image_checksum_index = indexes[:image_checksums]
-      @@numeric_filtering_index = indexes[:numeric_filtering]
-      @@product_groups = indexes[:product_groups]
-      @@product_ids_by_checksum = nil
+      @@category_definitions       = indexes[:category_definitions]
+      @@category_tree              = indexes[:category_tree]
+      @@facility_cache             = indexes[:facility_cache]
+      @@image_checksum_index       = indexes[:image_checksums]
+      @@numeric_filtering_index    = indexes[:numeric_filtering]
+      @@product_group_diffs        = indexes[:product_group_diffs]
+      @@product_ids_by_checksum    = nil
       @@product_relationship_cache = indexes[:product_relationship_cache]
-      @@product_title_cache = indexes[:product_title_cache]
-      @@property_display_cache = indexes[:property_display_cache]
-      @@tag_index = indexes[:tag_index]
-      @@tag_frequencies = nil
-      @@tags_by_product_id = nil
-      @@text_filtering_index = indexes[:text_filtering]
-      @@text_finding_index = indexes[:text_finding]
+      @@product_title_cache        = indexes[:product_title_cache]
+      @@property_display_cache     = indexes[:property_display_cache]
+      @@tag_index                  = indexes[:tag_index]
+      @@tag_frequencies            = nil
+      @@tags_by_product_id         = nil
+      @@text_filtering_index       = indexes[:text_filtering]
+      @@text_finding_index         = indexes[:text_finding]
     end
     
     @@class_property_id = PropertyDefinition.first(:name => "reference:class").id
@@ -203,10 +203,8 @@ module Indexer
     @@max_product_id if ensure_loaded
   end
   
-  def self.product_group_ids_for_product(product)
-    ids = (@@product_groups[[product.company_id, product.reference_group]] || [])
-    ids.delete(product.id)
-    ids
+  def self.product_group_diffs(product)
+    (@@product_group_diffs[[product.company_id, product.reference_group]] || {}) if ensure_loaded
   end
   
   def self.product_ids_for_image_checksum(checksum)
@@ -416,12 +414,22 @@ module Indexer
     compile_filtering_index(records, :unit, :min_value, :max_value)
   end
   
-  def self.compile_product_groups
-    Product.all(:reference_group.not => nil).group_by do |product|
-      [product.company_id, product.reference_group]
-    end.each do |key, products|
-      products.map! { |product| product.id }
+  def self.compile_product_group_diffs
+    query =<<-SQL
+      SELECT p.company_id, p.reference_group, pv.product_id, pv.text_value
+      FROM products p
+        INNER JOIN property_values pv ON p.id = pv.product_id
+      WHERE p.reference_group IS NOT NULL
+        AND pv.property_definition_id = ?
+      ORDER BY pv.sequence_number
+    SQL
+    
+    values_by_product_id_by_group = {}
+    repository.adapter.select(query, PropertyDefinition.first(:name => "auto:group_diff").id).each do |record|
+      values_by_product_id = (values_by_product_id_by_group[[record.company_id, record.reference_group]] ||= {})
+      (values_by_product_id[record.product_id] ||= []) << record.text_value
     end
+    values_by_product_id_by_group
   end
   
   def self.compile_product_title_cache

@@ -16,7 +16,14 @@ class PropertyHierarchyParser < AbstractParser
   end
   
   def parse_field(head, value, fields)
-    return value unless head =~ /^property_set_\d+$/
+    return nil if value.blank?
+    return value unless head =~ /^property_set_(\d+)$/
+    
+    previous_ps = ($1.to_i - 1)
+    if previous_ps > 0
+      previous_ps_head = "property_set_#{previous_ps}"
+      raise "value follows a blank in the previous field" if fields[previous_ps_head].blank?
+    end
     
     value.to_s.split(",").map do |part|
       part.strip!

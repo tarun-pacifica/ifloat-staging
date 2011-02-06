@@ -35,7 +35,8 @@ class TitleStrategy
   
   # TODO: spec
   def validate_title(title)
-    title.is_a?(Array) and title.all? { |part| name =~ PropertyDefinition::NAME_FORMAT or name == "-" } ||
-      [false, "Title should be an array containing property names and (optionally) '-'s"]
+    title.is_a?(Array) and
+    title.all? { |part| name =~ PropertyDefinition::NAME_FORMAT or name == "-" or name == "product.reference" } ||
+      [false, "Title should be an array containing property names and (optionally) '-'s and/or 'product.reference'"]
   end
 end

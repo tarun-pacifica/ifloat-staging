@@ -1,5 +1,23 @@
+function product_detail_buy_now(product_id, facility_id) {
+  window.location = '/products/' + product_id + '/buy_now/' + facility_id;
+}
+
 function product_detail_flash_related() {
   $('.relations').animate({backgroundColor: 'yellow'}).animate({backgroundColor: '#F3F3F3'});
+}
+
+function product_detail_load_related(related_by_name) {
+  for(var name in related_by_name) {
+    var related = related_by_name[name];
+    var section = $('#rel_' + name);
+    
+    for(i in related) {
+      var info = related[i];
+      section.append(find_results_make(info[0], info[1], info[2], info[3], info[4], $ifloat_body.product_id));
+    }
+    
+    section.append('<hr class="terminator" />');
+  }
 }
 
 function product_detail_pick_button_click(event) {
@@ -35,20 +53,6 @@ function product_detail_pick_buttons_update(group, pick_id) {
   
   pick_buttons.find('div').removeClass('selected').unbind('click').click(product_detail_pick_button_click);
   if(group) pick_buttons.find('.' + group).addClass('selected').unbind('click');
-}
-
-function product_detail_load_related(related_by_name) {
-  for(var name in related_by_name) {
-    var related = related_by_name[name];
-    var section = $('#rel_' + name);
-    
-    for(i in related) {
-      var info = related[i];
-      section.append(find_results_make(info[0], info[1], info[2], info[3], info[4], $ifloat_body.product_id));
-    }
-    
-    section.append('<hr class="terminator" />');
-  }
 }
 
 function product_detail_select_image(event) {

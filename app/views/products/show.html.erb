@@ -41,7 +41,7 @@
             (best partner price)
           </td>
           <td class="price">
-            <div class="buy_now" onclick="window.location = '/products/<%= @product.id %>/buy_now/<%= fac[:id] %>'" <%= tooltip_attributes(fac[:description], :left) %>>Buy Now</div>
+            <div class="buy_now" onclick="product_detail_buy_now(<%= @product.id %>, <%= fac[:id] %>)" <%= tooltip_attributes(fac[:description], :left) %>>Buy Now</div>
           </td>
         </tr>
         <% end %>

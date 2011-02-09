@@ -39,7 +39,7 @@ module Partners
       Nokogiri::XML::DocumentFragment.parse(File.open(from_xml_path).read).children.each do |node|
         next unless node.name == "ProductAttributeOption_Add"
         product_code, option_code = node.attributes.values_at("product_code", "attribute_code").map { |a| a.text }
-        value = node.css("Code").text
+        value = node.css("Code").text.upcase # note that this assumes case insensitivity on the roundtrip
         prompt = node.css("Prompt").text
         
         options = (options_by_product_code[product_code] ||= {})

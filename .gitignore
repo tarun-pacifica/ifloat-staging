@@ -6,6 +6,7 @@ caches/*
 doc/*
 !doc/README
 !doc/rdoc/
+importer/indexes
 log/
 public/assets
 public/javascripts/compiled.js

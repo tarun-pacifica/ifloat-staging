@@ -1,5 +1,5 @@
 class ProductParser < AbstractParser
-  HEADERS = %w(company.reference product.reference)
+  HEADERS = %w(company.reference product.reference IMPORT)
   
   SPECIAL_VALUE_VALIDITIES = {
     "AUTO" => [:values].to_set,
@@ -21,9 +21,6 @@ class ProductParser < AbstractParser
       end
     end
     @title_strategies_by_class.default = @title_strategies_by_class["ANY_CLASS"]
-    
-    # TODO: Remove this temporary hack when ready
-    @marine_store = @import_set.get!(Company, "GBR-02934378")
   end
   
   
@@ -113,8 +110,7 @@ class ProductParser < AbstractParser
   end
   
   def generate_objects(parsed_fields)
-    import = parsed_fields.delete([:import])
-    return [] if import == "N"
+    return [] unless parsed_fields.delete([:import]) == "Y"
     
     attributes = {}
     [:company, :reference, :reference_group].each do |attribute|
@@ -143,8 +139,6 @@ class ProductParser < AbstractParser
       objects.push(*values)
     end
     
-    # TODO: Remove this temporary hack when ready (and can remove import variable above)
-    return [] unless import == "Y" or objects.any? { |o| o.attributes[:company] == @marine_store }
     objects +
       generate_auto_group_diffs(value_objects_by_property_name, product) +
       generate_auto_titles(value_objects_by_property_name, product)
@@ -340,9 +334,6 @@ class ProductParser < AbstractParser
         end
       end
     end
-    
-    # TODO: remove when ready
-    warn "IMPORT header missing" unless headers.has_key?("IMPORT")
     
     errors
   end

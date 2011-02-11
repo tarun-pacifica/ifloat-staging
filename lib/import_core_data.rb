@@ -346,8 +346,6 @@ class ImportSet
   end
   
   def import_class(klass, objects)
-    GC.enable if [TextPropertyValue, NumericPropertyValue].include?(klass) # TODO: remove once GC trickery is defunct
-    
     relationships = {}
     klass.relationships.each do |attribute, relationship|
       relationships[attribute.to_sym] = relationship.child_key.first.name
@@ -669,11 +667,9 @@ end
 def memory_usage_kb; `ps -o rss= -p #{Process.pid}`.to_i; end
 
 def stopwatch(message)
-  GC.disable if memory_usage_kb < 2 ** 20
   start = Time.now
   result = yield
   puts "#{'%6.2f' % (Time.now - start)}s : #{message}"
-  GC.enable
   result
 end
 
@@ -802,7 +798,6 @@ end
 
 puts "=== Compiling Indexes ==="
 stopwatch(Indexer::COMPILED_PATH) do
-  GC.enable # TODO: remove once GC trickery is defunct
   begin
     Indexer.compile
     CachedFind.all.update!(:invalidated => true)

@@ -14,7 +14,9 @@ class MarshaledCSV < FasterCSV
       File.open(into_dir / row_md5, "w") { |f| f.write(row) }
     end
     
-    Marshal.dump({:name => name, :row_md5s => row_md5s}, File.open(into_dir / INFO_FILE_NAME, "w"))
+    info_file_path = into_dir / INFO_FILE_NAME
+    Marshal.dump({:name => name, :row_md5s => row_md5s}, File.open(info_file_path + ".tmp", "w"))
+    File.move(info_file_path + ".tmp", info_file_path)
   end
   
   def self.marshal_updated(path, into_dir)

@@ -14,7 +14,7 @@ module Partners
       classes_by_ms_ref = {}
       classes_by_product_id = TextPropertyValue.all("definition.name" => "reference:class").hash_by(:product_id)
       ProductMapping.all("company.reference" => "GBR-02934378").each do |mapping|
-        (classes_by_ms_ref[mapping.reference] ||= []) << classes_by_product_id[mapping.product_id].to_s
+        (classes_by_ms_ref[mapping.reference_parts.first.upcase] ||= []) << classes_by_product_id[mapping.product_id].to_s
       end
       
       lines_written = 0
@@ -23,7 +23,7 @@ module Partners
         options_by_product_code(from_xml_path).each do |product_code, options|
           traverse_or_report(product_code, options.to_a) do |product_code, reference, notes|
             next unless includer.nil? or includer.call(reference)
-            classes = (classes_by_ms_ref[product_code] || []).uniq.sort.join(", ")
+            classes = (classes_by_ms_ref[product_code.upcase] || []).uniq.sort.join(", ")
             csv << [classes, reference, notes]
             lines_written += 1
           end

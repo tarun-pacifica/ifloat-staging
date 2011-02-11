@@ -663,9 +663,6 @@ def repo_summary(path)
   `git --git-dir='#{path}/.git' log -n1 --pretty='format:%ai: %s'`.chomp
 end
 
-# TODO: remove GC directives if they no longer give a 3x-4x speed boost in 1.9
-def memory_usage_kb; `ps -o rss= -p #{Process.pid}`.to_i; end
-
 def stopwatch(message)
   start = Time.now
   result = yield

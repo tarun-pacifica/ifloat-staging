@@ -16,7 +16,7 @@ Dir[THIS_DIR / "lib" / "*.rb"].each { |path| load path }
 
 
 def mail_fail(whilst)
-  puts "\nErrors occured whilst #{whilst}"
+  puts " ! errors occured whilst #{whilst}"
   if Merb.environment == "development"
     system "mate", ERROR_CSV_PATH
   else

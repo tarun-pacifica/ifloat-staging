@@ -20,7 +20,7 @@ class ImportableAssets
     
     assets = []
     FasterCSV.foreach(@csv_path, :headers => :first_row, :return_headers => true, :encoding => "UTF-8") do |row|
-      if row.header?
+      if row.header_row?
         missing_headers = (CSV_HEADERS - row.map { |header, value| value })
         unless missing_headers.empty?
           puts " ! missing headers in #{@csv_path}: #{missing_headers.join(', ')} (erasing and starting again)"
@@ -28,7 +28,9 @@ class ImportableAssets
           return []
         end
       else
-        assets << Hash[row.map { |header, value| [header.to_sym, value] }]
+        a = Hash[row.map { |header, value| [header.to_sym, value] }]
+        a[:mtime] = a[:mtime].to_i
+        assets << a
       end
     end
     assets
@@ -72,7 +74,7 @@ class ImportableAssets
       end
       
       identified += paths.size
-      puts " > identifed #{identified}/#{images_by_path.size} image sizes"
+      puts " - identifed #{identified}/#{images_by_path.size} image sizes"
     end
   end
   
@@ -83,7 +85,7 @@ class ImportableAssets
     Dir[@source_dir / "**" / "*"].map do |path|
       stat = File::Stat.new(path)
       empty_paths << path if stat.zero?
-      mtimes_by_path[path] = stat.mtime if stat.file?
+      mtimes_by_path[path] = stat.mtime.to_i if stat.file?
     end
     
     [empty_paths.to_set, mtimes_by_path]
@@ -97,14 +99,14 @@ class ImportableAssets
     
     scanned = paths_to_scan.each_with_index.map do |path, i|
       raise "unable to extract relative path from #{path.inspect}" unless path =~ /^#{@source_dir}\/(.+)/
-      a = {:path => path, :relative_path => $1, :mtime => mtimes_by_path[:path]}
+      a = {:path => path, :relative_path => $1, :mtime => mtimes_by_path[path]}
       empty_paths.include?(path) ? error(a, "empty file") : scan_asset(a)
       puts " - #{i + 1}/#{scan_size} #{a[:relative_path]}"
       a
     end
     
-    all = unchanged + scanned
-    all.group_by { |a| a.values_at(:company_ref, :name) }.each do |key, assets|
+    @all = unchanged + scanned
+    @all.group_by { |a| a.values_at(:company_ref, :name) }.each do |key, assets|
       first, *rest = assets
       rest.each { |a| error(a, "duplicate of #{head[:relative_path]}") }
     end
@@ -114,8 +116,8 @@ class ImportableAssets
     return false unless @errors.empty?
     
     scanned_product_images = scanned.select { |a| a[:bucket] == "products" and a.has_key?(:pixel_size) }
-    variants_to_create = variants_missing(scanned_product_images)
-    variants_to_create.each_with_index do |spec, i|
+    scanned_product_images.each { |image| image.update(variants_by_name(image)) }
+    variants_missing(scanned_product_images).each_with_index do |spec, i|
       image, name, path = spec.values_at(:image, :name, :path)
       variant_create(image, name, path)
       puts " - #{i + 1}/#{variants_to_create.size} #{image[:relative_path]} -> [#{name}] #{path}"
@@ -123,12 +125,19 @@ class ImportableAssets
     return false unless @errors.empty?
     
     write_to_csv
+    puts " > managing #{@all.size} assets in total"
     
-    all_variant_paths = all.map { |a| a.values_at(:path_wm, :path_small, :path_tiny) }.flatten.compact
-    obsolete_variant_paths = (Dir[@variant_dir / "*"] - all_variant_paths)
-    puts " > deleted #{File.delete(*obsolete_variant_paths)} obsolete variants"
-    
+    all_variant_paths = @all.map { |a| a.values_at(:path_wm, :path_small, :path_tiny) }.flatten.compact
+    (Dir[@variant_dir / "*"] - all_variant_paths).delete_and_log("obsolete variants")
     true
+  end
+  
+  def variants_by_name(image)
+    ext = File.extname(image[:path])
+    stem = @variant_dir / image[:checksum]
+    variants = [:wm]
+    variants += [:small, :tiny] if image[:pixel_size] == "400x400"
+    Hash[variants.map { |v| ["path_#{v}".to_sym, "#{stem}#{v == :wm ? "" : "-#{v}"}#{ext}" ]}]
   end
   
   def variant_create(image, name, path)
@@ -143,23 +152,18 @@ class ImportableAssets
         `gm convert -size #{variant_size} #{wm_path.inspect} -resize #{variant_size} +profile '*' #{path.inspect} 2>&1`
       end
     
-    if $?.success?
-      image["path_#{name}".to_sym] = path
-      true
-    else
-      error(image, "GM command failed: #{report.inspect}")
-      false
+    if $?.success? then image["path_#{name}".to_sym] = path
+    else error(image, "GM command failed: #{report.inspect}")
     end
   end
   
   def variants_missing(product_images)
     product_images.map do |image|
-      ext = File.extname(image[:path])
-      stem = @variant_dir / image[:checksum]
-      variants = [[:wm, "#{stem}#{ext}"]]
-      variants += [[:small, "#{stem}-small#{ext}"], [:tiny, "#{stem}-tiny#{ext}"]] if image[:pixel_size] == "400x400"
-      variants.map { |name, path| File.exist?(path) ? nil : {:image => image, :name => name, :path => path} }.compact
-    end.flatten
+      [:wm, :small, :tiny].map do |name|
+        path = image["path_#{name}".to_sym]
+        {:image => image, :name => name, :path => path} unless path.nil? or File.exist?(path)
+      end
+    end.flatten.compact
   end
   
   def write_errors(path)
@@ -173,8 +177,8 @@ class ImportableAssets
     headers = CSV_HEADERS.map { |h| h.to_sym }
     FasterCSV.open("#{@csv_path}.tmp", "w") do |csv|
       csv << CSV_HEADERS
-      @assets.each { |a| csv << a.values_at(*headers) }
+      @all.each { |a| csv << a.values_at(*headers) }
     end
-    File.move("#{@csv_path}.tmp", @csv_path)
+    FileUtils.move("#{@csv_path}.tmp", @csv_path)
   end
 end

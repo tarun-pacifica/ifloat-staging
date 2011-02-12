@@ -213,16 +213,9 @@ class ProductParser < AbstractParser
       company_ref = $1
       company = @import_set.get!(Company, company_ref)
       [:mappings, company]
-
+      
     when /^(.+?:.+?):(.*?):(\d+)(:(tolerance))?$/
       property_name, unit, seq_num, component = $1, $2, $3, $5
-      
-      # TODO: remove when ready
-      if unit == "per_pack"
-        warn "header contains per_pack: #{header}"
-        unit = "per-pack"
-      end
-      
       property = @import_set.get!(PropertyDefinition, property_name)
       property_type = property.attributes[:property_type]
       unit = nil if unit.blank?
@@ -230,7 +223,7 @@ class ProductParser < AbstractParser
       raise "invalid unit (#{error}): #{unit.inspect}" unless valid
       klass = PropertyType.value_class(property_type.attributes[:core_type])
       [:values, klass, property, seq_num.to_i, unit, (component || :value).to_sym]
-
+      
     when /^(uni-)?relationship\.([a-z_]+)\.(.+?)(\.(.+?))?$/
       relationship_name, company_ref, property_name, bidirectional = $2, $3, $5, $1.nil?
       raise "unknown relationship: #{relationship_name}" unless ProductRelationship::NAMES.has_key?(relationship_name)
@@ -238,12 +231,12 @@ class ProductParser < AbstractParser
       property = (property_name.blank? ? nil : @import_set.get!(PropertyDefinition, property_name))
       raise "non-text property: #{property_name}" unless property.nil? or property.attributes[:property_type].attributes[:core_type] == "text"
       [:relationships, relationship_name, company, property, bidirectional]
-
+      
     when /^attachment\.([a-z_]+)\.(\d+)$/
       role, seq_num = $1, $2
       raise "unknown role: #{role}" unless Attachment::ROLES.has_key?(role)
       [:attachments, role, seq_num.to_i]
-
+      
     else raise "unknown/invalid header: #{header}"
     end
   end

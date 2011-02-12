@@ -39,8 +39,7 @@ csv_paths = Dir[REPO_DIRS["csvs"] / "**" / "*.csv"]
 # TODO: track PH, TS and product CSVs for later multi-row objects
 csv_md5s = csv_paths.map { |path| MarshaledCSV.marshal_updated(path, CSV_INDEX_DIR) }.to_set
 
-obsolete_csv_index_paths = Dir[CSV_INDEX_DIR / "*"].reject { |path| csv_md5s.include?(File.basename(path)) }
-obsolete_csv_index_paths.delete_and_log("obsolete CSV indexes")
+Dir[CSV_INDEX_DIR / "*"].reject { |path| csv_md5s.include?(File.basename(path)) }.delete_and_log("obsolete CSV indexes")
 
 # TODO: use CSV tracking here to establish PH, TS and product rows
 row_md5s = Dir[CSV_INDEX_DIR / "*" / "*"].map { |path| File.basename(path) }.to_set

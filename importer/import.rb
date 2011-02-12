@@ -47,23 +47,15 @@ row_md5s = Dir[CSV_INDEX_DIR / "*" / "*"].map { |path| File.basename(path) }.to_
 row_md5s.delete("info")
 puts " > managing #{row_md5s.size} rows in total"
 
+puts "Generating work list..." # cataloguing objects?
+objects = ObjectCatalogue.new(OBJECT_INDEX_DIR)
+objects.delete_obsolete_objects(row_md5s)
 
-# TODO: replace with...
-# indexes/single_row_object_names/row_md5 => marshal(object_paths: Product/pkmd5_valmd5, TextPropertyValue/pkmd5_valmd5, ...)
-# indexes/multi_row_object_names/UUID => marshal(object_paths)
+to_parse_row_md5s = objects.missing_object_row_md5s(row_md5s)
+puts " - #{to_parse_row_md5s.size} rows to parse"
 
-# 1. TS row 2 -> single_row_object_names/rowmd5.tmp = marshal("TitleStrategy/pkmd5_valmd5")
-#             -> objects/TitleStrategy/pkmd5_valmd5 = marshal(object)
-#             -> mv(rowmd5.tmp -> rowmd5)
-# 2. Product row 54 -> indexes/single_row_objects/rowmd5.tmp = marshal("Product/p_v", "TextPropertyValue/p_v")
-#             -> objects/.... = marshaled(objects)
-#             -> mv(rowmd5.tmp -> rowmd5)
-# NB: rows to generate = (row_md5s - <non-TMP row_md5s in row_objects>)
-# NB: multi_rows to generate = (title + property)_rows * (products)_rows
-# 3. combo(TS row 2, Product row 54) -> multi_row_object_names/row1md5_row2md5.tmp = marshal("TextPropertyValue/p_v")
-#             -> objects/... = marshaled(objects) : MOST OFTEN NONE - make the above file empty rather than marshal([])
-#             -> mv(row1md5_row2md5.tmp -> row1md5_row2md5)
+# ph_to_generate = objects.missing_auto_objects_row_md5s(ph_row_md5s, product_row_md5s)
+# ts_to_generate = objects.missing_auto_objects_row_md5s(ts_row_md5s, product_row_md5s)
 
-sorted_models = DataMapper::Model.sorted_descendants(PropertyDefinition => [PropertyHierarchy, TitleStrategy])
-sorted_tables = sorted_tables.map { |m| m.storage_name }
-
+# sorted_models = DataMapper::Model.sorted_descendants(PropertyDefinition => [PropertyHierarchy, TitleStrategy])
+# sorted_tables = sorted_models.map { |m| m.storage_name }

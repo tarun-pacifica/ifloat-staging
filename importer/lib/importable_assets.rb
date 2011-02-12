@@ -124,7 +124,7 @@ class ImportableAssets
     end
     return false unless @errors.empty?
     
-    write_to_csv
+    write_to_csv unless scanned.empty?
     puts " > managing #{@all.size} assets in total"
     
     all_variant_paths = @all.map { |a| a.values_at(:path_wm, :path_small, :path_tiny) }.flatten.compact

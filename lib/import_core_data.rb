@@ -504,7 +504,6 @@ class ImportSet
     end
     
     value_fields = (properties.map { |property| property.name } - pk_fields - [:id, :type]).sort_by { |sym| sym.to_s }
-    value_fields -= [:chain_id, :chain_sequence_number] if klass == Asset
     
     [pk_fields, value_fields]
   end

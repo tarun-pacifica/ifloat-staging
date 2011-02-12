@@ -17,14 +17,14 @@ class ProductRelationship
   # parent *includes* child:: child _is_included_in_ parent
   # generic *is_alternative_to* oem:: oem _is_originator_of_ generic
   # sibling *goes_well_with* sibling:: [bidirectional]
-  # child *used_on* parent:: parent _uses_ child
+  # child *is_used_on* parent:: parent _uses_ child
   # sibling *works_with* sibling:: [bidirectional]
   NAMES = {
     "includes"          => "is_included_in",
     "is_alternative_to" => "is_alternative_to",
     "goes_well_with"    => "goes_well_with",
-    "used_on"           => "uses",
-    "uses"              => "used_on",
+    "is_used_on"        => "uses",
+    "uses"              => "is_used_on",
     "works_with"        => "works_with"
   }
   

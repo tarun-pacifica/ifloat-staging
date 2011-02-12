@@ -38,11 +38,11 @@ class Attachment
   
   validates_within :role, :set => ROLES.keys
   
-  def self.product_role_assets(product_ids, include_chains = true)
+  def self.product_role_assets(product_ids)
     return [] if product_ids.empty?
-        
+    
     attachments = Attachment.all(:product_id => product_ids, :order => [:sequence_number])
-
+    
     asset_ids = attachments.map { |attachment| attachment.asset_id }
     
     assets_by_id = {}
@@ -50,14 +50,11 @@ class Attachment
       assets_by_id[asset.id] = asset
     end
     
-    asset_chains_by_id = (include_chains ? Asset.chains_by_id(asset_ids) : {})
-    
     assets_by_role_by_product_id = {}
     attachments.each do |attachment|
       assets_by_role = (assets_by_role_by_product_id[attachment.product_id] ||= {})
       assets = (assets_by_role[attachment.role] ||= [])      
       assets << assets_by_id[attachment.asset_id]
-      assets.push(*(asset_chains_by_id[attachment.asset_id] || []))
     end
     product_ids.each do |product_id|
       assets_by_role_by_product_id[product_id] = {} unless assets_by_role_by_product_id.has_key?(product_id)

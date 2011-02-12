@@ -1,6 +1,6 @@
 REPO_DIRS = Hash[["assets", "csvs"].map { |d| [d, Merb.root / ".." / "ifloat_#{d}"] }]
 
-ASSET_CSV_PATH       = "/tmp/ifloat_assets.csv"
+ASSET_CSV_PATH       = REPO_DIRS["csvs"] / "assets.csv"
 ASSET_VARIANT_DIR    = "/tmp/ifloat_asset_variants_new"
 ASSET_WATERMARK_PATH = Merb.root / "public" / "images" / "common" / "watermark.png"
 ERROR_CSV_PATH       = "/tmp/ifloat_errors.csv"
@@ -35,7 +35,7 @@ unless assets.update
 end
 
 puts "Scanning CSV repository for updates..."
-csv_paths = Dir[REPO_DIRS["csvs"] / "**" / "*.csv"] + [ASSET_CSV_PATH]
+csv_paths = Dir[REPO_DIRS["csvs"] / "**" / "*.csv"]
 # TODO: track PH, TS and product CSVs for later multi-row objects
 csv_md5s = csv_paths.map { |path| MarshaledCSV.marshal_updated(path, CSV_INDEX_DIR) }.to_set
 
@@ -64,4 +64,6 @@ puts " > managing #{row_md5s.size} rows in total"
 #             -> objects/... = marshaled(objects) : MOST OFTEN NONE - make the above file empty rather than marshal([])
 #             -> mv(row1md5_row2md5.tmp -> row1md5_row2md5)
 
-# p DataMapper::Model.sorted_descendants(PropertyDefinition => [PropertyHierarchy, TitleStrategy])
+sorted_models = DataMapper::Model.sorted_descendants(PropertyDefinition => [PropertyHierarchy, TitleStrategy])
+sorted_tables = sorted_tables.map { |m| m.storage_name }
+

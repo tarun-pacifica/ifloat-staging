@@ -175,10 +175,10 @@ class ImportableAssets
   
   def write_to_csv
     headers = CSV_HEADERS.map { |h| h.to_sym }
-    FasterCSV.open("#{@csv_path}.tmp", "w") do |csv|
+    FasterCSV.open("/tmp/ifloat_assets.csv.tmp", "w") do |csv|
       csv << CSV_HEADERS
       @all.each { |a| csv << a.values_at(*headers) }
     end
-    FileUtils.move("#{@csv_path}.tmp", @csv_path)
+    FileUtils.move("/tmp/ifloat_assets.csv.tmp", @csv_path)
   end
 end

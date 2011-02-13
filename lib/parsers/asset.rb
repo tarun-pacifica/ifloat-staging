@@ -12,7 +12,8 @@ class AssetParser < AbstractParser
   end
   
   def parse_field(head, value, fields)
-    return super unless head == "company.reference"
+    value = nil if value == "N/A"
+    return value unless head == "company.reference"
     @import_set.get!(Company, value)
   end
 end

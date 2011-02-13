@@ -638,7 +638,7 @@ def build_asset_csv
   stopwatch("assets.csv") do
     FasterCSV.open(ASSET_CSV_PATH, "w") do |csv|
       csv << ["bucket", "company.reference", "name", "file_path", "checksum", "pixel_size", "file_path_small", "file_path_tiny"]
-      assets.sort.each { |asset| csv << asset }
+      assets.sort.each { |asset| csv << (asset + Array.new(8 - asset.size, "N/A")) }
     end
   end
   nil

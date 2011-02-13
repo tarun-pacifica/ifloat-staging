@@ -177,7 +177,7 @@ class ImportableAssets
     headers = CSV_HEADERS.map { |h| h.to_sym }
     FasterCSV.open("/tmp/ifloat_assets.csv.tmp", "w") do |csv|
       csv << CSV_HEADERS
-      @all.each { |a| csv << a.values_at(*headers) }
+      @all.each { |a| csv << a.values_at(*headers).map { |v| v.nil? ? "NIL" : v } }
     end
     FileUtils.move("/tmp/ifloat_assets.csv.tmp", @csv_path)
   end

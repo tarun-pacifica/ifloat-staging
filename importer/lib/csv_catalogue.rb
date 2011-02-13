@@ -4,6 +4,7 @@ class CSVCatalogue
   
   def initialize(dir)
     @dir = dir
+    @errors = []
     @info_by_md5 = {}
   end
   
@@ -26,21 +27,38 @@ class CSVCatalogue
     end
     FileUtils.mkpath(index_dir)
     
-    info = @info_by_md5[md5] = add_rows(path, index_dir).update(:name => name)
+    info = add_rows(path, index_dir).update(:name => name)
+    
+    errors = info.delete(:errors)
+    if(errors.any?)
+      @errors += errors.map { |e| [name, e] }
+      FileUtils.rmtree(index_dir)
+      puts " ! #{name} #{errors.size} errors"
+      return
+    end
+    
+    @info_by_md5[md5] = info
     info_file_path = index_dir / INFO_FILE_NAME
     Marshal.dump(info, File.open("#{info_file_path}.tmp", "w"))
     FileUtils.move("#{info_file_path}.tmp", info_file_path)
-    
     puts " - #{name}"
   end
   
   def add_rows(from_path, into_dir)
+    errors = []
     header = nil
     row_md5s = []
     
+    row_index = 0
     FasterCSV.foreach(from_path, :headers => :first_row, :return_headers => true, :encoding => "UTF-8") do |row|
-      values = row.map { |header, value| header =~ SKIP_HEADER_MATCHER ? nil : value }.compact
+      row_index += 1
       
+      if row.any? { |header, value| value.nil? }
+        errors << "row #{row_index} contains blank cells"
+        row.header_row? ? break : next
+      end
+      
+      values = row.map { |header, value| header =~ SKIP_HEADER_MATCHER ? nil : value }.compact
       header = values and next if row.header_row?
       next if row["IMPORT"] == "N"
       
@@ -49,7 +67,8 @@ class CSVCatalogue
       File.open(into_dir / row_md5s.last, "w") { |f| f.write(marshaled) }
     end
     
-    {:header => header, :row_md5s => row_md5s}
+    errors << "no header row" if header.nil?
+    {:errors => errors, :header => header, :row_md5s => row_md5s}
   end
   
   def delete_obsolete
@@ -66,5 +85,15 @@ class CSVCatalogue
   
   def summarize
     puts " > managing #{row_md5s.size} rows from #{@info_by_md5.size} CSVs"
+  end
+  
+  def write_errors(path)
+    return false if @errors.empty?
+    
+    FasterCSV.open(path, "w") do |csv|
+      csv << %w(csv error)
+      @errors.each { |path, message| csv << [path, message] }
+    end
+    true
   end
 end

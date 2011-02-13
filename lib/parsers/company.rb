@@ -12,7 +12,8 @@ class CompanyParser < AbstractParser
   end
   
   def parse_field(head, value, fields)
-    return super unless head == "reference"
+    value = nil if (value == "N/A" or value == "NIL")
+    return value unless head == "reference"
     raise "invalid format: #{value.inspect}" unless value =~ Company::REFERENCE_FORMAT
     raise "longer than 50 characters: #{value.inspect}" unless value.size <= 50
     value

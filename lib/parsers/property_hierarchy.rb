@@ -16,7 +16,7 @@ class PropertyHierarchyParser < AbstractParser
   end
   
   def parse_field(head, value, fields)
-    return nil if value.blank?
+    return nil if (value.blank? or value == "N/A")
     return value unless head =~ /^property_set_(\d+)$/
     
     previous_ps = ($1.to_i - 1)

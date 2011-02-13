@@ -87,7 +87,7 @@ class AbstractParser
       head = (first_pass ? @headers[header] : header)
       
       begin
-        raise "blank field detected" if first_pass and value.blank? and reject_blank_value?(head)
+        raise "blank field detected" if first_pass and value.blank?
         
         value.strip! unless value.nil?
         
@@ -129,10 +129,6 @@ class AbstractParser
   
   def preflight_check
     []
-  end
-  
-  def reject_blank_value?(head)
-    self.class.const_get("REQUIRED_VALUE_HEADERS").include?(head)
   end
   
   def validate_headers(headers)

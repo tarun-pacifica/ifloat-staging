@@ -28,8 +28,4 @@ class AssociatedWordParser < AbstractParser
     else raise "unknown/invalid header: #{header}"
     end
   end
-  
-  def reject_blank_value?(head)
-    true
-  end
 end

@@ -289,10 +289,6 @@ class ProductParser < AbstractParser
     errors
   end
   
-  def reject_blank_value?(head)
-    true
-  end
-  
   def validate_headers(headers)
     errors = super
     

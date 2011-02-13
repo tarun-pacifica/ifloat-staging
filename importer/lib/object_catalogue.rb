@@ -17,14 +17,14 @@ class ObjectCatalogue
     end
   end
   
-  def delete_obsolete_objects(row_md5s)
-    obsolete_row_md5s = (@objects_by_row_md5.keys.to_set - row_md5s)
+  def delete_obsolete(row_md5s)
+    obsolete_row_md5s = (@objects_by_row_md5.keys - row_md5s)
     obsolete_objects = @objects_by_row_md5.values_at(*obsolete_row_md5s)    
     obsolete_objects.map { |o| @dir / o[0] }.delete_and_log("obsolete objects")
     build_catalogue unless obsolete_objects.empty?
   end
   
-  def missing_auto_objects_row_md5s(auto_row_md5s, product_row_md5s)
+  def missing_auto_row_md5s(auto_row_md5s, product_row_md5s)
     missing_auto_row_md5s = []
     seen_row_md5s = []
     
@@ -38,7 +38,7 @@ class ObjectCatalogue
     [missing_auto_row_md5s, product_row_md5s - seen_row_md5s]
   end
   
-  def missing_object_row_md5s(row_md5s)
-    row_md5s - @objects_by_row_md5.keys.to_set
+  def missing_row_md5s(row_md5s)
+    row_md5s - @objects_by_row_md5.keys
   end
 end

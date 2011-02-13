@@ -39,18 +39,23 @@ csvs = CSVCatalogue.new(CSV_INDEX_DIR)
 Dir[REPO_DIRS["csvs"] / "**" / "*.csv"].each { |path| csvs.add(path) }
 csvs.delete_obsolete
 csvs.summarize
-# TODO: track PH, TS and product CSVs for later multi-row objects
-# TODO: use CSV tracking here to establish PH, TS and product rows
 
-puts "Generating work list..." # cataloguing objects?
+puts "Updating objects..."
 objects = ObjectCatalogue.new(OBJECT_INDEX_DIR)
 objects.delete_obsolete(csvs.row_md5s)
 
-to_parse_row_md5s = objects.missing_row_md5s(csvs.row_md5s)
-puts " - #{to_parse_row_md5s.size} rows to parse"
+row_md5s_to_parse = objects.missing_row_md5s(csvs.row_md5s)
+puts " - #{row_md5s_to_parse.size} rows to parse"
 
-# ph_to_generate = objects.missing_auto_row_md5s(ph_row_md5s, product_row_md5s)
-# ts_to_generate = objects.missing_auto_row_md5s(ts_row_md5s, product_row_md5s)
+ph_row_md5s = csvs.row_md5s_for_name(/^property_hierarchies/)
+ts_row_md5s = csvs.row_md5s_for_name(/^title_strategies/)
+product_row_md5s = csvs.row_md5s_for_name(/^products\//)
+p [ph_row_md5s.size, ts_row_md5s.size, product_row_md5s.size]
+
+missing_ph_row_md5s, missing_product_row_md5s = objects.missing_auto_row_md5s(ph_row_md5s, product_row_md5s)
+p [missing_ph_row_md5s.size, missing_product_row_md5s.size]
+missing_ts_row_md5s, missing_product_row_md5s = objects.missing_auto_row_md5s(ts_row_md5s, product_row_md5s)
+p [missing_ts_row_md5s.size, missing_product_row_md5s.size]
 
 # sorted_models = DataMapper::Model.sorted_descendants(PropertyDefinition => [PropertyHierarchy, TitleStrategy])
 # sorted_tables = sorted_models.map { |m| m.storage_name }

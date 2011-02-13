@@ -46,7 +46,7 @@ class CSVCatalogue
       
       marshaled = Marshal.dump(values)
       row_md5s << Digest::MD5.hexdigest(marshaled)
-      File.open(into_dir / row_md5s.last, "w") { |f| f.write(row) }
+      File.open(into_dir / row_md5s.last, "w") { |f| f.write(marshaled) }
     end
     
     {:header => header, :row_md5s => row_md5s}
@@ -58,6 +58,10 @@ class CSVCatalogue
   
   def row_md5s
     @row_md5s ||= @info_by_md5.map { |md5, info| info[:row_md5s] }.flatten
+  end
+  
+  def row_md5s_for_name(matcher)
+    @info_by_md5.map { |md5, info| info[:name] =~ matcher ? info[:row_md5s] : [] }.flatten
   end
   
   def summarize

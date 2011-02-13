@@ -231,7 +231,7 @@ module Indexer
     return [] if phrase.blank? or not ensure_loaded
     
     index = (@@text_finding_index[language_code] || {})
-    phrase.downcase.split(/\W+/).map do |word|
+    normalized_find_words(phrase).map do |word|
        (index[word] || Set.new).to_set
     end.inject { |union, product_ids| union & product_ids }
   end
@@ -515,12 +515,12 @@ module Indexer
     records.each do |record|
       prod_ids_by_values = (prod_ids_by_values_by_prop_ids[record.property_definition_id] ||= {})
       (prod_ids_by_values[record.text_value] ||= []) << record.product_id
-            
+      
       next unless record.findable
       
-      record.text_value.downcase.split(/[^a-z0-9']+/).uniq.each do |word|
+      normalized_find_words(record.text_value).each do |word|
         language = (index[record.language_code] ||= {})
-        (language[word] ||= []) << record.product_id        
+        (language[word] ||= []) << record.product_id
       end
     end
     
@@ -528,7 +528,8 @@ module Indexer
     eng_index = (index["ENG"] ||= {})
     properties_by_name = properties.hash_by(:name)
     AssociatedWord.all.each do |aword|
-      eng_index[aword.word] = (eng_index[aword.word] || []) + aword.rules.map do |property_name, value|
+      word = normalized_find_words(aword.word).first
+      eng_index[word] = (eng_index[word] || []) + aword.rules.map do |property_name, value|
         prop_id = properties_by_name[property_name].id
         (prod_ids_by_values_by_prop_ids[prop_id] || {})[value] || []
       end.inject { |union, product_ids| union & product_ids }
@@ -545,6 +546,10 @@ module Indexer
     text_index = @@text_filtering_index[language_code]
     indexes << [language_code, text_index] unless text_index.nil?
     indexes
+  end
+  
+  def self.normalized_find_words(phrase)
+    phrase.delete("'-").downcase.split(/[^a-z0-9]+/).uniq
   end
   
   def self.text_records

@@ -317,10 +317,10 @@ class ImportSet
       require "lib" / "partners" / "marine_store"
       marine_store = get!(Company, "GBR-02934378")
       mappings = @objects.select { |o| o.klass == ProductMapping and o.attributes[:company] == marine_store }
-      references = mappings.map { |m| m.attributes[:reference] }.to_set
+      references = mappings.map { |m| m.attributes[:reference].upcase }.to_set
       from_xml_path = CSV_REPO / "partners" / "marinestore.co.uk" / "provide.xml"
       to_csv_path = "/tmp/ms_variant_refs_missing.csv"
-      missing = Partners::MarineStore.dump_report(from_xml_path, to_csv_path) { |ref| not references.include?(ref) }
+      missing = Partners::MarineStore.dump_report(from_xml_path, to_csv_path) { |ref| not references.include?(ref.upcase) }
       warn "#{missing} marinestore.co.uk references missing: #{to_csv_path}" if missing > 0
     end
   end

@@ -53,8 +53,10 @@ class CSVCatalogue
     FasterCSV.foreach(from_path, :headers => :first_row, :return_headers => true, :encoding => "UTF-8") do |row|
       row_index += 1
       
+      row.map { |h, v| value }.compact.repeated.each { |v| errors << "duplicate header #{v.inspect} detected" } if row.header_row?
+      
       if row.any? { |header, value| value.nil? }
-        errors << "row #{row_index} contains blank cells"
+        errors << "blank cells detected in row #{row_index}"
         row.header_row? ? break : next
       end
       

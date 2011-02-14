@@ -1,3 +1,5 @@
+$KCODE = "UTF-8" unless RUBY_VERSION =~ /^1\.9\./
+
 REPO_DIRS = Hash[["assets", "csvs"].map { |d| [d, Merb.root / ".." / "ifloat_#{d}"] }]
 
 ASSET_CSV_PATH       = REPO_DIRS["csvs"] / "assets.csv"
@@ -12,7 +14,7 @@ OBJECT_INDEX_DIR     = INDEXES_DIR / "objects"
 
 [ASSET_VARIANT_DIR, CSV_INDEX_DIR, OBJECT_INDEX_DIR].each { |dir| FileUtils.mkpath(dir) }
 
-Dir[THIS_DIR / "lib" / "*.rb"].each { |path| load path }
+%w(lib parsers).each { |dir| Dir[THIS_DIR / dir / "*.rb"].each { |path| load path } }
 
 
 def mail_fail(whilst)
@@ -45,18 +47,40 @@ puts "Updating objects..."
 objects = ObjectCatalogue.new(OBJECT_INDEX_DIR)
 objects.delete_obsolete(csvs.row_md5s)
 
-row_md5s_to_parse = objects.missing_row_md5s(csvs.row_md5s)
-puts " - #{row_md5s_to_parse.size} rows to parse"
+row_md5s_to_parse = objects.missing_row_md5s(csvs.row_md5s).to_set
+# puts " - #{row_md5s_to_parse.size} rows to parse"
 
-ph_row_md5s = csvs.row_md5s_for_name(/^property_hierarchies/)
-ts_row_md5s = csvs.row_md5s_for_name(/^title_strategies/)
-product_row_md5s = csvs.row_md5s_for_name(/^products\//)
-p [ph_row_md5s.size, ts_row_md5s.size, product_row_md5s.size]
+all_errors = []
+extra_dependency_rules = {Asset => [Product], PropertyDefinition => [AssociatedWord, PropertyHierarchy, TitleStrategy]}
+DataMapper::Model.sorted_descendants(extra_dependency_rules).each do |model|
+  name = model.storage_name
+  csvs.infos_for_name(/^#{name}/).each do |csv_info|
+    csv_row_md5s_to_parse = (row_md5s_to_parse & csv_info[:row_md5s])
+    next if csv_row_md5s_to_parse.empty?
+    
+    p [name, csv_info[:name], csv_row_md5s_to_parse.size]
+    parser = Kernel.const_get("#{model}Parser").new(csv_info)
+    
+    all_errors += parser.header_errors
+    next unless parser.header_errors.empty?
+    
+    csv_row_md5s_to_parse.map do |row_md5|
+      objects, errors = parser.parse(csvs.row(csv_info[:md5], row_md5))
+      # TODO: write out objects
+      #  use object catalogue to abstract this away
+      all_errors += errors
+    end
+  end
+end
 
-missing_ph_row_md5s, missing_product_row_md5s = objects.missing_auto_row_md5s(ph_row_md5s, product_row_md5s)
-p [missing_ph_row_md5s.size, missing_product_row_md5s.size]
-missing_ts_row_md5s, missing_product_row_md5s = objects.missing_auto_row_md5s(ts_row_md5s, product_row_md5s)
-p [missing_ts_row_md5s.size, missing_product_row_md5s.size]
+# objects.build_catalogue # ?
 
-# sorted_models = DataMapper::Model.sorted_descendants(PropertyDefinition => [PropertyHierarchy, TitleStrategy])
-# sorted_tables = sorted_models.map { |m| m.storage_name }
+# ph_row_md5s = csvs.row_md5s_for_name(/^property_hierarchies/)
+# ts_row_md5s = csvs.row_md5s_for_name(/^title_strategies/)
+# product_row_md5s = csvs.row_md5s_for_name(/^products\//)
+# p [ph_row_md5s.size, ts_row_md5s.size, product_row_md5s.size]
+# 
+# missing_ph_row_md5s, missing_product_row_md5s = objects.missing_auto_row_md5s(ph_row_md5s, product_row_md5s)
+# p [missing_ph_row_md5s.size, missing_product_row_md5s.size]
+# missing_ts_row_md5s, missing_product_row_md5s = objects.missing_auto_row_md5s(ts_row_md5s, product_row_md5s)
+# p [missing_ts_row_md5s.size, missing_product_row_md5s.size]

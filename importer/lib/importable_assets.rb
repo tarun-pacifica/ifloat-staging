@@ -117,10 +117,11 @@ class ImportableAssets
     
     scanned_product_images = scanned.select { |a| a[:bucket] == "products" and a.has_key?(:pixel_size) }
     scanned_product_images.each { |image| image.update(variants_by_name(image)) }
-    variants_missing(scanned_product_images).each_with_index do |spec, i|
+    variants = variants_missing(scanned_product_images)
+    variants.each_with_index do |spec, i|
       image, name, path = spec.values_at(:image, :name, :path)
       variant_create(image, name, path)
-      puts " - #{i + 1}/#{variants_to_create.size} #{image[:relative_path]} -> [#{name}] #{path}"
+      puts " - #{i + 1}/#{variants.size} #{image[:relative_path]} -> [#{name}] #{path}"
     end
     return false unless @errors.empty?
     

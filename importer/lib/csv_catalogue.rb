@@ -61,7 +61,7 @@ class CSVCatalogue
         row.header_row? ? break : next
       end
       
-      values = row.map { |header, value| header =~ SKIP_HEADER_MATCHER ? nil : value }.compact
+      values = row.map { |header, value| header =~ SKIP_HEADER_MATCHER ? nil : value.strip }.compact
       header = values and next if row.header_row?
       next if row["IMPORT"] == "N"
       
@@ -78,12 +78,21 @@ class CSVCatalogue
     Dir[@dir / "*"].reject { |path| @info_by_md5.has_key?(File.basename(path)) }.delete_and_log("obsolete CSV indexes")
   end
   
+  def infos_for_name(matcher)
+    @info_by_md5.map { |md5, info| info[:name] =~ matcher ? info.merge(:md5 => md5) : nil }.compact
+  end
+  
+  def row(csv_md5, row_md5)
+    Marshal.load(File.open(@dir / csv_md5 / row_md5))
+  end
+  
   def row_md5s
     @row_md5s ||= @info_by_md5.map { |md5, info| info[:row_md5s] }.flatten
   end
   
+  # TODO: may not need?
   def row_md5s_for_name(matcher)
-    @info_by_md5.map { |md5, info| info[:name] =~ matcher ? info[:row_md5s] : [] }.flatten
+    infos_for_name(matcher).map { |info| info[:row_md5s] }.flatten
   end
   
   def summarize

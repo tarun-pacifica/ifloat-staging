@@ -316,9 +316,12 @@ class ImportSet
     stopwatch("ensured no missing marinestore.co.uk product variants") do
       property = get!(PropertyDefinition, "reference:class")
       classes_by_product = {}
+      classes_by_product_ref = {}
       text_values.each do |tv|
-        a = tv.attributes
-        classes_by_product[a[:product]] = a[:text_value] if a[:definition] == property
+        next unless tv.attributes[:definition] == property
+        klass, product = tv.attributes.values_at(:text_value, :product)
+        classes_by_product[product] = klass
+        (classes_by_product_ref[product.attributes[:reference].upcase] ||= []) << klass
       end
       
       marine_store = get!(Company, "GBR-02934378")
@@ -326,9 +329,12 @@ class ImportSet
       classes_by_ms_prod_code = {}
       full_ms_refs = []
       mappings.each do |m|
+        klass = classes_by_product[m.attributes[:product]]
+        next if klass.nil?
+        
         ref = m.attributes[:reference].upcase
         prod_code = ref.split(";").first
-        (classes_by_ms_prod_code[prod_code] ||= []) << classes_by_product[m.attributes[:product]]
+        (classes_by_ms_prod_code[prod_code] ||= []) << klass
         full_ms_refs << ref
       end
       full_ms_refs = full_ms_refs.to_set
@@ -336,7 +342,19 @@ class ImportSet
       includer = proc { |ref| not full_ms_refs.include?(ref.upcase) }
       
       guesser = proc do |prod_code|
-        (classes_by_ms_prod_code[prod_code.upcase] || []).uniq.sort.join(", ")
+        justification = ""
+        
+        prod_code = prod_code.upcase
+        classes = classes_by_ms_prod_code[prod_code]
+        justification = "from products with MS mappings starting with #{prod_code}" unless classes.nil?
+        
+        if classes.nil? and prod_code =~ /^[A-Z]{2}([A-Z0-9]+)/
+          classes = classes_by_product_ref[$1]
+          justification = "from products with the reference #{$1}" unless classes.nil?
+        end
+        
+        return "" if classes.nil?
+        classes.uniq.sort.join(", ") + " (#{justification})"
       end
       
       require "lib" / "partners" / "marine_store"

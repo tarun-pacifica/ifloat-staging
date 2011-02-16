@@ -10,21 +10,15 @@ module Partners
       references
     end
     
-    def self.dump_report(from_xml_path, to_csv_path = "/tmp/ms_variant_refs.csv", &includer)
-      classes_by_ms_ref = {}
-      classes_by_product_id = TextPropertyValue.all("definition.name" => "reference:class").hash_by(:product_id)
-      ProductMapping.all("company.reference" => "GBR-02934378").each do |mapping|
-        (classes_by_ms_ref[mapping.reference_parts.first.upcase] ||= []) << classes_by_product_id[mapping.product_id].to_s
-      end
-      
+    def self.dump_report(from_xml_path, to_csv_path, includer, guesser)
       lines_written = 0
+      
       FasterCSV.open(to_csv_path, "w") do |csv|
-        csv << ["classes", "reference", "notes"]
+        csv << ["guesses", "reference", "notes"]
         options_by_product_code(from_xml_path).each do |product_code, options|
           traverse_or_report(product_code, options.to_a) do |product_code, reference, notes|
-            next unless includer.nil? or includer.call(reference)
-            classes = (classes_by_ms_ref[product_code.upcase] || []).uniq.sort.join(", ")
-            csv << [classes, reference, notes]
+            next unless includer.call(reference)
+            csv << [guesser.call(product_code), reference, notes]
             lines_written += 1
           end
         end

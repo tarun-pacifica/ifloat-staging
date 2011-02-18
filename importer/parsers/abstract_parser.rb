@@ -13,10 +13,6 @@ class AbstractParser
     @header_errors += validate_headers.map { |e| [nil, e] }
   end
   
-  def object(klass, attributes)
-    
-  end
-  
   def parse_row(row)
     errors = []
     parsed_by_header = Hash[@headers.zip(row)]

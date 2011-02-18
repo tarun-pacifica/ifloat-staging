@@ -1,5 +1,7 @@
 class AbstractParser
   REQUIRED_HEADERS = []
+  REQUIRED_VALUE_GROUPS = []
+  REQUIRED_VALUE_HEADERS = []
   
   attr_reader :header_errors
   
@@ -7,25 +9,37 @@ class AbstractParser
     @info = csv_info
     @objects = object_catalogue
     
-    @headers, @header_errors = parse_headers(csv_info[:header])
+    @headers, @header_errors = parse_headers(csv_info[:headers])
     @header_errors += validate_headers.map { |e| [nil, e] }
+  end
+  
+  def object(klass, attributes)
+    
   end
   
   def parse_row(row)
     errors = []
-    parsed_by_header = {}
+    parsed_by_header = Hash[@headers.zip(row)]
     
-    partition_fields(Hash[@headers.zip(row)]).each do |headed_values|
+    self.class.const_get("REQUIRED_VALUE_GROUPS").each do |headers|
+      errors << "value required for any of #{headers.join(', ')}" if parsed_by_header.values_at(*headers).compact.empty?
+    end
+    
+    self.class.const_get("REQUIRED_VALUE_HEADERS").each do |header|
+      errors << "value required for #{header}" if parsed_by_header[header].nil?
+    end
+    
+    partition_fields(parsed_by_header).each do |headed_values|
       headed_values.each do |header, value|
         begin
           parsed_by_header[header] = parse_field(header, value, parsed_values_by_header)
         rescue Exception => e
-          errors << [csv_info[:header][@headers.index(head)], e.message]
+          errors << [csv_info[:headers][@headers.index(head)], e.message]
         end
       end
-    end
+    end if errors.empty? and respond_to?(:parse_field)
     
-    errors.empty? ? generate_objects(parsed_by_header) : [[], errors]
+    errors.empty? ? [generate_objects(parsed_by_header), []] : [[], errors]
   end
   
   
@@ -54,6 +68,6 @@ class AbstractParser
   end
   
   def validate_headers
-    (self.class.const_get("REQUIRED_HEADERS") - @headers).map { |header| "header missing: #{header}" }
+    errors = (self.class.const_get("REQUIRED_HEADERS") - @headers).map { |header| "header missing: #{header}" }
   end
 end

@@ -1,11 +1,13 @@
 class CSVCatalogue
   INFO_FILE_NAME = "_info"
-  SKIP_HEADER_MATCHER = /^raw::/
+  NIL_VALUES = %w(N/A NIL)
+  SKIP_HEADER_MATCHER = /^raw:/
   
   def initialize(dir)
     @dir = dir
     @errors = []
-    @info_by_md5 = {}
+    @info_by_csv_md5 = {}
+    @info_by_row_md5 = {}
   end
   
   def add(path)
@@ -16,10 +18,7 @@ class CSVCatalogue
     index_dir = @dir / md5
     info_path = index_dir / INFO_FILE_NAME
     
-    if File.exist?(info_path)
-      @info_by_md5[md5] = Marshal.load(File.open(info_path))
-      return
-    end
+    add_info(md5, Marshal.load(File.open(info_path))) and return if File.exist?(info_path)
     
     if File.directory?(index_dir)
       puts " ! #{name} partial update detected (erasing and starting again)"
@@ -37,16 +36,22 @@ class CSVCatalogue
       return
     end
     
-    @info_by_md5[md5] = info
+    add_info(md5, info)
     info_file_path = index_dir / INFO_FILE_NAME
     Marshal.dump(info, File.open("#{info_file_path}.tmp", "w"))
     FileUtils.move("#{info_file_path}.tmp", info_file_path)
     puts " - #{name}"
   end
   
+  def add_info(csv_md5, info)
+    @info_by_csv_md5[csv_md5] = info.merge(:md5 => csv_md5)
+    name = info[:name]
+    info[:row_md5s].each_with_index { |row_md5, i| @info_by_row_md5[row_md5] = {:name => name, :index => i + 2} }
+  end
+  
   def add_rows(from_path, into_dir)
     errors = []
-    header = nil
+    headers = nil
     row_md5s = []
     
     row_index = 0
@@ -62,32 +67,38 @@ class CSVCatalogue
       end
       
       values = row.map { |header, value| header =~ SKIP_HEADER_MATCHER ? nil : value.strip }.compact
-      header = values and next if row.header_row?
+      headers = values and next if row.header_row?
       next if row["IMPORT"] == "N"
       
-      marshaled = Marshal.dump(values)
+      marshaled = Marshal.dump(values.map { |v| NIL_VALUES.include?(v) ? nil : v })
       row_md5s << Digest::MD5.hexdigest(marshaled)
       File.open(into_dir / row_md5s.last, "w") { |f| f.write(marshaled) }
     end
     
-    errors << "no header row" if header.nil?
-    {:errors => errors, :header => header, :row_md5s => row_md5s}
+    errors << "no header row" if headers.nil?
+    {:errors => errors, :headers => headers, :row_md5s => row_md5s}
   end
   
   def delete_obsolete
-    Dir[@dir / "*"].reject { |path| @info_by_md5.has_key?(File.basename(path)) }.delete_and_log("obsolete CSV indexes")
+    Dir[@dir / "*"].reject do |path|
+      @info_by_csv_md5.has_key?(File.basename(path))
+    end.delete_and_log("obsolete CSV indexes")
   end
   
   def infos_for_name(matcher)
-    @info_by_md5.map { |md5, info| info[:name] =~ matcher ? info.merge(:md5 => md5) : nil }.compact
+    @info_by_csv_md5.map { |md5, info| info[:name] =~ matcher ? info.merge(:md5 => md5) : nil }.compact
   end
   
   def row(csv_md5, row_md5)
     Marshal.load(File.open(@dir / csv_md5 / row_md5))
   end
   
+  def row_info(row_md5)
+    @info_by_row_md5[row_md5]
+  end
+  
   def row_md5s
-    @row_md5s ||= @info_by_md5.map { |md5, info| info[:row_md5s] }.flatten
+    @info_by_row_md5.keys
   end
   
   # TODO: may not need?
@@ -96,7 +107,7 @@ class CSVCatalogue
   end
   
   def summarize
-    puts " > managing #{row_md5s.size} rows from #{@info_by_md5.size} CSVs"
+    puts " > managing #{row_md5s.size} rows from #{@info_by_csv_md5.size} CSVs"
   end
   
   def write_errors(path)

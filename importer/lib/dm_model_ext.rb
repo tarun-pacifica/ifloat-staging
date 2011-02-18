@@ -1,6 +1,10 @@
 require "tsort"
 
 module DataMapper::Model
+  def self.import_object(attributes)
+    attributes.update(:class => self.class)
+  end
+  
   def self.sorted_descendants(extra_rules = {})
     models = (descendants.to_a + descendants.map { |d| d.descendants.to_a }).flatten.uniq.extend(TSort)
     models.instance_variable_set("@extra_rules", extra_rules)

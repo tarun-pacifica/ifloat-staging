@@ -55,25 +55,21 @@ extra_dependency_rules = {Asset => [Product], PropertyDefinition => [AssociatedW
 DataMapper::Model.sorted_descendants(extra_dependency_rules).each do |model|
   name = model.storage_name
   csvs.infos_for_name(/^#{name}/).each do |csv_info|
-    csv_row_md5s_to_parse = (row_md5s_to_parse & csv_info[:row_md5s])
+    csv_row_md5s = csv_info[:row_md5s]
+    csv_row_md5s_to_parse = (row_md5s_to_parse & csv_row_md5s)
     next if csv_row_md5s_to_parse.empty?
     
-    p [name, csv_info[:name], csv_row_md5s_to_parse.size]
     parser = Kernel.const_get("#{model}Parser").new(csv_info)
-    
     all_errors += parser.header_errors
     next unless parser.header_errors.empty?
     
     csv_row_md5s_to_parse.map do |row_md5|
-      objects, errors = parser.parse(csvs.row(csv_info[:md5], row_md5))
-      # TODO: write out objects
-      #  use object catalogue to abstract this away
-      all_errors += errors
+      row_objects, errors = parser.parse(csvs.row(csv_info[:md5], row_md5))
+      errors += objects.add(csvs, row_objects, row_md5).map { |e| [nil, e] }
+      all_errors += errors.map { |col, e| [csv_info[:name], row_info(row_md5)[:index], col, e] }
     end
   end
 end
-
-# objects.build_catalogue # ?
 
 # ph_row_md5s = csvs.row_md5s_for_name(/^property_hierarchies/)
 # ts_row_md5s = csvs.row_md5s_for_name(/^title_strategies/)

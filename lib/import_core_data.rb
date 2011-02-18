@@ -817,7 +817,7 @@ mail_fail("parsing CSVs") if import_set.write_errors(ERRORS_PATH)
 puts "=== Verifying Global Integrity ==="
 import_set.verify_integrity
 mail_fail("verifying data integrity") if import_set.write_errors(ERRORS_PATH)
-exit
+
 
 # Import the entire set
 

@@ -45,6 +45,10 @@ class AbstractParser
     @objects.lookup(klass, *pk_values)
   end
   
+  def loose_lookup(klass, *pk_values)
+    ObjectLookup.new(klass, pk_values)
+  end
+  
   # TODO: use anywhere we previously used :defer
   # - i.e. product needs to divide into 3 - company, concrete, concrete tolerance, AUTO, AUTO tolerance
   # CAN WE TAKE OUT TOLERANCE VALUE SUPPORT?

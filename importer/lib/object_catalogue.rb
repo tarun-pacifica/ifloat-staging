@@ -60,10 +60,11 @@ class ObjectCatalogue
       value = "%.#{NumericPropertyValue.MAX_DP}f" % value if attribute == :min_value or attribute == :max_value
       
       case value
-      when Array, Hash then Base64.encode64(Marshal.dump(value))
+      when Array, Hash           then Base64.encode64(Marshal.dump(value))
       when FalseClass, TrueClass then value ? 1 : 0
-      when Integer, String then value
-      when ObjectReference then value.pk_md5
+      when Integer, String       then value
+      when ObjectLookup          then lookup(value.klass, *value.pk_values).pk_md5
+      when ObjectReference       then value.pk_md5
       else raise "#{object.inspect} contains unknown type for #{attribute}: #{value.class} #{value.inspect}"
       end
     end

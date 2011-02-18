@@ -31,6 +31,7 @@ class ObjectReference
     [@klass, @pk_md5]
   end
   
+  # TODO: consider down-converting all ObjectReferences to ObjectLookups to tighten up space usage
   def write(object)
     Marshal.dump(object, File.open(@path, "w"))
   end

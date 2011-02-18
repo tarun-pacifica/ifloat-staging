@@ -36,6 +36,7 @@ unless assets.update
   mail_fail("compiling assets")
 end
 
+
 puts "Scanning CSV repository for updates..."
 csvs = CSVCatalogue.new(CSV_INDEX_DIR)
 Dir[REPO_DIRS["csvs"] / "**" / "*.csv"].each { |path| csvs.add(path) }
@@ -43,30 +44,28 @@ mail_fail("compiling CSVs") if csvs.write_errors(ERROR_CSV_PATH)
 csvs.delete_obsolete
 csvs.summarize
 
+
 puts "Updating objects..."
 objects = ObjectCatalogue.new(OBJECT_INDEX_DIR)
 objects.delete_obsolete(csvs.row_md5s)
-
-row_md5s_to_parse = objects.missing_row_md5s(csvs.row_md5s).to_set
-# puts " - #{row_md5s_to_parse.size} rows to parse"
+row_md5s_to_parse = objects.missing_row_md5s(csvs.row_md5s)
 
 all_errors = []
 extra_dependency_rules = {Asset => [Product], PropertyDefinition => [AssociatedWord, PropertyHierarchy, TitleStrategy]}
 DataMapper::Model.sorted_descendants(extra_dependency_rules).each do |model|
   name = model.storage_name
   csvs.infos_for_name(/^#{name}/).each do |csv_info|
-    csv_row_md5s = csv_info[:row_md5s]
-    csv_row_md5s_to_parse = (row_md5s_to_parse & csv_row_md5s)
+    csv_row_md5s_to_parse = (csv_info[:row_md5s] & row_md5s_to_parse) # not using sets to avoid extra sort operation
     next if csv_row_md5s_to_parse.empty?
     
-    parser = Kernel.const_get("#{model}Parser").new(csv_info)
+    parser = Kernel.const_get("#{model}Parser").new(csv_info, objects)
     all_errors += parser.header_errors
     next unless parser.header_errors.empty?
     
     csv_row_md5s_to_parse.map do |row_md5|
-      row_objects, errors = parser.parse(csvs.row(csv_info[:md5], row_md5))
+      row_objects, errors = parser.parse_row(csvs.row(csv_info[:md5], row_md5))
       errors += objects.add(csvs, row_objects, row_md5).map { |e| [nil, e] }
-      all_errors += errors.map { |col, e| [csv_info[:name], row_info(row_md5)[:index], col, e] }
+      all_errors += errors.map { |col, e| [csv_info[:name], csvs.row_info(row_md5)[:index], col, e] }
     end
   end
 end

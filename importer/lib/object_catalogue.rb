@@ -64,7 +64,7 @@ class ObjectCatalogue
       when FalseClass, TrueClass then value ? 1 : 0
       when Integer, String then value
       when ObjectReference then value.pk_md5
-      else raise "#{klass} #{object.inspect} contains unknown type for #{attribute}: #{value.class} #{value.inspect}"
+      else raise "#{object.inspect} contains unknown type for #{attribute}: #{value.class} #{value.inspect}"
       end
     end
     
@@ -82,7 +82,7 @@ class ObjectCatalogue
   def lookup(klass, *pk_values)
     pk_md5 = Digest::MD5.hexdigest(pk_values.join("::"))
     object_ref = @object_refs_by_class_pk_md5[[klass, pk_md5]]
-    raise "invalid/unknown #{klass}: #{friendly_pk(pk_value)}" if object_ref.nil? # TODO: fix error
+    raise "invalid/unknown #{klass}: #{pk_values.inspect}" if object_ref.nil? # TODO: fix error
     object_ref
   end
   
@@ -109,7 +109,12 @@ class ObjectCatalogue
   end
   
   def value_md5(klass, object)
-    property_names = klass.properties.map { |property| property.name }
+    rel_names_by_child_key = Hash[klass.relationships.map { |name, rel| [rel.child_key.first.name, name.to_sym] }]
+    property_names = klass.properties.map do |property|
+      name = property.name
+      rel_names_by_child_key[name] || name
+    end
+    
     attributes = (property_names - PRIMARY_KEYS[klass] - [:id, :type]).sort_by { |sym| sym.to_s }
     attribute_md5(object, attributes)
   end

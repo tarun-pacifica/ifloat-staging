@@ -42,7 +42,7 @@ class AbstractParser
   private
   
   def lookup(klass, *pk_values)
-    object_catalogue.lookup(klass, *pk_values)
+    @objects.lookup(klass, *pk_values)
   end
   
   # TODO: use anywhere we previously used :defer

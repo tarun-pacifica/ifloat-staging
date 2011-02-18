@@ -41,6 +41,10 @@ class AbstractParser
   
   private
   
+  def lookup(klass, *pk_values)
+    object_catalogue.lookup(klass, *pk_values)
+  end
+  
   # TODO: use anywhere we previously used :defer
   # - i.e. product needs to divide into 3 - company, concrete, concrete tolerance, AUTO, AUTO tolerance
   # CAN WE TAKE OUT TOLERANCE VALUE SUPPORT?

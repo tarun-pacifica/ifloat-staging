@@ -2,9 +2,6 @@ class PropertyDefinitionParser < AbstractParser
   REQUIRED_HEADERS = ["sort", "first-level", "second-level", "property type", "findable", "filterable", "displayed as data", "ui first level name", "ui second level name wording"]
   REQUIRED_VALUE_HEADERS = REQUIRED_HEADERS[0..-3]
   
-  
-  private
-  
   def generate_objects(parsed_fields)
     name = parsed_fields.values_at("first-level", "second-level").join(":")
     find, filter, display = parsed_fields.values_at("findable", "filterable", "displayed as data").map { |v| v == "Y" }
@@ -23,13 +20,13 @@ class PropertyDefinitionParser < AbstractParser
     translations = parsed_fields.values_at("ui first level name", "ui second level name wording")
     return objects if translations.any? { |t| t.nil? }
     
-    definition, value = loose_lookup(PropertyDefinition, name), translations.join(":")
+    definition, value = lookup(PropertyDefinition, name), translations.join(":")
     objects << {:class => Translation, :property_definition => definition, :language_code => "ENG", :value => value}
     
     objects
   end
   
   def parse_field(head, value, fields)
-    head == "property type" ? lookup(PropertyType, value) : value
+    head == "property type" ? lookup!(PropertyType, value) : value
   end
 end

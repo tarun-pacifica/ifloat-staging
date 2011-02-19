@@ -28,9 +28,9 @@ class AbstractParser
     partition_fields(parsed_by_header).each do |headed_values|
       headed_values.each do |header, value|
         begin
-          parsed_by_header[header] = parse_field(header, value, parsed_values_by_header)
+          parsed_by_header[header] = parse_field(header, value, parsed_by_header)
         rescue Exception => e
-          errors << [csv_info[:headers][@headers.index(head)], e.message]
+          errors << [@info[:headers][@headers.index(header)], e.message]
         end
       end
     end if errors.empty? and respond_to?(:parse_field)
@@ -42,11 +42,13 @@ class AbstractParser
   private
   
   def lookup(klass, *pk_values)
-    @objects.lookup(klass, *pk_values)
+    ObjectReference.loose(klass, pk_values)
   end
   
-  def loose_lookup(klass, *pk_values)
-    ObjectLookup.new(klass, pk_values)
+  def lookup!(klass, *pk_values)
+    loose_ref = lookup(klass, *pk_values)
+    raise "invalid/unknown #{klass}: #{pk_values.inspect}" unless @objects.has_object?(klass, loose_ref.pk_md5)
+    loose_ref
   end
   
   # TODO: use anywhere we previously used :defer

@@ -38,7 +38,7 @@ class CSVCatalogue
     
     add_info(md5, info)
     info_file_path = index_dir / INFO_FILE_NAME
-    Marshal.dump(info, File.open("#{info_file_path}.tmp", "w"))
+    File.open("#{info_file_path}.tmp", "w") { |f| Marshal.dump(info, f) }
     FileUtils.move("#{info_file_path}.tmp", info_file_path)
     puts " - #{name}"
   end
@@ -90,7 +90,7 @@ class CSVCatalogue
   end
   
   def row(csv_md5, row_md5)
-    Marshal.load(File.open(@dir / csv_md5 / row_md5))
+    File.open(@dir / csv_md5 / row_md5) { |f| Marshal.load(f) }
   end
   
   def row_info(row_md5)

@@ -1,27 +1,4 @@
 class ObjectCatalogue
-  # TODO: this may need a better home
-  PRIMARY_KEYS = {
-    PropertyType            => [:name],
-    PropertyDefinition      => [:name],
-    Translation             => [:property_definition, :language_code],
-    PropertyValueDefinition => [:property_type, :value],
-    AssociatedWord          => [:word, :rules],
-    PropertyHierarchy       => [:class_name, :sequence_number],
-    TitleStrategy           => [:name],
-    UnitOfMeasure           => [:class_name],
-    Company                 => [:reference],
-    Facility                => [:company, :name],
-    Asset                   => [:bucket, :company, :name],
-    Brand                   => [:company, :name],
-    Product                 => [:company, :reference],
-    Attachment              => [:product, :role, :sequence_number],
-    ProductMapping          => [:company, :product, :reference],
-    ProductRelationship     => [:company, :product, :property_definition, :name, :value],
-    DatePropertyValue       => [:product, :definition, :sequence_number],
-    NumericPropertyValue    => [:product, :definition, :sequence_number, :unit],
-    TextPropertyValue       => [:product, :definition, :sequence_number, :language_code]
-  }
-  
   def initialize(dir)
     @dir = dir
     
@@ -33,43 +10,24 @@ class ObjectCatalogue
   # TODO: make this atomic
   def add(csv_catalogue, objects, *row_md5s)
     objects.map do |object|
-      klass = object[:class]
-      pk_md5 = primary_key_md5(klass, object)
+      object_row_md5s = (row_md5s + row_md5_chain_for_object(object)).flatten.uniq
+      object_ref = ObjectReference.from_object(object, @dir, object_row_md5s)
       
-      existing = @object_refs_by_class_pk_md5[[klass, pk_md5]]
+      existing = @object_refs_by_class_pk_md5[object_ref.class_pk_md5]
       if existing.nil?
-        object_ref = ObjectReference.from_memory(@dir, klass, pk_md5, value_md5(klass, object), row_md5s)
         object_ref.write(object)
         add_object_ref(object_ref)
         next
       end
       
       rows = existing.row_md5s.map { |row_md5| csv_catalogue.row_info(row_md5).values_at(:name, :index).join(":") }
-      "duplicate of #{existing.klass} from #{rows.join(', ')} (based on #{PRIMARY_KEYS[klass].join(' / ')})"
+      "duplicate of #{existing.klass} from #{rows.join(', ')}"
     end.compact
   end
   
   def add_object_ref(object_ref)
     @object_refs_by_class_pk_md5[object_ref.class_pk_md5] = object_ref
     object_ref.row_md5s.each { |row_md5| (@object_refs_by_row_md5[row_md5] ||= []) << object_ref }
-  end
-  
-  def attribute_md5(object, attributes)
-    values = attributes.map do |attribute|
-      value = object[attribute]
-      value = "%.#{NumericPropertyValue.MAX_DP}f" % value if attribute == :min_value or attribute == :max_value
-      
-      case value
-      when Array, Hash           then Base64.encode64(Marshal.dump(value))
-      when FalseClass, TrueClass then value ? 1 : 0
-      when Integer, String       then value
-      when ObjectLookup          then lookup(value.klass, *value.pk_values).pk_md5
-      when ObjectReference       then value.pk_md5
-      else raise "#{object.inspect} contains unknown type for #{attribute}: #{value.class} #{value.inspect}"
-      end
-    end
-    
-    Digest::MD5.hexdigest(values.join("::"))
   end
   
   def delete_obsolete(row_md5s)
@@ -80,11 +38,12 @@ class ObjectCatalogue
     build_catalogue unless obsolete_object_refs.empty?
   end
   
-  def lookup(klass, *pk_values)
-    pk_md5 = Digest::MD5.hexdigest(pk_values.join("::"))
-    object_ref = @object_refs_by_class_pk_md5[[klass, pk_md5]]
-    raise "invalid/unknown #{klass}: #{pk_values.inspect}" if object_ref.nil? # TODO: fix error
-    object_ref
+  def has_object?(klass, pk_md5)
+    @object_refs_by_class_pk_md5.has_key?([klass, pk_md5])
+  end
+  
+  def lookup(klass, pk_md5)
+    @object_refs_by_class_pk_md5[[klass, pk_md5]]
   end
   
   def missing_auto_row_md5s(auto_row_md5s, product_row_md5s)
@@ -105,18 +64,12 @@ class ObjectCatalogue
     row_md5s - @object_refs_by_row_md5.keys
   end
   
-  def primary_key_md5(klass, object)
-    attribute_md5(object, PRIMARY_KEYS[klass])
-  end
-  
-  def value_md5(klass, object)
-    rel_names_by_child_key = Hash[klass.relationships.map { |name, rel| [rel.child_key.first.name, name.to_sym] }]
-    property_names = klass.properties.map do |property|
-      name = property.name
-      rel_names_by_child_key[name] || name
+  def row_md5_chain_for_object(object)
+    case object
+    when ObjectLookup    then row_md5_chain_for_object(lookup(object.klass, object.pk_md5))
+    when ObjectReference then object.row_md5s + row_md5_chain_for_object(object.attributes)
+    when Hash            then object.values.map { |v| row_md5_chain_for_object(v) }
+    else []
     end
-    
-    attributes = (property_names - PRIMARY_KEYS[klass] - [:id, :type]).sort_by { |sym| sym.to_s }
-    attribute_md5(object, attributes)
   end
 end

@@ -1,7 +1,52 @@
+ObjectLookup = Struct.new(:klass, :pk_md5)
+
 class ObjectReference
-  attr_reader :path, :klass, :pk_md5, :val_md5, :row_md5s
+  PRIMARY_KEYS = {
+    PropertyType            => [:name],
+    PropertyDefinition      => [:name],
+    Translation             => [:property_definition, :language_code],
+    PropertyValueDefinition => [:property_type, :value],
+    AssociatedWord          => [:word, :rules],
+    PropertyHierarchy       => [:class_name, :sequence_number],
+    TitleStrategy           => [:name],
+    UnitOfMeasure           => [:class_name],
+    Company                 => [:reference],
+    Facility                => [:company, :name],
+    Asset                   => [:bucket, :company, :name],
+    Brand                   => [:company, :name],
+    Product                 => [:company, :reference],
+    Attachment              => [:product, :role, :sequence_number],
+    ProductMapping          => [:company, :product, :reference],
+    ProductRelationship     => [:company, :product, :property_definition, :name, :value],
+    DatePropertyValue       => [:product, :definition, :sequence_number],
+    NumericPropertyValue    => [:product, :definition, :sequence_number, :unit],
+    TextPropertyValue       => [:product, :definition, :sequence_number, :language_code]
+  }
   
-  def self.from_memory(dir, klass, pk_md5, val_md5, row_md5s)
+  def self.attribute_md5(object, attributes)
+    values = attributes.map do |attribute|
+      value = object[attribute]
+      value = "%.#{NumericPropertyValue.MAX_DP}f" % value if attribute == :min_value or attribute == :max_value
+      coerce_for_md5(value) or raise "#{object.inspect} contains unknown type: #{value.class} #{value.inspect}"
+    end
+    
+    Digest::MD5.hexdigest(values.join("::"))
+  end
+  
+  def self.coerce_for_md5(value)
+    case value
+    when Array, Hash           then Base64.encode64(Marshal.dump(value))
+    when FalseClass, TrueClass then value ? 1 : 0
+    when Integer, String       then value
+    when ObjectLookup          then value.pk_md5
+    else nil
+    end
+  end
+  
+  def self.from_object(object, dir, row_md5s)
+    klass = object[:class]
+    pk_md5 = attribute_md5(object, PRIMARY_KEYS[klass])
+    val_md5 = value_md5(klass, object)
     name = ([klass, pk_md5, val_md5] + row_md5s).join("_")
     new(dir / name, klass, pk_md5, val_md5, row_md5s)
   end
@@ -10,6 +55,26 @@ class ObjectReference
     klass, pk_md5, val_md5, *row_md5s = File.basename(path).split("_")
     new(path, klass, pk_md5, val_md5, row_md5s)
   end
+  
+  def self.loose(klass, pk_values)
+    coerced = pk_values.map do |value|
+      coerce_for_md5(value) or raise "#{pk_values.inspect} contain unknown type: #{value.class} #{value.inspect}"
+    end
+    ObjectLookup.new(klass, Digest::MD5.hexdigest(coerced.join("::")))
+  end
+  
+  def self.value_md5(klass, object)
+    rel_names_by_child_key = Hash[klass.relationships.map { |name, rel| [rel.child_key.first.name, name.to_sym] }]
+    property_names = klass.properties.map do |property|
+      name = property.name
+      rel_names_by_child_key[name] || name
+    end
+    
+    attributes = (property_names - PRIMARY_KEYS[klass] - [:id, :type]).sort_by { |sym| sym.to_s }
+    attribute_md5(object, attributes)
+  end
+    
+  attr_reader :path, :klass, :pk_md5, :val_md5, :row_md5s, :attributes
   
   def initialize(path, klass, pk_md5, val_md5, row_md5s)
     @path = path
@@ -24,15 +89,14 @@ class ObjectReference
   end
   
   def attributes
-    @attributes ||= Marshal.load(File.open(@path))
+    @attributes ||= File.open(@path) { |f| Marshal.load(f) }
   end
   
   def class_pk_md5
     [@klass, @pk_md5]
   end
   
-  # TODO: consider down-converting all ObjectReferences to ObjectLookups to tighten up space usage
   def write(object)
-    Marshal.dump(object, File.open(@path, "w"))
+    File.open(@path, "w") { |f| Marshal.dump(object, f) }
   end
 end

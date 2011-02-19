@@ -72,6 +72,7 @@ DataMapper::Model.sorted_descendants(extra_dependency_rules).each do |model|
       error_count += errors.size
     end
     
+    objects.commit if parsed_count > 0
     puts " - parsed #{parsed_count} objects from #{csv_row_md5s_to_parse.size}/#{csv_info[:row_md5s].size} rows of #{csv_info[:name]}" if parsed_count > 0
     puts " ! #{error_count} errors reported from #{csv_info[:name]}" if error_count > 0
     

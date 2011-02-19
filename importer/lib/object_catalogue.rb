@@ -9,7 +9,6 @@ class ObjectCatalogue
     build_catalogue
   end
   
-  # TODO: make this atomic
   def add(csv_catalogue, objects, *row_md5s)
     row_catalogue_size = @row_md5s_by_class_pk_md5.size
     
@@ -29,8 +28,6 @@ class ObjectCatalogue
       "duplicate of #{existing.klass} from #{rows}"
     end.compact
     
-    File.open(@row_catalogue_path, "w") { |f| Marshal.dump(@row_md5s_by_class_pk_md5, f) } if @row_md5s_by_class_pk_md5.size > row_catalogue_size
-    
     errors
   end
   
@@ -49,6 +46,10 @@ class ObjectCatalogue
     
     Dir[@marshaled_dir / "*"].each { |path| add_object_ref(ObjectReference.from_path(path)) }
     @row_md5s_by_class_pk_md5.delete_if { |class_pk_md5, row_md5s| not has_object?(*class_pk_md5) }
+  end
+  
+  def commit
+    File.open(@row_catalogue_path, "w") { |f| Marshal.dump(@row_md5s_by_class_pk_md5, f) }
   end
   
   def delete_obsolete(row_md5s)

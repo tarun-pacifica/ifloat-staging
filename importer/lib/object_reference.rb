@@ -39,6 +39,7 @@ class ObjectReference
     when FalseClass, TrueClass then value ? 1 : 0
     when Integer, String       then value
     when ObjectLookup          then value.pk_md5
+    when NilClass              then ""
     else nil
     end
   end

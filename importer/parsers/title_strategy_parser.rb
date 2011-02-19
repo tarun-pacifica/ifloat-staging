@@ -14,7 +14,7 @@ class TitleStrategyParser < AbstractParser
     when "Canonical", "Description", "Image"
       value.to_s.split(",").map do |part|
         part.strip!
-        part = lookup!(PropertyDefinition, part) unless part == "-" or part == "product.reference"
+        lookup!(PropertyDefinition, part) unless part == "-" or part == "product.reference"
         part
       end
     else

@@ -16,6 +16,6 @@ class PropertyHierarchyParser < AbstractParser
   
   def parse_field(head, value, fields)
     return value unless head =~ PSET_HEADER_MATCH
-    value.to_s.split(",").map { |part| lookup!(PropertyDefinition, part.strip) }
+    value.to_s.split(",").map { |part| lookup!(PropertyDefinition, part.strip); part }
   end
 end

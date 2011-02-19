@@ -43,17 +43,17 @@ class ObjectReference
     end
   end
   
-  def self.from_object(object, dir, row_md5s)
+  def self.from_object(object, dir)
     klass = object[:class]
     pk_md5 = attribute_md5(object, PRIMARY_KEYS[klass])
     val_md5 = value_md5(klass, object)
-    name = ([klass, pk_md5, val_md5] + row_md5s).join("_")
-    new(dir / name, klass, pk_md5, val_md5, row_md5s)
+    name = [klass, pk_md5, val_md5].join("_")
+    new(dir / name, klass, pk_md5, val_md5)
   end
   
   def self.from_path(path)
-    klass, pk_md5, val_md5, *row_md5s = File.basename(path).split("_")
-    new(path, klass, pk_md5, val_md5, row_md5s)
+    klass, pk_md5, val_md5 = File.basename(path).split("_")
+    new(path, Kernel.const_get(klass), pk_md5, val_md5)
   end
   
   def self.loose(klass, pk_values)
@@ -74,14 +74,13 @@ class ObjectReference
     attribute_md5(object, attributes)
   end
     
-  attr_reader :path, :klass, :pk_md5, :val_md5, :row_md5s, :attributes
+  attr_reader :path, :klass, :pk_md5, :val_md5, :attributes
   
-  def initialize(path, klass, pk_md5, val_md5, row_md5s)
+  def initialize(path, klass, pk_md5, val_md5)
     @path = path
     @klass = klass
     @pk_md5 = pk_md5
     @val_md5 = val_md5
-    @row_md5s = row_md5s
   end
   
   def[](key)

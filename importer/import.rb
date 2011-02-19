@@ -60,6 +60,11 @@ DataMapper::Model.sorted_descendants(extra_dependency_rules).each do |model|
     
     parser = Kernel.const_get("#{model}Parser").new(csv_info, objects)
     all_errors += parser.header_errors
+    if all_errors.size > 0
+      require "pp"
+      pp all_errors
+      exit
+    end
     next unless parser.header_errors.empty?
     
     parsed_count, error_count = 0, 0

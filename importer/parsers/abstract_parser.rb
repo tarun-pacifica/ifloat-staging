@@ -9,8 +9,10 @@ class AbstractParser
     @info = csv_info
     @objects = object_catalogue
     
-    @headers, @header_errors = parse_headers(csv_info[:headers])
-    @header_errors += validate_headers.map { |e| [nil, e] }
+    headers = csv_info[:headers]
+    @header_errors = validate_headers(headers).map { |e| [nil, e] }
+    return unless @header_errors.empty?
+    @headers, @header_errors = parse_headers(headers)
   end
   
   def parse_row(row)
@@ -58,22 +60,22 @@ class AbstractParser
     [values_by_header]
   end
   
-  def parse_headers(row)
-    return [row, []] unless respond_to?(:parse_header)
+  def parse_headers(headers)
+    return [headers, []] unless respond_to?(:parse_header)
     
     errors = []
-    headers = row.map do |header, value|
+    headers = headers.map do |header|
       begin
-        parse_header(value)
+        parse_header(header)
       rescue Exception => e
         errors << [header, e.message]
-        value
+        header
       end
     end
-    errors
+    [headers, errors]
   end
   
-  def validate_headers
-    errors = (self.class.const_get("REQUIRED_HEADERS") - @headers).map { |header| "header missing: #{header}" }
+  def validate_headers(headers)
+    errors = (self.class.const_get("REQUIRED_HEADERS") - headers).map { |header| "header missing: #{header}" }
   end
 end

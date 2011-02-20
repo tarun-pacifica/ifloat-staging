@@ -23,30 +23,33 @@ class ObjectReference
     TextPropertyValue       => [:product, :definition, :sequence_number, :language_code]
   }
   
-  def self.attribute_md5(object, attributes)
-    values = attributes.map do |attribute|
-      value = object[attribute]
-      value = "%.#{NumericPropertyValue.MAX_DP}f" % value if attribute == :min_value or attribute == :max_value
-      coerce_for_md5(value) or raise "#{object.inspect} contains unknown type: #{value.class} #{value.inspect}"
+  @@md5s_by_values = {}
+  def self.coerce_to_md5(values, cache = false)
+    if cache
+      cached = @@md5s_by_values[values]
+      return cached unless cached.nil?
     end
     
-    Digest::MD5.hexdigest(values.join("::"))
-  end
-  
-  def self.coerce_for_md5(value)
-    case value
-    when Array, Hash           then Base64.encode64(Marshal.dump(value))
-    when FalseClass, TrueClass then value ? 1 : 0
-    when Integer, String       then value
-    when ObjectLookup          then value.pk_md5
-    when NilClass              then ""
-    else nil
+    coerced = values.map do |value|
+      case value
+      when Array, Hash           then Base64.encode64(Marshal.dump(value))
+      when BigDecimal            then "%.#{NumericPropertyValue.MAX_DP}f" % value
+      when FalseClass, TrueClass then value ? 1 : 0
+      when Integer, String       then value
+      when ObjectLookup          then value.pk_md5
+      when NilClass              then ""
+      else raise "unable to coerce #{value.class} #{value.inspect}"
+      end
     end
+    
+    md5 = Digest::MD5.hexdigest(coerced.join("::"))
+    @@md5s_by_values[values] = md5 if cache
+    md5
   end
   
   def self.from_object(object, dir)
     klass = object[:class]
-    pk_md5 = attribute_md5(object, PRIMARY_KEYS[klass])
+    pk_md5 = coerce_to_md5(object.values_at(*PRIMARY_KEYS[klass]))
     val_md5 = value_md5(klass, object)
     name = [klass, pk_md5, val_md5].join("_")
     new(dir / name, klass, pk_md5, val_md5)
@@ -58,10 +61,7 @@ class ObjectReference
   end
   
   def self.loose(klass, pk_values)
-    coerced = pk_values.map do |value|
-      coerce_for_md5(value) or raise "#{pk_values.inspect} contain unknown type: #{value.class} #{value.inspect}"
-    end
-    ObjectLookup.new(klass, Digest::MD5.hexdigest(coerced.join("::")))
+    ObjectLookup.new(klass, coerce_to_md5(pk_values, true))
   end
   
   def self.value_md5(klass, object)
@@ -72,7 +72,7 @@ class ObjectReference
     end
     
     attributes = (property_names - PRIMARY_KEYS[klass] - [:id, :type]).sort_by { |sym| sym.to_s }
-    attribute_md5(object, attributes)
+    coerce_to_md5(object.values_at(*attributes))
   end
     
   attr_reader :path, :klass, :pk_md5, :val_md5, :attributes

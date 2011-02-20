@@ -6,7 +6,7 @@ Merb::Router.prepare do
   
   match('/tools/:action(.:ext)').to(:controller => 'tools')
   
-  resources :articles
+  match('/brands/:name').to(:controller => 'brands', :action => 'show')
   
   match('/cached_finds/:id/filter/:property_id', :method => 'get').to(:controller => 'cached_finds', :action => 'filter_get')
   match('/cached_finds/:id/filter/:property_id', :method => 'post').to(:controller => 'cached_finds', :action => 'filter_set')

@@ -16,13 +16,44 @@ class Brand
   belongs_to :asset
   belongs_to :company
     property :company_id, Integer, :required => true, :unique_index => :name_per_company
-    
+  
   before :destroy do
-	  asset.destroy unless asset.nil?
+    asset.destroy unless asset.nil?
   end
   
   # TODO: if needed, augment to take a list of names_by_company_id to support brand namespace clashes
   def self.logos(names)
     Asset.all("brands.name" => names)
+  end
+  
+  # TODO: spec
+  def product_ids_by_category_node
+    query =<<-SQL
+      SELECT DISTINCT(pv.product_id)
+      FROM property_values pv
+        INNER JOIN property_definitions pd ON pv.property_definition_id = pd.id
+      WHERE pd.name = 'marketing:brand'
+        AND text_value = ?
+    SQL
+    
+    product_ids = repository.adapter.select(query, name).to_set
+    product_ids_by_node = {}
+    walk_category_tree_for_product_ids(product_ids) do |node, node_product_ids|
+      product_ids_by_node[node] = node_product_ids.to_a
+    end
+    product_ids_by_node
+  end
+  
+  
+  private
+  
+  def walk_category_tree_for_product_ids(product_ids, node = [], &block)
+    children = Indexer.category_children_for_node(node)
+    if children.first.is_a?(Integer)
+      node_product_ids = (product_ids & children)
+      block.call(node, node_product_ids) unless node_product_ids.empty?
+    else
+      children.each { |c| walk_category_tree_for_product_ids(product_ids, node + [c], &block) }
+    end
   end
 end

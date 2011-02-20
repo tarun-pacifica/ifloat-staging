@@ -52,7 +52,7 @@ class Products < Application
     product_ids = rel_names_by_product_ids.keys
     product_ids_by_checksum = Indexer.image_checksums_for_product_ids(product_ids)
     @images_by_rel_name = {}
-    marshal_images(product_ids).each do |info|
+    marshal_images(product_ids).each do |info| # TODO: correct for the fact a total comes back from this as the lead item
       product_ids = (product_ids_by_checksum[info[0]] || [])
       rel_names_by_product_ids.values_at(*product_ids).flatten.uniq.each do |name|
         (@images_by_rel_name[name] ||= []) << info

@@ -1,0 +1,27 @@
+<%= partial "common/header" %>
+
+<div id="body">
+  <div id="brand_info">
+    <img src=<%= @brand.asset.url.inspect %> alt="brand logo" />
+    <div class="description">
+      <h1><%= @brand.name %></h1>
+      <p>no description support yet</p>
+    </div>
+  </div>
+  
+  <div id="brand_products">
+    <% current_section = nil %>
+    <% @product_ids_by_node.sort.each do |section_heading, product_ids| %>
+    <% section, heading = section_heading %>
+    
+    <% unless section == current_section %>
+    <h2><%= section %></h2>
+    <% current_section = section %>
+    <% end %>
+    
+    <h3><%= heading %></h3>
+    
+    
+    <% end %>
+  </div>
+</div>

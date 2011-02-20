@@ -1,7 +1,6 @@
 Merb.logger.info("Compiling routes...")
 
 Merb::Router.prepare do
-  # TODO: remove for launch
   match('/prelaunch/:action').to(:controller => 'prelaunch')
   
   match('/tools/:action(.:ext)').to(:controller => 'tools')

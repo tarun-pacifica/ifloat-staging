@@ -8,7 +8,7 @@ class DatePropertyValue < NumericPropertyValue
     :verbose => ["%Y", "%B %Y", "%B %d, %Y"]
   }
   
-  validates_absence_of :tolerance, :unit
+  validates_absence_of :unit
   
   def self.format_value(value, params = {})
     v = value.to_i

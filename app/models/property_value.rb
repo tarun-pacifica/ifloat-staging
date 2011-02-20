@@ -3,8 +3,8 @@
 # All data associated with a Product is managed as a PropertyValue subclass. <b>PropertyValue itself is abstract and should never be created directly.</b> PropertyValues track primary data as well as pertinent meta-information that depends upon the exact subclass employed...
 #
 # TextPropertyValue:: All textual (free form) data is stored using this class. It carries a language code which should be set to ENG in any ambiguous cases as per the default values discussion in CachedFind.
-# NumericPropertyValue:: It holds any scalar or range value that can be expressed as a decimal. It carries a unit (which must be found in the valid_units list of the ultimate PropertyType the value belongs to). It also carries a tolerance (+/-) which, when not nil, indicates the variation in the measurement provided and is deemed to be in the same unit as the primary value. Note that currency values should be stored using this class (the currencies themeselves being regarded as units).
-# DatePropertyValue:: A specific subclass of NumericPropertyValue that returns a structured [year, month, day] as its value and stores the date in the database in a manner that supports direct comparison operations. It should never have a tolerance. It allows for the specification of year-only (YYYY0000), year-month (YYYYMM00) and year-month-day (YYYYMMDD) values.
+# NumericPropertyValue:: It holds any scalar or range value that can be expressed as a decimal. It carries a unit (which must be found in the valid_units list of the ultimate PropertyType the value belongs to). Note that currency values should be stored using this class (the currencies themeselves being regarded as units).
+# DatePropertyValue:: A specific subclass of NumericPropertyValue that returns a structured [year, month, day] as its value and stores the date in the database in a manner that supports direct comparison operations. It allows for the specification of year-only (YYYY0000), year-month (YYYYMM00) and year-month-day (YYYYMMDD) values.
 #
 # One Product may have many PropertyValues of the same PropertyDefinition. Take the example of a shoe which has only one Product (with one reference) but comes in many sizes. In this case, multiple NumericPropertyValues would exist with differing values but all belonging to the same shoe-size PropertyDefinition. It is not permitted to create multiple numeric / text PropertyValues for a single Product and PropertyDefinition where the primary value of those objects is the same. In other words, a car cannot be tagged as being available in 'red' more than once.
 #
@@ -32,7 +32,6 @@
 #
 # unit:: 'kg'
 # value:: 12.2..15.6
-# tolerance:: 0.05
 # sequence_number:: 1
 # 
 class PropertyValue

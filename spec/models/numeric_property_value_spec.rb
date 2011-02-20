@@ -10,10 +10,9 @@ describe NumericPropertyValue do
                                         :max_value => 22.50,
                                         :auto_generated => false,
                                         :sequence_number => 1,
-                                        :unit => "GBP",
-                                        :tolerance => 2.5)
+                                        :unit => "GBP")
     end
-
+    
     it "should succeed with valid data" do
       @value.should be_valid
       @value.to_s.should == "22.5 GBP"
@@ -64,22 +63,12 @@ describe NumericPropertyValue do
       @value.to_s.should == "22.5"
       @value.comparison_key.should == [22.5]
     end
-    
-    it "should succeed without a tolerance" do
-      @value.tolerance = nil
-      @value.should be_valid
-    end
   end
   
   describe "conversion" do
     it "should succeed with a valid conversion" do
       original = {:min_value => 10, :max_value => 20, :unit => "in"}
       NumericPropertyValue.convert(original, "mm").should == {:min_value => 254, :max_value => 508, :unit => "mm"}
-    end
-    
-    it "should succeed with a valid conversion when it includes a tolerance" do
-      original = {:min_value => 10, :max_value => 20, :unit => "in", :tolerance => 0.111}
-      NumericPropertyValue.convert(original, "mm")[:tolerance].should == 2.82
     end
     
     it "should honour the maximum significant figures of the input value (with a minimum of 3SF)" do

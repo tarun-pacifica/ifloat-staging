@@ -36,7 +36,7 @@ sorted_column_names = universal_columns.keys.sort_by do |col_name|
   when "product.reference" then [2]
   when /^mapping\.(.+?)$/ then [3, $1]
   when /^raw:.*?(\d+)$/ then [7, $1.to_i]
-  when /^(.+?:.+?):(.*?):(\d+)(:tolerance)?$/ then [4, (properties_by_name[$1].sequence_number rescue 0).to_i, $3.to_i, $2, ($4.nil? ? 0 : 1)]
+  when /^(.+?:.+?):(.*?):(\d+)$/ then [4, (properties_by_name[$1].sequence_number rescue 0).to_i, $3.to_i, $2]
   when /^relationship\.(.+?)$/ then [5, $1]
   when /^attachment.(.+?).(\d+)$/ then [6, $1, $2.to_i]
   else [8]

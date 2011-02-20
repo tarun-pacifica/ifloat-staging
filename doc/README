@@ -43,9 +43,6 @@ Add the ability to track filtering usage to build a profile that will optimize t
 <b>Multi-dimensional Relationsip Support:</b>
 Support the notion that a relationship can be in terms of more than one property. The current workaround is to use properties like 'association:rope_type = nylon' whereas ideally it should be possible to construct a primary relationship of the form '<role>:[material:composition = nylon, reference:class = rope]'.
 
-<b>Support NIL Tolerances In Importer:</b>
-Although not yet used, it may become important to be able to tag tolerances corresponding to concrete / AUTO numerical values as 'to-come'. <em>Undecided</em>
-
 <b>Smart Differential Summaries In List View:</b>
 Derive a set of algorithms to alter the summaries / other displayed values per product in the list view such that the information shown is always maximally useful in discriminating between similar products in the listing. <em>Undecided</em>
 

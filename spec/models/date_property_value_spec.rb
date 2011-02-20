@@ -59,11 +59,6 @@ describe DatePropertyValue do
       @value.unit = "YYYYMMDD"
       @value.should_not be_valid
     end
-    
-    it "should fail with a tolerance" do
-      @value.tolerance = 1.5
-      @value.should_not be_valid
-    end
   end
   
   describe "parsing" do

@@ -11,17 +11,14 @@ class NumericPropertyValue < PropertyValue
   property :unit, String
   property :min_value, Decimal, :precision => PRECISION, :scale => MAX_DP
   property :max_value, Decimal, :precision => PRECISION, :scale => MAX_DP
-  property :tolerance, Float
   
   validates_presence_of :min_value, :max_value
   
   def self.convert(from_attributes, to_unit)
     min, max = from_attributes.values_at(:min_value, :max_value)
-    tolerance = from_attributes[:tolerance]
     unit = from_attributes[:unit]
     
     attributes = {:unit => to_unit}
-    attributes[:tolerance] = Conversion.convert(tolerance, unit, to_unit) unless tolerance.nil?
     
     max_sig_figs = [min, max].map { |v| Conversion.determine_sig_figs(v) }.max
     attributes[:min_value] = Conversion.convert(min.to_f, unit, to_unit, max_sig_figs)

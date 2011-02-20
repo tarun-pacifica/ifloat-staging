@@ -53,9 +53,6 @@ class AbstractParser
     loose_ref
   end
   
-  # TODO: use anywhere we previously used :defer
-  # - i.e. product needs to divide into 3 - company, concrete, concrete tolerance, AUTO, AUTO tolerance
-  # CAN WE TAKE OUT TOLERANCE VALUE SUPPORT?
   def partition_fields(values_by_header)
     [values_by_header]
   end

@@ -11,8 +11,8 @@
   
   <div id="brand_products">
     <% current_section = nil %>
-    <% @product_ids_by_node.sort.each do |section_heading, product_ids| %>
-    <% section, heading = section_heading %>
+    <% @checksums_by_node.sort.each do |node, checksums| %>
+    <% section, heading = node %>
     
     <% unless section == current_section %>
     <h2><%= section %></h2>
@@ -21,6 +21,7 @@
     
     <h3><%= heading %></h3>
     
+    <code>carousel with <%= checksums.size %> items</code>
     
     <% end %>
   </div>

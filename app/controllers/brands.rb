@@ -3,14 +3,26 @@ class Brands < Application
     @brand = Brand.first(:name => name)
     return render("../cached_finds/new".to_sym, :status => 404) if @brand.nil?
     
-    @product_ids_by_node = @brand.product_ids_by_category_node
-    product_ids = @product_ids_by_node.values.flatten
-    product_ids_by_checksum = Indexer.image_checksums_for_product_ids(product_ids)
+    product_ids_by_node = @brand.product_ids_by_category_node
+    product_ids = product_ids_by_node.values.flatten
     
-    @image_infos_by_product_id = {}
-    marshal_images(product_ids)[1..-1].each do |info|
-      product_id = product_ids_by_checksum[info[0]].first
-      @image_infos_by_product_id[product_id] = info
+    product_ids_by_checksum = Indexer.image_checksums_for_product_ids(product_ids)
+    checksums_by_product_id = {}
+    product_ids_by_checksum.each do |checksum, product_ids|
+      product_ids.each { |product_id| checksums_by_product_id[product_id] = checksum }
+    end
+    
+    @checksums_by_node = {}
+    product_ids_by_node.each do |node, product_ids|
+      @checksums_by_node[node] = checksums_by_product_id.values_at(*product_ids).uniq
+    end
+    
+    @assets_by_checksum = Asset.all(:checksum => product_ids_by_checksum.keys).hash_by(:checksum)
+    
+    @titles_by_checksum = {}
+    product_ids_by_checksum.each do |checksum, product_ids|
+      product_id = product_ids.first
+      @titles_by_checksum[checksum] = [:image, :summary].map { |domain| Indexer.product_title(domain, product_id) }
     end
     
     # @page_description = @brand.description

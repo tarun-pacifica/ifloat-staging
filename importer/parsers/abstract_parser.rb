@@ -48,9 +48,8 @@ class AbstractParser
   end
   
   def lookup!(klass, *pk_values)
-    loose_ref = lookup(klass, *pk_values)
-    raise "invalid/unknown #{klass}: #{pk_values.inspect}" unless @objects.has_object?(klass, loose_ref.pk_md5)
-    loose_ref
+    loose_ref = ObjectReference.loose(klass, pk_values)
+    @objects.lookup(klass, loose_ref.pk_md5) or raise "invalid/unknown #{klass}: #{pk_values.inspect}"
   end
   
   def partition_fields(values_by_header)

@@ -45,7 +45,7 @@ class ObjectCatalogue
     @row_md5s_by_class_pk_md5 = (File.open(@row_catalogue_path) { |f| Marshal.load(f) } rescue {})
     
     Dir[@marshaled_dir / "*"].each { |path| add_object_ref(ObjectReference.from_path(path)) }
-    @row_md5s_by_class_pk_md5.delete_if { |class_pk_md5, row_md5s| not has_object?(*class_pk_md5) }
+    @row_md5s_by_class_pk_md5.delete_if { |class_pk_md5, row_md5s| lookup(*class_pk_md5) != nil }
   end
   
   def commit
@@ -58,10 +58,6 @@ class ObjectCatalogue
     obsolete_object_refs.map { |o| o.path }.delete_and_log("obsolete objects")
     obsolete_object_refs.each { |o| @object_refs_by_class_pk_md5.delete(o.class_pk_md5) }
     build_catalogue unless obsolete_object_refs.empty?
-  end
-  
-  def has_object?(klass, pk_md5)
-    @object_refs_by_class_pk_md5.has_key?([klass, pk_md5])
   end
   
   def lookup(klass, pk_md5)

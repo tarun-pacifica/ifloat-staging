@@ -1,7 +1,7 @@
 class CSVCatalogue
   INFO_FILE_NAME = "_info"
   NIL_VALUES = %w(N/A NIL)
-  SKIP_HEADER_MATCHER = /^raw:/
+  SKIP_HEADER_MATCHER = /^(raw:)|(IMPORT)/
   
   def initialize(dir)
     @dir = dir

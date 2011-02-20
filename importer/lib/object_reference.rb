@@ -23,28 +23,20 @@ class ObjectReference
     TextPropertyValue       => [:product, :definition, :sequence_number, :language_code]
   }
   
-  @@md5s_by_values = {}
-  def self.coerce_to_md5(values, cache = false)
-    if cache
-      cached = @@md5s_by_values[values]
-      return cached unless cached.nil?
-    end
-    
+  def self.coerce_to_md5(values)
     coerced = values.map do |value|
       case value
-      when Array, Hash           then Base64.encode64(Marshal.dump(value))
-      when BigDecimal            then "%.#{NumericPropertyValue.MAX_DP}f" % value
-      when FalseClass, TrueClass then value ? 1 : 0
-      when Integer, String       then value
-      when ObjectLookup          then value.pk_md5
-      when NilClass              then ""
+      when Array, Hash                   then Base64.encode64(Marshal.dump(value))
+      when BigDecimal                    then "%.#{NumericPropertyValue.MAX_DP}f" % value
+      when FalseClass, TrueClass         then value ? 1 : 0
+      when Integer, String               then value
+      when ObjectLookup, ObjectReference then value.pk_md5
+      when nil                           then ""
       else raise "unable to coerce #{value.class} #{value.inspect}"
       end
     end
     
-    md5 = Digest::MD5.hexdigest(coerced.join("::"))
-    @@md5s_by_values[values] = md5 if cache
-    md5
+    Digest::MD5.hexdigest(coerced.join("::"))
   end
   
   def self.from_object(object, dir)
@@ -60,8 +52,10 @@ class ObjectReference
     new(path, Kernel.const_get(klass), pk_md5, val_md5)
   end
   
+  @@loose_md5s_by_pk_values = {}
   def self.loose(klass, pk_values)
-    ObjectLookup.new(klass, coerce_to_md5(pk_values, true))
+    md5 = (@@loose_md5s_by_pk_values[pk_values] ||= coerce_to_md5(pk_values))
+    ObjectLookup.new(klass, md5)
   end
   
   def self.value_md5(klass, object)
@@ -97,6 +91,10 @@ class ObjectReference
   end
   
   def write(object)
-    File.open(@path, "w") { |f| Marshal.dump(object, f) }
+    simplified = object.map do |attribute, value|
+      value = ObjectLookup.new(value.klass, value.pk_md5) if value.is_a?(ObjectReference)
+      [attribute, value]
+    end
+    File.open(@path, "w") { |f| Marshal.dump(Hash[simplified], f) }
   end
 end

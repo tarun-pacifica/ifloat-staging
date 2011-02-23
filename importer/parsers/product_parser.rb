@@ -1,5 +1,5 @@
 class ProductParser < AbstractParser
-  REQUIRED_HEADERS = REQUIRED_VALUE_HEADERS = %w(company.reference product.reference)
+  REQUIRED_HEADERS = REQUIRED_VALUE_HEADERS = %w(company.reference product.reference reference:class::1 marketing:brand::1)
   
   SPECIAL_VALUE_VALIDITIES = {
     "AUTO" => [:values].to_set,
@@ -12,7 +12,7 @@ class ProductParser < AbstractParser
     attributes = Hash[[:company, :reference, :reference_group].map { |key| [key, parsed_fields.delete([key])] }]
     product = attributes.update(:class => Product)
     
-    product_lookup = lookup(Product, *attributes.values_at(:company, :reference))
+    product_lookup = delayed_lookup(Product, *attributes.values_at(:company, :reference))
     [product] + parsed_fields.map do |head, object|
       next if object.nil?
       values = (object.is_a?(Array) ? object : [object])
@@ -122,8 +122,7 @@ class ProductParser < AbstractParser
       next if object.nil?
       
       attributes = {:class => klass, :definition => property, :auto_generated => true, :sequence_number => seq_num}
-      attributes.update(klass.convert(object.attributes, unit))
-      attributes
+      return attributes.update(klass.convert(object, unit))
     end
     
     raise "AUTO value with no concrete value from which to convert"
@@ -168,7 +167,7 @@ class ProductParser < AbstractParser
   
   def partition_fields(values_by_header)
     values_by_header.group_by do |header, value|
-      if header == :company then 0
+      if header == [:company] then 0
       elsif value == "AUTO" then 2
       else 1
       end

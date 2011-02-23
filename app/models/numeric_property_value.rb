@@ -15,14 +15,15 @@ class NumericPropertyValue < PropertyValue
   validates_presence_of :min_value, :max_value
   
   def self.convert(from_attributes, to_unit)
-    min, max = from_attributes.values_at(:min_value, :max_value)
     unit = from_attributes[:unit]
-    
     attributes = {:unit => to_unit}
     
-    max_sig_figs = [min, max].map { |v| Conversion.determine_sig_figs(v) }.max
-    attributes[:min_value] = Conversion.convert(min.to_f, unit, to_unit, max_sig_figs)
-    attributes[:max_value] = Conversion.convert(max.to_f, unit, to_unit, max_sig_figs)
+    max_sig_figs = from_attributes.values_at(:min_value, :max_value).map { |v| Conversion.determine_sig_figs(v) }.max
+    
+    [:min_value, :max_value].each do |key|
+      converted = Conversion.convert(from_attributes[key].to_f, unit, to_unit, max_sig_figs)
+      attributes[key] = parse_atom(converted.to_s)
+    end
     
     attributes
   end
@@ -86,7 +87,7 @@ class NumericPropertyValue < PropertyValue
     raise "number is blank" if atom == ""
     raise "non-numeric characters in #{atom.inspect}" if atom =~ /[^0-9\-\+ \.e]/
     value = BigDecimal.new(atom).round(MAX_DP)
-    raise "number #{value} is outside the range #{VALUE_RANGE}" unless VALUE_RANGE.include?(value)    
+    raise "number #{value} is outside the range #{VALUE_RANGE}" unless VALUE_RANGE.include?(value)
     value
   end
 end

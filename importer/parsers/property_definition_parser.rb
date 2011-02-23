@@ -20,7 +20,7 @@ class PropertyDefinitionParser < AbstractParser
     translations = parsed_fields.values_at("ui first level name", "ui second level name wording")
     return objects if translations.any? { |t| t.nil? }
     
-    definition, value = lookup(PropertyDefinition, name), translations.join(":")
+    definition, value = delayed_lookup(PropertyDefinition, name), translations.join(":")
     objects << {:class => Translation, :property_definition => definition, :language_code => "ENG", :value => value}
     
     objects

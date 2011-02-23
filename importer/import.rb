@@ -70,7 +70,7 @@ DataMapper::Model.sorted_descendants(extra_dependency_rules).each do |model|
     parsed_count, error_count = 0, 0
     csv_row_md5s_to_parse.each do |row_md5|
       row_objects, errors = parser.parse_row(csvs.row(csv_info[:md5], row_md5))
-      if row_objects.empty? then errors << [nil, "no objects parsed from this row"]
+      if row_objects.empty? and errors.empty? then errors << [nil, "no objects parsed from this row"]
       else errors += objects.add(csvs, row_objects, row_md5).map { |e| [nil, e] }
       end
       all_errors += errors.map { |col, e| [csv_info[:name], csvs.row_info(row_md5)[:index], col, e] }
@@ -79,7 +79,6 @@ DataMapper::Model.sorted_descendants(extra_dependency_rules).each do |model|
       error_count += errors.size
     end
     
-    objects.commit if parsed_count > 0
     puts " - parsed #{parsed_count} objects from #{csv_row_md5s_to_parse.size}/#{csv_info[:row_md5s].size} rows of #{csv_info[:name]}" if parsed_count > 0
     puts " ! #{error_count} errors reported from #{csv_info[:name]}" if error_count > 0
     
@@ -88,6 +87,8 @@ DataMapper::Model.sorted_descendants(extra_dependency_rules).each do |model|
       pp all_errors
       exit
     end
+    
+    objects.commit(csv_info[:name].tr("/", "_"))
   end
 end
 

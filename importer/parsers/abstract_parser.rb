@@ -9,25 +9,29 @@ class AbstractParser
     @info = csv_info
     @objects = object_catalogue
     
-    headers = csv_info[:headers]
-    @header_errors = validate_headers(headers).map { |e| [nil, e] }
+    @original_headers = csv_info[:headers]
+    @header_errors = validate_headers(@original_headers).map { |e| [nil, e] }
     return unless @header_errors.empty?
-    @headers, @header_errors = parse_headers(headers)
+    @headers, @header_errors = parse_headers(@original_headers)
   end
   
   def parse_row(row)
     errors = []
-    parsed_by_header = Hash[@headers.zip(row)]
+    values_by_header = Hash[@headers.zip(row)]
     
-    self.class.const_get("REQUIRED_VALUE_GROUPS").each do |headers|
-      errors << "value required for any of #{headers.join(', ')}" if parsed_by_header.values_at(*headers).compact.empty?
+    rvg, rvh = %w(REQUIRED_VALUE_GROUPS REQUIRED_VALUE_HEADERS).map { |c| self.class.const_get(c) }
+    unless rvg.empty? and rvh.empty?
+      values_by_original_header = Hash[@original_headers.zip(row)]
+      
+      rvg.each do |headers|
+        errors << [nil, "value required for any of #{headers.join(', ')}"] if values_by_original_header.values_at(*headers).compact.empty?
+      end
+      
+      rvh.each { |header| errors << [nil, "value required for #{header}"] if values_by_original_header[header].nil? }
     end
     
-    self.class.const_get("REQUIRED_VALUE_HEADERS").each do |header|
-      errors << "value required for #{header}" if parsed_by_header[header].nil?
-    end
-    
-    partition_fields(parsed_by_header).each do |headed_values|
+    parsed_by_header = {}
+    partition_fields(values_by_header).each do |headed_values|
       headed_values.each do |header, value|
         begin
           parsed_by_header[header] = parse_field(header, value, parsed_by_header)
@@ -35,7 +39,7 @@ class AbstractParser
           errors << [@info[:headers][@headers.index(header)], e.message]
         end
       end
-    end if errors.empty? and respond_to?(:parse_field)
+    end if errors.empty?
     
     errors.empty? ? [generate_objects(parsed_by_header), []] : [[], errors]
   end
@@ -43,17 +47,17 @@ class AbstractParser
   
   private
   
-  def lookup(klass, *pk_values)
-    ObjectReference.loose(klass, pk_values)
+  def delayed_lookup(klass, *pk_values)
+    ObjectReference.unique_id_for(klass, pk_values)
   end
   
   def lookup!(klass, *pk_values)
-    loose_ref = ObjectReference.loose(klass, pk_values)
-    @objects.lookup(klass, loose_ref.pk_md5) or raise "invalid/unknown #{klass}: #{pk_values.inspect}"
+    unique_id = ObjectReference.unique_id_for(klass, pk_values)
+    @objects.lookup_ref(unique_id) or raise "invalid/unknown #{klass}: #{pk_values.inspect}"
   end
   
-  def partition_fields(values_by_header)
-    [values_by_header]
+  def parse_field(header, value, fields)
+    value
   end
   
   def parse_headers(headers)
@@ -69,6 +73,10 @@ class AbstractParser
       end
     end
     [headers, errors]
+  end
+  
+  def partition_fields(values_by_header)
+    [values_by_header]
   end
   
   def validate_headers(headers)

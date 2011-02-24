@@ -1,31 +1,45 @@
 class ObjectCatalogue
+  def self.default
+    @@default
+  end
+  
   def initialize(dir)
-    @data_dir, @refs_dir = %w(data refs).map { |d| dir / d }
-    data_group_names, ref_group_names = [@data_dir, @refs_dir].map do |d|
+    @@default = self
+    
+    @data_dir, @refs_dir, @rows_dir = %w(data refs rows).map { |d| dir / d }
+    group_names_by_dir = Hash[ [@data_dir, @refs_dir, @rows_dir].map do |d|
       FileUtils.mkpath(d)
-      Dir[d / "*"].map { |path| File.basename(path) }
+      [d, Dir[d / "*"].map { |path| File.basename(path) }]
+    end ]
+    
+    common_group_names = group_names_by_dir.values.inject(:&)
+    group_names_by_dir.each do |dir, names|
+      (names - common_group_names).map { |name| dir / name }.delete_and_log("orphaned #{File.basename(dir)}")
     end
     
-    (data_group_names - ref_group_names).map { |name| @data_dir / name }.delete_and_log("orphaned data files")
-    (ref_group_names - data_group_names).map { |name| @refs_dir / name }.delete_and_log("orphaned ref files")
-    
-    @group_names_by_unique_id = {}
-    @refs_by_unique_id = {}
-    
-    ref_group_names.each do |name|
-      File.open(@refs_dir / name) { |f| Marshal.load(f) }.each do |unique_id, ref|
-        @group_names_by_unique_id[unique_id] = name
-        @refs_by_unique_id[unique_id] = ref
-        ref.catalogue = self
+    @group_names_by_pk_md5 = {}
+    @refs_by_pk_md5 = {}
+    common_group_names.each do |name|
+      File.open(@refs_dir / name) { |f| Marshal.load(f) }.each do |pk_md5, value_md5|
+        @group_names_by_pk_md5[pk_md5] = name
+        @refs_by_pk_md5[pk_md5] = ObjectReference.new(pk_md5, value_md5)
       end
     end
     
-    @data_by_unique_id = {}
+    @rows_by_pk_md5 = {}
+    common_group_names.each do |name|
+      @rows_by_pk_md5.update(File.open(@rows_dir / name) { |f| Marshal.load(f) })
+    end
+    
+    @data_by_pk_md5 = {}
     @refs_to_write = []
   end
   
   def add(csv_catalogue, objects, *row_md5s)
     objects.each do |object|
+      
+      # row_md5s = (row_md5s + row_md5_chain(object, catalogue)).flatten.uniq
+      
       ref = ObjectReference.new(self, row_md5s, object)
       uid = ref.unique_id
       

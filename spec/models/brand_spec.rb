@@ -4,7 +4,7 @@ describe Brand do
   
   describe "creation" do
     before(:each) do
-      @brand = Brand.new(:asset_id => 1, :company_id => 1, :name => "Musto", :primary_url => "www.musto.com")
+      @brand = Brand.new(:asset_id => 1, :company_id => 1, :name => "Musto", :primary_url => "www.musto.com", :description => "A marine company.")
     end
     
     it "should succeed with valid data" do
@@ -28,6 +28,11 @@ describe Brand do
     
     it "should succeed without a primary URL" do
       @brand.primary_url = nil
+      @brand.should be_valid
+    end
+    
+    it "should succeed without a description" do
+      @brand.description = nil
       @brand.should be_valid
     end
   end

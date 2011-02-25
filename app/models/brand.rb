@@ -1,10 +1,12 @@
 # = Summary
 #
-# Brands are uniquely named per company and may carry a logo and primary URL.
+# Brands are uniquely named per company and may carry a logo, a description and a primary URL.
 #
 # === Sample Data
 #
+# name:: 'Nauticalia'
 # primary_url:: 'www.mybrand.com'
+# description:: 'A fine seafaring brand.'
 #
 class Brand
   include DataMapper::Resource
@@ -12,6 +14,7 @@ class Brand
   property :id, Serial
   property :name, String, :required => true, :length => 255, :unique_index => :name_per_company
   property :primary_url, String, :length => 255
+  property :description, Text, :lazy => false
   
   belongs_to :asset
   belongs_to :company

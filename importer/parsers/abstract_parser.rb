@@ -48,12 +48,12 @@ class AbstractParser
   private
   
   def delayed_lookup(klass, *pk_values)
-    ObjectReference.unique_id_for(klass, pk_values)
+    ObjectReference.pk_md5_for(klass, pk_values)
   end
   
   def lookup!(klass, *pk_values)
-    unique_id = ObjectReference.unique_id_for(klass, pk_values)
-    @objects.lookup_ref(unique_id) or raise "invalid/unknown #{klass}: #{pk_values.inspect}"
+    pk_md5 = ObjectReference.pk_md5_for(klass, pk_values)
+    @objects.lookup_ref(pk_md5) or raise "invalid/unknown #{klass}: #{pk_values.inspect}"
   end
   
   def parse_field(header, value, fields)

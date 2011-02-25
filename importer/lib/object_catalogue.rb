@@ -37,13 +37,9 @@ class ObjectCatalogue
   
   def add(csv_catalogue, objects, *row_md5s)
     objects.each do |object|
+      ref = ObjectReference.from_object(object)
       
-      # row_md5s = (row_md5s + row_md5_chain(object, catalogue)).flatten.uniq
-      
-      ref = ObjectReference.new(self, row_md5s, object)
-      uid = ref.unique_id
-      
-      existing_ref = @refs_by_unique_id[uid]
+      existing_ref = @refs_by_pk_md5[ref.pk_md5]
       unless existing_ref.nil?
         existing_rows = existing_ref.row_md5s.map do |row_md5|
           csv_catalogue.row_info(row_md5).values_at(:name, :index).join(":")
@@ -52,8 +48,10 @@ class ObjectCatalogue
         return ["duplicate of #{existing_ref.klass} from #{existing_rows}"]
       end
       
-      @data_by_unique_id[uid] = object
-      @refs_by_unique_id[uid] = ref
+      @data_by_pk_md5[ref.pk_md5] = object
+      @refs_by_pk_md5[ref.pk_md5] = ref
+      @rows_by_pk_md5[ref.pk_md5] = (row_md5s + row_md5_chain(object)).flatten.uniq
+      
       @refs_to_write << ref
     end
     
@@ -63,17 +61,18 @@ class ObjectCatalogue
   def commit(group_name)
     return if @refs_to_write.empty?
     
-    data_by_unique_id = {}
-    refs_by_unique_id = {}
+    data_by_pk_md5 = {}
+    rows_by_pk_md5 = {}
+    vals_by_pk_md5 = {}
     @refs_to_write.each do |ref|
-      uid = ref.unique_id
-      data_by_unique_id[uid] = flatten_object(@data_by_unique_id.delete(uid))
-      refs_by_unique_id[uid] = ref
-      @group_names_by_unique_id[uid] = group_name
+      data_by_pk_md5[ref.pk_md5] = @data_by_pk_md5.delete(ref.pk_md5)
+      rows_by_pk_md5[ref.pk_md5] = @rows_by_pk_md5[ref.pk_md5]
+      vals_by_pk_md5[ref.pk_md5] = ref.value_md5
+      @group_names_by_pk_md5[ref.pk_md5] = group_name
     end
     @refs_to_write.clear
     
-    {@data_dir => data_by_unique_id, @refs_dir => refs_by_unique_id}.each do |dir, set|
+    {@data_dir => data_by_pk_md5, @refs_dir => vals_by_pk_md5, @rows_dir => rows_by_pk_md5}.each do |dir, set|
       path = dir / group_name
       data = (File.open(path) { |f| Marshal.load(f) } rescue {})
       data.update(set)
@@ -82,50 +81,42 @@ class ObjectCatalogue
   end
   
   def delete_obsolete(row_md5s)
-    refs_by_row_md5 = {}
-    @refs_by_unique_id.values.each do |ref|
-      ref.row_md5s.each { |row_md5| (refs_by_row_md5[row_md5] ||= []) << ref }
-    end
+    row_md5s = row_md5s.to_set
     
-    obsolete_row_md5s = (refs_by_row_md5.keys - row_md5s)
-    obsolete_refs = refs_by_row_md5.values_at(*obsolete_row_md5s).flatten
+    obsolete_pk_md5s = @rows_by_pk_md5.map do |pk_md5, rows|
+      next if (row_md5s & rows).size == rows.size
+      pk_md5
+    end.compact
     
-    obsolete_refs.group_by { |ref| @group_names_by_unique_id.delete(ref.unique_id) }.each do |name, refs|
-      [@data_dir, @refs_dir].each do |dir|
+    obsolete_pk_md5s.group_by { |pk_md5| @group_names_by_pk_md5.delete(pk_md5) }.each do |name, pk_md5s|
+      [@data_dir, @refs_dir, @rows_dir].each do |dir|
         path = dir / name
         data = File.open(path) { |f| Marshal.load(f) } rescue {}
-        refs.each { |ref| data.delete(ref.unique_id) }
+        pk_md5s.each { |pk_md5| data.delete(pk_md5) }
         File.open(path, "w") { |f| Marshal.dump(data, f) }
       end
     end
     
-    obsolete_refs.each do |ref|
-      @data_by_unique_id.delete(ref.unique_id)
-      @refs_by_unique_id.delete(ref.unique_id)
+    obsolete_pk_md5s.each do |pk_md5|
+      @data_by_pk_md5.delete(pk_md5)
+      @refs_by_pk_md5.delete(pk_md5)
+      @rows_by_pk_md5.delete(pk_md5)
     end
     
-    puts " - deleted #{obsolete_refs.size} objects in #{obsolete_group_names.size} groups" unless obsolete_refs.empty?
+    puts " - deleted #{obsolete_pk_md5s.size} objects in #{obsolete_group_names.size} groups" unless obsolete_pk_md5s.empty?
   end
   
-  def flatten_object(object)
-    flattened = object.map do |key, value|
-      value = value.unique_id if value.is_a?(ObjectReference)
-      [key, value]
-    end
-    Hash[flattened]
-  end
-  
-  def lookup_data(unique_id)
-    data = @data_by_unique_id[unique_id]
+  def lookup_data(pk_md5)
+    data = @data_by_pk_md5[pk_md5]
     return data unless data.nil?
     
-    path = @data_dir / @group_names_by_unique_id[unique_id]
+    path = @data_dir / @group_names_by_pk_md5[pk_md5]
     return nil unless File.exist?(path)
-    @data_by_unique_id[unique_id] = File.open(path) { |f| unflatten_object(Marshal.load(f)[unique_id]) }
+    @data_by_pk_md5[pk_md5] = File.open(path) { |f| Marshal.load(f)[pk_md5] }
   end
   
-  def lookup_ref(unique_id)
-    @refs_by_unique_id[unique_id]
+  def lookup_ref(pk_md5)
+    @refs_by_pk_md5[pk_md5]
   end
   
   # TODO: reimplement
@@ -138,7 +129,7 @@ class ObjectCatalogue
     auto_row_md5s.each do |md5|
       object_refs = @object_refs_by_row_md5[md5]
       if object_refs.nil? then missing_auto_row_md5s << md5
-      else object_refs.each { |o| seen_row_md5s += (@row_md5s_by_unique_id[o.unique_id] || []) }
+      else object_refs.each { |o| seen_row_md5s += (@row_md5s_by_pk_md5[o.pk_md5] || []) }
       end
     end
     
@@ -146,14 +137,15 @@ class ObjectCatalogue
   end
   
   def missing_row_md5s(row_md5s)
-    row_md5s - @refs_by_unique_id.values.map { |ref| ref.row_md5s }.flatten
+    row_md5s - @rows_by_pk_md5.values.flatten.uniq
   end
   
-  def unflatten_object(object)
-    unflattened = object.map do |key, value|
-      value = lookup_ref(value) if value.is_a?(ObjectUniqueID)
-      [key, value]
+  def row_md5_chain(object)
+    case object
+    when Array                then object.map { |v| row_md5_chain(v) }
+    when Hash                 then object.values.map { |v| row_md5_chain(v) }
+    when ObjectReference::MD5 then @rows_by_pk_md5[object]
+    else []
     end
-    Hash[unflattened]
   end
 end

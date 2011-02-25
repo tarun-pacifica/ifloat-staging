@@ -30,6 +30,7 @@ class ObjectReference < Struct.new(:pk_md5, :value_md5)
       when BigDecimal          then "%.#{NumericPropertyValue::MAX_DP}f" % value
       when Class, Integer, nil then value.to_s
       when false               then "0"
+      when ObjectReference     then value.pk_md5
       when String              then value
       when true                then "1"
       else raise "unable to coerce #{value.class} #{value.inspect}"
@@ -42,8 +43,7 @@ class ObjectReference < Struct.new(:pk_md5, :value_md5)
   def self.from_object(object)
     klass = object[:class]
     
-    pk_values = object.values_at(*PRIMARY_KEYS[klass])
-    pk_md5 = coerce_to_md5(klass, pk_values)
+    pk_md5 = pk_md5_for(klass, object.values_at(*PRIMARY_KEYS[klass]))
     
     rel_names_by_child_key = Hash[klass.relationships.map { |name, rel| [rel.child_key.first.name, name.to_sym] }]
     property_names = klass.properties.map do |property|
@@ -54,15 +54,6 @@ class ObjectReference < Struct.new(:pk_md5, :value_md5)
     value_md5 = ObjectReference.coerce_to_md5(object.values_at(*keys))
     
     new(pk_md5, value_md5)
-  end
-  
-  def self.row_md5_chain(object, catalogue)
-    case object
-    when Array then object.map { |v| row_md5_chain(v) }
-    when Hash  then object.values.map { |v| row_md5_chain(v) }
-    when MD5   then catalogue.lookup_ref(value).row_md5s
-    else []
-    end
   end
   
   @@md5_cache = {}
@@ -76,7 +67,7 @@ class ObjectReference < Struct.new(:pk_md5, :value_md5)
   end
   
   def attributes
-    ObjectCatalogue.default.lookup_data(@pk_md5)
+    ObjectCatalogue.default.lookup_data(pk_md5)
   end
   
   def lookup(key)

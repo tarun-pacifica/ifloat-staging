@@ -88,12 +88,17 @@ class ObjectCatalogue
       pk_md5
     end.compact
     
+    obsolete_group_names = []
     obsolete_pk_md5s.group_by { |pk_md5| @group_names_by_pk_md5.delete(pk_md5) }.each do |name, pk_md5s|
+      obsolete_group_names << name
+      
       [@data_dir, @refs_dir, @rows_dir].each do |dir|
         path = dir / name
         data = File.open(path) { |f| Marshal.load(f) } rescue {}
         pk_md5s.each { |pk_md5| data.delete(pk_md5) }
-        File.open(path, "w") { |f| Marshal.dump(data, f) }
+        if data.empty? then File.delete(path)
+        else File.open(path, "w") { |f| Marshal.dump(data, f) }
+        end
       end
     end
     

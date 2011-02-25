@@ -132,9 +132,12 @@ module Merb
       html.join("\n")
     end
     
-    def product_image(image)
+    # TODO: find out where simple form is used : product_image(image)
+    def product_image(image)#, titles, relative_position)
       url, popup_url = product_image_urls(image)
       "<img class=\"product\" src=#{url.inspect} onmouseover=\"product_image_popup(event, '#{popup_url}')\" onmouseout=\"product_image_unpopup(event)\" alt=\"product\" />"
+      # TODO: carousel position affects left/right bias - need adaptive positioning - right by default
+      # '<img class="product" src="' + url + '" alt="product" onmouseover="product_image_popup(event, \'' + popup_url + '\', \'' + relative_position + '\', ' + product_image_caption(titles) + ')" onmouseout="product_image_unpopup(event)" />';
     end
     
     def product_image_urls(image)

@@ -2,11 +2,14 @@
 
 <div id="body">
   <div id="brand_info">
-    <img src=<%= @brand.asset.url.inspect %> alt="brand logo" />
+    <div class="logo">
+      <img src=<%= @brand.asset.url.inspect %> alt="brand logo" />
+    </div>
     <div class="description">
       <h1><%= @brand.name %></h1>
       <p>no description support yet</p>
     </div>
+    <hr class="terminator" />
   </div>
   
   <div id="brand_products">
@@ -19,10 +22,32 @@
     <% current_section = section %>
     <% end %>
     
-    <h3><%= heading %></h3>
+    <h3><%= heading %> <span onclick="brand_show_all('<%= heading.attribute_escape(true) %>')">show me all nnn</span></h3>
     
-    <code>carousel with <%= checksums.size %> items</code>
+    <div class="product_set">
+      <a class="buttons prev" href="#"></a>
+      <div class="viewport">
+        <ul class="overview">
+          <% checksums.sort_by { |c| @titles_by_checksum[c] }.each do |checksum| %>
+          <li>
+            <a href=<%= @urls_by_checksum[checksum].inspect %>>
+              <%= product_image(@assets_by_checksum[checksum]) %>
+            </a>
+          </li>
+          <% end %>
+        </ul>
+      </div>
+      <a class="buttons next" href="#"></a>
+    </div>
     
     <% end %>
   </div>
 </div>
+
+<script type="text/javascript" charset="utf-8">
+  $(document).ready(function(){
+    var config = {callback: function(e, i) { console.log(e, i); }, display: 8, duration: 1000};
+    $('#brand_products .product_set').each(function() { $(this).tinycarousel(config) });
+    // TODO: collapse each carousel's width to fit exactly the number of total items or 8 (whichever is less)
+  });
+</script>

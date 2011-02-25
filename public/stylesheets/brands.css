@@ -1,0 +1,95 @@
+#brand_info {
+  background: white;
+  border: 1px solid silver;
+  border-radius: 10px 10px 0 0;
+  -moz-border-radius: 10px 10px 0 0;
+  -webkit-border-radius: 10px 10px 0 0;
+  padding: 10px;
+}
+
+#brand_info div {
+  float: left;
+}
+
+#brand_info h1 {
+  margin: 5px 0 0 0;
+  font-size: 16px;
+}
+
+#brand_info p {
+  color: gray;
+  margin: 0;
+}
+
+#brand_products {
+  background: #3E3E3E;
+  border-radius: 0 0 10px 10px;
+  -moz-border-radius: 0 0 10px 10px;
+  -webkit-border-radius: 0 0 10px 10px;
+  color: white;
+  padding: 15px;
+}
+
+#brand_products h2 {
+  font-size: 24px;
+  font-weight: normal;
+  margin: 0;
+}
+
+#brand_products h3 {
+  font-size: 16px;
+  font-weight: normal;
+  margin: 10px 0 5px 0;
+}
+
+#brand_products h3 span {
+  color: #FEB330;
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+#brand_products .product_set {
+  height: 100px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+#brand_products .product_set .viewport {
+  float: left;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  width: 807px;
+}
+
+#brand_products .product_set .buttons {
+  background: #FEB330;
+  display: block;
+  float: left;
+  height: 100%;
+  width: 30px;
+}
+
+#brand_products .product_set .disable.prev {
+  background: gray;
+}
+
+#brand_products .product_set .disable.next {
+  visibility: hidden;
+}
+
+#brand_products .product_set .overview {
+  left: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 0;
+}
+
+#brand_products .product_set .overview li {
+  float: left;
+  margin-right: 1px;
+  height: 100px;
+  width: 100px;
+}

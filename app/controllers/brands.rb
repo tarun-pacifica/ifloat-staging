@@ -20,9 +20,11 @@ class Brands < Application
     @assets_by_checksum = Asset.all(:checksum => product_ids_by_checksum.keys).hash_by(:checksum)
     
     @titles_by_checksum = {}
+    @urls_by_checksum = {}
     product_ids_by_checksum.each do |checksum, product_ids|
       product_id = product_ids.first
       @titles_by_checksum[checksum] = [:image, :summary].map { |domain| Indexer.product_title(domain, product_id) }
+      @urls_by_checksum[checksum] = Indexer.product_url(product_id)
     end
     
     # @page_description = @brand.description

@@ -78,7 +78,7 @@ class CSVCatalogue
       File.open(into_dir / row_md5s.last, "w") { |f| f.write(marshaled) }
     end
     
-    errors << "no header row" if headers.nil?
+    errors << "no header row" if row_md5s.nil?
     {:errors => errors, :headers => headers, :row_md5s => row_md5s}
   end
   

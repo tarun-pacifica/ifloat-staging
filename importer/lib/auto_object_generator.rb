@@ -8,9 +8,17 @@ class AutoObjectGenerator
     @objects = object_catalogue
     
     @errors = []
+    
+    @agd_property, @at_property = %w(auto:group_diff auto:title).map do |name|
+      ref = @objects.lookup_ref(ObjectReference.pk_md5_for(PropertyDefinition, name))
+      @errors << "#{name} property not found - cannot generate values without it" if ref.nil?
+      ref
+    end
   end
   
   def generate
+    return unless @errors.empty?
+    
     product_row_md5s, *auto_row_md5s = [/^products\//, /^property_hierarchies/, /^title_strategies/].map do |matcher|
       @csvs.infos_for_name(matcher).map { |info| info[:row_md5s] }.flatten.to_set
     end

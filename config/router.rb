@@ -6,6 +6,8 @@ Merb::Router.prepare do
   match('/tools/:action(.:ext)').to(:controller => 'tools')
   
   match('/brands/:name').to(:controller => 'brands', :action => 'show')
+  match('/brands/:name/:root').to(:controller => 'brands', :action => 'show')
+  match('/brands/:name/:root/:sub').to(:controller => 'brands', :action => 'show')
   
   match('/cached_finds/:id/filter/:property_id', :method => 'get').to(:controller => 'cached_finds', :action => 'filter_get')
   match('/cached_finds/:id/filter/:property_id', :method => 'post').to(:controller => 'cached_finds', :action => 'filter_set')
@@ -18,8 +20,7 @@ Merb::Router.prepare do
   
   match('/categories').to(:controller => 'categories', :action => 'show').name(:categories)
   match('/categories/:root').to(:controller => 'categories', :action => 'show').name(:categories)
-  match('/categories/:root/:suba').to(:controller => 'categories', :action => 'show').name(:categories)
-  match('/categories/:root/:suba/:subb').to(:controller => 'categories', :action => 'show').name(:categories)
+  match('/categories/:root/:sub').to(:controller => 'categories', :action => 'show').name(:categories)
   
   match('/picked_products/buy/:facility_id').to(:controller => 'picked_products', :action => 'buy')
   match('/picked_products/products_for/:klass').to(:controller => 'picked_products', :action => 'compare_by_class')

@@ -3,7 +3,7 @@
 <div id="body">
   <div id="brand_info">
     <div class="logo">
-      <img src=<%= @brand.asset.url.inspect %> alt="brand logo" />
+      <a href="<%= @brand_url %>"> <img src=<%= @brand.asset.url.inspect %> alt="brand logo" /> </a>
     </div>
     <div class="description">
       <h1><%= @brand.name %></h1>
@@ -16,29 +16,41 @@
     <% current_section = nil %>
     <% @checksums_by_node.sort.each do |node, checksums| %>
     <% section, heading = node %>
+    <% checksums = checksums.sort_by { |c| @titles_by_checksum[c] } %>
     
     <% unless section == current_section %>
     <h2><%= section %></h2>
     <% current_section = section %>
     <% end %>
     
-    <h3><%= heading %> <span onclick="brand_show_all('<%= heading.attribute_escape(true) %>')">show me all nnn</span></h3>
+    <h3>
+      <%= heading %>
+      <% if checksums.size > 8 and @checksums_by_node.size > 1 %>
+      <a href="<%= ([@brand_url] + node).join('/').tr(' ', '+') %>">show me all <%= checksums.size %></a>
+      <% end %>
+    </h3>
     
+    <% if @checksums_by_node.size > 1 %>
     <div class="product_set">
       <a class="buttons prev" href="#"></a>
       <div class="viewport">
         <ul class="overview">
-          <% checksums.sort_by { |c| @titles_by_checksum[c] }.each do |checksum| %>
+          <% checksums.each do |checksum| %>
           <li>
-            <a href=<%= @urls_by_checksum[checksum].inspect %>>
-              <%= product_image(@assets_by_checksum[checksum]) %>
-            </a>
+            <a href=<%= @urls_by_checksum[checksum].inspect %>> <%= product_image(@assets_by_checksum[checksum]) %> </a>
           </li>
           <% end %>
         </ul>
       </div>
       <a class="buttons next" href="#"></a>
     </div>
+    <% else %>
+    <div class="product_set_all">
+      <% checksums.each do |checksum| %>
+        <a href=<%= @urls_by_checksum[checksum].inspect %>> <%= product_image(@assets_by_checksum[checksum]) %> </a>
+      <% end %>
+    </div>
+    <% end %>
     
     <% end %>
   </div>
@@ -46,7 +58,7 @@
 
 <script type="text/javascript" charset="utf-8">
   $(document).ready(function(){
-    var config = {callback: function(e, i) { console.log(e, i); }, display: 8, duration: 1000};
+    var config = {display: 8, duration: 1000};
     $('#brand_products .product_set').each(function() { $(this).tinycarousel(config) });
   });
 </script>

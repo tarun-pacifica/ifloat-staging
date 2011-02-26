@@ -1,10 +1,13 @@
 class Brands < Application
-  def show(name)
+  def show(name, root = nil, sub = nil)
+    name = URI.unescape(name)
     @brand = Brand.first(:name => name)
     return render("../cached_finds/new".to_sym, :status => 404) if @brand.nil?
     
-    product_ids_by_node = @brand.product_ids_by_category_node
-    product_ids = product_ids_by_node.values.flatten
+    path_names = [root, sub].compact.map { |n| n.tr("+", " ") }
+    
+    @product_ids_by_node = @brand.product_ids_by_category_node(path_names)
+    product_ids = @product_ids_by_node.values.flatten
     
     product_ids_by_checksum = Indexer.image_checksums_for_product_ids(product_ids)
     checksums_by_product_id = {}
@@ -13,7 +16,7 @@ class Brands < Application
     end
     
     @checksums_by_node = {}
-    product_ids_by_node.each do |node, product_ids|
+    @product_ids_by_node.each do |node, product_ids|
       @checksums_by_node[node] = checksums_by_product_id.values_at(*product_ids).uniq
     end
     
@@ -27,8 +30,9 @@ class Brands < Application
       @urls_by_checksum[checksum] = Indexer.product_url(product_id)
     end
     
-    # @page_description = @brand.description
-    @page_title = "#{name}"
+    @brand_url = "/brands/#{URI.escape(name)}"
+    @page_description = @brand.description
+    @page_title = ([name] + path_names).join(" - ")
     render
   end
   

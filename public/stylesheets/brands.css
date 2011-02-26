@@ -42,10 +42,15 @@
   margin: 10px 0 5px 0;
 }
 
-#brand_products h3 span {
+#brand_products h3 a {
   color: #FEB330;
   font-size: 12px;
   margin-left: 5px;
+  text-decoration: none;
+}
+
+#brand_products h3 a:hover {
+  text-decoration: underline;
 }
 
 #brand_products .product_set {
@@ -92,4 +97,8 @@
   margin-right: 1px;
   height: 100px;
   width: 100px;
+}
+
+#brand_products .product_set_all {
+  padding: 10px 0 0 20px;
 }

@@ -30,7 +30,7 @@ class Brand
   end
   
   # TODO: spec
-  def product_ids_by_category_node
+  def product_ids_by_category_node(node_matcher)
     query =<<-SQL
       SELECT DISTINCT(pv.product_id)
       FROM property_values pv
@@ -42,7 +42,7 @@ class Brand
     product_ids = repository.adapter.select(query, name).to_set
     product_ids_by_node = {}
     walk_category_tree_for_product_ids(product_ids) do |node, node_product_ids|
-      product_ids_by_node[node] = node_product_ids.to_a
+      product_ids_by_node[node] = node_product_ids.to_a if node_matcher.zip(node).all? { |m, n| m == n }
     end
     product_ids_by_node
   end

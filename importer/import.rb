@@ -60,11 +60,6 @@ DataMapper::Model.sorted_descendants(extra_dependency_rules).each do |model|
     
     parser = Kernel.const_get("#{model}Parser").new(csv_info, objects)
     all_errors += parser.header_errors
-    if all_errors.size > 0
-      require "pp"
-      pp all_errors
-      exit
-    end
     next unless parser.header_errors.empty?
     
     parsed_count, error_count = 0, 0
@@ -81,16 +76,20 @@ DataMapper::Model.sorted_descendants(extra_dependency_rules).each do |model|
     
     puts " - parsed #{parsed_count} objects from #{csv_row_md5s_to_parse.size}/#{csv_info[:row_md5s].size} rows of #{csv_info[:name]}" if parsed_count > 0
     puts " ! #{error_count} errors reported from #{csv_info[:name]}" if error_count > 0
-    
-    if error_count > 0
-      require "pp"
-      pp all_errors
-      exit
-    end
-    
-    objects.commit(csv_info[:name].tr("/", "_"))
+    objects.commit(csv_info[:name].tr("/", "_")) unless error_count > 0
   end
 end
+unless all_errors.empty?
+  FasterCSV.open(ERROR_CSV_PATH, "w") do |csv|
+    csv << %w(csv row column error)
+    all_errors.each { |fields| csv << fields }
+  end
+  mail_fail("compiling objects")
+end
+
+# TODO: auto objects
+
+objects.summarize
 
 # ph_row_md5s = csvs.row_md5s_for_name(/^property_hierarchies/)
 # ts_row_md5s = csvs.row_md5s_for_name(/^title_strategies/)

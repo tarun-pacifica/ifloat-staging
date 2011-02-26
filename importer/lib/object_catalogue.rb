@@ -153,4 +153,8 @@ class ObjectCatalogue
     else []
     end
   end
+  
+  def summarize
+    puts " > managing #{@group_names_by_pk_md5.size} objects in #{@group_names_by_pk_md5.values.uniq.size} groups"
+  end
 end

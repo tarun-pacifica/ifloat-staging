@@ -15,7 +15,7 @@ class BrandParser < AbstractParser
     
     case head
     when "company.reference" then @import_set.get!(Company, value)
-    when "logo" then @import_set.get!(Asset, "brand_logos", fields["company.reference"], value, description)
+    when "logo" then @import_set.get!(Asset, "brand_logos", fields["company.reference"], value)
     else super
     end
   end

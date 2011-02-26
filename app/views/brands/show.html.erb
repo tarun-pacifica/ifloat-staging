@@ -49,6 +49,7 @@
       <% checksums.each do |checksum| %>
         <a href=<%= @urls_by_checksum[checksum].inspect %>> <%= product_image(@assets_by_checksum[checksum]) %> </a>
       <% end %>
+      <hr class="terminator">
     </div>
     <% end %>
     

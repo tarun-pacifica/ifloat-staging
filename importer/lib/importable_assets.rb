@@ -1,5 +1,8 @@
 class ImportableAssets
+  include ErrorWriter
+  
   CSV_HEADERS = %w(path mtime bucket company_ref name checksum pixel_size path_wm path_small path_tiny)
+  ERROR_HEADERS = %w(asset error)
   VARIANT_SIZES = {:small => "200x200", :tiny => "100x100"}
   
   def initialize(source_dir, csv_path, variant_dir, watermark_path)
@@ -40,15 +43,15 @@ class ImportableAssets
     path_parts = a[:relative_path].split("/")
     error(a, "not in a bucket/company(/class) directory") and return a unless (3..4).include?(path_parts.size)
     
-    a[:errors] << "unknown bucket" unless Asset::BUCKETS.include?(a[:bucket] = path_parts.shift)
+    error(a, "unknown bucket") unless Asset::BUCKETS.include?(a[:bucket] = path_parts.shift)
     
     company_ref = path_parts.shift
     company_ref = $1 if company_ref =~ /^(.+?)___/
-    a[:errors] << "invalid company reference format" unless company_ref =~ Company::REFERENCE_FORMAT
+    error(a, "invalid company reference format") unless company_ref =~ Company::REFERENCE_FORMAT
     
     name = path_parts.pop
-    a[:errors] << "invalid asset name format" unless name =~ Asset::NAME_FORMAT
-    a[:errors] << "extension not jpg, pdf or png" unless name =~ /(jpg|pdf|png)$/
+    error(a, "invalid asset name format") unless name =~ Asset::NAME_FORMAT
+    error(a, "extension not jpg, pdf or png") unless name =~ /(jpg|pdf|png)$/
     
     a.update(:company_ref => company_ref, :name => name, :checksum => Digest::MD5.file(a[:path]).hexdigest)
   end
@@ -165,13 +168,6 @@ class ImportableAssets
         {:image => image, :name => name, :path => path} unless path.nil? or File.exist?(path)
       end
     end.flatten.compact
-  end
-  
-  def write_errors(path)
-    FasterCSV.open(path, "w") do |csv|
-      csv << %w(asset error)
-      @errors.each { |path, message| csv << [path, message] }
-    end
   end
   
   def write_to_csv

@@ -3,6 +3,8 @@ class ObjectCatalogue
     @@default
   end
   
+  attr_reader :rows_by_pk_md5
+  
   def initialize(dir)
     @@default = self
     
@@ -122,27 +124,6 @@ class ObjectCatalogue
   
   def lookup_ref(pk_md5)
     @refs_by_pk_md5[pk_md5]
-  end
-  
-  # TODO: reimplement
-  def missing_auto_row_md5s(auto_row_md5s, product_row_md5s)
-    raise "to reimplement"
-    
-    missing_auto_row_md5s = []
-    seen_row_md5s = []
-    
-    auto_row_md5s.each do |md5|
-      object_refs = @object_refs_by_row_md5[md5]
-      if object_refs.nil? then missing_auto_row_md5s << md5
-      else object_refs.each { |o| seen_row_md5s += (@row_md5s_by_pk_md5[o.pk_md5] || []) }
-      end
-    end
-    
-    [missing_auto_row_md5s, product_row_md5s - seen_row_md5s]
-  end
-  
-  def missing_row_md5s(row_md5s)
-    row_md5s - @rows_by_pk_md5.values.flatten.uniq
   end
   
   def row_md5_chain(object)

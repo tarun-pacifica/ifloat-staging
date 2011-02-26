@@ -1,4 +1,7 @@
 class CSVCatalogue
+  include ErrorWriter
+  
+  ERROR_HEADERS = %w(csv error)
   INFO_FILE_NAME = "_info"
   NIL_VALUES = %w(N/A NIL)
   SKIP_HEADER_MATCHER = /^(raw:)|(IMPORT)/
@@ -101,22 +104,7 @@ class CSVCatalogue
     @info_by_row_md5.keys
   end
   
-  # TODO: may not need?
-  def row_md5s_for_name(matcher)
-    infos_for_name(matcher).map { |info| info[:row_md5s] }.flatten
-  end
-  
   def summarize
     puts " > managing #{row_md5s.size} rows from #{@info_by_csv_md5.size} CSVs"
-  end
-  
-  def write_errors(path)
-    return false if @errors.empty?
-    
-    FasterCSV.open(path, "w") do |csv|
-      csv << %w(csv error)
-      @errors.each { |path, message| csv << [path, message] }
-    end
-    true
   end
 end

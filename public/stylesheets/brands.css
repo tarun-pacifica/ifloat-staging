@@ -59,6 +59,11 @@
   overflow: hidden;
 }
 
+#brand_products .product_set img {
+  height: 100px;
+  width: 100px;
+}
+
 #brand_products .product_set .viewport {
   float: left;
   height: 100%;

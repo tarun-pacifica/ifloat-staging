@@ -31,25 +31,31 @@ end
 
 
 puts "Scanning asset repository for updates..."
+GC.disable
 assets = ImportableAssets.new(REPO_DIRS["assets"], ASSET_CSV_PATH, ASSET_VARIANT_DIR, ASSET_WATERMARK_PATH)
 unless assets.update
   assets.write_errors(ERROR_CSV_PATH)
   mail_fail("compiling assets")
 end
+GC.enable
 
 
 puts "Scanning CSV repository for updates..."
+GC.disable
 csvs = CSVCatalogue.new(CSV_INDEX_DIR)
 Dir[REPO_DIRS["csvs"] / "**" / "*.csv"].each { |path| csvs.add(path) }
 mail_fail("compiling CSVs") if csvs.write_errors(ERROR_CSV_PATH)
 csvs.delete_obsolete
 csvs.summarize
+GC.enable
 
 
 puts "Recovering object state..."
+GC.disable
 objects = ObjectCatalogue.new(OBJECT_INDEX_DIR)
 objects.delete_obsolete(csvs.row_md5s)
 objects.summarize
+GC.enable
 
 
 puts "Generating any missing row objects..."

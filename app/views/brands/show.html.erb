@@ -6,8 +6,8 @@
       <a href="<%= @brand_url %>"> <img src=<%= @brand.asset.url.inspect %> alt="brand logo" /> </a>
     </div>
     <div class="description">
-      <h1><%= @brand.name %></h1>
-      <p><%= @brand.description %></p>
+      <h1><%= @brand.name.superscript %></h1>
+      <p><%= @brand.description.superscript %></p>
     </div>
     <hr class="terminator" />
   </div>

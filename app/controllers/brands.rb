@@ -8,6 +8,7 @@ class Brands < Application
     
     product_ids_by_node = @brand.product_ids_by_category_node(path_names)
     all_product_ids = product_ids_by_node.values.flatten
+    return render("../cached_finds/new".to_sym, :status => 404) if all_product_ids.empty?
     
     checksums_by_product_id = {}
     product_ids_by_checksum = {}

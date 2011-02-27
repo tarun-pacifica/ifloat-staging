@@ -1,3 +1,5 @@
+// TODO: DEPRECATE
+
 function product_image_caption(titles) {
 	return titles ? util_superscript('text', util_escape_attr_js(titles.join('<br/>'))) : 'null';
 }

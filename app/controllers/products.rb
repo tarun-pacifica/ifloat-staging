@@ -1,15 +1,17 @@
 class Products < Application
   def batch(ids)
-    product_ids = ids.split("_").map { |id| id.to_i }.uniq[0, 100]
+    provides :js
     
+    product_ids = ids.split("_").map { |id| id.to_i }.uniq[0, 100]
     images_by_product_id = Product.primary_images_by_product_id(product_ids)
     
     product_ids.map do |product_id|
-      { :id         => product_id,
-        :image_urls => product_image_urls(images_by_product_id[product_id]),
-        :title      => Indexer.product_title(:canonical, product_id),
-        :summary    => Indexer.product_title(:summary, product_id),
-        :url        => Indexer.product_url(product_id) }
+      image = images_by_product_id[product_id]
+      image_urls = Hash[[:small, :tiny].map { |k| [k, image.url(k)] }]
+      titles = Hash[[:canonical, :image, :summary].map { |k| [k, Indexer.product_title(k, product_id)] }]
+      url = Indexer.product_url(product_id)
+      
+      {:id => product_id, :image_urls => image_urls, :titles => titles, :url => url}
     end.to_json
   end
   

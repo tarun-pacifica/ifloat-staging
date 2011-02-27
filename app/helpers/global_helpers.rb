@@ -144,6 +144,10 @@ module Merb
       image.nil? ? Array.new(2) { "/images/common/no_image.png" } : [image.url(:tiny), image.url(:small)]
     end
     
+    def product_link(product_id, image)
+      "<a id=\"product_#{product_id}\" href=#{Indexer.product_url(product_id).inspect}> <img src=#{image.url(:tiny).inspect} alt=\"product\" /> </a>"
+    end
+    
     def product_value_summary(info, tooltip_position = :right)
       return nil if info.nil?
       

@@ -42,6 +42,7 @@ module Merb
       "<div>#{super}</div>"
     end
     
+    # TODO: deprecate once new product link code in place for cached finds
     def marshal_images(product_ids, limit = nil)
       product_ids_by_checksum = Indexer.image_checksums_for_product_ids(product_ids)
       total = product_ids_by_checksum.values.map { |pids| pids.size }.inject(0, :+)
@@ -132,14 +133,13 @@ module Merb
       html.join("\n")
     end
     
-    # TODO: find out where simple form is used : product_image(image)
-    def product_image(image)#, titles, relative_position)
+    # TODO: deprecate
+    def product_image(image)
       url, popup_url = product_image_urls(image)
       "<img class=\"product\" src=#{url.inspect} onmouseover=\"product_image_popup(event, '#{popup_url}')\" onmouseout=\"product_image_unpopup(event)\" alt=\"product\" />"
-      # TODO: carousel position affects left/right bias - need adaptive positioning - right by default
-      # '<img class="product" src="' + url + '" alt="product" onmouseover="product_image_popup(event, \'' + popup_url + '\', \'' + relative_position + '\', ' + product_image_caption(titles) + ')" onmouseout="product_image_unpopup(event)" />';
     end
     
+    # TODO: deprecate
     def product_image_urls(image)
       image.nil? ? Array.new(2) { "/images/common/no_image.png" } : [image.url(:tiny), image.url(:small)]
     end

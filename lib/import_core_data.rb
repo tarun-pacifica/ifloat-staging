@@ -183,6 +183,29 @@ class ImportSet
       end
     end
     
+    stopwatch("ensured all checksum groups map to product group subsets") do
+      first_products_by_checksum = {}
+      
+      all_products.each do |product|
+        attachment = pias_by_product[product]
+        next if attachment.nil?
+        checksum = attachment.attributes[:asset].attributes[:checksum]
+        first_product = first_products_by_checksum[checksum]
+        
+        first_products_by_checksum[checksum] = product and next if first_product.nil?
+        
+        fp_group, p_group = [first_product, product].map { |prod| prod.attributes[:reference_group] }
+        next unless fp_group.nil? or fp_group != p_group
+        
+        fp_company, fp_ref = first_product.attributes.values_at(:company, :reference)
+        fp_company_ref = fp_company.attributes[:reference]
+        fp_ident = "#{first_product.path} row #{first_product.row} (#{fp_company_ref} / #{fp_ref})"
+        problem = "their reference_group values differ (#{p_group.inspect} vs #{fp_group.inspect})"
+        problem = "neither have a reference_group value set" if fp_group == p_group
+        error(Product, product.path, product.row, nil, "has the same primary image as #{fp_ident} but #{problem}")
+      end
+    end if false
+    
     stopwatch("handled orphaned PickedProducts") do
       db_companies = Company.all.hash_by(:reference)
       orphaned_product_ids = []

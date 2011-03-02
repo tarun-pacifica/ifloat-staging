@@ -40,7 +40,7 @@ end
 
 puts "Scanning CSV repository for updates..."
 csvs = CSVCatalogue.new(CSV_INDEX_DIR)
-Dir[REPO_DIRS["csvs"] / "**" / "*.csv"].each { |path| csvs.add(path) }
+Dir[REPO_DIRS["csvs"] / "**" / "*.csv"].each { |path| GC.disable; csvs.add(path); GC.enable } # TODO: remove GC hacks once Ruby Marshal stops blowing up
 mail_fail("compiling CSVs") if csvs.write_errors(ERROR_CSV_PATH)
 csvs.delete_obsolete
 csvs.summarize

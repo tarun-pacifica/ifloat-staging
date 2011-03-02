@@ -10,7 +10,7 @@ class AutoObjectGenerator
     @errors = []
     
     @agd_property, @at_property = %w(auto:group_diff auto:title).map do |name|
-      ref = @objects.lookup_ref(ObjectReference.pk_md5_for(PropertyDefinition, name))
+      ref = @objects.lookup_ref(ObjectReference.pk_md5_for(PropertyDefinition, [name]))
       @errors << "#{name} property not found - cannot generate values without it" if ref.nil?
       ref
     end
@@ -38,10 +38,10 @@ class AutoObjectGenerator
   end
   
   def generate_ph_values(row_md5)
-    p ["PH", row_md5]
+    # p ["PH", row_md5]
   end
   
   def generate_ts_values(row_md5)
-    p ["TS", row_md5]
+    # p ["TS", row_md5]
   end
 end

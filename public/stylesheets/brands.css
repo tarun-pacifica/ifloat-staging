@@ -68,18 +68,29 @@
 }
 
 #brand_products .product_set .buttons {
-  background: #FEB330;
   display: block;
   float: left;
   height: 100%;
   width: 30px;
 }
 
-#brand_products .product_set .disable.prev {
-  background: gray;
+#brand_products .product_set .buttons.prev {
+  background: url(/images/carousel/buttons/previous.png) no-repeat;
 }
 
-#brand_products .product_set .disable.next {
+#brand_products .product_set .buttons.next {
+  background: url(/images/carousel/buttons/next.png) no-repeat;
+}
+
+#brand_products .product_set .buttons:hover {
+  background-position: 0 -100px;
+}
+
+#brand_products .product_set .buttons.prev.disable {
+  background-position: 0 -200px;
+}
+
+#brand_products .product_set .buttons.next.disable {
   visibility: hidden;
 }
 

@@ -24,6 +24,9 @@
     
     <h3>
       <%= heading %>
+      <% if @product_links_by_node.size == 1 %>
+      (<%= links.size %>) <a href="<%= @brand_url %>"> « back to all <%= @brand.name %> products </a>
+      <% end %>
       <% if links.size > 8 and @product_links_by_node.size > 1 %>
       <a href="<%= ([@brand_url] + node).join('/').tr(' ', '+') %>">show me all <%= links.size %></a>
       <% end %>

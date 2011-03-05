@@ -133,17 +133,6 @@ module Merb
       html.join("\n")
     end
     
-    # TODO: deprecate
-    def product_image(image)
-      url, popup_url = product_image_urls(image)
-      "<img class=\"product\" src=#{url.inspect} onmouseover=\"product_image_popup(event, '#{popup_url}')\" onmouseout=\"product_image_unpopup(event)\" alt=\"product\" />"
-    end
-    
-    # TODO: deprecate
-    def product_image_urls(image)
-      image.nil? ? Array.new(2) { "/images/common/no_image.png" } : [image.url(:tiny), image.url(:small)]
-    end
-    
     def product_link(product_id, image)
       "<a id=\"product_#{product_id}\" href=#{Indexer.product_url(product_id).inspect}> <img src=#{image.url(:tiny).inspect} alt=\"product\" /> </a>"
     end

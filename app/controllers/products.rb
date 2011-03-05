@@ -7,11 +7,10 @@ class Products < Application
     
     product_ids.map do |product_id|
       image = images_by_product_id[product_id]
-      image_urls = Hash[[:small, :tiny].map { |k| [k, image.url(k)] }]
       titles = Hash[[:canonical, :image, :summary].map { |k| [k, Indexer.product_title(k, product_id)] }]
       url = Indexer.product_url(product_id)
       
-      {:id => product_id, :image_urls => image_urls, :titles => titles, :url => url}
+      {:id => product_id, :image_urls => image.urls_by_variant, :titles => titles, :url => url}
     end.to_json
   end
   

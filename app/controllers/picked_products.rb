@@ -102,7 +102,7 @@ class PickedProducts < Application
       (picks_by_group[pick.group] ||= []) << {
         :id          => pick.id,
         :product_id  => product_id,
-        :image_urls  => product_image_urls(images_by_product_id[product_id]),
+        :image_urls  => images_by_product_id[product_id].urls_by_variant,
         :title_parts => pick.title_parts,
         :url         => Indexer.product_url(product_id)
       }

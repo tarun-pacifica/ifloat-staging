@@ -14,7 +14,7 @@
   
   <div class="body">
     <div class="summary">
-      <%= product_image(@image) %>
+      <%= product_link(@product_id, @image) %>
       <%= @title_parts.map { |part| "<h3>#{part.superscript}</h3>" } %>
       <p class="prompt"><strong>Choose a variant</strong> of this product...</p>
       <hr class="terminator"/>
@@ -67,6 +67,8 @@
     language: <%= session.language.inspect %>,
     primary_class: <%= @primary_class.inspect %>
   };
+  
+  product_links_wire_up(<%= [@product_id].to_json %>);
   
   $('img.property_icon').not('.disabled').css('cursor', 'pointer');
   util_carousel_table('#compare_by_image table', [0], [1, 2, 3, 4, 5, 6], true);

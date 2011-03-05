@@ -19,6 +19,7 @@ class CachedFinds < Application
     retreat if @image.nil?
     
     @common_values, diff_values = Product.marshal_values(product_ids, session.language, RANGE_SEPARATOR)
+    @product_id = product_ids.first
     
     diff_dad_values = diff_values.select { |info| info[:dad] }
     @diff_property_ids = diff_dad_values.map { |info| info[:id] }.uniq.sort_by do |property_id|

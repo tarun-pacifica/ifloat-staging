@@ -63,4 +63,9 @@ class Asset
   def url(variant = nil)
     AssetStore.url(self, variant)
   end
+  
+  # TODO: spec
+  def urls_by_variant
+    Hash[[:small, :tiny].map { |k| [k, url(k)] }]
+  end
 end

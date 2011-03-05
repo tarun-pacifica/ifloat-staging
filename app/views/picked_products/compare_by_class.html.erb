@@ -3,73 +3,74 @@
 <div id="body">
 
 <div id="product_data_panel" class="panel minor">
-	<div class="title"> <h2>Common Product Data</h2> </div>
-	<%= product_data_panel(@common_values) %>
+  <div class="title"> <h2>Common Product Data</h2> </div>
+  <%= product_data_panel(@common_values) %>
 </div>
 
 <div id="compare_by_class" class="panel major">
-	<div class="title">
-		<h2><%= panel_title_back_to_find(@find) %></h2>
-	</div>
-	
-	<div class="body">
-		<table summary="comparison">
-			<tr>
-				<td> </td>
-				<% @product_ids.each_with_index do |product_id, i| %>
-				<td class="image col_<%= i %>"
-					onmouseover="util_highlight_column(event, 'on', <%= i + 2 %>)"
-					onmouseout="util_highlight_column(event, 'off')">
-					<%= product_image(@images_by_product_id[product_id]) %>
-					<% pick = @picks_by_product_id[product_id] %>
-					<div class="pick_buttons">
-						<div class="buy_later" onclick="compare_by_class_pick('buy_later', <%= pick.id %>, 'col_<%= i %>')"> </div>
-						<div class="buy_now" onclick="compare_by_class_pick('buy_now', <%= pick.id %>, 'col_<%= i %>')"> </div>
-						<div class="reset" onclick="compare_by_class_pick(null, <%= pick.id %>, 'col_<%= i %>')"> </div>
-					</div>
-				</td>
-				<% end %>
-			</tr>
-		
-			<% parity = :even %>
-			<% @diff_properties.each do |prop_info| %>
-			<% property_id = prop_info[:id] %>
-			<% infos_by_product_id = @diff_values_by_prop_id[property_id].hash_by { |info| info[:product_id] } %>
-			<tr class="<%= parity = (parity == :even ? :odd : :even) %>">
-				<td class="icon">
-					<%= property_icon(prop_info) if prop_info[:dad] %>
-				</td>
-				<% @product_ids.each_with_index do |product_id, i| %>
-				<td class="product col_<%= i %>"
-					onclick="window.location = '<%= Indexer.product_url(product_id) %>'"
-					onmouseover="util_highlight_column(event, 'on', 'col_<%= i %>')"
-					onmouseout="util_highlight_column(event, 'off')">
-					<%= product_value_summary(infos_by_product_id[product_id], :left) %>
-				</td>
-				<% end %>
-			</tr>
-			<% end %>
-			
-			<tr class="<%= parity = (parity == :even ? :odd : :even) %>">
-				<td class="icon">
-					<%= property_icon(@sale_price_property_info) %>
-				</td>
-				<% @product_ids.each_with_index do |product_id, i| %>
-				<td class="product col_<%= i %>"
-					onclick="window.location = '<%= Indexer.product_url(product_id) %>'"
-					onmouseover="util_highlight_column(event, 'on', 'col_<%= i %>')"
-					onmouseout="util_highlight_column(event, 'off')">
-					<%= @formatted_prices_by_product_id[product_id] %>
-				</td>
-				<% end %>
-			</tr>
-		</table>
-	</div>
+  <div class="title">
+    <h2><%= panel_title_back_to_find(@find) %></h2>
+  </div>
+  
+  <div class="body">
+    <table summary="comparison">
+      <tr>
+        <td> </td>
+        <% @product_ids.each_with_index do |product_id, i| %>
+        <td class="image col_<%= i %>"
+          onmouseover="util_highlight_column(event, 'on', <%= i + 2 %>)"
+          onmouseout="util_highlight_column(event, 'off')">
+          <%= product_link(product_id, @images_by_product_id[product_id]) %>
+          <% pick = @picks_by_product_id[product_id] %>
+          <div class="pick_buttons">
+            <div class="buy_later" onclick="compare_by_class_pick('buy_later', <%= pick.id %>, 'col_<%= i %>')"> </div>
+            <div class="buy_now" onclick="compare_by_class_pick('buy_now', <%= pick.id %>, 'col_<%= i %>')"> </div>
+            <div class="reset" onclick="compare_by_class_pick(null, <%= pick.id %>, 'col_<%= i %>')"> </div>
+          </div>
+        </td>
+        <% end %>
+      </tr>
+      
+      <% parity = :even %>
+      <% @diff_properties.each do |prop_info| %>
+      <% property_id = prop_info[:id] %>
+      <% infos_by_product_id = @diff_values_by_prop_id[property_id].hash_by { |info| info[:product_id] } %>
+      <tr class="<%= parity = (parity == :even ? :odd : :even) %>">
+        <td class="icon">
+          <%= property_icon(prop_info) if prop_info[:dad] %>
+        </td>
+        <% @product_ids.each_with_index do |product_id, i| %>
+        <td class="product col_<%= i %>"
+          onclick="window.location = '<%= Indexer.product_url(product_id) %>'"
+          onmouseover="util_highlight_column(event, 'on', 'col_<%= i %>')"
+          onmouseout="util_highlight_column(event, 'off')">
+          <%= product_value_summary(infos_by_product_id[product_id], :left) %>
+        </td>
+        <% end %>
+      </tr>
+      <% end %>
+      
+      <tr class="<%= parity = (parity == :even ? :odd : :even) %>">
+        <td class="icon">
+          <%= property_icon(@sale_price_property_info) %>
+        </td>
+        <% @product_ids.each_with_index do |product_id, i| %>
+        <td class="product col_<%= i %>"
+          onclick="window.location = '<%= Indexer.product_url(product_id) %>'"
+          onmouseover="util_highlight_column(event, 'on', 'col_<%= i %>')"
+          onmouseout="util_highlight_column(event, 'off')">
+          <%= @formatted_prices_by_product_id[product_id] %>
+        </td>
+        <% end %>
+      </tr>
+    </table>
+  </div>
 </div>
 
 </div>
 
 <script type="text/javascript" charset="utf-8">
-	$('img.property_icon').unbind('click');
-	util_carousel_table('#compare_by_class table', [0], [1, 2, 3]);
+  product_links_wire_up(<%= @images_by_product_id.keys.to_json %>);
+  $('img.property_icon').unbind('click');
+  util_carousel_table('#compare_by_class table', [0], [1, 2, 3]);
 </script>

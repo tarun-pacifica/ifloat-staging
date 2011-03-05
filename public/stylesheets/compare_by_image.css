@@ -1,88 +1,88 @@
 #compare_by_image .summary {
-	clear: both;
-	padding: 5px;
+  clear: both;
+  padding: 5px;
 }
 
 #compare_by_image .summary h3 {
-	font-size: 16px;
-	font-weight: normal;
-	margin: 0 0 10px 0;
+  font-size: 16px;
+  font-weight: normal;
+  margin: 0 0 10px 0;
 }
 
-#compare_by_image .summary img.product {
-	border: 1px solid #D0D0D0;
-	float: left;
-	height: 100px;
-	margin-right: 10px;
-	width: 100px;
+#compare_by_image .summary img {
+  border: 1px solid #D0D0D0;
+  float: left;
+  height: 100px;
+  margin-right: 10px;
+  width: 100px;
 }
 
 #compare_by_image table {
-	width: 100%;
+  width: 100%;
 }
 
 #compare_by_image table tr.even td {
-	background: #F3F3F3;
+  background: #F3F3F3;
 }
 
 #compare_by_image table tr.icons a {
-	display: block;
+  display: block;
 }
 
 #compare_by_image table tr.icons td {
-	background: #B9B9B9;
-	padding: 6px 0 3px 0;
-	text-align: center;
+  background: #B9B9B9;
+  padding: 6px 0 3px 0;
+  text-align: center;
 }
 
 #compare_by_image table tr.icons td.empty {
-	background: white;
+  background: white;
 }
 
 #compare_by_image table tr.icons td.primary {
-	background: #959494;
+  background: #959494;
 }
 
 #compare_by_image table tr.nav td {
-	color: #404040;
-	font-size: 16px;
+  color: #404040;
+  font-size: 16px;
 }
 
 #compare_by_image table tr.nav td:hover {
-	color: black;
-	text-decoration: underline;
+  color: black;
+  text-decoration: underline;
 }
 
 #compare_by_image table tr.nav td.maximize {
-	cursor: pointer;
-	text-align: right;
+  cursor: pointer;
+  text-align: right;
 }
 
 #compare_by_image table tr.nav td.minimize {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 #compare_by_image table tr.odd td {
-	background: #DCE9F7;
+  background: #DCE9F7;
 }
 
 #compare_by_image table tr.hover td {
-	background: #F9BD48;
+  background: #F9BD48;
 }
 
 #compare_by_image table tr.values td {
-	cursor: pointer;
-	vertical-align: top;
+  cursor: pointer;
+  vertical-align: top;
 }
 
 #compare_by_image table tr.values td.bullet {
-	text-align: center;
-	vertical-align: middle;
-	width: 29px;
+  text-align: center;
+  vertical-align: middle;
+  width: 29px;
 }
 
 #compare_by_image table tr.values td.bullet img {
-	border: 1px solid #D0D0D0;
-	height: 25px;
-	width: 25px;
+  border: 1px solid #D0D0D0;
+  height: 25px;
+  width: 25px;
 }

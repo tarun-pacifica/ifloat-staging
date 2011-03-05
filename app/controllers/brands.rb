@@ -31,6 +31,7 @@ class Brands < Application
     end
     
     @brand_url = "/brands/#{URI.escape(name)}"
+    @canonical_path = [@brand_url, root, sub].compact.join("/")
     @page_description = @brand.description
     @page_title = ([name] + path_names).join(" - ")
     render

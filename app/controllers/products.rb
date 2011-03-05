@@ -23,8 +23,8 @@ class Products < Application
   
   def show(id)
     product_id = id.to_i
-    path = Indexer.product_url(product_id)
-    return redirect(path, :status => 301) unless path.nil? or path == request.path
+    @canonical_path = Indexer.product_url(product_id)
+    return redirect(@canonical_path, :status => 301) unless @canonical_path.nil? or @canonical_path == request.path
     
     @product = Product.get(product_id)
     return render("../cached_finds/new".to_sym, :status => (product_id < Indexer.max_product_id ? 410 : 404)) if @product.nil?

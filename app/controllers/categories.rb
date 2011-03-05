@@ -20,6 +20,7 @@ class Categories < Application
     if children.empty?
       render("../cached_finds/new".to_sym, :status => 404)
     else
+      @canonical_path = ["/categories", root, sub].compact.join("/")
       @page_title = (path_names.empty? ? "All categories" : path_names.join(" - "))
       @page_description = Indexer.category_definition(path_names.last)
       @page_description ||= "The ifloat® yachting/sailing/boating categories provide a traditional way to see all the the marine leisure nautical products we have." if root.nil?

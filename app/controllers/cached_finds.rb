@@ -106,6 +106,7 @@ class CachedFinds < Application
   end
   
   def new
+    @canonical_path = "/"
     render
   end
   

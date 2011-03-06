@@ -1,4 +1,4 @@
-// TODO: DEPRECATE
+// TODO: deprecate once pick options page no longer uses old-style product display
 
 function product_link(product) {
   var image_urls = product.image_urls;

@@ -40,7 +40,7 @@ function pick_options_update(data) {
     product_ids.push(info.product_id);
     
     html.push('<div class="product">');
-    html.push(product_image_make(info.image_urls[0], info.image_urls[1], 'right'));
+    html.push(product_image_make(info.image_urls.tiny, info.image_urls.small, 'right'));
     html.push('<a href="' + info.url + '">' + info.title_parts.join('<br/>') + '</a>');
     html.push('</div>');
     html.push('<div class="pick_buttons">');

@@ -2,6 +2,10 @@
 
 module Merb
   module GlobalHelpers
+    def brand_image(brand)
+      brand.nil? ? "" : "<img src=\"#{brand.asset.url}\" alt=\"brand logo\" />"
+    end
+    
     def category_link(path_names)
       url = ("/categories/" + path_names.join("/")).tr(" ", "+")
       category = path_names.last

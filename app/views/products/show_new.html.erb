@@ -1,0 +1,18 @@
+<% @async_tracking = true %>
+<%= partial "common/header" %>
+
+<div id="body">
+  <div id="product_detail" class="panel major">
+    <div class="title">
+      <h2><%= panel_title_back_to_find(@find) %></h2>
+    </div>
+    
+    <div class="ident">
+      <%= brand_image(@brand) %>
+    </div>
+  </div>
+  
+  <div id="product_data_panel" class="panel minor">
+    <div class="title"> <h2>basket in this column</h2> </div>
+  </div>
+</div>

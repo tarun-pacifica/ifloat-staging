@@ -3,7 +3,7 @@
 <div id="body">
   <div id="brand_info">
     <div class="logo">
-      <a href="<%= @brand_url %>"> <img src=<%= @brand.asset.url.inspect %> alt="brand logo" /> </a>
+      <a href="<%= @brand_url %>"> <%= brand_image(@brand) %> </a>
     </div>
     <div class="description">
       <h1><%= @brand.name.superscript %></h1>

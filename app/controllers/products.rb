@@ -30,15 +30,18 @@ class Products < Application
     
     @common_values, diff_values = @product.marshal_values(session.language, RANGE_SEPARATOR)
     
-    names = %w(marketing:description marketing:feature_list reference:class reference:wikipedia).to_set
+    names = %w(marketing:brand marketing:description marketing:feature_list reference:class reference:wikipedia).to_set
     @body_values_by_name = {}
     @common_values.each do |info|
       raw_name = info[:raw_name]
       @body_values_by_name[raw_name] = info[:values] if names.include?(raw_name)
     end
+    
     @title, @summary, @page_description =
       [:canonical, :summary, :description].map { |domain| Indexer.product_title(domain, product_id) }
     @page_title = @title.desuperscript
+    
+    @brand = Brand.first(:name => @body_values_by_name["marketing:brand"])
     
     gather_assets(@product)
     
@@ -66,7 +69,7 @@ class Products < Application
     @more_counts[@more_class] = Indexer.product_ids_for_phrase(@more_class, session.language).size
     
     @find = session.most_recent_cached_find
-    render
+    render(Merb.env == "development" ? :show_new : :show)
   end
   
   

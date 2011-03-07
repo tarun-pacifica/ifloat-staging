@@ -7,7 +7,7 @@ class BrandParser < AbstractParser
   
   def generate_objects(parsed_fields)
     company, name, logo, description = parsed_fields.values_at(*HEADERS)
-    [ImportObject.new(Brand, :asset => logo, :company => company, :name => name)]
+    [ImportObject.new(Brand, :asset => logo, :company => company, :name => name, :description => description)]
   end
   
   def parse_field(head, value, fields)

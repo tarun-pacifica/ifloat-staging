@@ -204,7 +204,7 @@ class ImportSet
         problem = "neither have a reference_group value set" if fp_group == p_group
         error(Product, product.path, product.row, nil, "has the same primary image as #{fp_ident} but #{problem}")
       end
-    end if false
+    end
     
     stopwatch("handled orphaned PickedProducts") do
       db_companies = Company.all.hash_by(:reference)

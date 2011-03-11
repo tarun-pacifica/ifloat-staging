@@ -3,8 +3,52 @@
 
 <div id="product">
   <h1><%= brand_image(@brand) %> <%= @title.superscript %></h1>
+  
+  <div class="main_info">
+    <div class="images">
+    </div>
+    
+    <div class="other">
+      <% unless @summary.blank? %>
+      <div class="info_snippet">
+        <h2>Summary</h2>
+        <p><%= @summary %></p>
+      </div>
+      <% end %>
+    </div>
+  </div>
+  
+  <div class="extended_info">
+    <% features, description = @body_values_by_name.values_at("marketing:feature_list", "marketing:description").map { |values| (values || []).first.to_s.superscript } %>
+    
+    <% unless features.blank? %>
+    <div class="info_snippet">
+      <h2>Features</h2>
+      <ul>
+        <% features.split("\n").each do |feature| %>
+        <li><%= feature %></li>
+        <% end %>
+      </ul>
+    </div>
+    <% end %>
+    
+    <% unless description.blank? %>
+    <div class="info_snippet">
+      <h2>Description</h2>
+      <%= BlueCloth.new(description).to_html %>
+    </div>
+    <% end %>
+  </div>
+  
+  <div class="properties">
+    
+  </div>
+  
+  <div class="related">
+    
+  </div>
 </div>
 
 <div id="basket_panel">
-  <h2>basket in this column</h2>
+  <p>basket in this column</p>
 </div>

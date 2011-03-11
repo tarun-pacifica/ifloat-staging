@@ -1,5 +1,6 @@
 #header {
   border-top: 5px solid #30A0FB;
+  min-width: 960px;
 }
 
 #header .global_links {

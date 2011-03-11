@@ -3,13 +3,13 @@ a img {
 }
 
 body {
-  background: url(/images/common/backgrounds/body.png);
   font-family: "Lucida Sans", Arial, Helvetica, sans-serif;
   font-size: 12px;
   margin: 0;
   padding: 0;
 }
 
+/* TODO: deprecate */
 #body {
   margin: 10px auto 0 auto;
   width: 900px;

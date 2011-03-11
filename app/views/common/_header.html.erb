@@ -1,38 +1,15 @@
 <div id="header">
-  <div id="header_body">
-    <span class="global_links">
-      <a href="mailto:admin@ifloat.biz">Contact Us</a> |
-      <a href="/terms.pdf">Terms</a> |
-      <a class="login" href="#">Log In</a>
-    </span>
-    <a href="/"><img src="/images/common/logo.png" alt="ifloat logo" /></a>
-    <div class="find_bar">
-      <%= partial "common/finder" %>
-      
-      <div id="pl_buy_now" class="pick_list">
-        <div class="menu">
-          <span class="name">Basket</span>
-          <span class="total"></span>
-        </div>
-        <div class="items"></div>
-      </div>
-      
-      <div id="pl_buy_later" class="pick_list">
-        <div class="menu">
-          <span class="name">Future Buys</span>
-          <span class="total"></span>
-        </div>
-        <div class="items"></div>
-      </div>
-      
-      <div id="pl_compare" class="pick_list">
-        <div class="menu">
-          <span class="name">Differentiate</span>
-          <span class="total"></span>
-        </div>
-        <div class="items"></div>
-      </div>
-    </div>
+  <div class="global_links">
+    <a href="mailto:admin@ifloat.biz">Contact Us</a> |
+    <a href="/terms.pdf">Terms</a>
+    <a class="login" href="#">Log In</a>
+  </div>
+  
+  <a href="/"><img src="/images/common/logo.png" alt="ifloat logo" /></a>
+  
+  <div class="find_bar">
+    <%= partial "common/finder" %>
+    <div id="basket_tab">BASKET</div>
   </div>
 </div>
 
@@ -42,7 +19,6 @@
   
   $(document).ready(function() {
     login_update();
-    pick_lists_update();
     <% if @async_tracking %> $.get("/users/track", {url: window.location.pathname, r: Math.random()});<% end %>
   });
 </script>

@@ -1,28 +1,26 @@
 <div class="finder">
-	<div class="left"></div>
-	<%= form :action => resource(:cached_finds), :onsubmit => "return finder_validate()" do %>
-		<%= hidden_field :language_code, :value => session.language, :id => "finder_language_code" %>
-		<p> <%= text_field :specification, :id => "finder_specification" %> </p>
-		<p> <%= submit "Find", :id => "finder_submit" %> </p>
-	<% end =%>
-	<div class="right"></div>
+  <%= form :action => resource(:cached_finds), :onsubmit => "return finder_validate()" do %>
+    <%= hidden_field :language_code, :value => session.language, :id => "finder_language_code" %>
+    <p> <%= text_field :specification, :id => "finder_specification" %> </p>
+    <p> <%= submit "Find", :id => "finder_submit" %> </p>
+  <% end =%>
 </div>
 
 <script type="text/javascript" charset="utf-8">
-	var spec_field = $('#finder_specification');
-	var tempter = 'What can we find for you?';
+  var spec_field = $('#finder_specification');
+  var tempter = 'What can we find for you?';
 
-	function tempt() {
-		if(spec_field.val() == '') { spec_field.val(tempter); }
-		if(spec_field.val() == tempter) { spec_field.css('color', 'gray'); }
-	}
+  function tempt() {
+    if(spec_field.val() == '') { spec_field.val(tempter); }
+    if(spec_field.val() == tempter) { spec_field.css('color', 'gray'); }
+  }
   
-	function untempt() {
-		spec_field.css('color', 'black');
-		if(spec_field.val() == tempter) { spec_field.val(''); }
-	}
-	
-	tempt();
-	spec_field.blur(tempt);
-	spec_field.focus(untempt);
+  function untempt() {
+    spec_field.css('color', 'black');
+    if(spec_field.val() == tempter) { spec_field.val(''); }
+  }
+  
+  tempt();
+  spec_field.blur(tempt);
+  spec_field.focus(untempt);
 </script>

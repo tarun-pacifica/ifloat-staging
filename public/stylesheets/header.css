@@ -80,7 +80,9 @@
   background: orange;
   float: right;
   font-size: 16px;
-  height: 25px;
-  margin: 10px 15px 0 0;
-  padding: 11px 20px 5px 50px;
+  height: 20px;
+  margin: 17px 15px 0 0;
+  padding: 7px 0;
+  text-align: center;
+  width: 150px;
 }

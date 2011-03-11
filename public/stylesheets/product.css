@@ -1,8 +1,6 @@
 #product {
-  background: white;
-  border: 1px solid silver;
-  border-right: none;
-  border-top: none;
+  float: left;
+  margin-right: 165px;
 }
 
 #product h1 {
@@ -13,5 +11,4 @@
 
 #product h1 img {
   float: left;
-  margin-left: 5px;
 }

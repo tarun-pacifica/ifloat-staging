@@ -7,7 +7,7 @@
 #product h1 {
   color: #404040;
   font-size: 18px;
-  margin: 10px;
+  margin: 10px 5px 20px 5px;
 }
 
 #product h1 img {
@@ -44,4 +44,25 @@
 #product .info_snippet ul {
   margin: 10px;
   padding-left: 15px;
+}
+
+#product .main_info {
+  margin-bottom: 10px;
+}
+
+#product .main_info .images {
+  background: silver;
+  float: left;
+  height: 400px;
+  margin-right: -410px;
+  width: 400px;
+}
+
+#product .main_info .images img.main {
+  border: 1px solid silver;
+}
+
+#product .main_info .other {
+  float: left;
+  margin-left: 410px;
 }

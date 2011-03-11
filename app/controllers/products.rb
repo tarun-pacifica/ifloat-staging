@@ -37,11 +37,11 @@ class Products < Application
       @body_values_by_name[raw_name] = info[:values] if names.include?(raw_name)
     end
     
+    @brand = Brand.first(:name => @body_values_by_name["marketing:brand"])
+    
     @title, @summary, @page_description =
       [:canonical, :summary, :description].map { |domain| Indexer.product_title(domain, product_id) }
     @page_title = @title.desuperscript
-    
-    @brand = Brand.first(:name => @body_values_by_name["marketing:brand"])
     
     gather_assets(@product)
     

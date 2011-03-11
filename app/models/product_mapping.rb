@@ -14,7 +14,7 @@ class ProductMapping
   REFERENCE_FORMAT = /^[\w\-\.\/;=]+$/
   
   property :id, Serial
-  property :reference, String, :required => true, :format => REFERENCE_FORMAT, :unique_index => :prod_per_company_per_ref
+  property :reference, String, :required => true, :length => 255, :format => REFERENCE_FORMAT, :unique_index => :prod_per_company_per_ref
   
   belongs_to :company
     property :company_id, Integer, :required => true, :unique_index => :prod_per_company_per_ref

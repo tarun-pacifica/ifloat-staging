@@ -10,12 +10,6 @@ body {
   padding: 0;
 }
 
-/* TODO: deprecate */
-#body {
-  margin: 10px auto 0 auto;
-  width: 900px;
-}
-
 hr.terminator {
   border: none;
   clear: both;

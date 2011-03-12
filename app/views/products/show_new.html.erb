@@ -8,7 +8,7 @@
   <div class="main_info">
     <div class="images">
       <img class="main" src=<%= @image_urls.first.inspect %> alt=<%= @page_title.inspect %> />
-      <%= @image_urls.map { |url| "<img class=\"thumb\" src=#{url.inspect} alt=\"thumbnail\" onmouseover=\"product_detail_select_image(event)\" />" } %>
+      <%= @image_urls.map { |url| "<img class=\"thumb\" src=#{url.inspect} alt=\"thumbnail\" onmouseover=\"product_thumb_hover(event)\" />" } if @image_urls.size > 1 %>
     </div>
     
     <div class="other">
@@ -88,3 +88,7 @@
 <div id="basket_panel">
   <p>basket in this column</p>
 </div>
+
+<script type="text/javascript" charset="utf-8">
+  product_thumb_hover({target: $('#product img.thumb')[0]})
+</script>

@@ -63,6 +63,9 @@ class Products < Application
       end
     end
     
+    @sibling_data = @product.sibling_properties_with_prod_ids_and_values(session.language)
+    
+    # TODO: switch to category links rather than new finds
     @more_class = @body_values_by_name["reference:class"].first
     @more_tags = (Indexer.tags_for_product_id(product_id, session.language) || [])
     @more_counts = Hash[@more_tags.map { |tag| [tag, Indexer.product_ids_for_tag(tag, session.language).size] }]

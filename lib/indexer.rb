@@ -2,6 +2,7 @@ module Indexer
   COMPILED_PATH = (Merb.env == "test" ? "caches/indexer.test.marshal" : "caches/indexer.marshal" )
   SITEMAP_PATH = "public/sitemap.xml"
   
+  @@auto_diff_property_id = nil
   @@category_definitions = {}
   @@category_tree = {}
   @@class_property_id = nil
@@ -12,7 +13,6 @@ module Indexer
   @@last_loaded_time = nil
   @@max_product_id = nil
   @@numeric_filtering_index = {}
-  @@product_group_diffs = {}
   @@product_relationship_cache = {}
   @@product_title_cache = {}
   @@property_display_cache = {}
@@ -23,6 +23,10 @@ module Indexer
   @@tags_by_product_id = nil
   @@text_filtering_index = {}
   @@text_finding_index = {}
+  
+  def self.auto_diff_property_id
+    @@class_property_id if ensure_loaded
+  end
   
   def self.category_children_for_node(path_names)
     return [] unless ensure_loaded
@@ -54,7 +58,6 @@ module Indexer
         :facility_cache             => compile_facility_cache,
         :image_checksums            => compile_image_checksum_index,
         :numeric_filtering          => compile_numeric_filtering_index,
-        :product_group_diffs        => compile_product_group_diffs,
         :product_relationship_cache => ProductRelationship.compile_index,
         :product_title_cache        => compile_product_title_cache,
         :property_display_cache     => compile_property_display_cache(properties),
@@ -162,7 +165,6 @@ module Indexer
       @@facility_cache             = indexes[:facility_cache]
       @@image_checksum_index       = indexes[:image_checksums]
       @@numeric_filtering_index    = indexes[:numeric_filtering]
-      @@product_group_diffs        = indexes[:product_group_diffs]
       @@product_ids_by_checksum    = nil
       @@product_relationship_cache = indexes[:product_relationship_cache]
       @@product_title_cache        = indexes[:product_title_cache]
@@ -174,6 +176,7 @@ module Indexer
       @@text_finding_index         = indexes[:text_finding]
     end
     
+    @@auto_diff_property_id = PropertyDefinition.first(:name => "auto:group_diff").id
     @@class_property_id = PropertyDefinition.first(:name => "reference:class").id
     @@max_product_id = repository.adapter.select("SELECT max(id) FROM products").first
     @@sale_price_min_property_id = PropertyDefinition.first(:name => "sale:price_min").id
@@ -201,10 +204,6 @@ module Indexer
   
   def self.max_product_id
     @@max_product_id if ensure_loaded
-  end
-  
-  def self.product_group_diffs(product)
-    (@@product_group_diffs[[product.company_id, product.reference_group]] || {}) if ensure_loaded
   end
   
   def self.product_ids_for_image_checksum(checksum)
@@ -413,25 +412,7 @@ module Indexer
     records = repository.adapter.select(query, true)
     compile_filtering_index(records, :unit, :min_value, :max_value)
   end
-  
-  def self.compile_product_group_diffs
-    query =<<-SQL
-      SELECT p.company_id, p.reference_group, pv.product_id, pv.text_value
-      FROM products p
-        INNER JOIN property_values pv ON p.id = pv.product_id
-      WHERE p.reference_group IS NOT NULL
-        AND pv.property_definition_id = ?
-      ORDER BY pv.sequence_number
-    SQL
     
-    values_by_product_id_by_group = {}
-    repository.adapter.select(query, PropertyDefinition.first(:name => "auto:group_diff").id).each do |record|
-      values_by_product_id = (values_by_product_id_by_group[[record.company_id, record.reference_group]] ||= {})
-      (values_by_product_id[record.product_id] ||= []) << record.text_value
-    end
-    values_by_product_id_by_group
-  end
-  
   def self.compile_product_title_cache
     query =<<-SQL
       SELECT product_id, property_definition_id, text_value, sequence_number

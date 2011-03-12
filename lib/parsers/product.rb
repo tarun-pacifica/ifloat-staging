@@ -61,7 +61,6 @@ class ProductParser < AbstractParser
         value_objects = value_objects_by_property_name[name]
         rendered_parts << generate_auto_part(value_objects, false, false) unless value_objects.nil?
       end
-      next if rendered_parts.empty?
       
       attributes = {
         :definition => @auto_group_diff_property,

@@ -140,6 +140,34 @@ class Product
   end
   
   # TODO: spec
+  def sibling_properties_with_prod_ids_and_values(language_code)
+    return [] if reference_group.nil?
+    
+    klass = TextPropertyValue.first(:product_id => id, :property_definition_id => Indexer.class_property_id).to_s
+    properties_by_name = Indexer.property_display_cache.values.hash_by { |info| info[:raw_name] }
+    
+    lead_property_by_seq_num = {}
+    PropertyHierarchy.all(:class_name => klass).each do |ph|
+      lead_property_by_seq_num[ph.sequence_number] = properties_by_name[ph.property_names.first]
+    end
+    
+    prod_ids_and_values_by_seq_num = {}
+    TextPropertyValue.all(
+      :product_id.not           => id,
+      "product.company_id"      => company_id,
+      "product.reference_group" => reference_group,
+      :property_definition_id   => Indexer.auto_diff_property_id,
+      :language_code            => language_code
+    ).each do |tpv|
+      (prod_ids_and_values_by_seq_num[tpv.sequence_number] ||= []) << [tpv.product_id, tpv.to_s]
+    end
+    
+    lead_property_by_seq_num.sort.map do |seq_num, property|
+      [property, (prod_ids_and_values_by_seq_num[seq_num] || []).sort]
+    end
+  end
+  
+  # TODO: spec
   def values_by_property_name(language_code, names_or_ids)
     Product.values_by_property_name_by_product_id([id], language_code, names_or_ids)[id] || {}
   end

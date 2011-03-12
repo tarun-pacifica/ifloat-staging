@@ -56,7 +56,7 @@ class PropertyDefinition
     friendly_names
   end
   
-  # TODO: spec
+  # TODO: spec - deprecate in favour of Indexer approach?
   def self.icon_urls_by_property_id(properties)
     properties_by_asset_name = {}
     properties.each do |property|

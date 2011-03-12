@@ -97,18 +97,24 @@
 }
 
 #product .main_info .images {
-  background: silver;
   float: left;
-  height: 400px;
-  margin-right: -410px;
-  width: 400px;
+  margin-right: -412px;
+  width: 402px;
 }
 
 #product .main_info .images img.main {
   border: 1px solid silver;
 }
 
+#product .main_info .images img.thumb {
+  border: 1px solid silver;
+  height: 50px;
+  margin-right: 5px;
+  opacity: 0.5;
+  width: 50px;
+}
+
 #product .main_info .other {
   float: left;
-  margin-left: 410px;
+  margin-left: 412px;
 }

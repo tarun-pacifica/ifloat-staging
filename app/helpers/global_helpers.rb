@@ -121,6 +121,7 @@ module Merb
       HTML
     end
     
+    # TODO: deprecate once all pages using the product_data_table method
     def product_data_panel(values)
       html = []
       
@@ -158,6 +159,20 @@ module Merb
       
       html << "</div>"
       
+      html.join("\n")
+    end
+    
+    def product_data_table(infos)
+      html = ['<table summary="properties">']
+      html += infos.map do |info|
+        <<-HTML
+          <tr id="property_#{info[:id]}">
+            <td class="icon"> #{property_icon(info)} </td>
+            <td class="summary"> #{product_value_summary(info)} </td>
+          </tr>
+        HTML
+      end
+      html << '</table>'
       html.join("\n")
     end
     

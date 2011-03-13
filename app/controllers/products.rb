@@ -37,7 +37,11 @@ class Products < Application
       @body_values_by_name[raw_name] = info[:values] if names.include?(raw_name)
       info[:dad] ? info : nil
     end.compact.sort_by { |info| info[:seq_num] }
-    @property_value_sections = @property_values.map { |info| info[:section] }.uniq
+    
+    @property_value_sections = ["Show All"] + @property_values.map { |info| info[:section] }.uniq
+    @property_ids_by_section = {}
+    @property_values.each { |info| (@property_ids_by_section[info[:section]] ||= []) << info[:id] }
+    @property_ids_by_section["Show All"] = @property_ids_by_section.values.flatten
     
     @brand = Brand.first(:name => @body_values_by_name["marketing:brand"])
     

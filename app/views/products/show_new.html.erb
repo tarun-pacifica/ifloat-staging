@@ -75,14 +75,15 @@
   </div>
   
   <div class="properties">
-    <code>
-      <%= @property_value_sections.inspect %>
-    </code>
-    <p></p>
-    <code>
-      <% @property_values.inspect %>
-    </code>
-    <p></p>
+    <div class="sections">
+      <%= @property_value_sections.map { |name| "<div>#{name}</div>" } %>
+    </div>
+    
+    <div class="values">
+      <%= product_data_table(@property_values) %>
+    </div>
+    
+    <hr class="terminator" />
   </div>
   
   <% unless @product_links_by_rel_name.empty? %>
@@ -104,4 +105,5 @@
 <script type="text/javascript" charset="utf-8">
   product_links_wire_up(<%= @rel_product_ids.to_json %>);
   product_thumb_hover({target: $('#product img.thumb')[0]});
+  product_property_sections_init(<%= @property_ids_by_section.to_json %>);
 </script>

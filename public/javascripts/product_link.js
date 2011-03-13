@@ -55,8 +55,8 @@ function product_link_popup(event) {
   var popup_height = popup.outerHeight();
   var popup_width = popup.outerWidth();
   
-  var body = $('#body');
-  var position_on = (image_left + image_width + 10 + popup_width < body.offset().left + body.width()) ? 'right' : 'left'
+  var doc = $(document);
+  var position_on = (image_left + image_width + 10 + popup_width < doc.width()) ? 'right' : 'left'
   
   var left_end = image_left, left_start;
   if(position_on == 'right') {
@@ -68,13 +68,13 @@ function product_link_popup(event) {
   }
   
   var top = image_top + (image_height - popup_height) / 2;
-  var document_overhang = top + popup_height - $(document).height();
+  var document_overhang = top + popup_height - doc.height();
   if(document_overhang > 0) top -= document_overhang;
   
   image.css('opacity', '0.5');
   popup.css('left', left_start + 'px').css('top', top + 'px').css('opacity', 0).show();
   popup.animate({left: left_end + 'px', opacity: 1}, 'fast');
-}
+  }
 
 function product_link_unpopup(event) {
   $(this).children('img').css('opacity', '1');

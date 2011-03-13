@@ -1,56 +1,54 @@
 <%= partial "common/header" %>
 
-<div id="body">
-  <div id="brand_info">
-    <div class="logo">
-      <a href="<%= @brand_url %>"> <%= brand_image(@brand) %> </a>
-    </div>
-    <div class="description">
-      <h1><%= @brand.name.superscript %></h1>
-      <p><%= @brand.description.to_s.superscript %></p>
-    </div>
-    <hr class="terminator" />
+<div id="brand_info">
+  <div class="logo">
+    <a href="<%= @brand_url %>"> <%= brand_image(@brand) %> </a>
   </div>
+  <div class="description">
+    <h1><%= @brand.name.superscript %></h1>
+    <p><%= @brand.description.to_s.superscript %></p>
+  </div>
+  <hr class="terminator" />
+</div>
+
+<div id="brand_products">
+  <% current_section = nil %>
+  <% @product_links_by_node.sort.each do |node, links| %>
+  <% section, heading = node %>
   
-  <div id="brand_products">
-    <% current_section = nil %>
-    <% @product_links_by_node.sort.each do |node, links| %>
-    <% section, heading = node %>
-    
-    <% unless section == current_section %>
-    <h2><%= section %></h2>
-    <% current_section = section %>
+  <% unless section == current_section %>
+  <h2><%= section %></h2>
+  <% current_section = section %>
+  <% end %>
+  
+  <h3>
+    <%= heading %>
+    <% if @product_links_by_node.size == 1 %>
+    (<%= links.size %>) <a href="<%= @brand_url %>"> « back to all <%= @brand.name %> products </a>
     <% end %>
-    
-    <h3>
-      <%= heading %>
-      <% if @product_links_by_node.size == 1 %>
-      (<%= links.size %>) <a href="<%= @brand_url %>"> « back to all <%= @brand.name %> products </a>
-      <% end %>
-      <% if links.size > 8 and @product_links_by_node.size > 1 %>
-      <a href="<%= ([@brand_url] + node).join('/').tr(' ', '+') %>">show me all <%= links.size %></a>
-      <% end %>
-    </h3>
-    
-    <% if @product_links_by_node.size > 1 %>
-    <div class="product_set">
-      <a class="buttons prev" href="#"></a>
-      <div class="viewport">
-        <ul class="overview">
-          <%= links.map { |link| "<li> #{link} </li>" } %>
-        </ul>
-      </div>
-      <a class="buttons next" href="#"></a>
+    <% if links.size > 8 and @product_links_by_node.size > 1 %>
+    <a href="<%= ([@brand_url] + node).join('/').tr(' ', '+') %>">show me all <%= links.size %></a>
+    <% end %>
+  </h3>
+  
+  <% if @product_links_by_node.size > 1 %>
+  <div class="product_set">
+    <a class="buttons prev" href="#"></a>
+    <div class="viewport">
+      <ul class="overview">
+        <%= links.map { |link| "<li> #{link} </li>" } %>
+      </ul>
     </div>
-    <% else %>
-    <div class="product_set_all">
-      <%= links.join(" ") %>
-      <hr class="terminator">
-    </div>
-    <% end %>
-    
-    <% end %>
+    <a class="buttons next" href="#"></a>
   </div>
+  <% else %>
+  <div class="product_set_all">
+    <%= links.join(" ") %>
+    <hr class="terminator">
+  </div>
+  <% end %>
+  
+  <% end %>
 </div>
 
 <script type="text/javascript" charset="utf-8">

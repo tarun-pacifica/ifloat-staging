@@ -1,13 +1,13 @@
 #product {
   float: left;
   margin-right: 165px;
-  padding: 5px;
+  padding: 5px 15px;
 }
 
 #product h1 {
   color: #404040;
   font-size: 18px;
-  margin: 10px 5px 20px 5px;
+  margin: 10px 0;
 }
 
 #product h1 img {
@@ -117,4 +117,18 @@
 #product .main_info .other {
   float: left;
   margin-left: 412px;
+}
+
+#product .related_set {
+  margin: 0 0 15px 10px;
+}
+
+#product .related_set a {
+  margin-right: 5px;
+}
+
+#product .related_set img {
+  border: 1px solid silver;
+  height: 50px;
+  width: 50px;
 }

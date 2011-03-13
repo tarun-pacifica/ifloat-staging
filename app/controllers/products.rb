@@ -28,14 +28,16 @@ class Products < Application
     @product = Product.get(product_id)
     return render("../cached_finds/new".to_sym, :status => (product_id < Indexer.max_product_id ? 410 : 404)) if @product.nil?
     
-    @common_values, diff_values = @product.marshal_values(session.language, RANGE_SEPARATOR)
+    common_values, diff_values = @product.marshal_values(session.language, RANGE_SEPARATOR)
     
     names = %w(marketing:brand marketing:description marketing:feature_list reference:class reference:wikipedia).to_set
     @body_values_by_name = {}
-    @common_values.each do |info|
+    @property_values = common_values.map do |info|
       raw_name = info[:raw_name]
       @body_values_by_name[raw_name] = info[:values] if names.include?(raw_name)
-    end
+      info[:dad] ? info : nil
+    end.compact.sort_by { |info| info[:seq_num] }
+    @property_value_sections = @property_values.map { |info| info[:section] }.uniq
     
     @brand = Brand.first(:name => @body_values_by_name["marketing:brand"])
     
@@ -48,20 +50,7 @@ class Products < Application
     @prices_by_url = @product.prices_by_url(session.currency)
     @price_unit, @price_divisor = UnitOfMeasure.unit_and_divisor_by_product_id([product_id])[product_id]
     
-    rel_names_by_product_ids = {}
-    (Indexer.product_relationships(product_id) || []).each do |name, product_ids|
-      product_ids.each { |product_id| (rel_names_by_product_ids[product_id] ||= []) << name }
-    end
-    
-    product_ids = rel_names_by_product_ids.keys
-    product_ids_by_checksum = Indexer.image_checksums_for_product_ids(product_ids)
-    @images_by_rel_name = {}
-    marshal_images(product_ids).each do |info| # TODO: correct for the fact a total comes back from this as the lead item
-      product_ids = (product_ids_by_checksum[info[0]] || [])
-      rel_names_by_product_ids.values_at(*product_ids).flatten.uniq.each do |name|
-        (@images_by_rel_name[name] ||= []) << info
-      end
-    end
+    @product_links_by_rel_name, @rel_product_ids = marshal_product_links(Indexer.product_relationships(product_id))
     
     @sibling_data = @product.sibling_properties_with_prod_ids_and_values(session.language)
     

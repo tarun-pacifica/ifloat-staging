@@ -28,11 +28,10 @@
           <%= finder_link(@more_class, :text => "#{@more_class} products (#{@more_counts[@more_class]})") %>
           <%= @more_tags.map { |tag| finder_link(tag, :tag => true, :text => "#{tag} (#{@more_counts[tag]})") } %>
         </p>
+        <% unless @product_links_by_rel_name.empty? %>
+        <p id="related_anchor"> <a href="#related_products">VIEW RELATED PRODUCTS</a> </p>
+        <% end %>
       </div>
-      
-      <% unless @product_links_by_rel_name.empty? %>
-        <a href="#related_products" id="related_anchor">VIEW RELATED PRODUCTS</a>
-      <% end %>
       
       <% unless @related_media.empty? %>
       <div class="info_snippet" id="related_media">

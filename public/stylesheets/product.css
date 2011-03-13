@@ -49,9 +49,14 @@
 
 #product #show_me_more {
   background: #FFFFC0;
+  text-align: center;
 }
 
 #product #related_anchor {
+  margin: 15px;
+}
+
+#product #related_anchor a {
   background: #3453FA;
   background: -moz-linear-gradient(100% 100% 90deg, #2A9DFB, #381AFA);
   background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#2A9DFB), to(#381AFA));
@@ -60,14 +65,12 @@
   -moz-border-radius: 5px;
   -webkit-border-radius: 5px;
   color: white;
-  display: block;
-  margin-bottom: 10px;
   padding: 5px 10px;
   text-align: center;
   text-decoration: none;
 }
 
-#product #related_anchor:hover {
+#product #related_anchor a:hover {
   text-decoration: underline;
 }
 

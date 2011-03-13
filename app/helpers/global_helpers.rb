@@ -67,6 +67,30 @@ module Merb
       end.unshift(total)
     end
     
+    def marshal_product_links(product_ids_by_group)
+      checksums_by_product_id = {}
+      product_ids_by_checksum = {}
+      Indexer.image_checksums_for_product_ids(product_ids_by_group.values.flatten).each do |checksum, product_ids|
+        checksums_by_product_id[product_ids.first] = checksum
+        product_ids_by_checksum[checksum] = product_ids.first
+      end
+      
+      images_by_checksum = Asset.all(:checksum => product_ids_by_checksum.keys).hash_by(:checksum)
+      product_ids = checksums_by_product_id.keys
+      
+      product_links_by_group = {}
+      product_ids_by_group.each do |group, g_product_ids|
+        checksums = checksums_by_product_id.values_at(*(g_product_ids & product_ids)).uniq.sort_by do |checksum|
+          Indexer.product_title(:image, product_ids_by_checksum[checksum])
+        end
+        product_links_by_group[group] = checksums.map do |checksum|
+          product_link(product_ids_by_checksum[checksum], images_by_checksum[checksum])
+        end
+      end
+      
+      [product_links_by_group, product_ids]
+    end
+    
     def money(amount, currency, per_unit = nil)
       return nil if amount.nil?
       

@@ -4,7 +4,7 @@ describe PickedProduct do
 
   describe "creation" do   
     before(:each) do
-      @pick = PickedProduct.new(:product_id => 1, :user_id => 1, :group => "buy_now", :cached_brand => "Marlow", :cached_class => "Rope", :invalidated => false)
+      @pick = PickedProduct.new(:product_id => 1, :user_id => 1, :group => "buy_now", :cached_brand => "Marlow", :cached_class => "Rope", :cached_unit => "m", :quantity => 1, :invalidated => false)
     end
     
     it "should succeed with valid data" do
@@ -40,6 +40,11 @@ describe PickedProduct do
     
     it "should fail without a cached class" do
       @pick.cached_class = nil
+      @pick.should_not be_valid
+    end
+    
+    it "should fail without a quantity" do
+      @pick.quantity = nil
       @pick.should_not be_valid
     end
     

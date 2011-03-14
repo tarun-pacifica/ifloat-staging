@@ -18,6 +18,7 @@ class PickedProduct
   property :group,        String,   :required => true
   property :cached_brand, String,   :required => true
   property :cached_class, String,   :required => true
+  property :quantity,     Integer
   property :invalidated,  Boolean,  :required => true
   
   belongs_to :product

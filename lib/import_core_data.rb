@@ -311,27 +311,49 @@ class ImportSet
     end
     
     stopwatch("ensured all grouped products are adequately differentiated") do
-      property = get!(PropertyDefinition, "auto:group_diff")
+      properties = %w(auto:group_diff reference:class).map { |name| get!(PropertyDefinition, name) }
+      agd, rc = properties
       
+      classes_by_group = {}
       values_by_product_by_group = {}
       
       text_values.each do |tv|
-        next unless tv.attributes[:definition] == property
-        product = tv.attributes[:product]
+        property = tv.attributes[:definition]
+        next unless properties.include?(property)
+        
+        product, value = tv.attributes.values_at(:product, :text_value)
         group = product.attributes.values_at(:company, :reference_group)
-        values_by_product = (values_by_product_by_group[group] ||= {})
-        (values_by_product[product] ||= []) << tv.attributes[:text_value]
+        
+        case property
+        when agd
+          values_by_product = (values_by_product_by_group[group] ||= {})
+          (values_by_product[product] ||= []) << value
+        when rc
+          (classes_by_group[group] ||= []) << value
+        end
       end
       
       values_by_product_by_group.each do |group, values_by_product|
-        values_by_product.each do |product, values|
-          error(Product, product.path, product.row, nil, "differentiating values #{values.inspect} include one or more blanks") if values.any? { |v| v.blank? }
+        next if values_by_product.size == 1
+        friendly_group = "#{group[0].attributes[:reference]} / #{group[1]}"
+        
+        classes = classes_by_group[group].uniq
+        if classes.size > 1
+          error(Product, nil, nil, nil, "product reference group #{friendly_group} spans multiple classes: #{classes.inspect}")
+          next
+        end
+        
+        values_by_product.values.transpose.each_with_index do |diff_column, i|
+          blank_count = diff_column.count { |v| v.blank? }
+          next if blank_count == 0 or blank_count == diff_column.size
+          product = values_by_product.keys.first
+          error(Product, product.path, nil, nil, "differentiating values from property set #{i + 1} are a mixture of values and blanks: #{diff_column.inspect} (group: #{friendly_group})")
         end
         
         values_by_product.to_a.combination(2) do |a, b|
           prod1, values1 = a
           prod2, values2 = b
-          error(Product, prod2.path, prod2.row, nil, "duplicates differentiating values #{values1.inspect} from #{prod1.path} row #{prod1.row} (group: #{group[0].attributes[:reference]} / #{group[1]})") if values1 == values2
+          error(Product, prod2.path, prod2.row, nil, "duplicates differentiating values #{values1.inspect} from #{prod1.path} row #{prod1.row} (group: #{friendly_group})") if values1 == values2
         end
       end
     end

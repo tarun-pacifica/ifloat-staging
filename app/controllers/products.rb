@@ -100,7 +100,7 @@ class Products < Application
   end
   
   def icon_for_url(url)
-    "/images/product_detail/icons/" +
+    "/images/common/icons/" +
       case url
       when Asset::IMAGE_FORMAT then "image.png"
       when /\.pdf$/ then "pdf.png"

@@ -27,7 +27,3 @@ function product_thumb_hover(event) {
   $('#product img.thumb').css('opacity', '0.5').css('border-style', 'dotted');
   thumb.css('opacity', '1').css('border-style', 'solid');
 }
-
-// function product_detail_buy_now(product_id, facility_id) {
-//   window.location = '/products/' + product_id + '/buy_now/' + facility_id;
-// }

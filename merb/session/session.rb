@@ -19,6 +19,7 @@ module Merb
       existing = picked_products.find { |p| p.product_id == pick.product_id }
       unless existing.nil?
         existing.group = pick.group
+        existing.quantity = pick.quantity
         existing.save
         return
       end

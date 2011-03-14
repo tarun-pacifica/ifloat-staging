@@ -34,10 +34,10 @@ class PickedProducts < Application
     render
   end
   
-  def create(product_id, group)
+  def create(product_id, group, quantity)
     raise Unauthenticated unless group != "buy_later" or session.authenticated?
     raise NotFound unless Product.get(product_id)
-    session.add_picked_product(PickedProduct.new(:product_id => product_id, :group => group))
+    session.add_picked_product(PickedProduct.new(:product_id => product_id, :group => group, :quantity => quantity))
     index
   end
   
@@ -109,16 +109,7 @@ class PickedProducts < Application
     end
     
     compare_picks = picks_by_group["compare"]
-    unless compare_picks.nil?
-      compare_picks_by_class = compare_picks.group_by { |info| info[:title_parts].last }
-      picks_by_group["compare"] = compare_picks_by_class.map do |klass, info_for_picks|
-        { :ids         => info_for_picks.map { |info| info[:id] },
-          :product_ids => info_for_picks.map { |info| info[:product_id] },
-          :image_urls  => info_for_picks.map { |info| info[:image_urls] }.compact.first,
-          :title_parts => [klass, info_for_picks.size],
-          :url         => "/picked_products/products_for/#{Merb::Parse.escape(klass)}" }
-      end
-    end
+    picks_by_group["compare"] = compare_picks.sort_by { |info| [info[:title_parts].last, info[:id]] } unless compare_picks.nil?
     
     picks_by_group.to_json
   end

@@ -668,7 +668,7 @@ def build_asset_csv
     assets.each do |info|
       bucket, company_ref, name, path, checksum, size = info
       next if size.nil? or bucket != "products"
-
+      
       ext = File.extname(path)
       
       wm_path = path
@@ -683,13 +683,13 @@ def build_asset_csv
           end
         end
       end
-
-      next unless size == "400x400"    
+      
+      next unless size == "400x400"
       [:small, :tiny].map do |variant|
         variant_path = ASSET_VARIANT_DIR / "#{checksum}-#{variant}#{ext}"
         info << variant_path
         next if File.exist?(variant_path)
-      
+        
         variant_size = ASSET_VARIANT_SIZES[variant]
         report = `gm convert -size #{variant_size} #{wm_path.inspect} -resize #{variant_size} +profile '*' #{variant_path.inspect} 2>&1`
         errors << [path, "GM.convert failed: #{report.inspect}"] unless $?.success?
@@ -806,7 +806,9 @@ puts "=== Parsing CSVs ==="
 dump_paths = []
 freshly_parsed_classes = Set.new
 import_set = ImportSet.new
-CLASSES.each do |klass|  
+CLASSES.each do |klass|
+  break if import_set.write_errors(ERRORS_PATH) and klass == Product
+  
   parser = parsers_by_class[klass].new(import_set)
   csv_paths_by_class[klass].each do |path|
     nice_path = File.basename(path)

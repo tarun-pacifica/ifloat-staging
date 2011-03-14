@@ -24,7 +24,6 @@ Merb::Router.prepare do
   
   match('/picked_products/buy/:facility_id').to(:controller => 'picked_products', :action => 'buy')
   match('/picked_products/products_for/:klass').to(:controller => 'picked_products', :action => 'compare_by_class')
-  match('/picked_products/options').to(:controller => 'picked_products', :action => 'options')
   resources :picked_products
   
   match('/products/batch/:ids').to(:controller => 'products', :action => 'batch')

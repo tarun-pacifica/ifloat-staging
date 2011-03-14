@@ -1,5 +1,9 @@
 function basket_panel_load() {
-  
+  $.getJSON('/picked_products', basket_panel_load_handle);
+}
+
+function basket_panel_load_handle(data) {
+  console.log(data);
 }
 
 // function product_detail_pick_button_click(event) {

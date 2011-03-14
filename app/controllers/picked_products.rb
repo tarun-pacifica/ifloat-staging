@@ -2,13 +2,13 @@ class PickedProducts < Application
   def buy(facility_id)
     facility = Facility.get(facility_id) 
     raise NotFound if facility.nil?
-    return redirect("/picked_products/options") if facility.primary_url.nil?
+    return redirect("/") if facility.primary_url.nil?
     
     prod_ids_by_group = {}
     session.picked_products.each do |pick|
       (prod_ids_by_group[pick.group] ||= []).push(pick.product_id)
     end
-    return redirect("/picked_products/options") unless prod_ids_by_group.has_key?("buy_now")
+    return redirect("/") unless prod_ids_by_group.has_key?("buy_now")
     
     prod_ids_by_group.delete("compare")
     
@@ -18,7 +18,7 @@ class PickedProducts < Application
     one_off_product_id = params[:product_id].to_i
     purchase_product_ids = (one_off_product_id > 0 ? [one_off_product_id] : prod_ids_by_group["buy_now"]).to_set
     @purchase_urls = facility.purchase_urls(mappings.select { |m| purchase_product_ids.include?(m.product_id) })
-    return redirect("/picked_products/options") if @purchase_urls.empty?
+    return redirect("/") if @purchase_urls.empty?
     
     Mailer.deliver(:purchase_started,
       :url     => facility.primary_url,
@@ -112,39 +112,6 @@ class PickedProducts < Application
     picks_by_group["compare"] = compare_picks.sort_by { |info| [info[:title_parts].last, info[:id]] } unless compare_picks.nil?
     
     picks_by_group.to_json
-  end
-  
-  def options
-    non_compare_picks = session.picked_products.reject { |pick| pick.group == "compare" }
-    return redirect("/") if non_compare_picks.empty?
-    
-    @picks_by_product_id = non_compare_picks.hash_by(:product_id) # TODO: check whether needed
-    product_ids = @picks_by_product_id.keys
-    
-    @prices_by_url_by_product_id = Product.prices_by_url_by_product_id(product_ids, session.currency)
-    unit_and_divisor_by_product_id = UnitOfMeasure.unit_and_divisor_by_product_id(product_ids)
-    
-    @prices_by_url_by_product_id.each do |product_id, prices_by_url|
-      unit, divisor = unit_and_divisor_by_product_id[product_id]
-      
-      formatted_prices_by_url = {}
-      prices_by_url.each do |url, price|
-        formatted_prices_by_url[url] = money_uom(price, session.currency, unit, divisor)
-      end
-      
-      prices_by_url.update(formatted_prices_by_url)
-    end
-    
-    @facility_descriptions_by_url = {}
-    @facility_ids_by_url = {}
-    Indexer.facilities.each do |url, facility|
-      @facility_descriptions_by_url[url] = facility[:description]
-      @facility_ids_by_url[url] = facility[:id]
-    end
-    @facility_urls = Indexer.facilities.keys
-    
-    session.log!("GET", "picked_products_options", request.remote_ip)
-    render
   end
   
   def update(id, group)

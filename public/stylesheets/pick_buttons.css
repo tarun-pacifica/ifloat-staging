@@ -1,46 +1,48 @@
-#pick_buttons {
-	margin-top: 10px;
-	padding-left: 17px;
+/* TODO: delete*/
+
+/*#pick_buttons {
+  margin-top: 10px;
+  padding-left: 17px;
 }
 
 #pick_buttons div {
-	cursor: pointer;
-	float: left;
-	height: 23px;
-	width: 57px;
+  cursor: pointer;
+  float: left;
+  height: 23px;
+  width: 57px;
 }
 
 #pick_buttons div:hover {
-	background-position: 0 -23px;
+  background-position: 0 -23px;
 }
 
 #pick_buttons div:active {
-	background-position: 0 -46px;
+  background-position: 0 -46px;
 }
 
 #pick_buttons .buy_later {
-	background: url(/images/product_detail/buttons/buy_later.png) no-repeat;
+  background: url(/images/product_detail/buttons/buy_later.png) no-repeat;
 }
 
 #pick_buttons .buy_now {
-	background: url(/images/product_detail/buttons/buy_now.png) no-repeat;
+  background: url(/images/product_detail/buttons/buy_now.png) no-repeat;
 }
 
 #pick_buttons .compare {
-	background: url(/images/product_detail/buttons/compare.png) no-repeat;
-	width: 59px;
+  background: url(/images/product_detail/buttons/compare.png) no-repeat;
+  width: 59px;
 }
 
 #pick_buttons .reset {
-	background: url(/images/product_detail/buttons/reset.png) no-repeat;
-	width: 56px;
+  background: url(/images/product_detail/buttons/reset.png) no-repeat;
+  width: 56px;
 }
 
 #pick_buttons .selected {
-	background-position: 0 -46px;
-	cursor: default;
+  background-position: 0 -46px;
+  cursor: default;
 }
 
 #pick_buttons .selected:hover {
-	background-position: 0 -46px;
-}
+  background-position: 0 -46px;
+}*/

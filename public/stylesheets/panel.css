@@ -1,96 +1,98 @@
-.major {
-	float: left;
-	width: 699px;
+/* TODO: delete */
+
+/*.major {
+  float: left;
+  width: 699px;
 }
 
 .major .body {
-	background: white;
-	border: 1px solid silver;
-	border-top: none;
+  background: white;
+  border: 1px solid silver;
+  border-top: none;
 }
 
 .major .title {
-	border-left: 1px solid silver;
+  border-left: 1px solid silver;
 }
 
 .major .title h2 {
-	background: url(/images/panel/backgrounds/title_right.png) no-repeat top right;
+  background: url(/images/panel/backgrounds/title_right.png) no-repeat top right;
 }
 
 .major .title h2 a {
-	color: #404040;
-	display: block;
-	float: left;
-	text-decoration: none;
+  color: #404040;
+  display: block;
+  float: left;
+  text-decoration: none;
 }
 
 .major .title h2 a:hover {
-	color: black;
-	text-decoration: underline;
+  color: black;
+  text-decoration: underline;
 }
 
 .major .title h2 img {
-	margin-top: -8px;
+  margin-top: -8px;
 }
 
 .minor {
-	background: #DCE9F7;
-	border-right: 1px solid silver;
-	float: left;
-	margin-right: -1px;
-	width: 200px;
+  background: #DCE9F7;
+  border-right: 1px solid silver;
+  float: left;
+  margin-right: -1px;
+  width: 200px;
 }
 
 .minor .controls {
-	background: url(/images/panel/backgrounds/controls.png) repeat-x;
-	border-left: 1px solid silver;
-	height: 37px;
-	padding-left: 2px;
+  background: url(/images/panel/backgrounds/controls.png) repeat-x;
+  border-left: 1px solid silver;
+  height: 37px;
+  padding-left: 2px;
 }
 
 .minor .controls .button {
-	cursor: pointer;
-	float: left;
-	height: 18px;
-	margin: 7px 0 0 3px;
-	padding: 5px 0 0 25px;
-	width: 93px;
+  cursor: pointer;
+  float: left;
+  height: 18px;
+  margin: 7px 0 0 3px;
+  padding: 5px 0 0 25px;
+  width: 93px;
 }
 
 .minor h3 {
-	background: url(/images/panel/backgrounds/section.png) repeat-x;
-	border-top: 1px solid silver;
-	color: #404040;
-	font-weight: normal;
-	height: 21px;
-	margin: 0 0 5px;
-	padding: 5px 0 0 5px;
+  background: url(/images/panel/backgrounds/section.png) repeat-x;
+  border-top: 1px solid silver;
+  color: #404040;
+  font-weight: normal;
+  height: 21px;
+  margin: 0 0 5px;
+  padding: 5px 0 0 5px;
 }
 
 .minor h3.topmost {
-	border: none;
+  border: none;
 }
 
 .minor .sections {
-	border-bottom: 1px solid silver;
-	border-left: 1px solid silver;
+  border-bottom: 1px solid silver;
+  border-left: 1px solid silver;
 }
 
 .minor .title h2 {
-	background: url(/images/panel/backgrounds/title_left.png) no-repeat;
-	width: 190px;
+  background: url(/images/panel/backgrounds/title_left.png) no-repeat;
+  width: 190px;
 }
 
 .panel .title {
-	background: url(/images/panel/backgrounds/title.png) repeat-x;
-	height: 35px;
+  background: url(/images/panel/backgrounds/title.png) repeat-x;
+  height: 35px;
 }
 
 .panel .title h2 {
-	color: #404040;
-	font-size: 16px;
-	font-weight: normal;
-	height: 27px;
-	margin: 0;
-	padding: 8px 0 0 10px;
-}
+  color: #404040;
+  font-size: 16px;
+  font-weight: normal;
+  height: 27px;
+  margin: 0;
+  padding: 8px 0 0 10px;
+}*/

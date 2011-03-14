@@ -4,7 +4,7 @@ describe Asset do
   
   describe "creation" do
     before(:each) do
-      @asset = Asset.new(:company_id => 1, :bucket => "articles", :name => "car.jpg")
+      @asset = Asset.new(:company_id => 1, :bucket => "products", :name => "car.jpg")
     end
     
     it "should succeed with valid data" do

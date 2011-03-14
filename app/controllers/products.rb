@@ -65,7 +65,7 @@ class Products < Application
     @more_counts[@more_class] = Indexer.product_ids_for_phrase(@more_class, session.language).size
     
     @find = session.most_recent_cached_find
-    render(Merb.env == "development" ? :show_new : :show)
+    render
   end
   
   

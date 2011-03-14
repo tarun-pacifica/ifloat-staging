@@ -1,66 +1,41 @@
 <% @async_tracking = true %>
 <%= partial "common/header" %>
 
-<div id="body">
-
-<div id="product_data_panel" class="panel minor">
-  <div class="title"> <h2>Product Data</h2> </div>
-  <%= product_data_panel(@common_values) %>
-</div>
-
-<div id="product_detail" class="panel major">
-  <div class="title">
-    <h2><%= panel_title_back_to_find(@find) %></h2>
-  </div>
+<div id="product">
+  <h1><%= brand_image(@brand) %> <%= @title.superscript %></h1>
+  <hr class="terminator" />
   
-  <div class="body">
+  <div class="main_info">
     <div class="images">
       <img class="main" src=<%= @image_urls.first.inspect %> alt=<%= @page_title.inspect %> />
-      <% if @image_urls.size > 1 %>     
-        <% @image_urls.each do |url|%>
-        <img class="thumb" src=<%= url.inspect %> alt="thumbnail" onmouseover="product_detail_select_image(event)" />
-        <% end %>
-      <% end %>
+      <%= @image_urls.map { |url| "<img class=\"thumb\" src=#{url.inspect} alt=\"thumbnail\" onmouseover=\"product_thumb_hover(event)\" />" } if @image_urls.size > 1 %>
     </div>
     
-    <div class="sidebar">
-      <div id="pick_buttons">
-        <div class="compare"> </div>
-        <div class="buy_later"> </div>
-        <div class="buy_now"> </div>
-        <div class="reset"> </div>
-        <hr class="terminator" />
+    <div class="other">
+      <div class="info_snippet">
+        <h2>Summary</h2>
+        <p><%= @summary %></p>
       </div>
       
-      <table class="prices" summary="prices">
-        <% @prices_by_url.each do |url, amount| %>
-        <% fac = (Indexer.facilities[url] || {})%>
-        <tr>
-          <td>
-            <%= money_uom(amount, session.currency, @price_unit, @price_divisor) %> <br />
-            (best partner price)
-          </td>
-          <td class="price">
-            <div class="buy_now" onclick="product_detail_buy_now(<%= @product.id %>, <%= fac[:id] %>)" <%= tooltip_attributes(fac[:description], :left) %>>Buy Now</div>
-          </td>
-        </tr>
-        <% end %>
-        <% if @prices_by_url.empty? %>
-        <tr> <td class="no_stock">None of our partners have this item in stock</td> </tr>
-        <% end %>
-      </table>
+      <code>
+        <%= @sibling_data.inspect %>
+      </code>
+      <p></p>
       
-      <div class="more">
-        <h3>Show me more...</h3>
-        <ul class="more">
-          <li><%= finder_link(@more_class, :text => "#{@more_class} products (#{@more_counts[@more_class]})") %></li>
-          <%= @more_tags.map { |tag| "<li>#{finder_link(tag, :tag => true, :text => "#{tag} (#{@more_counts[tag]})")}</li>"} %>
-        </ul>
+      <div class="info_snippet" id="show_me_more">
+        <h2>Show me more...</h2>
+        <p>
+          <%= finder_link(@more_class, :text => "#{@more_class} products (#{@more_counts[@more_class]})") %>
+          <%= @more_tags.map { |tag| finder_link(tag, :tag => true, :text => "#{tag} (#{@more_counts[tag]})") } %>
+        </p>
+        <% unless @product_links_by_rel_name.empty? %>
+        <p id="related_anchor"> <a href="#related_products">VIEW RELATED PRODUCTS</a> </p>
+        <% end %>
       </div>
       
       <% unless @related_media.empty? %>
-      <div class="related_media">
-        <h3>Related media...</h3>
+      <div class="info_snippet" id="related_media">
+        <h2>Related media...</h2>
         <table class="related_media" summary="related media">
           <% @related_media.each do |name, url, icon_url| %>
           <tr>
@@ -74,53 +49,59 @@
     </div>
     
     <hr class="terminator" />
+  </div>
+  
+  <div class="extended_info">
+    <% features, description = @body_values_by_name.values_at("marketing:feature_list", "marketing:description").map { |values| (values || []).first.to_s.superscript } %>
     
-    <div class="description">
-      <h1><%= @title.superscript %></h1>
-      
-      <% unless @images_by_rel_name.empty? %>
-      <a href="#relations" onclick="product_detail_flash_related()">View Related Products</a>
-      <% end %>
-      
-      <% features, description = @body_values_by_name.values_at("marketing:feature_list", "marketing:description").map { |values| (values || []).first.to_s.superscript } %>
-      
-      <% unless @summary.blank? %>
-      <h3>Summary</h3>
-      <p><%= @summary %></p>
-      <% end %>
-      
-      <% unless features.blank? %>
-      <h3>Features</h3>
+    <% unless features.blank? %>
+    <div class="info_snippet">
+      <h2>Features</h2>
       <ul>
         <% features.split("\n").each do |feature| %>
         <li><%= feature %></li>
         <% end %>
       </ul>
-      <% end %>
-      
-      <% unless description.blank? %>
-      <h3>Description</h3>
-      <%= BlueCloth.new(description).to_html %>
-      <% end %>
     </div>
+    <% end %>
     
-    <% unless @images_by_rel_name.empty? %>
-    <div class="relations">
-      <a name="relations"> </a>
-      <% @images_by_rel_name.each do |name, image| %>
-      <div id="rel_<%= name %>">
-        <h3>This product <%= name.tr("_", " ") %>...</h3>
-      </div>
-      <% end %>
-    </div>  
+    <% unless description.blank? %>
+    <div class="info_snippet">
+      <h2>Description</h2>
+      <%= BlueCloth.new(description).to_html %>
+    </div>
     <% end %>
   </div>
+  
+  <div class="properties">
+    <div class="sections">
+      <%= @property_value_sections.map { |name| "<div>#{name}</div>" } %>
+    </div>
+    
+    <div class="values">
+      <%= product_data_table(@property_values) %>
+    </div>
+    
+    <hr class="terminator" />
+  </div>
+  
+  <% unless @product_links_by_rel_name.empty? %>
+  <div class="info_snippet">
+    <a name="related_products"> </a>
+    <h2>Related Products</h2>
+    <% @product_links_by_rel_name.each do |name, links| %>
+    <p>This <%= name.tr("_", " ") %>...</p>
+    <div class="related_set"> <%= links.join(" ") %> </div>
+    <% end %>
+  </div>  
+  <% end %>
 </div>
 
-</div>
+<div id="basket_panel"> </div>
 
 <script type="text/javascript" charset="utf-8">
-  $ifloat_body = { product_id: <%= @product.id %> };
-  $('img.property_icon').unbind('click');
-  product_detail_load_related(<%= @images_by_rel_name.to_json %>);
+  basket_panel_load();
+  product_links_wire_up(<%= @rel_product_ids.to_json %>);
+  product_thumb_hover({target: $('#product img.thumb')[0]});
+  product_property_sections_init(<%= @property_ids_by_section.to_json %>);
 </script>

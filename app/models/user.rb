@@ -40,7 +40,6 @@ class User
   property :confirm_key,    String,    :required => true, :default => proc { Password.gen_string(16) }
   property :confirmed_at,   DateTime
   
-  has n, :blogs
   has n, :cached_finds
   has n, :contacts
   has n, :picked_products, :order => [:created_at]

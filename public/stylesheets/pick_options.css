@@ -1,4 +1,6 @@
-#po_buy_later .pick_buttons div {
+/* TODO: delete */
+
+/*#po_buy_later .pick_buttons div {
   cursor: pointer;
   float: left;
   height: 23px;
@@ -89,7 +91,7 @@
   cursor: pointer;
   height: 18px;
   padding: 5px 0 0 25px;
-  width: 60px; /* 137px */
+  width: 60px;
 }
 
 #po_buy_now div.move {
@@ -270,4 +272,4 @@
 
 #po_buy_now table tr.odd td {
   background: #DCE9F7;
-}
+}*/

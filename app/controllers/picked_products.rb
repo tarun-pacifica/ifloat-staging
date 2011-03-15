@@ -95,18 +95,31 @@ class PickedProducts < Application
     picks = session.picked_products
     product_ids = picks.map { |pick| pick.product_id }
     images_by_product_id = Product.primary_images_by_product_id(product_ids)
+    prices_by_url_by_product_id = Product.prices_by_url_by_product_id(product_ids, session.currency)
+    ud_by_product_id = UnitOfMeasure.unit_and_divisor_by_product_id(product_ids)
     
+    basket_subtotal = 0.0
     picks_by_group = {}
     picks.each do |pick|
       product_id = pick.product_id
+      quantity = (pick.quantity || 1)
+      price = (prices_by_url_by_product_id[product_id] || {}).values.first
+      
       (picks_by_group[pick.group] ||= []) << {
         :id          => pick.id,
         :product_id  => product_id,
         :image_urls  => images_by_product_id[product_id].urls_by_variant,
         :title_parts => pick.title_parts,
-        :url         => Indexer.product_url(product_id)
+        :url         => Indexer.product_url(product_id),
+        :quantity    => quantity,
+        :unit        => (ud_by_product_id[product_id] || []).first,
+        :subtotal    => price.nil? ? "N/A" : money(quantity * price, session.currency)
       }
+      
+      basket_subtotal += quantity * price if pick.group == "buy_now" and not price.nil?
     end
+    
+    picks_by_group["buy_now"] << money(basket_subtotal, session.currency) if basket_subtotal > 0
     
     compare_picks = picks_by_group["compare"]
     picks_by_group["compare"] = compare_picks.sort_by { |info| [info[:title_parts].last, info[:id]] } unless compare_picks.nil?

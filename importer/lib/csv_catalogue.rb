@@ -22,7 +22,14 @@ class CSVCatalogue
     index_dir = @dir / md5
     info_path = index_dir / INFO_FILE_NAME
     
-    add_info(md5, Marshal.load(File.open(info_path))) and return if File.exist?(info_path)
+    # TODO: remove once marshal stops blowing up in ruby 1.8
+    if File.exist?(info_path)
+      GC.disable
+      add_info(md5, Marshal.load(File.open(info_path)))
+      GC.enable
+      return
+    end
+    # add_info(md5, Marshal.load(File.open(info_path))) and return if File.exist?(info_path)
     
     if File.directory?(index_dir)
       puts " ! #{name} partial update detected (erasing and starting again)"

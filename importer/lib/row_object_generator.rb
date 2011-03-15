@@ -22,8 +22,9 @@ class RowObjectGenerator
       next unless parser.header_errors.empty?
       
       parsed_count, error_count = 0, 0
+      csv_rows_by_md5 = @csvs.rows_by_md5(csv_info[:md5])
       csv_row_md5s_to_parse.each do |row_md5|
-        row_objects, errors = parser.parse_row(@csvs.row(csv_info[:md5], row_md5))
+        row_objects, errors = parser.parse_row(csv_rows_by_md5[row_md5])
         if row_objects.empty? and errors.empty? then errors << [nil, "no objects parsed from this row"]
         else errors += @objects.add(@csvs, row_objects, row_md5).map { |e| [nil, e] }
         end

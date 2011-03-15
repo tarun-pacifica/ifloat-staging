@@ -74,8 +74,8 @@ class CSVCatalogue
       headers = values and next if row.header_row?
       next if row["IMPORT"] == "N"
       
-      marshaled = Marshal.dump(values.map { |v| NIL_VALUES.include?(v) ? nil : v })
-      rows_by_md5[Digest::MD5.hexdigest(marshaled)] = values
+      values.map! { |v| NIL_VALUES.include?(v) ? nil : v }
+      rows_by_md5[Digest::MD5.hexdigest(Marshal.dump(values))] = values
     end
     
     if rows_by_md5.empty? then errors << "no header row"

@@ -3,56 +3,61 @@ class ObjectCatalogue
     @@default
   end
   
-  attr_reader :rows_by_pk_md5
+  attr_reader :rows_by_ref
   
   def initialize(dir)
     @@default = self
     
     @data_dir, @refs_dir, @rows_dir = %w(data refs rows).map { |d| dir / d }
-    group_names_by_dir = Hash[ [@data_dir, @refs_dir, @rows_dir].map do |d|
+    dirs_with_groups = [@data_dir, @refs_dir, @rows_dir].map do |d|
       FileUtils.mkpath(d)
       [d, Dir[d / "*"].map { |path| File.basename(path) }]
-    end ]
+    end
+    groups_by_dir = Hash[dirs_with_groups]
     
-    common_group_names = group_names_by_dir.values.inject(:&)
-    group_names_by_dir.each do |dir, names|
-      (names - common_group_names).map { |name| dir / name }.delete_and_log("orphaned #{File.basename(dir)}")
+    common_groups = groups_by_dir.values.inject(:&)
+    groups_by_dir.each do |dir, names|
+      (names - common_groups).map { |name| dir / name }.delete_and_log("orphaned #{File.basename(dir)}")
     end
     
-    @group_names_by_pk_md5 = {}
-    @refs_by_pk_md5 = {}
-    common_group_names.each do |name|
-      File.open(@refs_dir / name) { |f| Marshal.load(f) }.each do |pk_md5, value_md5|
-        @group_names_by_pk_md5[pk_md5] = name
-        @refs_by_pk_md5[pk_md5] = ObjectReference.new(pk_md5, value_md5)
+    @groups_by_ref = {}
+    @vals_by_ref = {}
+    common_groups.each do |name|
+      # TODO: remove once marshal stops blowing up in ruby 1.8
+      GC.disable
+      value_md5s_by_ref = File.open(@refs_dir / name) { |f| Marshal.load(f) }
+      GC.enable
+      
+      value_md5s_by_ref.each do |ref, value_md5|
+        @groups_by_ref[ref] = name
+        @vals_by_ref[ref] = value_md5
       end
     end
     
-    @rows_by_pk_md5 = {}
-    common_group_names.each do |name|
-      @rows_by_pk_md5.update(File.open(@rows_dir / name) { |f| Marshal.load(f) })
+    @rows_by_ref = {}
+    common_groups.each do |name|
+      @rows_by_ref.update(File.open(@rows_dir / name) { |f| Marshal.load(f) })
     end
     
-    @data_by_pk_md5 = {}
+    @data_by_ref = {}
     @refs_to_write = []
   end
   
   def add(csv_catalogue, objects, *row_md5s)
     objects.each do |object|
-      ref = ObjectReference.from_object(object)
+      ref, value_md5 = ObjectRef.from_object(object)
       
-      existing_ref = @refs_by_pk_md5[ref.pk_md5]
-      unless existing_ref.nil?
-        existing_rows = existing_ref.row_md5s.map do |row_md5|
+      if has_ref?(ref)
+        existing_rows = @rows_by_ref[ref].map do |row_md5|
           csv_catalogue.row_info(row_md5).values_at(:name, :index).join(":")
         end.join(", ")
         existing_rows = "unknown csvs / rows" if existing_rows.blank?
-        return ["duplicate of #{existing_ref.klass} from #{existing_rows}"]
+        return ["duplicate of #{object[:class]} from #{existing_rows}"]
       end
       
-      @data_by_pk_md5[ref.pk_md5] = object
-      @refs_by_pk_md5[ref.pk_md5] = ref
-      @rows_by_pk_md5[ref.pk_md5] = (row_md5s + row_md5_chain(object)).flatten.uniq
+      @data_by_ref[ref] = object
+      @rows_by_ref[ref] = (row_md5s + row_md5_chain(object)).flatten.uniq
+      @vals_by_ref[ref] = value_md5
       
       @refs_to_write << ref
     end
@@ -60,82 +65,84 @@ class ObjectCatalogue
     []
   end
   
-  def commit(group_name)
+  def commit(group)
     return if @refs_to_write.empty?
     
-    data_by_pk_md5 = {}
-    rows_by_pk_md5 = {}
-    vals_by_pk_md5 = {}
+    data_by_ref = {}
+    rows_by_ref = {}
+    vals_by_ref = {}
     @refs_to_write.each do |ref|
-      data_by_pk_md5[ref.pk_md5] = @data_by_pk_md5.delete(ref.pk_md5)
-      rows_by_pk_md5[ref.pk_md5] = @rows_by_pk_md5[ref.pk_md5]
-      vals_by_pk_md5[ref.pk_md5] = ref.value_md5
-      @group_names_by_pk_md5[ref.pk_md5] = group_name
+      data_by_ref[ref] = @data_by_ref.delete(ref)
+      rows_by_ref[ref] = @rows_by_ref[ref]
+      vals_by_ref[ref] = @vals_by_ref[ref]
+      @groups_by_ref[ref] = group
     end
     @refs_to_write.clear
     
-    {@data_dir => data_by_pk_md5, @refs_dir => vals_by_pk_md5, @rows_dir => rows_by_pk_md5}.each do |dir, set|
-      path = dir / group_name
+    {@data_dir => data_by_ref, @refs_dir => vals_by_ref, @rows_dir => rows_by_ref}.each do |dir, set|
+      path = dir / group
       data = (File.open(path) { |f| Marshal.load(f) } rescue {})
       data.update(set)
       File.open(path, "w") { |f| Marshal.dump(data, f) }
     end
   end
   
+  def data_for(ref)
+    data = @data_by_ref[ref]
+    return data unless data.nil?
+    
+    path = @data_dir / @groups_by_ref[ref]
+    return nil unless File.exist?(path)
+    
+    # TODO: remove once marshal stops blowing up in ruby 1.8
+    GC.disable
+    data = @data_by_ref[ref] = File.open(path) { |f| Marshal.load(f)[ref] }
+    GC.enable
+    data
+  end
+  
   def delete_obsolete(row_md5s)
     row_md5s = row_md5s.to_set
     
-    obsolete_pk_md5s = @rows_by_pk_md5.map do |pk_md5, rows|
-      next if (row_md5s & rows).size == rows.size
-      pk_md5
-    end.compact
+    obsolete_groups = []
+    obsolete_refs = @rows_by_ref.map { |ref, rows| ref if (row_md5s & rows).size != rows.size }.compact
     
-    obsolete_group_names = []
-    obsolete_pk_md5s.group_by { |pk_md5| @group_names_by_pk_md5.delete(pk_md5) }.each do |name, pk_md5s|
-      obsolete_group_names << name
+    obsolete_refs.group_by { |ref| @groups_by_ref.delete(ref) }.each do |name, refs|
+      obsolete_groups << name
       
       [@data_dir, @refs_dir, @rows_dir].each do |dir|
         path = dir / name
         data = File.open(path) { |f| Marshal.load(f) } rescue {}
-        pk_md5s.each { |pk_md5| data.delete(pk_md5) }
+        refs.each { |ref| data.delete(ref) }
         if data.empty? then File.delete(path)
         else File.open(path, "w") { |f| Marshal.dump(data, f) }
         end
       end
     end
     
-    obsolete_pk_md5s.each do |pk_md5|
-      @data_by_pk_md5.delete(pk_md5)
-      @refs_by_pk_md5.delete(pk_md5)
-      @rows_by_pk_md5.delete(pk_md5)
+    obsolete_refs.each do |ref|
+      @data_by_ref.delete(ref)
+      @rows_by_ref.delete(ref)
+      @vals_by_ref.delete(ref)
     end
     
-    puts " - deleted #{obsolete_pk_md5s.size} objects in #{obsolete_group_names.size} groups" unless obsolete_pk_md5s.empty?
+    puts " - deleted #{obsolete_refs.size} objects in #{obsolete_groups.size} groups" unless obsolete_refs.empty?
   end
   
-  def lookup_data(pk_md5)
-    data = @data_by_pk_md5[pk_md5]
-    return data unless data.nil?
-    
-    path = @data_dir / @group_names_by_pk_md5[pk_md5]
-    return nil unless File.exist?(path)
-    @data_by_pk_md5[pk_md5] = File.open(path) { |f| Marshal.load(f)[pk_md5] }
-  end
-  
-  def lookup_ref(pk_md5)
-    @refs_by_pk_md5[pk_md5]
+  def has_ref?(ref)
+    @vals_by_ref.has_key?(ref)
   end
   
   def row_md5_chain(object)
     case object
-    when Array                then object.map { |v| row_md5_chain(v) }
-    when Hash                 then object.values.map { |v| row_md5_chain(v) }
-    when ObjectReference::MD5 then @rows_by_pk_md5[object]
+    when Array     then object.map { |v| row_md5_chain(v) }
+    when Hash      then object.values.map { |v| row_md5_chain(v) }
+    when ObjectRef then @rows_by_ref[object]
     else []
     end
   end
   
   def summarize
-    puts " > managing #{@group_names_by_pk_md5.size} objects in #{@group_names_by_pk_md5.values.uniq.size} groups"
+    puts " > managing #{@groups_by_ref.size} objects in #{@groups_by_ref.values.uniq.size} groups"
   end
 end

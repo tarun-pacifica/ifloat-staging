@@ -18,7 +18,7 @@ class RowObjectGenerator
       next if csv_row_md5s_to_parse.empty?
       
       parser = Kernel.const_get("#{model}Parser").new(csv_info, @objects)
-      @errors += parser.header_errors
+      @errors += parser.header_errors.map { |col, e| [csv_info[:name], 1, col, e] }
       next unless parser.header_errors.empty?
       
       parsed_count, error_count = 0, 0
@@ -28,7 +28,7 @@ class RowObjectGenerator
         if row_objects.empty? and errors.empty? then errors << [nil, "no objects parsed from this row"]
         else errors += @objects.add(@csvs, row_objects, row_md5).map { |e| [nil, e] }
         end
-        @errors += errors.map { |col, e| [csv_info[:name], @csvs.row_info(row_md5)[:index], col, e] }
+        @errors += errors.map { |col, e| [csv_info[:name], @csvs.row_index(row_md5), col, e] }
         
         parsed_count += row_objects.size
         error_count += errors.size
@@ -41,6 +41,6 @@ class RowObjectGenerator
   end
   
   def row_md5s_to_parse
-    @row_md5s_to_parse ||= (@csvs.row_md5s - @objects.rows_by_pk_md5.values.flatten.uniq)
+    @row_md5s_to_parse ||= (@csvs.row_md5s - @objects.rows_by_ref.values.flatten.uniq)
   end
 end

@@ -12,15 +12,6 @@ class ProductParser < AbstractParser
     
     @auto_group_diff_property = @import_set.get(PropertyDefinition, "auto:group_diff")
     @auto_title_property = @import_set.get(PropertyDefinition, "auto:title")
-    
-    @title_strategies_by_class = {}
-    @import_set.get(TitleStrategy).each do |name, strategy|
-      attributes = strategy.attributes
-      attributes[:class_names].each do |klass|
-        @title_strategies_by_class[klass] = attributes
-      end
-    end
-    @title_strategies_by_class.default = @title_strategies_by_class["ANY_CLASS"]
   end
   
   
@@ -78,8 +69,9 @@ class ProductParser < AbstractParser
   
   def generate_auto_titles(value_objects_by_property_name, product)
     klass = (value_objects_by_property_name["reference:class"].first.attributes[:text_value] rescue nil)
-    strategy = @title_strategies_by_class[klass]
+    strategy = @import_set.get(TitleStrategy, klass)
     return [] if strategy.nil?
+    strategy = strategy.attributes
     
     TitleStrategy::TITLE_PROPERTIES.each_with_index.map do |title, i|
       rendered_parts = []

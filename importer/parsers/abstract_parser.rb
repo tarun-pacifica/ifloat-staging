@@ -47,15 +47,16 @@ class AbstractParser
   
   private
   
-  def delayed_lookup(klass, *pk_values)
-    ObjectReference.pk_md5_for(klass, pk_values)
+  def lookup(klass, *pk_values)
+    ObjectRef.for(klass, pk_values)
   end
   
   def lookup!(klass, *pk_values)
-    pk_md5 = ObjectReference.pk_md5_for(klass, pk_values)
+    ref = ObjectRef.for(klass, pk_values)
     # TODO: still need friendlier lookup chain here for error as getting things like...
     # "invalid/unknown Asset: [\"products\", #<struct ObjectReference pk_md5=\"8d9a3d8527d8fd182a5d42aa570e6501\", value_md5=\"be737916ea722e21a565ee8bbb8c2685\">, \"D161-detail.jpg\"]"
-    @objects.lookup_ref(pk_md5) or raise "invalid/unknown #{klass}: #{pk_values.inspect}"
+    raise "invalid/unknown #{klass}: #{pk_values.inspect}" unless @objects.has_ref?(ref)
+    ref
   end
   
   def parse_field(header, value, fields)

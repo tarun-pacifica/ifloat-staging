@@ -15,14 +15,8 @@
 class TitleStrategy
   include DataMapper::Resource
   
-  property :id,          Serial
-  property :name,        String, :required => true, :unique_index => true
-  property :class_names, Object, :lazy => false, :required => true
-  
-  validates_with_block :class_names, :if => :class_names do
-    class_names.is_a?(Array) and class_names.all? { |name| name.is_a?(String) and name.size > 0 } ||
-      [false, "Class names should be an array of class names"]
-  end
+  property :id,         Serial
+  property :class_name, String, :required => true, :unique_index => true
   
   TITLE_PROPERTIES = [:canonical, :description, :image]
   TITLE_PROPERTIES.each do |title|

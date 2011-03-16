@@ -10,8 +10,8 @@ class AutoObjectGenerator
     @errors = []
     
     @agd_property, @at_property = %w(auto:group_diff auto:title).map do |name|
-      ref = @objects.lookup_ref(ObjectReference.pk_md5_for(PropertyDefinition, [name]))
-      @errors << "#{name} property not found - cannot generate values without it" if ref.nil?
+      ref = ObjectRef.for(PropertyDefinition, [name])
+      @errors << "#{name} property not found - cannot generate values without it" unless @objects.has_ref?(ref)
       ref
     end
   end
@@ -23,25 +23,33 @@ class AutoObjectGenerator
       @csvs.infos_for_name(matcher).map { |info| info[:row_md5s] }.flatten.to_set
     end
     
-    product_row_md5s_satisfied = Array.new(auto_row_md5s.size) { [] }
+    refs_by_product_row_md5 = {}
+    row_md5s_by_product_row_md5 = {}
     
-    @objects.rows_by_pk_md5 do |pk_md5, object_row_md5s|
-      object_product_row_md5s = (product_row_md5s & object_row_md5s)
-      next if object_product_row_md5s.empty?
-      auto_row_md5s.each_with_index do |row_md5s, i|
-        product_row_md5s_satisfied[i] += object_product_row_md5s unless (row_md5s & object_row_md5s).empty?
-      end
+    @objects.rows_by_ref do |ref, object_row_md5s|
+      primary_row_md5 = object_row_md5s.first
+      next unless product_row_md5s.include?(primary_row_md5)
+      
+      (refs_by_product_row_md5[primary_row_md5] ||= []) << ref
+      (row_md5s_by_product_row_md5[primary_row_md5] ||= []).concat(object_row_md5s)
     end
     
-    (product_row_md5s - product_row_md5s_satisfied[0]).each { |row_md5| generate_ph_values(row_md5) }
-    (product_row_md5s - product_row_md5s_satisfied[1]).each { |row_md5| generate_ts_values(row_md5) }
+    [:generate_ph_values, :generate_ts_values].zip(auto_row_md5s).each do |method_sym, row_md5s|
+      row_md5s_by_product_row_md5.each do |row_md5, object_row_md5s|
+        next unless (row_md5s & object_row_md5s).empty?
+        send(method_sym, row_md5, refs_by_product_row_md5[row_md5])
+      end
+    end
   end
   
-  def generate_ph_values(row_md5)
-    # p ["PH", row_md5]
+  def generate_ph_values(row_md5, pk_md5s)
+    p ["PH", row_md5]
+    pk_md5s.each do |pk_md5|
+      p @objects.lookup_data(pk_md5)
+    end
   end
   
-  def generate_ts_values(row_md5)
-    # p ["TS", row_md5]
+  def generate_ts_values(row_md5, pk_md5s)
+    p ["TS", row_md5, pk_md5s]
   end
 end

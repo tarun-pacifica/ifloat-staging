@@ -42,7 +42,7 @@ class ImportSet
     PropertyValueDefinition => [:property_type, :value],
     AssociatedWord          => [:word, :rules],
     PropertyHierarchy       => [:class_name, :sequence_number],
-    TitleStrategy           => [:name],
+    TitleStrategy           => [:class_name],
     UnitOfMeasure           => [:class_name],
     Company                 => [:reference],
     Facility                => [:company, :name],

@@ -10,8 +10,8 @@ class CSVCatalogue
   def initialize(dir)
     @dir = dir
     @errors = []
+    @indexes_by_row_md5 = {}
     @info_by_csv_md5 = {}
-    @info_by_row_md5 = {}
   end
   
   def add(path)
@@ -57,13 +57,14 @@ class CSVCatalogue
   def add_info(csv_md5, info)
     @info_by_csv_md5[csv_md5] = info.merge(:md5 => csv_md5)
     name = info[:name]
-    info[:row_md5s].each_with_index { |row_md5, i| @info_by_row_md5[row_md5] = {:name => name, :index => i + 2} }
+    info[:row_md5s].each_with_index { |row_md5, i| @indexes_by_row_md5[row_md5] = i + 2 }
   end
   
   def add_rows(from_path, into_dir)
     errors = []
     headers = nil
     rows_by_md5 = {}
+    row_md5s = []
     
     row_index = 0
     FasterCSV.foreach(from_path, :headers => :first_row, :return_headers => true, :encoding => "UTF-8") do |row|
@@ -82,14 +83,16 @@ class CSVCatalogue
       next if row["IMPORT"] == "N"
       
       values.map! { |v| NIL_VALUES.include?(v) ? nil : v }
-      rows_by_md5[Digest::MD5.hexdigest(Marshal.dump(values))] = values
+      md5 = Digest::MD5.hexdigest(Marshal.dump(values))
+      rows_by_md5[md5] = values
+      row_md5s << md5
     end
     
     if rows_by_md5.empty? then errors << "no header row"
     else File.open(into_dir / DATA_FILE_NAME, "w") { |f| Marshal.dump(rows_by_md5, f) }
     end
     
-    {:errors => errors, :headers => headers, :row_md5s => rows_by_md5.keys}
+    {:errors => errors, :headers => headers, :row_md5s => row_md5s}
   end
   
   def delete_obsolete
@@ -102,12 +105,12 @@ class CSVCatalogue
     @info_by_csv_md5.map { |md5, info| info[:name] =~ matcher ? info.merge(:md5 => md5) : nil }.compact
   end
   
-  def row_info(row_md5)
-    @info_by_row_md5[row_md5]
+  def row_index(row_md5)
+    @indexes_by_row_md5[row_md5]
   end
   
   def row_md5s
-    @info_by_row_md5.keys
+    @indexes_by_row_md5.keys
   end
   
   def rows_by_md5(csv_md5)

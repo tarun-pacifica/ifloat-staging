@@ -12,7 +12,7 @@ class ProductParser < AbstractParser
     attributes = Hash[[:company, :reference, :reference_group].map { |key| [key, parsed_fields.delete([key])] }]
     product = attributes.update(:class => Product)
     
-    product_lookup = delayed_lookup(Product, *attributes.values_at(:company, :reference))
+    product_lookup = lookup(Product, *attributes.values_at(:company, :reference))
     [product] + parsed_fields.map do |head, object|
       next if object.nil?
       values = (object.is_a?(Array) ? object : [object])

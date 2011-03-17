@@ -11,7 +11,7 @@ class Product
   
   property :id,              Serial
   property :reference,       String,  :required => true, :format => REFERENCE_FORMAT, :unique_index => :ref_per_company
-  property :reference_group, String,  :format => REFERENCE_FORMAT, :index => true
+  property :reference_group, String,  :length => 255, :format => REFERENCE_FORMAT, :index => true
   
   belongs_to :company
     property :company_id,    Integer, :required => true, :unique_index => :ref_per_company

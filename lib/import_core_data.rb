@@ -444,6 +444,8 @@ class ImportSet
     to_update = []
     
     objects.each do |object|
+      next if klass == TextPropertyValue and object.attributes[:text_value].blank?
+      
       attributes = {}
       object.attributes.each do |key, value|
         key = relationships[key] if relationships.has_key?(key)
@@ -455,7 +457,7 @@ class ImportSet
       pk_md5 = Digest::MD5.hexdigest(pk.join("::"))
       existing_value_md5, existing_id = existing_catalogue[pk_md5]
       to_create << [pk_md5, object, attributes] and next if existing_id.nil?
-
+      
       object.resource_id = existing_id
       
       values = value_fields.map do |attribute|

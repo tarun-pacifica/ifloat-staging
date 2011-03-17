@@ -12,6 +12,7 @@ class CSVCatalogue
     @errors = []
     @indexes_by_row_md5 = {}
     @info_by_csv_md5 = {}
+    @names_by_row_md5 = {}
   end
   
   def add(path)
@@ -57,7 +58,10 @@ class CSVCatalogue
   def add_info(csv_md5, info)
     @info_by_csv_md5[csv_md5] = info.merge(:md5 => csv_md5)
     name = info[:name]
-    info[:row_md5s].each_with_index { |row_md5, i| @indexes_by_row_md5[row_md5] = i + 2 }
+    info[:row_md5s].each_with_index do |row_md5, i|
+      @indexes_by_row_md5[row_md5] = i + 2
+      @names_by_row_md5[row_md5] = name
+    end
   end
   
   def add_rows(from_path, into_dir)
@@ -103,6 +107,10 @@ class CSVCatalogue
   
   def infos_for_name(matcher)
     @info_by_csv_md5.map { |md5, info| info[:name] =~ matcher ? info.merge(:md5 => md5) : nil }.compact
+  end
+  
+  def row_csv_name(row_md5)
+    @names_by_row_md5[row_md5]
   end
   
   def row_index(row_md5)

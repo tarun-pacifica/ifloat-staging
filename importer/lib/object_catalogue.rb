@@ -96,9 +96,9 @@ class ObjectCatalogue
     
     # TODO: remove once marshal stops blowing up in ruby 1.8
     GC.disable
-    data = @data_by_ref[ref] = File.open(path) { |f| Marshal.load(f)[ref] }
+    data_by_ref = File.open(path) { |f| Marshal.load(f) }
     GC.enable
-    data
+    @data_by_ref.update(data_by_ref)[ref]
   end
   
   def delete_obsolete(row_md5s)

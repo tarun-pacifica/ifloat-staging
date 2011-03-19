@@ -118,7 +118,7 @@ function basket_panel_markup_item(pick, buy_now) {
   var html = ['<div class="item ' + (buy_now ? 'buy_now' : '') + '">'];
   
   html.push('<span class="delete" onclick="basket_panel_delete(event, ' + pick.id + ')">X</span>');
-  html.push('<p> <a href="' + pick.url + '">'+ pick.title_parts.join(' - ') + '</a> </p>');
+  html.push('<p> <a href="' + pick.url + '">'+ util_superscript('text', pick.title_parts.join(' - ')) + '</a> </p>');
   
   if(buy_now) html.push('<p class="quantity"> ' + (pick.unit ? pick.quantity + pick.unit : 'x' + pick.quantity) + '<span class="change_quantity" onclick="basket_panel_change_quantity(' + [pick.id, pick.quantity, pick.unit ? util_escape_attr_js(pick.unit) : ''].join(', ') + ')">change quantity</span> </p>');
   

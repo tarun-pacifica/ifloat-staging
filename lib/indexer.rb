@@ -25,7 +25,7 @@ module Indexer
   @@text_finding_index = {}
   
   def self.auto_diff_property_id
-    @@class_property_id if ensure_loaded
+    @@auto_diff_property_id if ensure_loaded
   end
   
   def self.category_children_for_node(path_names)

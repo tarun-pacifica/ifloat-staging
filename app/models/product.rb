@@ -67,6 +67,8 @@ class Product
   # TODO: spec, implement supply country filtering support when required (retail:country)
   # TODO: may be able to factor out the mapping bit to ProductMapping
   def self.prices_by_url_by_product_id(product_ids, currency)
+    return {} if product_ids.empty?
+    
     query =<<-EOS
       SELECT DISTINCT pm.product_id, pm.reference, f.primary_url, fp.price
       FROM product_mappings pm

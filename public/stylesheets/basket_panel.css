@@ -10,9 +10,9 @@
   background: -moz-linear-gradient(100% 100% 90deg, #FAFAFA, #DADADA);
   background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FAFAFA), to(#DADADA));
   border: 1px solid silver;
-  border-radius: 10px 10px 0 0;
-  -moz-border-radius: 10px 10px 0 0;
-  -webkit-border-radius: 10px 10px 0 0;
+  border-radius: 5px 5px 0 0;
+  -moz-border-radius: 5px 5px 0 0;
+  -webkit-border-radius: 5px 5px 0 0;
   font-size: 14px;
   font-weight: normal;
   margin: 10px 0 0 0;
@@ -97,9 +97,6 @@
 #basket_panel .subtotal {
   border: 1px solid gray;
   border-top: none;
-  border-radius: 0 0 10px 10px;
-  -moz-border-radius: 0 0 10px 10px;
-  -webkit-border-radius: 0 0 10px 10px;
   text-align: center;
 }
 
@@ -139,9 +136,15 @@
 #basket_panel_adder {
   background: #F1F9FF;
   border: 1px solid gray;
-  border-bottom: 2px dotted gray;
   border-top: none;
   padding: 10px;
+}
+
+#basket_panel_adder p.no_price {
+  color: #404040;
+  font-style: italic;
+  font-weight: bold;
+  margin: 0;
 }
 
 #basket_panel_adder p.price {

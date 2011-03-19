@@ -10,7 +10,6 @@
   background: -moz-linear-gradient(100% 100% 90deg, #FAFAFA, #DADADA);
   background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FAFAFA), to(#DADADA));
   border: 1px solid silver;
-  border-bottom: none;
   border-radius: 10px 10px 0 0;
   -moz-border-radius: 10px 10px 0 0;
   -webkit-border-radius: 10px 10px 0 0;
@@ -23,4 +22,115 @@
 #basket_panel h2 img {
   float: left;
   margin-right: 10px;
+}
+
+#basket_panel h3 {
+  background: #F1F9FF;
+  border: 1px solid silver;
+  border-top: none;
+  color: #404040;
+  margin: 0;
+  padding: 5px 10px;
+}
+
+#basket_panel .item {
+  border: 1px solid silver;
+  border-top: none;
+  color: gray;
+  padding: 5px;
+}
+
+#basket_panel .item.buy_now {
+  color: black;
+  border-color: gray;
+}
+
+#basket_panel .item .delete {
+  background: #CC0000;
+  border-radius: 10px 10px 10px 10px;
+  -moz-border-radius: 10px 10px 10px 10px;
+  -webkit-border-radius: 10px 10px 10px 10px;
+  color: white;
+  float: right;
+  font-size: 8px;
+  padding: 1px 3px;
+}
+
+#basket_panel .item .delete:hover {
+  background: red;
+  cursor: pointer;
+}
+
+#basket_panel .item a {
+  color: gray;
+  text-decoration: none;
+}
+
+#basket_panel .item.buy_now a {
+  color: black;
+}
+
+#basket_panel .item a:hover {
+  color: black;
+  text-decoration: underline;
+}
+
+#basket_panel .item p {
+  margin: 2px 0 0 0;
+}
+
+#basket_panel .item.buy_now p.money {
+  text-align: right;
+}
+
+#basket_panel .item p.quantity .change_quantity {
+  color: #80C4FD;
+  margin-left: 5px;
+}
+
+#basket_panel .item p.quantity .change_quantity:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+#basket_panel .subtotal {
+  border: 1px solid gray;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  -moz-border-radius: 0 0 10px 10px;
+  -webkit-border-radius: 0 0 10px 10px;
+  text-align: center;
+}
+
+#basket_panel .subtotal p {
+  font-weight: bold;
+  margin: 0;
+  min-height: 10px;
+  padding: 5px;
+}
+
+#basket_panel .subtotal p .label {
+  float: left;
+}
+
+#basket_panel .subtotal p .money {
+  float: right;
+}
+
+#basket_panel .subtotal .checkout {
+  background: orange;
+  background: -moz-linear-gradient(100% 100% 90deg, #FECC46, #FFA329);
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FECC46), to(#FFA329));
+  border: 1px solid silver;
+  border-radius: 5px 5px 5px 5px;
+  -moz-border-radius: 5px 5px 5px 5px;
+  -webkit-border-radius: 5px 5px 5px 5px;
+  clear: both;
+  margin: 10px;
+  padding: 7px;
+}
+
+#basket_panel .subtotal .checkout:hover {
+  cursor: pointer;
+  text-decoration: underline;
 }

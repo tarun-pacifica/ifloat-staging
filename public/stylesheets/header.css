@@ -78,11 +78,17 @@
 
 #header .find_bar #basket_tab {
   background: orange;
+  background: -moz-linear-gradient(100% 100% 90deg, #FECC46, #FFA329);
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FECC46), to(#FFA329));
+  border: 1px solid gray;
+  border-radius: 5px 5px 0 0;
+  -moz-border-radius: 5px 5px 0 0;
+  -webkit-border-radius: 5px 5px 0 0;
   float: right;
   font-size: 16px;
-  height: 20px;
+  height: 18px;
   margin: 17px 15px 0 0;
   padding: 7px 0;
   text-align: center;
-  width: 150px;
+  width: 148px;
 }

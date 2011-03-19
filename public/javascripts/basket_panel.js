@@ -17,9 +17,11 @@ function basket_panel_load_handle_buy_now(picks_and_subtotal) {
   
   var subtotal = picks_and_subtotal.pop();
   
+  // TODO: cope with 0-valued subtotal by hiding checkout button and ?
+  
   var html = [];
   for(var i in picks_and_subtotal) html.push(basket_panel_markup_item(picks_and_subtotal[i], true));
-  html.push('<div class="subtotal"> <span class="label">Sub-total</span> <span class="money">' + subtotal + ' </span></div>');
+  html.push('<div class="subtotal"> <p><span class="label">Sub-total</span> <span class="money">' + subtotal + ' </span></p> <div class="checkout">GO TO CHECKOUT</div> </div>');
   return html;
 }
 
@@ -57,15 +59,15 @@ function basket_panel_load_handle_compare(picks) {
   return html;
 }
 
-function basket_panel_markup_item(pick, show_quantity) {
-  var html = ['<div class="item">'];
+function basket_panel_markup_item(pick, buy_now) {
+  var html = ['<div class="item ' + (buy_now ? 'buy_now' : '') + '">'];
   
-  html.push('<a href="/picked_products/' + pick.id + '/delete">X</a>');
-  html.push('<p>' + pick.title_parts.join(' - ') + '</p>');
+  html.push('<span class="delete" onclick="basket_panel_delete(' + pick.id + ')">X</span>');
+  html.push('<p> <a href="' + pick.url + '">'+ pick.title_parts.join(' - ') + '</a> </p>');
   
-  var quantity = '';
-  if(show_quantity) quantity = '<span class="quantity">' + (pick.unit ? pick.quantity + pick.unit : 'x' + pick.quantity) + '</span> <span class="change_quantity">change quantity</span>';
-  html.push('<p> ' + quantity + ' <span class="money">' + pick.subtotal + '</span> </p>');
+  if(buy_now) html.push('<p class="quantity"> ' + (pick.unit ? pick.quantity + pick.unit : 'x' + pick.quantity) + '<span class="change_quantity" onclick="basket_panel_change_quantity(' + [pick.id, pick.quantity, pick.unit ? util_escape_attr_js(pick.unit) : ''].join(', ') + ')">change quantity</span> </p>');
+  
+  html.push('<p class="money">' + pick.subtotal + '</p>');
   
   html.push('</div>');
   return html.join(' ');

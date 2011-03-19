@@ -95,7 +95,7 @@ function login_update_handle(data) {
   
   $ifloat_header.authenticated = (name != undefined);
   
-  var link = $("#header_body .login");
+  var link = $("#header .login");
   if(name == undefined) link.click(login_open).text("Log In");
   else link.click(login_logout).text("Log Out (" + name + ")");
   

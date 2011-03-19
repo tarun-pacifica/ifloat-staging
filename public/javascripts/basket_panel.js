@@ -69,8 +69,6 @@ function basket_panel_load_handle_buy_now(picks_and_subtotal) {
   
   var subtotal = picks_and_subtotal.pop();
   
-  // TODO: cope with 0-valued subtotal by hiding checkout button and ?
-  
   var html = [];
   for(var i in picks_and_subtotal) html.push(basket_panel_markup_item(picks_and_subtotal[i], true));
   html.push('<div class="subtotal"> <p><span class="label">Sub-total</span> <span class="money">' + subtotal + ' </span></p> <div class="checkout">GO TO CHECKOUT</div> </div>');
@@ -97,9 +95,7 @@ function basket_panel_load_handle_compare(picks) {
     var klass = pick.title_parts[1];
     if(section != klass) {
       html.push('<h3>' + klass + '</h3>');
-      if(section_count > 1) {
-        html.push('<a href="/picked_products/products_for/' + klass + '"> Differentiate ' + klass + ' Products </a>');
-      }
+      html.push(basket_panel_markup_differentiate(section_count, klass));
       section = klass;
       section_count = 0;
     }
@@ -108,7 +104,14 @@ function basket_panel_load_handle_compare(picks) {
     section_count += 1;
   }
   
+  html.push(basket_panel_markup_differentiate(section_count, picks[picks.length - 1].title_parts[1]));
+  
   return html;
+}
+
+function basket_panel_markup_differentiate(section_count, klass) {
+  if(section_count < 2) return '';
+  return '<div class="item compare"> <a class="compare" href="/picked_products/products_for/' + klass + '"> Compare ' + klass + ' </a> </div>';
 }
 
 function basket_panel_markup_item(pick, buy_now) {

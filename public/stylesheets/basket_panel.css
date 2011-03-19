@@ -46,6 +46,11 @@
   border-color: gray;
 }
 
+#basket_panel .item.compare {
+  padding: 15px 0;
+  text-align: center;
+}
+
 #basket_panel .item .delete {
   background: #CC0000;
   border-radius: 10px 10px 10px 10px;
@@ -130,6 +135,24 @@
 
 #basket_panel .subtotal .checkout:hover {
   cursor: pointer;
+  text-decoration: underline;
+}
+
+#basket_panel a.compare {
+  background: #90C0FA;
+  background: -moz-linear-gradient(100% 100% 90deg, #A8D8FD, #78B3FA);
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#A8D8FD), to(#78B3FA));
+  border: 1px solid silver;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  color: white;
+  padding: 7px;
+  text-decoration: none;
+}
+
+#basket_panel a.compare:hover {
+  color: white;
   text-decoration: underline;
 }
 

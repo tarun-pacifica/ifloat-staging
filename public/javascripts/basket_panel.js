@@ -1,15 +1,39 @@
-function basket_panel_load() {
+var basket_panel_product_info = null;
+function basket_panel_load(product_id, price, unit_of_measure) {
+  if(product_id) basket_panel_product_info = {product_id: product_id, price: price, uom: unit_of_measure};
   $.getJSON('/picked_products', basket_panel_load_handle);
 }
 
 function basket_panel_load_handle(picks_by_group) {
-  var html = [].concat(
+  var html = [];
+  
+  var info = basket_panel_product_info;
+  if(info) {
+    picks_contain_product_id = false;    
+    for(group in picks_by_group) {
+      var picks = picks_by_group[group];
+      for(i in picks) picks_contain_product_id = picks_contain_product_id || (info.product_id == picks[i].product_id);
+    }
+    
+    if(!picks_contain_product_id) {
+      html.push('<div id="basket_panel_adder">');
+      html.push('<p class="price">' + info.price + '</p>');
+      html.push('<p class="price_note">(Best partner price)</p>');
+      html.push('<form onsubmit="return false"> <label for="quantity">Quantity</label> <input name="quantity" type="text" value="1" size="4" />' + (info.uom ? info.uom : '') + '</form>');
+      html.push('<div class="add_basket">ADD TO BASKET</div>');
+      html.push('<p class="add_other">Add to Future Buys</p>');
+      html.push('<p class="add_other">Add to Compare List</p>');
+      html.push('</div>');
+    }
+  }
+  
+  html = html.concat(
     basket_panel_load_handle_buy_now(picks_by_group.buy_now),
     basket_panel_load_handle_buy_later(picks_by_group.buy_later),
     basket_panel_load_handle_compare(picks_by_group.compare)
   );
   
-  $('#basket_panel').append(html.join(' '));
+  $('#basket_panel').html(html.join(' '));
 }
 
 function basket_panel_load_handle_buy_now(picks_and_subtotal) {
@@ -28,7 +52,7 @@ function basket_panel_load_handle_buy_now(picks_and_subtotal) {
 function basket_panel_load_handle_buy_later(picks) {
   if (!picks) return [];
   
-  var html = [basket_panel_markup_header('Future Buys', '/images/basket/buy_later.png')];
+  var html = [basket_panel_markup_header('Future Buys', '/images/basket_panel/buy_later_blue.png')];
   for(var i in picks) html.push(basket_panel_markup_item(picks[i], false));
   return html;
 }
@@ -36,7 +60,7 @@ function basket_panel_load_handle_buy_later(picks) {
 function basket_panel_load_handle_compare(picks) {
   if (!picks) return [];
   
-  var html = [basket_panel_markup_header('Compare List', '/images/basket/compare.png')];
+  var html = [basket_panel_markup_header('Compare List', '/images/basket_panel/compare_blue.png')];
   
   var section = undefined, section_count = 0;
   for(var i in picks) {
@@ -74,5 +98,6 @@ function basket_panel_markup_item(pick, buy_now) {
 }
 
 function basket_panel_markup_header(text, img_src) {
-  return '<h2> <img src="' + img_src + '" /> ' + text + ' </h2>';
+  return '<h2>' + text + ' </h2>';
+  // return '<h2> <img src="' + img_src + '" /> ' + text + ' </h2>';
 }

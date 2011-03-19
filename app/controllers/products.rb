@@ -51,8 +51,10 @@ class Products < Application
     
     gather_assets(@product)
     
-    @prices_by_url = @product.prices_by_url(session.currency)
-    @price_unit, @price_divisor = UnitOfMeasure.unit_and_divisor_by_product_id([product_id])[product_id]
+    prices_by_url = @product.prices_by_url(session.currency)
+    @price_unit, price_divisor = UnitOfMeasure.unit_and_divisor_by_product_id([product_id])[product_id]
+    # TODO: generalise this once we have more than one partner
+    @price = money_uom(prices_by_url.values.first, session.currency, @price_unit, price_divisor)
     
     @product_links_by_rel_name, @rel_product_ids = marshal_product_links(Indexer.product_relationships(product_id))
     

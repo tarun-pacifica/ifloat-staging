@@ -139,7 +139,7 @@
 #basket_panel_adder {
   background: #F1F9FF;
   border: 1px solid gray;
-  border-bottom: 2px solid #404040;
+  border-bottom: 2px dotted gray;
   border-top: none;
   padding: 10px;
 }

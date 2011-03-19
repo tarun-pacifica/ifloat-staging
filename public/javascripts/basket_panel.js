@@ -1,4 +1,28 @@
 var basket_panel_product_info = null;
+function basket_panel_add(group) {
+  if(group == 'buy_later' && ! $ifloat_header.authenticated) {
+    login_open('Please login / register to add items to your future buys...');
+    return;
+  }
+  
+  var adder =  $('#basket_panel_adder');
+  adder.fadeOut('fast');
+  
+  var data = {
+    group: group,
+    product_id: basket_panel_product_info.product_id,
+    quantity: adder.find('input').val()
+  };
+  
+  $.post('/picked_products', data, basket_panel_load_handle, 'json');
+}
+
+function basket_panel_delete(event, pick_id) {
+  util_target(event).parent().fadeOut('fast');
+  $.getJSON('/picked_products/' + pick_id + '/delete', basket_panel_load_handle);
+}
+
+
 function basket_panel_load(product_id, price, unit_of_measure) {
   if(product_id) basket_panel_product_info = {product_id: product_id, price: price, uom: unit_of_measure};
   $.getJSON('/picked_products', basket_panel_load_handle);
@@ -9,7 +33,7 @@ function basket_panel_load_handle(picks_by_group) {
   
   var info = basket_panel_product_info;
   if(info) {
-    picks_contain_product_id = false;    
+    picks_contain_product_id = false;
     for(group in picks_by_group) {
       var picks = picks_by_group[group];
       for(i in picks) picks_contain_product_id = picks_contain_product_id || (info.product_id == picks[i].product_id);
@@ -20,9 +44,9 @@ function basket_panel_load_handle(picks_by_group) {
       html.push('<p class="price">' + info.price + '</p>');
       html.push('<p class="price_note">(Best partner price)</p>');
       html.push('<form onsubmit="return false"> <label for="quantity">Quantity</label> <input name="quantity" type="text" value="1" size="4" />' + (info.uom ? info.uom : '') + '</form>');
-      html.push('<div class="add_basket">ADD TO BASKET</div>');
-      html.push('<p class="add_other">Add to Future Buys</p>');
-      html.push('<p class="add_other">Add to Compare List</p>');
+      html.push('<div class="add_basket" onclick="basket_panel_add(\'buy_now\')">ADD TO BASKET</div>');
+      html.push('<p class="add_other" onclick="basket_panel_add(\'buy_later\')">Add to Future Buys</p>');
+      html.push('<p class="add_other" onclick="basket_panel_add(\'compare\')">Add to Compare List</p>');
       html.push('</div>');
     }
   }
@@ -86,7 +110,7 @@ function basket_panel_load_handle_compare(picks) {
 function basket_panel_markup_item(pick, buy_now) {
   var html = ['<div class="item ' + (buy_now ? 'buy_now' : '') + '">'];
   
-  html.push('<span class="delete" onclick="basket_panel_delete(' + pick.id + ')">X</span>');
+  html.push('<span class="delete" onclick="basket_panel_delete(event, ' + pick.id + ')">X</span>');
   html.push('<p> <a href="' + pick.url + '">'+ pick.title_parts.join(' - ') + '</a> </p>');
   
   if(buy_now) html.push('<p class="quantity"> ' + (pick.unit ? pick.quantity + pick.unit : 'x' + pick.quantity) + '<span class="change_quantity" onclick="basket_panel_change_quantity(' + [pick.id, pick.quantity, pick.unit ? util_escape_attr_js(pick.unit) : ''].join(', ') + ')">change quantity</span> </p>');
@@ -97,6 +121,7 @@ function basket_panel_markup_item(pick, buy_now) {
   return html.join(' ');
 }
 
+// TODO: simplify if images no longer needed
 function basket_panel_markup_header(text, img_src) {
   return '<h2>' + text + ' </h2>';
   // return '<h2> <img src="' + img_src + '" /> ' + text + ' </h2>';

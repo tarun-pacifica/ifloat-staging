@@ -56,6 +56,11 @@
   vertical-align: middle;
 }
 
+#product #pick_sibling select {
+  margin-left: 5px;
+  width: 275px;
+}
+
 #product #show_me_more {
   background: #FFFFC0;
 }

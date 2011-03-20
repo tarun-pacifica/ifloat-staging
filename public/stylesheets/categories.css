@@ -4,24 +4,13 @@
   padding: 5px 15px;
 }
 
-#categories .items a {
-  background: #F1F9FF;
-  border: 1px solid silver;
-  display: block;
-  float: left;
-  height: 100px;
-  margin: 7px 7px 0 0;
-  text-align: center;
-  width: 100px;
-}
-
 #categories .breadcrumbs {
+  font-size: 16px;
   margin: 5px 0;
 }
 
 #categories .breadcrumbs a {
   color: #404040;
-  font-size: 14px;
   text-decoration: none;
 }
 
@@ -32,4 +21,71 @@
 
 #categories .breadcrumbs a:last-child {
   font-weight: bold;
+}
+
+#categories .breadcrumbs a.filter {
+  color: #30A0FB;
+}
+
+#categories .filters {
+  background: #404040;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  display: none;
+  margin-right: 10px;
+  padding: 10px;
+}
+
+#categories .filters h2 {
+  color: white;
+  font-weight: normal;
+  margin: 0 0 10px 0;
+}
+
+#categories .filters .even {
+  background: #F1F9FF;
+}
+
+#categories .filters .odd {
+  background: white;
+}
+
+#categories .filters .row {
+  border-bottom: 1px solid silver;
+}
+
+#categories .filters .section {
+  border-left: 1px dashed gray;
+  float: left;
+  margin-left: -1px;
+}
+
+#categories .filters .section .filter {
+  float: left;
+  padding: 5px 10px;
+}
+
+#categories .filters .section h3 {
+  color: #404040;
+  font-weight: normal;
+  height: 21px;
+  margin: 0;
+  padding: 5px 0 0 5px;
+  width: 151px;
+}
+
+#categories .filters .section img.property_icon {
+  cursor: pointer;
+}
+
+#categories .items a {
+  background: #F1F9FF;
+  border: 1px solid silver;
+  display: block;
+  float: left;
+  height: 100px;
+  margin: 7px 7px 0 0;
+  text-align: center;
+  width: 100px;
 }

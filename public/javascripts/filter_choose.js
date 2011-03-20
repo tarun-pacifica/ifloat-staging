@@ -47,7 +47,7 @@ function filter_choose_load_handle(filters) {
       row_count = section_count;
     }
   }
-    
+  
   var html = ['<p class="prompt"><strong>Choose a property</strong> to create a filter...</p>'];
   for(var i in rows) {
     var row = rows[i];

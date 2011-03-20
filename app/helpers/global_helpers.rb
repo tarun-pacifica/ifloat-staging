@@ -10,7 +10,8 @@ module Merb
       return "" if category_path_names.empty?
       
       crumbs = category_path_names.size.times.map { |i| category_link(category_path_names[0, i + 1]) }
-      # TODO: add filter crumbs
+      
+      crumbs << '<a class="filter" href="#" onclick="category_filters_show(); return false">Filter your results</a>' if category_path_names.size == 2
       
       crumbs.join(" &rarr; ")
     end

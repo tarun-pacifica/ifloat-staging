@@ -21,6 +21,7 @@ Merb::Router.prepare do
   match('/categories').to(:controller => 'categories', :action => 'show').name(:categories)
   match('/categories/:root').to(:controller => 'categories', :action => 'show').name(:categories)
   match('/categories/:root/:sub').to(:controller => 'categories', :action => 'show').name(:categories)
+  match('/categories/:root/:sub/filters').to(:controller => 'categories', :action => 'filters').name(:categories)
   
   match('/picked_products/buy/:facility_id').to(:controller => 'picked_products', :action => 'buy')
   match('/picked_products/products_for/:klass').to(:controller => 'picked_products', :action => 'compare_by_class')

@@ -23,8 +23,8 @@
             <%= property_icon(property) %>
             <select onchange="product_sibling_select()">
               <option> <%= property[:name] %>... </option>
-              <% @sibling_prod_ids_by_value_by_prop_ids[property[:id]].keys.sort.each do |value| %>
-              <option> <%= value %> </option>
+              <% @sibling_prod_ids_by_value_by_prop_ids[property[:id]].keys.sort_by { |v| property[:type] == 'text'  ? v : v.to_f }.each do |v| %>
+              <option> <%= v %> </option>
               <% end %>
             </select>
           </div>

@@ -317,14 +317,14 @@ module Indexer
   
   # TODO: extend to support multiple languages
   def self.compile_category_definitions(properties)
-    property_names = %w(reference:class_senior reference:class)
+    property_names = %w(reference:category reference:class)
     property_ids = properties.map { |pd| property_names.include?(pd.name) ? pd.id : nil }.compact
     defs_by_value_by_property_id = PropertyValueDefinition.by_property_id(property_ids, "ENG")
     defs_by_value_by_property_id.values.inject(:update)
   end
   
   def self.compile_category_tree(properties, records)
-    property_names = %w(reference:class_senior reference:class)
+    property_names = %w(reference:category reference:class)
     properties = properties.select { |pd| property_names.include?(pd.name) }
     properties_by_id = properties.hash_by(:id)
     properties_by_name = properties.hash_by(:name)
@@ -473,7 +473,7 @@ module Indexer
   end
   
   def self.compile_tag_index(properties, records)
-    property_names = %w(reference:class_senior reference:tag).to_set
+    property_names = %w(reference:category reference:tag).to_set
     pd_ids = properties.select { |pd| property_names.include?(pd.name) }.map { |pd| pd.id }.to_set
     
     index = {}

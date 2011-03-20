@@ -41,7 +41,7 @@ Merb::Router.prepare do
   match('/users/track').to(:controller => 'users', :action => 'track')
   resources :users
   
-  match('/').to(:controller => 'cached_finds', :action =>'new')
+  match('/').to(:controller => 'categories', :action =>'show')
   
   match("/sitemap.txt").defer_to { [404, {}, ""] }
   match(/.*/).redirect("/")

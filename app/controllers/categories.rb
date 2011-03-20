@@ -1,7 +1,6 @@
 class Categories < Application
   def show(root = nil, sub = nil)
     path_names = [root, sub].compact.map { |name| name.tr("+", " ") }
-    # @links = path_names.length.times.map { |i| category_link(path_names[0, i + 1]) }
     
     children = Indexer.category_children_for_node(path_names)
     if children.empty?
@@ -12,11 +11,6 @@ class Categories < Application
     else
       @children_links = children.map { |child| category_link(path_names + [child]) }.sort
     end
-    
-    # @definitions = path_names.map do |name|
-    #   definition = Indexer.category_definition(name)
-    #   definition.nil? ? nil : [name, definition]
-    # end.compact
     
     @canonical_path = ["/categories", root, sub].compact.join("/")
     @page_title = (path_names.empty? ? "All categories" : path_names.join(" - "))

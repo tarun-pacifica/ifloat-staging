@@ -63,14 +63,21 @@ class Users < Application
   def track(url)
     session.log!("GET", url, request.remote_ip) if
       case url
-      when "/" then true
-      when %r(^/categories/?$) then true
-      when %r(^/categories/(.+?)$)
-        Indexer.category_children_for_node($1.split("/").map { |name| name.tr("+", " ") }).any?
-      when %r(^/products/.*?(\d+)$)
-        Indexer.product_url($1.to_i) == url
+      when "/"                       then true
+      when %r(^/brands/(.+?)/(.+?)$) then valid_category_path($2) and not Brand.first(:name => $1).nil?
+      when %r(^/brands/(.+?)/?$)     then not Brand.first(:name => $1).nil?
+      when %r(^/categories/?$)       then true
+      when %r(^/categories/(.+?)$)   then valid_category_path($1)
+      when %r(^/products/.*?(\d+)$)  then Indexer.product_url($1.to_i) == url
       else false
       end
     ""
+  end
+  
+  
+  private
+  
+  def valid_category_path(path)
+    Indexer.category_children_for_node(path.split("/").map { |name| name.tr("+", " ") }).any?
   end
 end

@@ -68,6 +68,8 @@ module Merb
     end
     
     def marshal_product_links(product_ids_by_group)
+      return [{}, {}] if product_ids_by_group.nil?
+      
       checksums_by_product_id = {}
       product_ids_by_checksum = {}
       Indexer.image_checksums_for_product_ids(product_ids_by_group.values.flatten).each do |checksum, product_ids|

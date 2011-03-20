@@ -1,37 +1,5 @@
-#category_nav p.definition {
-  margin: 10px 10px;
-  text-align: justify;
-}
-
-#category_nav p.prompt {
-  font-size: 14px;
-  margin: 0;
-  padding: 17px 0;
-  text-align: center;
-}
-
-#category_contents .title h2 span {
+#categories {
   float: left;
-  margin: 0 10px;
-}
-
-#category_contents .body {
-  padding: 17px;
-  padding-bottom: 7px;
-}
-
-#category_contents .body a {
-  color: #404040;
-  font-size: 14px;
-  padding-right: 10px;
-  text-decoration: none;
-}
-
-#category_contents .body a:hover {
-  color: black;
-  text-decoration: underline;
-}
-
-#category_contents .body div {
-  margin-bottom: 5px;
+  margin-right: 165px;
+  padding: 5px 15px;
 }

@@ -196,6 +196,10 @@
   font-size: 10px;
 }
 
+#basket_panel_adder form input {
+  margin-right: 5px;
+}
+
 #basket_panel_adder .add_basket {
   background: orange;
   background: -moz-linear-gradient(100% 100% 90deg, #FECC46, #FFA329);

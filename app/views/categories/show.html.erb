@@ -2,8 +2,14 @@
 <%= partial "common/header" %>
 
 <div id="categories">
-  <%= (@children_links || []).join(" ") %>
-  <%= (@product_links || []).join(" ") %>
+  <div class="breadcrumbs">
+    <%= breadcrumbs(@path_names) %>
+  </div>
+  
+  <div class="items">
+    <%= (@children_links || []).join(" ") %>
+    <%= (@product_links || []).join(" ") %>
+  </div>
 </div>
 
 <div id="basket_panel"> </div>

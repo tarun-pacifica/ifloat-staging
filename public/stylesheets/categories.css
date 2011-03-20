@@ -4,7 +4,7 @@
   padding: 5px 15px;
 }
 
-#categories a {
+#categories .items a {
   background: #F1F9FF;
   border: 1px solid silver;
   display: block;
@@ -13,4 +13,23 @@
   margin: 7px 7px 0 0;
   text-align: center;
   width: 100px;
+}
+
+#categories .breadcrumbs {
+  margin: 5px 0;
+}
+
+#categories .breadcrumbs a {
+  color: #404040;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+#categories .breadcrumbs a:hover {
+  color: black;
+  text-decoration: underline;
+}
+
+#categories .breadcrumbs a:last-child {
+  font-weight: bold;
 }

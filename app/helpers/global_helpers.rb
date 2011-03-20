@@ -6,6 +6,15 @@ module Merb
       brand.nil? ? "" : "<img src=\"#{brand.asset.url}\" alt=\"brand logo\" />"
     end
     
+    def breadcrumbs(category_path_names)
+      return "" if category_path_names.empty?
+      
+      crumbs = category_path_names.size.times.map { |i| category_link(category_path_names[0, i + 1]) }
+      # TODO: add filter crumbs
+      
+      crumbs.join(" &rarr; ")
+    end
+    
     def category_link(path_names)
       url = ("/categories/" + path_names.join("/")).tr(" ", "+")
       category = path_names.last

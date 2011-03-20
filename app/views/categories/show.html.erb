@@ -2,11 +2,13 @@
 <%= partial "common/header" %>
 
 <div id="categories">
-  <%= @children_links.map { |l| "<div>#{l}</div>" } %>
+  <%= (@children_links || []).join(" ") %>
+  <%= (@product_links || []).join(" ") %>
 </div>
 
 <div id="basket_panel"> </div>
 
 <script type="text/javascript" charset="utf-8">
   basket_panel_load();
+  product_links_wire_up(<%= (@product_ids || []).to_json %>);
 </script>

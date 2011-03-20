@@ -3,3 +3,14 @@
   margin-right: 165px;
   padding: 5px 15px;
 }
+
+#categories a {
+  background: #F1F9FF;
+  border: 1px solid silver;
+  display: block;
+  float: left;
+  height: 100px;
+  margin: 7px 7px 0 0;
+  text-align: center;
+  width: 100px;
+}

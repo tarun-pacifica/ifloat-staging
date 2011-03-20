@@ -85,6 +85,12 @@
   margin: 2px 0 0 0;
 }
 
+#basket_panel .item p.no_items {
+  font-style: italic;
+  font-weight: bold;
+  text-align: center;
+}
+
 #basket_panel .item.buy_now p.money {
   text-align: right;
 }

@@ -50,9 +50,13 @@ function basket_panel_load_handle(picks_by_group) {
         html.push('<p class="add_other" onclick="basket_panel_add(\'compare\')">Add to Compare List</p>');
         html.push('</div>');
       } else {
-        html.push('<div id="basket_panel_adder"> <p class="no_price">None of our partners have this item in stock at the moment.</p> </div>');
+        html.push('<div id="basket_panel_adder"> <p class="no_price">None of our partners have this item in stock at the moment</p> </div>');
       }
     }
+  }
+  
+  if(html.length == 0 && !picks_by_group.buy_now) {
+    html.push('<div class="item"> <p class="no_items">Your basket is empty</p> </div>');
   }
   
   html = html.concat(
@@ -94,8 +98,8 @@ function basket_panel_load_handle_compare(picks) {
     
     var klass = pick.title_parts[1];
     if(section != klass) {
+      html.push(basket_panel_markup_differentiate(section_count, section));
       html.push('<h3>' + klass + '</h3>');
-      html.push(basket_panel_markup_differentiate(section_count, klass));
       section = klass;
       section_count = 0;
     }

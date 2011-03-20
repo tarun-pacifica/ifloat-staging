@@ -58,7 +58,24 @@ class Products < Application
     
     @product_links_by_rel_name, @rel_product_ids = marshal_product_links(Indexer.product_relationships(product_id))
     
-    @sibling_data = @product.sibling_properties_with_prod_ids_and_values(session.language)
+    klass = @body_values_by_name["reference:class"]
+    sibling_data = @product.sibling_properties_with_prod_ids_and_values(session.language, klass)
+    
+    @sibling_prod_ids_by_value_by_prop_ids = {}
+    sibling_data.each do |property, prod_ids_with_values|
+      prod_ids_by_values = (@sibling_prod_ids_by_value_by_prop_ids[property[:id]] ||= {})
+      prod_ids_with_values.each do |prod_id, value|
+        (prod_ids_by_values[value] ||= []) << prod_id
+      end
+    end
+    
+    @sibling_prod_ids_by_value_by_prop_ids.delete_if do |prop_id, prod_ids_by_value|
+      prod_ids_by_value.size == 1 and prod_ids_by_value.values.first.size > 1
+    end
+    
+    @sibling_properties = sibling_data.map do |property, prod_ids_with_values|
+      property if @sibling_prod_ids_by_value_by_prop_ids.has_key?(property[:id])
+    end.compact
     
     # TODO: switch to category links rather than new finds
     @more_class = @body_values_by_name["reference:class"].first

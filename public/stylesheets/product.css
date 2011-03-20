@@ -47,9 +47,17 @@
   padding-left: 15px;
 }
 
+#product #pick_sibling {
+  padding: 0 0 5px 10px;
+}
+
+#product #pick_sibling img.property_icon {
+  padding-bottom: 5px;
+  vertical-align: middle;
+}
+
 #product #show_me_more {
   background: #FFFFC0;
-  text-align: center;
 }
 
 #product #related_anchor {

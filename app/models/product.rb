@@ -142,10 +142,10 @@ class Product
   end
   
   # TODO: spec
-  def sibling_properties_with_prod_ids_and_values(language_code)
+  def sibling_properties_with_prod_ids_and_values(language_code, klass = nil)
     return [] if reference_group.nil?
     
-    klass = TextPropertyValue.first(:product_id => id, :property_definition_id => Indexer.class_property_id).to_s
+    klass ||= TextPropertyValue.first(:product_id => id, :property_definition_id => Indexer.class_property_id).to_s
     properties_by_name = Indexer.property_display_cache.values.hash_by { |info| info[:raw_name] }
     
     lead_property_by_seq_num = {}
@@ -165,8 +165,9 @@ class Product
     end
     
     lead_property_by_seq_num.sort.map do |seq_num, property|
-      [property, (prod_ids_and_values_by_seq_num[seq_num] || []).sort]
-    end
+      prod_ids_and_values = prod_ids_and_values_by_seq_num[seq_num]
+      [property, prod_ids_and_values] unless prod_ids_and_values.nil?
+    end.compact
   end
   
   # TODO: spec

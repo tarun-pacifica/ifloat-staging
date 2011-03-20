@@ -17,10 +17,19 @@
         <p><%= @summary %></p>
       </div>
       
-      <code>
-        <%= @sibling_data.inspect %>
-      </code>
-      <p></p>
+      <div id="pick_sibling">
+        <% @sibling_properties.each do |property| %>
+          <div class="sibling" id="sibling_property_<%= property[:id] %>">
+            <%= property_icon(property) %>
+            <select onchange="product_sibling_select()">
+              <option> <%= property[:name] %>... </option>
+              <% @sibling_prod_ids_by_value_by_prop_ids[property[:id]].keys.sort.each do |value| %>
+              <option> <%= value %> </option>
+              <% end %>
+            </select>
+          </div>
+        <% end %>
+      </div>
       
       <div class="info_snippet" id="show_me_more">
         <h2>Show me more...</h2>
@@ -102,6 +111,7 @@
 <script type="text/javascript" charset="utf-8">
   basket_panel_load(<%= @product.id %>, <%= @price.to_json %>, <%= @price_unit.to_json %>);
   product_links_wire_up(<%= @rel_product_ids.to_json %>);
-  product_thumb_hover({target: $('#product img.thumb')[0]});
   product_property_sections_init(<%= @property_ids_by_section.to_json %>);
+  product_siblings_wire_up(<%= @sibling_prod_ids_by_value_by_prop_ids.to_json %>);
+  product_thumb_hover({target: $('#product img.thumb')[0]});
 </script>

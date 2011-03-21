@@ -1,8 +1,53 @@
+var category_filters_choose_values = null;
+function category_filters_choose(index) {
+  console.log(index, category_filters_choose_values[index]);
+}
+
+function category_filters_configure(filter_id) {
+  console.log(window.location + '/filter/' + filter_id)
+  $.getJSON(window.location + '/filter/' + filter_id + '?filters=', category_filters_configure_handle);
+  spinner_show('Retrieving filter values...');
+}
+
+function category_filters_configure_handle(filter) {
+  category_filters_choose_values = [];
+  
+  var all_values = [], vbu = filter.values_by_unit;
+  for(var unit in vbu) {
+    var values = vbu[unit];
+    for(var i in values) {
+      var v = values[i];
+      var formatted = (filter.type == 'text' ? util_defined(v[0], v[1]) : v[1]);
+      all_values[i] = (all_values[i] ? all_values[i] + ' / ' + formatted : formatted);
+      category_filters_choose_values[i] = [v[0], unit, all_values[i]];
+    }
+  }
+  
+  if(all_values.length == 0) {
+    alert('The product catalogue has been updated so we need to refresh the page.');
+    window.location.reload();
+    return;
+  }
+  
+  var html = ['<h2>Choose a ' + filter.name + ' value...</h2>'];
+  
+  html.push('<ul>');
+  for(var i in all_values) html.push('<li onclick="category_filters_choose(' + i + ')">' + util_superscript('text', all_values[i]) + '</li>');
+  html.push('</ul>');
+  
+  var filter_panel = $('#categories .filters');
+  filter_panel.html(html.join(' '));  
+  spinner_hide();
+}
+
+function category_filters_icon(filter) {
+  return '<img class="property_icon" src="' + filter.icon_url + '" alt="' + filter.name + '" onclick="category_filters_configure(' + filter.id + ')" onmouseover="tooltip_show(event, ' + util_escape_attr_js(filter.name) + ', \'above\')" onmouseout="tooltip_hide()" />';
+}
+
 function category_filters_show() {
   var filter_panel = $('#categories .filters');
-  filter_panel.html('<img src="/images/common/spinner.gif" alt="spinner" />');
-  filter_panel.fadeIn('fast');
   $.getJSON(window.location + '/filters?filters=', category_filters_show_handle);
+  spinner_show('Retrieving filters...');
 }
 
 function category_filters_show_handle(filters) {
@@ -49,7 +94,7 @@ function category_filters_show_handle(filters) {
       for(var k in filters) {
         var filter = filters[k];
         html.push('<div class="filter">');
-        html.push(filter_panel_property_icon(filter, 'above'));
+        html.push(category_filters_icon(filter));
         html.push('</div>');
       }
       
@@ -61,4 +106,6 @@ function category_filters_show_handle(filters) {
   }
   
   filter_panel.html(html.join(' '));
+  filter_panel.fadeIn('fast');
+  spinner_hide();
 }

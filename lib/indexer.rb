@@ -121,13 +121,13 @@ module Indexer
     @@facility_cache if ensure_loaded
   end
   
-  def self.filterable_values_for_property_id(property_id, all_prod_ids, relevant_prod_ids, language_code = nil)
+  def self.filterable_values_for_property_id(property_id, all_prod_ids, relevant_prod_ids, language_code)
     return {} if all_prod_ids.empty? or not ensure_loaded
     
     values_by_root_key = {}
     filtering_indexes(language_code).each do |root_key, products_by_property_id|
       values_by_product_id = products_by_property_id[property_id]
-      next if values_by_product_id.nil?      
+      next if values_by_product_id.nil?
       
       all_values = values_by_product_id.values_at(*all_prod_ids).flatten.compact.uniq.sort
       relevant_values = 

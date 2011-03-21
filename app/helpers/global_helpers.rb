@@ -3,13 +3,20 @@
 module Merb
   module GlobalHelpers
     def brand_image(brand)
-      brand.nil? ? "" : "<img src=\"#{brand.asset.url}\" alt=\"brand logo\" />"
+      brand.nil? ? nil : "<img src=\"#{brand.asset.url}\" alt=\"brand logo\" />"
     end
     
-    def breadcrumbs(category_path_names)
-      return "" if category_path_names.empty?
+    def brand_title(brand, title)
+      image = brand_image(brand)
+      image.nil? ? title.superscript : "#{image} <span>#{title.superscript}</span>"
+    end
+    
+    def breadcrumbs(phrase, category_path_names)
+      crumbs = [category_link([])]
       
-      crumbs = category_path_names.size.times.map { |i| category_link(category_path_names[0, i + 1]) }
+      crumbs << phrase.inspect unless phrase.nil?
+            
+      crumbs += category_path_names.size.times.map { |i| category_link(category_path_names[0, i + 1]) }
       
       crumbs << '<a class="filter" href="#" onclick="category_filters_show(); return false">Filter your results</a>' if category_path_names.size == 2
       
@@ -18,7 +25,7 @@ module Merb
     
     def category_link(path_names)
       url = ("/categories/" + path_names.join("/")).tr(" ", "+")
-      category = path_names.last
+      category = path_names.last || "All Categories"
       on_hover = tooltip_attributes(Indexer.category_definition(category))
       "<a href=#{url.inspect} #{on_hover}>#{category}</a>"
     end

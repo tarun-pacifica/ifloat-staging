@@ -14,8 +14,8 @@ module Merb
     def breadcrumbs(phrase, category_path_names)
       crumbs = [category_link([])]
       
-      crumbs << phrase.inspect unless phrase.nil?
-            
+      crumbs << Merb::Parse.escape_xml("\"#{phrase}\"") unless phrase.nil?
+      
       crumbs += category_path_names.size.times.map { |i| category_link(category_path_names[0, i + 1]) }
       
       crumbs << '<a class="filter" href="#" onclick="category_filters_show(); return false">Filter your results</a>' if category_path_names.size == 2

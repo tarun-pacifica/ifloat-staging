@@ -26,12 +26,13 @@ class Categories < Application
       @find_bad = true
     end
     
-    if children.first.is_a?(Integer)
-      product_links_by_node, @product_ids = marshal_product_links(:products => children)
-      @product_links = product_links_by_node[:products]
-    else
-      @children_links = children.map { |child| category_link(@path_names + [child]) }.sort
-    end
+    @child_links =
+      if children.first.is_a?(Integer)
+        product_links_by_node, @product_ids = marshal_product_links(:products => children)
+        product_links_by_node[:products]
+      else
+        children.map { |child| category_link(@path_names + [child]) }.sort
+      end
     
     @canonical_path = ["/categories", root, sub].compact.join("/")
     @page_title = @path_names.join(" - ") unless @path_names.empty?

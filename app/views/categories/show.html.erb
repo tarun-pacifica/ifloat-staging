@@ -1,7 +1,7 @@
 <% @async_tracking = true %>
 <%= partial "common/header" %>
 
-<div id="categories">  
+<div id="categories">
   <% if @find_bad %>
   
   <div class="find_bad">
@@ -20,8 +20,7 @@
   <div class="filters"> </div>
   
   <div class="items">
-    <%= (@children_links || []).join(" ") %>
-    <%= (@product_links || []).join(" ") %>
+    <%= @child_links.join(" ") %>
   </div>
   
   <% end %>
@@ -30,6 +29,9 @@
 <div id="basket_panel"> </div>
 
 <script type="text/javascript" charset="utf-8">
+  var items = $('#categories .items a');
+  if(items.length == 1) window.location = items.attr('href');
+  
   basket_panel_load();
   product_links_wire_up(<%= (@product_ids || []).to_json %>);
 </script>

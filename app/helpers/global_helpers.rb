@@ -25,6 +25,9 @@ module Merb
     
     def category_link(path_names)
       url = ("/categories/" + path_names.join("/")).tr(" ", "+")
+      query_params = params.keep("filters", "find").map { |k, v| "#{k}=#{v}" }.join("&")
+      url += "?#{query_params}" unless query_params.blank?
+      
       category = path_names.last || "All Categories"
       on_hover = tooltip_attributes(Indexer.category_definition(category))
       "<a href=#{url.inspect} #{on_hover}>#{category}</a>"

@@ -23,7 +23,6 @@ class Categories < Application
     
     @find_phrase = params["find"]
     # TODO: use find phrase to limit results / offer suggester
-    # TODO: carry the find param throughout
     
     if children.first.is_a?(Integer)
       product_links_by_node, @product_ids = marshal_product_links(:products => children)

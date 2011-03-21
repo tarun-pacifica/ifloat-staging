@@ -12,9 +12,9 @@ module Merb
     end
     
     def breadcrumbs(phrase, category_path_names)
-      crumbs = [category_link([])]
+      crumbs = [category_link([], "All Categories", true)]
       
-      crumbs << Merb::Parse.escape_xml("\"#{phrase}\"") unless phrase.nil?
+      crumbs << category_link([], Merb::Parse.escape_xml("\"#{phrase}\"")) unless phrase.nil?
       
       crumbs += category_path_names.size.times.map { |i| category_link(category_path_names[0, i + 1]) }
       
@@ -23,14 +23,17 @@ module Merb
       crumbs.join(" &rarr; ")
     end
     
-    def category_link(path_names)
+    def category_link(path_names, name = nil, ignore_params = false)
       url = ("/categories/" + path_names.join("/")).tr(" ", "+")
-      query_params = params.keep("filters", "find").map { |k, v| "#{k}=#{v}" }.join("&")
-      url += "?#{query_params}" unless query_params.blank?
       
-      category = path_names.last || "All Categories"
-      on_hover = tooltip_attributes(Indexer.category_definition(category))
-      "<a href=#{url.inspect} #{on_hover}>#{category}</a>"
+      unless ignore_params
+        query_params = params.keep("filters", "find").map { |k, v| "#{k}=#{v}" }.join("&")
+        url += "?#{query_params}" unless query_params.blank?
+      end
+      
+      name ||= path_names.last
+      on_hover = tooltip_attributes(Indexer.category_definition(name))
+      "<a href=#{url.inspect} #{on_hover}>#{name}</a>"
     end
     
     def compile_tags

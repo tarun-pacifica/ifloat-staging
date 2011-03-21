@@ -17,12 +17,14 @@ class Categories < Application
   end
   
   def show(root = nil, sub = nil)
+    @find_phrase = params["find"]
     @path_names, children = path_names_and_children(root, sub)
     
-    return render("../cached_finds/new".to_sym, :status => 404) if children.empty?
-    
-    @find_phrase = params["find"]
-    # TODO: use find phrase to limit results / offer suggester
+    if children.empty?
+      return render("../cached_finds/new".to_sym, :status => 404) if path_names_and_children(root, sub, nil).last.empty?
+      @find_alternatives = find_phrase_alternatives(@find_phrase)
+      @find_bad = true
+    end
     
     if children.first.is_a?(Integer)
       product_links_by_node, @product_ids = marshal_product_links(:products => children)
@@ -67,8 +69,25 @@ class Categories < Application
     product_ids # TODO: do filtering
   end
   
-  def path_names_and_children(root, sub)
+  def find_phrase_alternatives(phrase)
+    words = phrase.downcase.split.map { |word| Indexer.correct_spelling(word, session.language) }.compact
+    return words if words.size <= 1
+    
+    (words.size - 1).downto(1) do |i|
+      hits = words.combination(i).map do |combo|
+        spec = combo.join(" ")
+        (Indexer.product_ids_for_phrase(spec, language_code).size > 0) ? spec : nil
+      end.compact
+      return hits unless hits.empty?
+    end
+    
+    []
+  end
+  
+  def path_names_and_children(root, sub, find_phrase = params["find"])
     path_names = [root, sub].compact.map { |name| name.tr("+", " ") }
-    [path_names, Indexer.category_children_for_node(path_names)]
+    only_product_ids = nil
+    only_product_ids = Indexer.product_ids_for_phrase(find_phrase, session.language) unless find_phrase.nil?
+    [path_names, Indexer.category_children_for_node(path_names, only_product_ids)]
   end
 end

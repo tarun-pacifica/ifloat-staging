@@ -1,7 +1,18 @@
 <% @async_tracking = true %>
 <%= partial "common/header" %>
 
-<div id="categories">
+<div id="categories">  
+  <% if @find_bad %>
+  
+  <div class="find_bad">
+    <p>Sorry, we couldn't find any products matching "<strong><%= Merb::Parse.escape_xml(@find_phrase) %></strong>".</p>
+    <% unless @find_alternatives.empty? %>
+    <p>How about <%= friendly_list(@find_alternatives.map { |spec| '"' + finder_link(spec) + '"' }, "or") %>?</p>
+    <% end %>
+  </div>
+  
+  <% else %>
+  
   <div class="breadcrumbs">
     <%= breadcrumbs(@find_phrase, @path_names) %>
   </div>
@@ -12,6 +23,8 @@
     <%= (@children_links || []).join(" ") %>
     <%= (@product_links || []).join(" ") %>
   </div>
+  
+  <% end %>
 </div>
 
 <div id="basket_panel"> </div>

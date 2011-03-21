@@ -28,7 +28,7 @@ module Indexer
     @@auto_diff_property_id if ensure_loaded
   end
   
-  def self.category_children_for_node(path_names)
+  def self.category_children_for_node(path_names, only_product_ids = nil)
     return [] unless ensure_loaded
     
     node = path_names.inject(@@category_tree) do |node, name|
@@ -36,7 +36,15 @@ module Indexer
       else return []
       end
     end
-    node.is_a?(Hash) ? node.keys : node
+    
+    return (node.is_a?(Hash) ? node.keys : node) if only_product_ids.nil?
+    
+    return (only_product_ids & node).to_a if node.is_a?(Array)
+    
+    integer_collector = proc { |node| node.is_a?(Array) ? node : node.values.map(&integer_collector) }
+    node.map do |key, children|
+      key unless (only_product_ids & integer_collector.call(children).flatten).empty?
+    end.compact
   end
   
   def self.category_definition(category)

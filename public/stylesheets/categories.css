@@ -61,6 +61,10 @@
   margin-left: -1px;
 }
 
+#categories .filters .section:first-child {
+  border-left: none;
+}
+
 #categories .filters .section .filter {
   float: left;
   padding: 5px 10px;

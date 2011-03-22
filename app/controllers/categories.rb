@@ -27,7 +27,7 @@ class Categories < Application
     children = filtered_product_ids(children) if children.first.is_a?(Integer)
     
     if children.empty?
-      return render("../cached_finds/new".to_sym, :status => 404) if @find_phrase.blank? or path_names_and_children(root, sub, nil).last.empty?
+      return show_404 if @find_phrase.blank? or path_names_and_children(root, sub, nil).last.empty?
       @find_alternatives = find_phrase_alternatives(@find_phrase)
       @find_bad = true
     end
@@ -46,6 +46,13 @@ class Categories < Application
     render
   end
   
+  def show_404
+    @path_names, children = path_names_and_children(nil, nil)
+    @child_links = children.map { |child| category_link(@path_names + [child]) }.sort
+    @canonical_path = "/categories"
+    render
+  end
+  
   
   private
   
@@ -60,7 +67,7 @@ class Categories < Application
     values_by_unit = {}
     Indexer.filterable_values_for_property_id(property_id, product_ids, product_ids, session.language).each do |unit, values|
       all_values, relevant_values = values
-      extra_values = 
+      extra_values =
         if type == "text" then all_values.map { |v| definitions[v] }
         else all_values.map do |value|
             v1, v2 = (value.is_a?(Range) ? [value.first, value.last] : [value, value])

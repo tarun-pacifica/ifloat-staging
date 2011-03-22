@@ -4,8 +4,7 @@ function category_filters_choose(index) {
 }
 
 function category_filters_configure(filter_id) {
-  console.log(window.location + '/filter/' + filter_id)
-  $.getJSON(window.location + '/filter/' + filter_id + '?filters=', category_filters_configure_handle);
+  $.getJSON(category_filters_url('filter/' + filter_id), category_filters_configure_handle);
   spinner_show('Retrieving filter values...');
 }
 
@@ -46,7 +45,7 @@ function category_filters_icon(filter) {
 
 function category_filters_show() {
   var filter_panel = $('#categories .filters');
-  $.getJSON(window.location + '/filters?filters=', category_filters_show_handle);
+  $.getJSON(category_filters_url('filters'), category_filters_show_handle);
   spinner_show('Retrieving filters...');
 }
 
@@ -54,7 +53,7 @@ function category_filters_show_handle(filters) {
   var filter_panel = $('#categories .filters');
   
   if(filters.length == 0) {
-    filter_panel.hide();
+    spinner_hide();
     return;
   }
   
@@ -108,4 +107,18 @@ function category_filters_show_handle(filters) {
   filter_panel.html(html.join(' '));
   filter_panel.fadeIn('fast');
   spinner_hide();
+}
+
+function category_filters_url(intermediate_path, filters) {
+  var loc = util_location_parts();
+  
+  var path = loc.path;
+  if(intermediate_path) path += '/' + intermediate_path;
+  
+  if(filters) loc.params.filters = filters;
+  var queryString = jQuery.param(loc.params);
+  if(queryString.length > 0) path += '?' + queryString;
+  
+  console.log(path);
+  return path;
 }

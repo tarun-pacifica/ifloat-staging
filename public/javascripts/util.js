@@ -116,3 +116,16 @@ function util_superscript(type, value) {
 function util_target(event) {
   return $(event.target ? event.target : event.srcElement);
 }
+
+function util_location_parts() {
+  var loc = window.location;
+  
+  var params = {};
+  var raw_params = loc.search.slice(1).split('&');
+  for(var i in raw_params) {
+    var kv = raw_params[i].split('=');
+    if(kv[0] != '') params[unescape(kv[0])] = unescape(kv[1]);
+  }
+  
+  return {path: loc.pathname, params: params};
+}

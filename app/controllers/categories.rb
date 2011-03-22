@@ -1,17 +1,17 @@
 class Categories < Application
-  def filter(root, sub, id, filters)
+  def filter(root, sub, id)
     provides :js    
     path_names, product_ids = path_names_and_children(root, sub)
-    filter_detail(id.to_i, product_ids, filters).to_json
+    filter_detail(id.to_i, product_ids).to_json
   end
   
-  def filters(root, sub, filters)
+  def filters(root, sub)
     provides :js
     
     path_names, product_ids = path_names_and_children(root, sub)
-    return {}.to_json if product_ids.empty?
+    return [].to_json if product_ids.empty?
     
-    filters = (JSON.parse(filters) rescue {})
+    filters = (JSON.parse(params["filters"]) rescue {})
     property_ids = Indexer.property_ids_for_product_ids(product_ids, session.language).reject { |id| filters.has_key?(id) }
     Indexer.property_display_cache.values_at(*property_ids).compact.sort_by { |info| info[:seq_num] }.to_json
   end
@@ -43,7 +43,7 @@ class Categories < Application
   
   private
   
-  def filter_detail(property_id, product_ids, filters)
+  def filter_detail(property_id, product_ids)
     prop_info = Indexer.property_display_cache[property_id]
     return [] if prop_info.nil? or product_ids.empty?
     
@@ -51,7 +51,7 @@ class Categories < Application
     type = prop_info[:type]
     value_class = PropertyType.value_class(type)
     
-    pids = filtered_product_ids(product_ids, filters)
+    pids = filtered_product_ids(product_ids)
     values_by_unit = {}
     Indexer.filterable_values_for_property_id(property_id, pids, pids, session.language).each do |unit, values|
       all_values, relevant_values = values
@@ -65,8 +65,8 @@ class Categories < Application
     prop_info.merge(:values_by_unit => values_by_unit)
   end
   
-  def filtered_product_ids(product_ids, filters)
-    filters = (JSON.parse(filters) rescue {})
+  def filtered_product_ids(product_ids)
+    filters = (JSON.parse(params["filters"]) rescue {})
     product_ids # TODO: do filtering
   end
   

@@ -142,6 +142,6 @@ class CachedFinds < Application
   private
   
   def retreat
-    @find.nil? ? render("../cached_finds/new".to_sym, :status => 404) : redirect(resource(@find))
+    @find.nil? ? categories_404 : redirect(resource(@find))
   end
 end

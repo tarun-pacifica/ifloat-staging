@@ -2,11 +2,11 @@ class Brands < Application
   def show(name, root = nil, sub = nil)
     name = URI.unescape(name)
     @brand = Brand.first(:name => name)
-    return render("../cached_finds/new".to_sym, :status => 404) if @brand.nil?
+    return categories_404 if @brand.nil?
     
     path_names = [root, sub].compact.map { |n| n.tr("+", " ") }
     product_ids_by_node = @brand.product_ids_by_category_node(path_names)
-    return render("../cached_finds/new".to_sym, :status => 404) if product_ids_by_node.empty?
+    return categories_404 if product_ids_by_node.empty?
     
     @product_links_by_node, @product_ids = marshal_product_links(product_ids_by_node)
     

@@ -27,7 +27,7 @@ class Categories < Application
     children = filtered_product_ids(children) if children.first.is_a?(Integer)
     
     if children.empty?
-      return show_404 if @find_phrase.blank? or path_names_and_children(root, sub, nil).last.empty?
+      return categories_404 if @find_phrase.blank? or path_names_and_children(root, sub, nil).last.empty?
       @find_alternatives = find_phrase_alternatives(@find_phrase)
       @find_bad = true
     end
@@ -43,13 +43,6 @@ class Categories < Application
     @canonical_path = ["/categories", root, sub].compact.join("/")
     @page_title = @path_names.join(" - ") unless @path_names.empty?
     @page_description = Indexer.category_definition(@path_names.last)
-    render
-  end
-  
-  def show_404
-    @path_names, children = path_names_and_children(nil, nil)
-    @child_links = children.map { |child| category_link(@path_names + [child]) }.sort
-    @canonical_path = "/categories"
     render
   end
   

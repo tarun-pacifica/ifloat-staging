@@ -13,6 +13,13 @@ class Application < Merb::Controller
     @redacted_params = params
   end
   
+  def categories_404(status = 404)
+    @path_names = []
+    @child_links = Indexer.category_children_for_node([]).map { |child| category_link(@path_names + [child]) }.sort
+    @canonical_path = "/categories"
+    render("../categories/show".to_sym, :status => status)
+  end
+  
   def ensure_authenticated
     raise Unauthenticated if Merb.environment == "staging" and not session.authenticated?
   end

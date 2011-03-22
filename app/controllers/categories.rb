@@ -2,7 +2,7 @@ class Categories < Application
   def filter(root, sub, id)
     provides :js    
     path_names, product_ids = path_names_and_children(root, sub)
-    filter_detail(id.to_i, product_ids).to_json
+    filter_detail(id.to_i, filtered_product_ids(product_ids)).to_json
   end
   
   def filters(root, sub)
@@ -11,8 +11,12 @@ class Categories < Application
     path_names, product_ids = path_names_and_children(root, sub)
     return [].to_json if product_ids.empty?
     
-    filters = (JSON.parse(params["filters"]) rescue {})
-    property_ids = Indexer.property_ids_for_product_ids(product_ids, session.language).reject { |id| filters.has_key?(id) }
+    property_ids = Indexer.property_ids_for_product_ids(filtered_product_ids(product_ids), session.language)
+    
+    filters = (JSON.parse(params["filters"]) rescue [])
+    filter_ids = filters.map { |f| f.first }.to_set
+    property_ids = property_ids.reject { |id| filter_ids.include?(id) }
+    
     Indexer.property_display_cache.values_at(*property_ids).compact.sort_by { |info| info[:seq_num] }.to_json
   end
   
@@ -20,8 +24,10 @@ class Categories < Application
     @find_phrase = params["find"]
     @path_names, children = path_names_and_children(root, sub)
     
+    children = filtered_product_ids(children) if children.first.is_a?(Integer)
+    
     if children.empty?
-      return render("../cached_finds/new".to_sym, :status => 404) if path_names_and_children(root, sub, nil).last.empty?
+      return render("../cached_finds/new".to_sym, :status => 404) if @find_phrase.blank? or path_names_and_children(root, sub, nil).last.empty?
       @find_alternatives = find_phrase_alternatives(@find_phrase)
       @find_bad = true
     end
@@ -51,13 +57,15 @@ class Categories < Application
     type = prop_info[:type]
     value_class = PropertyType.value_class(type)
     
-    pids = filtered_product_ids(product_ids)
     values_by_unit = {}
-    Indexer.filterable_values_for_property_id(property_id, pids, pids, session.language).each do |unit, values|
+    Indexer.filterable_values_for_property_id(property_id, product_ids, product_ids, session.language).each do |unit, values|
       all_values, relevant_values = values
       extra_values = 
         if type == "text" then all_values.map { |v| definitions[v] }
-        else all_values.map { |v| value_class.format(v, v, nil, unit, :verbose => true) }
+        else all_values.map do |value|
+            v1, v2 = (value.is_a?(Range) ? [value.first, value.last] : [value, value])
+            value_class.format(v1, v2, RANGE_SEPARATOR, unit, :verbose => true)
+          end
         end
       values_by_unit[unit] = all_values.zip(extra_values)
     end
@@ -66,8 +74,8 @@ class Categories < Application
   end
   
   def filtered_product_ids(product_ids)
-    filters = (JSON.parse(params["filters"]) rescue {})
-    product_ids # TODO: do filtering
+    filters = (JSON.parse(params["filters"]) rescue [])
+    filters.empty? ? product_ids : Indexer.product_ids_for_filters(product_ids, filters)
   end
   
   def find_phrase_alternatives(phrase)

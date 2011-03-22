@@ -97,34 +97,6 @@ module Indexer
     end
   end
   
-  def self.excluded_product_ids_for_filters(filters_by_property_id, language_code)
-    return [] if filters_by_property_id.empty? or not ensure_loaded
-    
-    product_ids = []
-    text_index = @@text_filtering_index[language_code]
-    
-    filters_by_property_id.each do |property_id, filter|
-      prop_info = @@property_display_cache[property_id]
-      next if prop_info.nil?
-      
-      type = prop_info[:type]
-      
-      if type == "text"
-        inclusions = filter[:data].to_set
-        (text_index[property_id] || {}).each do |product_id, values|
-          product_ids << product_id if (inclusions & values).empty?
-        end
-      else
-        min, max, unit = filter[:data]
-        ((@@numeric_filtering_index[unit] || {})[property_id] || {}).each do |product_id, values|
-          product_ids << product_id if min > values.last or max < values.first
-        end
-      end
-    end
-    
-    product_ids.uniq
-  end
-  
   def self.facilities
     @@facility_cache if ensure_loaded
   end
@@ -137,7 +109,11 @@ module Indexer
       values_by_product_id = products_by_property_id[property_id]
       next if values_by_product_id.nil?
       
-      all_values = values_by_product_id.values_at(*all_prod_ids).flatten.compact.uniq.sort
+      all_values = values_by_product_id.values_at(*all_prod_ids).flatten.compact.uniq.sort_by do |value|
+        value.is_a?(Range) ? [value.first, value.last] : [value]
+      end
+      
+      # TODO: deprecate relevant values system as no longer needed
       relevant_values = 
         if property_id == @@class_property_id then all_values
         else values_by_product_id.values_at(*relevant_prod_ids).flatten.compact.uniq
@@ -212,6 +188,26 @@ module Indexer
   
   def self.max_product_id
     @@max_product_id if ensure_loaded
+  end
+  
+  def self.product_ids_for_filters(product_ids, filters)
+    return [] unless ensure_loaded
+    
+    filters.map do |property_id, unit, value, label|
+      prop_info = @@property_display_cache[property_id]
+      next if prop_info.nil?
+      
+      type = prop_info[:type]
+      
+      if(type != "text")
+        values = value.split("..").map { |v| v.to_f }.uniq
+        value = (values.size == 2 ? Range.new(*values) : values.first)
+      end
+      
+      index = (type == "text" ? @@text_filtering_index : @@numeric_filtering_index)
+      values_by_product_id = ((index[unit] || {})[property_id] || {})
+      product_ids.select { |product_id| (values_by_product_id[product_id] || []).include?(value) }
+    end.compact.inject { |union, ids| union & ids }
   end
   
   def self.product_ids_for_image_checksum(checksum)
@@ -376,11 +372,11 @@ module Indexer
       root = (index[record[root_key]] ||= {})
       property = (root[record.property_definition_id] ||= {})
       values = (property[record.product_id] ||= [])
-      value_keys.each do |key|
-        value = record[key]
-        values << (value.is_a?(String) ? value : value.to_f)
+      
+      record_values = value_keys.map { |k| v = record[k]; v.is_a?(String) ? v : v.to_f }.uniq
+      if record_values.size == 2 then values << Range.new(*record_values)
+      else values.concat(record_values)
       end
-      values.sort!
     end
     
     index.each do |r, properties|

@@ -1,6 +1,6 @@
 var category_filters_choose_values = null;
 function category_filters_choose(index) {
-  console.log(index, category_filters_choose_values[index]);
+  window.location = category_filters_url(null, category_filters_choose_values[index]);
 }
 
 function category_filters_configure(filter_id) {
@@ -18,7 +18,7 @@ function category_filters_configure_handle(filter) {
       var v = values[i];
       var formatted = (filter.type == 'text' ? util_defined(v[0], v[1]) : v[1]);
       all_values[i] = (all_values[i] ? all_values[i] + ' / ' + formatted : formatted);
-      category_filters_choose_values[i] = [v[0], unit, all_values[i]];
+      category_filters_choose_values[i] = [filter.id, unit, v[0], filter.type == 'text' ? null : all_values[i]];
     }
   }
   
@@ -35,12 +35,12 @@ function category_filters_configure_handle(filter) {
   html.push('</ul>');
   
   var filter_panel = $('#categories .filters');
-  filter_panel.html(html.join(' '));  
+  filter_panel.html(html.join(' '));
   spinner_hide();
 }
 
 function category_filters_icon(filter) {
-  return '<img class="property_icon" src="' + filter.icon_url + '" alt="' + filter.name + '" onclick="category_filters_configure(' + filter.id + ')" onmouseover="tooltip_show(event, ' + util_escape_attr_js(filter.name) + ', \'above\')" onmouseout="tooltip_hide()" />';
+  return '<img class="property_icon" src="' + filter.icon_url + '" alt="' + filter.name + '" onclick="category_filters_configure(' + filter.id + ')" onmouseover="tooltip_show(event, ' + util_escape_attr_js(filter.name) + ')" onmouseout="tooltip_hide()" />';
 }
 
 function category_filters_show() {
@@ -109,16 +109,23 @@ function category_filters_show_handle(filters) {
   spinner_hide();
 }
 
-function category_filters_url(intermediate_path, filters) {
+function category_filters_url(intermediate_path, new_filter) {
   var loc = util_location_parts();
   
   var path = loc.path;
   if(intermediate_path) path += '/' + intermediate_path;
   
-  if(filters) loc.params.filters = filters;
-  var queryString = jQuery.param(loc.params);
-  if(queryString.length > 0) path += '?' + queryString;
+  var params = loc.params;
+  if(new_filter) {
+    var filtersJSON = params.filters;
+    var filters = (filtersJSON ? JSON.parse(filtersJSON) : []);
+    filters.push(new_filter);
+    params.filters = JSON.stringify(filters);
+  }
   
-  console.log(path);
+  var queryParts = [];
+  for(var key in params) queryParts.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
+  if(queryParts.length > 0) path += '?' + queryParts.join('&');
+  
   return path;
 }

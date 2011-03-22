@@ -14,26 +14,35 @@ module Merb
     def breadcrumbs(phrase, category_path_names)
       crumbs = [category_link([], "All Categories", true)]
       
-      crumbs << category_link([], Merb::Parse.escape_xml("\"#{phrase}\"")) unless phrase.nil?
+      crumbs << category_link([], "\"#{phrase}\"") unless phrase.nil?
       
       crumbs += category_path_names.size.times.map { |i| category_link(category_path_names[0, i + 1]) }
+      
+      filters = (JSON.parse(params["filters"]) rescue [])
+      filters.each_with_index do |filter, i|
+        property_id, unit, value, label = filter
+        label = (label.nil? ? value : label.gsub(Application::RANGE_SEPARATOR, "-"))
+        crumbs << category_link(category_path_names, label, false, filters[0, i + 1])
+      end
       
       crumbs << '<a class="filter" href="#" onclick="category_filters_show(); return false">Filter your results</a>' if category_path_names.size == 2
       
       crumbs.join(" &rarr; ")
     end
     
-    def category_link(path_names, name = nil, ignore_params = false)
+    def category_link(path_names, name = nil, ignore_find = false, filters = [])
       url = ("/categories/" + path_names.join("/")).tr(" ", "+")
       
-      unless ignore_params
-        query_params = params.keep("filters", "find").map { |k, v| "#{k}=#{v}" }.join("&")
-        url += "?#{query_params}" unless query_params.blank?
-      end
+      query_params = []
       
+      find_phrase = params["find"]
+      query_params << "find=#{find_phrase}" unless ignore_find or find_phrase.nil?
+      query_params << "filters=#{URI.encode(filters.to_json)}" unless filters.empty?
+      
+      url += "?#{query_params.join('&')}" unless query_params.empty?
       name ||= path_names.last
       on_hover = tooltip_attributes(Indexer.category_definition(name))
-      "<a href=#{url.inspect} #{on_hover}>#{name}</a>"
+      "<a href=#{url.inspect} #{on_hover}>#{Merb::Parse.escape_xml(name)}</a>"
     end
     
     def compile_tags

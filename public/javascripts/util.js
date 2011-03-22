@@ -83,9 +83,22 @@ function util_highlight_column(event, action, col_class) {
 
 function util_highlight_row(event, action) {
   var row = util_target(event).parent();
-
+  
   if(action == 'on') row.addClass('hover');
   else row.removeClass('hover');
+}
+
+function util_location_parts() {
+  var loc = window.location;
+  
+  var params = {};
+  var raw_params = loc.search.slice(1).split('&');
+  for(var i in raw_params) {
+    var kv = raw_params[i].split('=');
+    if(kv[0] != '') params[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
+  }
+  
+  return {path: loc.pathname, params: params};
 }
 
 function util_pluralize(count, singular, verb) {
@@ -115,17 +128,4 @@ function util_superscript(type, value) {
 
 function util_target(event) {
   return $(event.target ? event.target : event.srcElement);
-}
-
-function util_location_parts() {
-  var loc = window.location;
-  
-  var params = {};
-  var raw_params = loc.search.slice(1).split('&');
-  for(var i in raw_params) {
-    var kv = raw_params[i].split('=');
-    if(kv[0] != '') params[unescape(kv[0])] = unescape(kv[1]);
-  }
-  
-  return {path: loc.pathname, params: params};
 }

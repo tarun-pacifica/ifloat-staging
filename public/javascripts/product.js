@@ -21,6 +21,11 @@ function product_property_section_select(event) {
   for(var i in property_ids) $('#property_' + property_ids[i]).show();
 }
 
+function product_related_media_show(event) {
+  util_target(event).hide();
+  $('#product .related_media').fadeIn('fast');
+}
+
 var product_sibling_prod_ids_by_value_by_prop_ids = {};
 function product_sibling_select() {
   var siblings = $('#pick_sibling .sibling');

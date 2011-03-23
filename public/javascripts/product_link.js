@@ -35,19 +35,27 @@ function product_link_popup(event) {
   image.css('opacity', '0.5');
   popup.css('left', left_start + 'px').css('top', top + 'px').css('opacity', 0).show();
   popup.animate({left: left_end + 'px', opacity: 1}, 'fast');
-  }
+}
 
 function product_link_unpopup(event) {
   $(this).children('img').css('opacity', '1');
   $('#link_popup').remove();
 }
 
-function product_links_wire_up(product_ids) {
+function product_links_wire_up(product_ids, copy_params) {
   var slices = Math.ceil(product_ids.length / 100);
   for(var i = 0; i < slices; i++) {
     var j = i * 100;
     $.getJSON('/products/batch/' + product_ids.slice(j, j + 100).join('_'), product_links_wire_up_handle);
   }
+  
+  if(!copy_params) return;
+  
+  var query_string = window.location.search;
+  $('a.product').each(function() {
+    var a = $(this);
+    a.attr('href', a.attr('href') + query_string);
+  });
 }
 
 function product_links_wire_up_handle(products) {

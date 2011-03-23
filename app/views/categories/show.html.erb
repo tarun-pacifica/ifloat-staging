@@ -31,5 +31,5 @@
   if(items.length == 1) window.location = items.attr('href');
   
   basket_panel_load();
-  product_links_wire_up(<%= (@product_ids || []).to_json %>);
+  product_links_wire_up(<%= (@product_ids || []).to_json %>, true);
 </script>

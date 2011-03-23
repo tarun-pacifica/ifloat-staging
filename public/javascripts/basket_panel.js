@@ -18,7 +18,7 @@ function basket_panel_add(group) {
 }
 
 function basket_panel_change_quantity(event, pick_id, quantity, unit) {
-  util_target(event).parent().html('<form onsubmit="return false"> <input name="quantity" type="text" value="' + quantity + '" size="4" />' + (unit ? unit : '') + ' <span class="change_quantity" onclick="basket_panel_change_quantity_apply(event, ' + pick_id + ')">apply</span></form>');
+  util_target(event).parent().html('<form onsubmit="$(this).find(\'.change_quantity\').click(); return false"> <input name="quantity" type="text" value="' + quantity + '" size="4" />' + (unit ? unit : '') + ' <span class="change_quantity" onclick="basket_panel_change_quantity_apply(event, ' + pick_id + ')">apply</span></form>');
 }
 
 function basket_panel_change_quantity_apply(event, pick_id) {
@@ -53,7 +53,7 @@ function basket_panel_load_handle(picks_by_group) {
         html.push('<div id="basket_panel_adder">');
         html.push('<p class="price">' + info.price + '</p>');
         html.push('<p class="price_note">(Best partner price)</p>');
-        html.push('<form onsubmit="return false"> <label for="quantity">Quantity</label> <input name="quantity" type="text" value="1" size="4" />' + (info.uom ? info.uom : '') + '</form>');
+        html.push('<form onsubmit="$(\'#basket_panel_adder .add_basket\').click(); return false"> <label for="quantity">Quantity</label> <input name="quantity" type="text" value="1" size="4" />' + (info.uom ? info.uom : '') + '</form>');
         html.push('<div class="add_basket" onclick="basket_panel_add(\'buy_now\')">ADD TO BASKET</div>');
         html.push('<p class="add_other" onclick="basket_panel_add(\'buy_later\')">Add to Future Buys</p>');
         html.push('<p class="add_other" onclick="basket_panel_add(\'compare\')">Add to Compare List</p>');

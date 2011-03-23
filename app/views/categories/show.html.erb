@@ -27,9 +27,15 @@
 <div id="basket_panel"> </div>
 
 <script type="text/javascript" charset="utf-8">
+  var query_string = window.location.search;
+  $('a.product').each(function() {
+    var a = $(this);
+    a.attr('href', a.attr('href') + query_string);
+  });
+  
   var items = $('#categories .items a');
   if(items.length == 1) window.location = items.attr('href');
   
   basket_panel_load();
-  product_links_wire_up(<%= (@product_ids || []).to_json %>, true);
+  product_links_wire_up(<%= (@product_ids || []).to_json %>);
 </script>

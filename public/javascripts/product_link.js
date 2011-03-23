@@ -48,14 +48,6 @@ function product_links_wire_up(product_ids, copy_params) {
     var j = i * 100;
     $.getJSON('/products/batch/' + product_ids.slice(j, j + 100).join('_'), product_links_wire_up_handle);
   }
-  
-  if(!copy_params) return;
-  
-  var query_string = window.location.search;
-  $('a.product').each(function() {
-    var a = $(this);
-    a.attr('href', a.attr('href') + query_string);
-  });
 }
 
 function product_links_wire_up_handle(products) {

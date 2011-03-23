@@ -58,16 +58,15 @@ class Categories < Application
     value_class = PropertyType.value_class(type)
     
     values_by_unit = {}
-    Indexer.filterable_values_for_property_id(property_id, product_ids, product_ids, session.language).each do |unit, values|
-      all_values, relevant_values = values
+    Indexer.filterable_values_for_property_id(property_id, product_ids, session.language).each do |unit, values|
       extra_values =
-        if type == "text" then all_values.map { |v| definitions[v] }
-        else all_values.map do |value|
+        if type == "text" then values.map { |v| definitions[v] }
+        else values.map do |value|
             v1, v2 = (value.is_a?(Range) ? [value.first, value.last] : [value, value])
             value_class.format(v1, v2, RANGE_SEPARATOR, unit, :verbose => true)
           end
         end
-      values_by_unit[unit] = all_values.zip(extra_values)
+      values_by_unit[unit] = values.zip(extra_values)
     end
     
     prop_info.merge(:values_by_unit => values_by_unit)

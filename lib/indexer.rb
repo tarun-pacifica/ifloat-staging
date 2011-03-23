@@ -97,24 +97,17 @@ module Indexer
     @@facility_cache if ensure_loaded
   end
   
-  def self.filterable_values_for_property_id(property_id, all_prod_ids, relevant_prod_ids, language_code)
-    return {} if all_prod_ids.empty? or not ensure_loaded
+  def self.filterable_values_for_property_id(property_id, product_ids, language_code)
+    return {} if product_ids.empty? or not ensure_loaded
     
     values_by_root_key = {}
     filtering_indexes(language_code).each do |root_key, products_by_property_id|
       values_by_product_id = products_by_property_id[property_id]
       next if values_by_product_id.nil?
       
-      all_values = values_by_product_id.values_at(*all_prod_ids).flatten.compact.uniq.sort_by do |value|
+      values_by_root_key[root_key] = values_by_product_id.values_at(*product_ids).flatten.compact.uniq.sort_by do |value|
         value.is_a?(Range) ? [value.first, value.last] : [value]
       end
-      
-      # TODO: deprecate relevant values system as no longer needed
-      relevant_values = 
-        if property_id == @@class_property_id then all_values
-        else values_by_product_id.values_at(*relevant_prod_ids).flatten.compact.uniq
-        end
-      values_by_root_key[root_key] = [all_values, relevant_values] unless all_values.empty?
     end
     values_by_root_key
   end

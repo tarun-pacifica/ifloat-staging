@@ -1,5 +1,4 @@
 User-Agent: *
-Disallow: /cached_finds
 Disallow: /picked_products
 Disallow: /purchases
 Disallow: /users

@@ -1,20 +1,20 @@
 #tooltip {
-	background: #B0E0FF;
-	border: none;
-	border-radius: 10px;
-	-moz-border-radius: 10px;
-	-webkit-border-radius: 10px;
-	box-shadow: 2px 2px 2px gray;
-	-moz-box-shadow: 2px 2px 2px gray;
-	-webkit-box-shadow: 2px 2px 2px gray;
-	display: none;
-	max-width: 250px;
-	padding: 15px;
-	position: absolute;
-	z-index: 5000;
+  background: #B0E0FF;
+  border: none;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  box-shadow: 2px 2px 2px gray;
+  -moz-box-shadow: 2px 2px 2px gray;
+  -webkit-box-shadow: 2px 2px 2px gray;
+  display: none;
+  max-width: 250px;
+  padding: 15px;
+  position: absolute;
+  z-index: 5000;
 }
 
 #tooltip ul {
-	margin: 0;
-	padding-left: 10px;
+  margin: 0;
+  padding-left: 10px;
 }

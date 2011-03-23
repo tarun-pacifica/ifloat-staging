@@ -78,7 +78,6 @@ class PickedProducts < Application
     end
     @sale_price_property_info = Indexer.property_display_cache[Indexer.sale_price_min_property_id]
     
-    @find = session.most_recent_cached_find
     session.log!("GET", "picked_products_compare_by_class:#{klass}", request.remote_ip)
     render
   end

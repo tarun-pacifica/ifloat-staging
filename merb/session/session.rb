@@ -6,15 +6,6 @@ module Merb
   module Session
     include Merb::ControllerExceptions
     
-    def add_cached_find(cached_find)
-      existing_find = cached_finds.find { |cf| cf.specification == cached_find.specification }
-      return existing_find unless existing_find.nil?
-      
-      cached_find.user = user
-      self[:cached_find_ids] = (cached_find_ids << cached_find.id) if cached_find.save
-      cached_find
-    end
-    
     def add_picked_product(pick)
       existing = picked_products.find { |p| p.product_id == pick.product_id }
       unless existing.nil?
@@ -43,22 +34,12 @@ module Merb
       not self[:user_id].nil?
     end
     
-    def cached_finds
-      return [] if cached_find_ids.empty?
-      CachedFind.all(:id => cached_find_ids)
-    end
-    
     def currency
       self[:currency] || "GBP"
     end
     
     def currency=(code)
       self[:currency] = code if code =~ /^[A-Z]{3}$/
-    end
-    
-    def ensure_cached_find(find_id, retrieve = true) # TODO: review all uses to prevent retrieval where unnecessary
-      raise NotFound unless cached_find_ids.include?(find_id)
-      retrieve ? (CachedFind.get(find_id) or raise NotFound) : nil
     end
     
     def ensure_picked_product(pick_id) # TODO: review all uses to prevent retrieval where unnecessary
@@ -92,7 +73,7 @@ module Merb
       raise Unauthenticated, "Disabled account" unless user.enabled?
       self[:user_id] = user.id
       
-      [[:cached_finds, :specification], [:picked_products, :product_id]].each do |set, discriminator|
+      [[:picked_products, :product_id]].each do |set, discriminator|
         session_set = send(set)
         user_set = user.send(set)
         
@@ -114,15 +95,7 @@ module Merb
     
     def logout
       self[:user_id] = nil
-      self[:cached_find_ids] = self[:picked_product_ids] = []
-    end
-    
-    def most_recent_cached_find
-      CachedFind.get(self[:most_recent_find_id])
-    end
-    
-    def most_recent_cached_find=(cached_find)
-      self[:most_recent_find_id] = cached_find.id
+      self[:picked_product_ids] = []
     end
     
     def picked_products
@@ -167,10 +140,6 @@ module Merb
     
     
     private
-    
-    def cached_find_ids
-      self[:cached_find_ids] || []
-    end
     
     def picked_product_ids
       self[:picked_product_ids] || []

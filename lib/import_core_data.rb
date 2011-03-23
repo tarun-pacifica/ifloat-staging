@@ -885,7 +885,6 @@ puts "=== Compiling Indexes ==="
 stopwatch(Indexer::COMPILED_PATH) do
   begin
     Indexer.compile
-    CachedFind.all.update!(:invalidated => true)
     PickedProduct.all.update!(:invalidated => true)
   rescue Exception => e
     p e

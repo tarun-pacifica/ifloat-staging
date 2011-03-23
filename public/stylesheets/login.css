@@ -1,53 +1,53 @@
 #login_register {
-	display: none;
-	padding-bottom: 16px;
+  display: none;
+  padding-bottom: 16px;
 }
 
 #login_register form {
-	background: #F3F3F3;
-	border: 1px solid silver;
-	float: left;
-	margin: 0;
-	padding: 0 15px;
-	width: 294px;
+  background: #F3F3F3;
+  border: 1px solid silver;
+  float: left;
+  margin: 0;
+  padding: 0 15px;
+  width: 294px;
 }
 
 #login_register form.login {
-	margin-right: 20px;
+  margin-right: 20px;
 }
 
 #login_register form .errors {
-	background: #FFFFE0;
-	border: 2px solid red;
-	padding: 0 15px 15px 15px;
-	margin-bottom: 15px;
+  background: #FFFFE0;
+  border: 2px solid red;
+  padding: 0 15px 15px 15px;
+  margin-bottom: 15px;
 }
 
 #login_register form .errors p {
-	margin: 15px 0 0 0;
-	text-align: left;
+  margin: 15px 0 0 0;
+  text-align: left;
 }
 
 #login_register form h3 {
-	font-size: 14px;
-	text-align: center;
-	width: 100%;
+  font-size: 14px;
+  text-align: center;
+  width: 100%;
 }
 
 #login_register form p {
-	text-align: right;
-	width: 100%;
+  text-align: right;
+  width: 100%;
 }
 
 #login_register form p.marketing {
-	text-align: center;
+  text-align: center;
 }
 
 #login_register form p.submit {
-	text-align: center;
+  text-align: center;
 }
 
 #login_register p.error {
-	color: red;
-	font-weight: bold;
+  color: red;
+  font-weight: bold;
 }

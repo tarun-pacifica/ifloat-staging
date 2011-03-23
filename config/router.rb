@@ -9,15 +9,6 @@ Merb::Router.prepare do
   match('/brands/:name/:root').to(:controller => 'brands', :action => 'show')
   match('/brands/:name/:root/:sub').to(:controller => 'brands', :action => 'show')
   
-  match('/cached_finds/:id/filter/:property_id', :method => 'get').to(:controller => 'cached_finds', :action => 'filter_get')
-  match('/cached_finds/:id/filter/:property_id', :method => 'post').to(:controller => 'cached_finds', :action => 'filter_set')
-  match('/cached_finds/:id/filters/:list').to(:controller => 'cached_finds', :action => 'filters', :format => 'js')
-  match('/cached_finds/:id/images').to(:controller => 'cached_finds', :action => 'images', :format => 'js')
-  match('/cached_finds/:id/products_for/:image_checksum').to(:controller => 'cached_finds', :action => 'compare_by_image')
-  match('/cached_finds/:id/reset').to(:controller => 'cached_finds', :action => 'reset')
-  match('/cached_finds/create', :method => 'get').to(:controller => 'cached_finds', :action => 'create')
-  resources :cached_finds
-  
   match('/categories').to(:controller => 'categories', :action => 'show').name(:categories)
   match('/categories/:root').to(:controller => 'categories', :action => 'show').name(:categories)
   match('/categories/:root/:sub').to(:controller => 'categories', :action => 'show').name(:categories)
@@ -31,8 +22,6 @@ Merb::Router.prepare do
   match('/products/batch/:ids').to(:controller => 'products', :action => 'batch')
   match('/products/:junk-:id', :junk => /[\w\-.]+/).to(:controller => 'products', :action => 'show')
   resources :products
-  
-  match('/products_for/:image_checksum').to(:controller => 'cached_finds', :action => 'compare_by_image', :id => 0)
   
   match('/purchases/track').to(:controller => 'purchases', :action => 'track')
   

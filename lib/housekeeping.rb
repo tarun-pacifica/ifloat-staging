@@ -3,16 +3,11 @@
 begin
   Merb::DataMapperSessionStore.expired.destroy
   
-  cached_find_ids = Set.new
   picked_product_ids = Set.new
   Merb::DataMapperSessionStore.all.each do |session|
-    cached_find_ids += (session.data["cached_find_ids"] || [])
     picked_product_ids += (session.data["picked_product_ids"] || [])
   end
-  
-  CachedFind.unused.update!(:user_id => nil)
-  CachedFind.all(:user_id => nil, :id.not => cached_find_ids).destroy!
-  
+    
   ControllerError.obsolete.destroy!
   
   PickedProduct.all(:user_id => nil, :id.not => picked_product_ids).destroy!

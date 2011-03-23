@@ -1,12 +1,1 @@
-#po_buy_now table td.buttons .buttons {
-	width: 117px;
-}
 
-#po_buy_now table td.product div {
-	width: 410px;
-	margin-right: -32px;
-}
-
-#tag_cloud_cta {
-	display: none;
-}

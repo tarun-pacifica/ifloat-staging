@@ -2,7 +2,7 @@
 #
 # All data associated with a Product is managed as a PropertyValue subclass. <b>PropertyValue itself is abstract and should never be created directly.</b> PropertyValues track primary data as well as pertinent meta-information that depends upon the exact subclass employed...
 #
-# TextPropertyValue:: All textual (free form) data is stored using this class. It carries a language code which should be set to ENG in any ambiguous cases as per the default values discussion in CachedFind.
+# TextPropertyValue:: All textual (free form) data is stored using this class. It carries a language code which should be set to ENG in any ambiguous cases.
 # NumericPropertyValue:: It holds any scalar or range value that can be expressed as a decimal. It carries a unit (which must be found in the valid_units list of the ultimate PropertyType the value belongs to). Note that currency values should be stored using this class (the currencies themeselves being regarded as units).
 # DatePropertyValue:: A specific subclass of NumericPropertyValue that returns a structured [year, month, day] as its value and stores the date in the database in a manner that supports direct comparison operations. It allows for the specification of year-only (YYYY0000), year-month (YYYYMM00) and year-month-day (YYYYMMDD) values.
 #

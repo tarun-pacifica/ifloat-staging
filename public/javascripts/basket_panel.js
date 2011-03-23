@@ -18,7 +18,9 @@ function basket_panel_add(group) {
 }
 
 function basket_panel_change_quantity(event, pick_id, quantity, unit) {
-  util_target(event).parent().html('<form onsubmit="$(this).find(\'.change_quantity\').click(); return false"> <input name="quantity" type="text" value="' + quantity + '" size="4" />' + (unit ? unit : '') + ' <span class="change_quantity" onclick="basket_panel_change_quantity_apply(event, ' + pick_id + ')">apply</span></form>');
+  var para = util_target(event).parent();
+  para.html('<form onsubmit="$(this).find(\'.change_quantity\').click(); return false"> <input name="quantity" type="text" value="' + quantity + '" size="4" />' + (unit ? unit : '') + ' <span class="change_quantity" onclick="basket_panel_change_quantity_apply(event, ' + pick_id + ')">apply</span></form>');
+  para.find('input').focus();
 }
 
 function basket_panel_change_quantity_apply(event, pick_id) {

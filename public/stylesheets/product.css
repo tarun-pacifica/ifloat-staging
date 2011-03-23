@@ -125,6 +125,8 @@
 
 #product .main_info .images img.main {
   border: 1px solid silver;
+  height: 400px;
+  width: 400px;
 }
 
 #product .main_info .images img.thumb {

@@ -85,7 +85,7 @@ class Categories < Application
     (words.size - 1).downto(1) do |i|
       hits = words.combination(i).map do |combo|
         spec = combo.join(" ")
-        (Indexer.product_ids_for_phrase(spec, language_code).size > 0) ? spec : nil
+        (Indexer.product_ids_for_phrase(spec, session.language).size > 0) ? spec : nil
       end.compact
       return hits unless hits.empty?
     end

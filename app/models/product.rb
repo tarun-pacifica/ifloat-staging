@@ -155,7 +155,6 @@ class Product
     
     prod_ids_and_values_by_seq_num = {}
     TextPropertyValue.all(
-      :product_id.not           => id,
       "product.company_id"      => company_id,
       "product.reference_group" => reference_group,
       :property_definition_id   => Indexer.auto_diff_property_id,
@@ -166,7 +165,9 @@ class Product
     
     lead_property_by_seq_num.sort.map do |seq_num, property|
       prod_ids_and_values = prod_ids_and_values_by_seq_num[seq_num]
-      [property, prod_ids_and_values] unless prod_ids_and_values.nil?
+      next if prod_ids_and_values.nil?
+      next if prod_ids_and_values.map { |pid, val| val }.uniq.size == 1
+      [property, prod_ids_and_values.select { |pid, val| pid != id }]
     end.compact
   end
   

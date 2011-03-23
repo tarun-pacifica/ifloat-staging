@@ -11,7 +11,7 @@ module Merb
       image.nil? ? title.superscript : "#{image} <span>#{title.superscript}</span>"
     end
     
-    def breadcrumbs(phrase, category_path_names)
+    def breadcrumbs(phrase, category_path_names, filter_prompt = true)
       crumbs = [category_link([], "All Categories", true)]
       
       crumbs << category_link([], "\"#{phrase}\"") unless phrase.nil?
@@ -25,9 +25,9 @@ module Merb
         crumbs << category_link(category_path_names, label, false, filters[0, i + 1])
       end
       
-      crumbs << '<a class="filter" href="#" onclick="category_filters_show(); return false">Filter your results</a>' if category_path_names.size == 2
+      crumbs << '<a class="filter" href="#" onclick="category_filters_show(); return false">Filter your results</a>' if filter_prompt and category_path_names.size == 2
       
-      crumbs.join(" &rarr; ")
+      '<div id="breadcrumbs">' + crumbs.join(" &rarr; ") + '</div>'
     end
     
     def category_link(path_names, name = nil, ignore_find = false, filters = [])

@@ -30,7 +30,7 @@ class Products < Application
     
     common_values, diff_values = @product.marshal_values(session.language, RANGE_SEPARATOR)
     
-    names = %w(marketing:brand marketing:description marketing:feature_list reference:class reference:wikipedia).to_set
+    names = %w(marketing:brand marketing:description marketing:feature_list reference:category reference:class reference:wikipedia).to_set
     @body_values_by_name = {}
     @property_values = common_values.map do |info|
       raw_name = info[:raw_name]
@@ -83,6 +83,9 @@ class Products < Application
     @more_tags = (Indexer.tags_for_product_id(product_id, session.language) || [])
     @more_counts = Hash[@more_tags.map { |tag| [tag, Indexer.product_ids_for_tag(tag, session.language).size] }]
     @more_counts[@more_class] = Indexer.product_ids_for_phrase(@more_class, session.language).size
+    
+    @find_phrase = params["find"]
+    @path_names = @body_values_by_name.values_at("reference:category", "reference:class")
     
     render
   end

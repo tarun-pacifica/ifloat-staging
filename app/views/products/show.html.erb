@@ -2,6 +2,8 @@
 <%= partial "common/header" %>
 
 <div id="product">
+  <%= breadcrumbs(@find_phrase, @path_names, false) %>
+  
   <h1> <%= brand_title(@brand, @title) %> </h1>
   <hr class="terminator" />
   

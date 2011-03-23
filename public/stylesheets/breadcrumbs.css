@@ -1,0 +1,22 @@
+#breadcrumbs {
+  font-size: 16px;
+  margin: 5px 0;
+}
+
+#breadcrumbs a {
+  color: #404040;
+  text-decoration: none;
+}
+
+#breadcrumbs a:hover {
+  color: black;
+  text-decoration: underline;
+}
+
+#breadcrumbs a:last-child {
+  font-weight: bold;
+}
+
+#breadcrumbs a.filter {
+  color: #30A0FB;
+}

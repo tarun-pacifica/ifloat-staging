@@ -12,12 +12,12 @@
 
 #product h1 img {
   float: left;
-  margin-right: -180px;
+  margin-right: -185px;
 }
 
 #product h1 span {
   float: left;
-  margin-left: 180px;
+  margin-left: 185px;
 }
 
 #product .info_snippet {

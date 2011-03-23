@@ -4,29 +4,6 @@
   padding: 5px 15px;
 }
 
-#categories .breadcrumbs {
-  font-size: 16px;
-  margin: 5px 0;
-}
-
-#categories .breadcrumbs a {
-  color: #404040;
-  text-decoration: none;
-}
-
-#categories .breadcrumbs a:hover {
-  color: black;
-  text-decoration: underline;
-}
-
-#categories .breadcrumbs a:last-child {
-  font-weight: bold;
-}
-
-#categories .breadcrumbs a.filter {
-  color: #30A0FB;
-}
-
 #categories .find_bad {
   background: #FFDDDD;
   border: 1px solid red;

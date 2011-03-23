@@ -66,10 +66,6 @@
   width: 275px;
 }
 
-#product #show_me_more {
-  background: #FFFFC0;
-}
-
 #product #related_anchor {
   margin: 15px;
 }
@@ -89,17 +85,6 @@
 }
 
 #product #related_anchor a:hover {
-  text-decoration: underline;
-}
-
-#product #show_me_more span {
-  color: #404040;
-  margin-right: 15px;
-}
-
-#product #show_me_more span:hover {
-  color: black;
-  cursor: pointer;
   text-decoration: underline;
 }
 

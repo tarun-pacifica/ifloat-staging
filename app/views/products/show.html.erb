@@ -1,6 +1,8 @@
 <% @async_tracking = true %>
 <%= partial "common/header" %>
 
+<% features, description = @body_values_by_name.values_at("marketing:feature_list", "marketing:description").map { |values| (values || []).first.to_s.superscript } %>
+
 <div id="product">
   <%= breadcrumbs(@body_values_by_name.values_at("reference:category", "reference:class"), false) %>
   
@@ -37,6 +39,17 @@
         <% end %>
       </div>
       
+      <% unless features.blank? %>
+      <div class="info_snippet">
+        <h2>Features</h2>
+        <ul>
+          <% features.split("\n").each do |feature| %>
+          <li><%= feature %></li>
+          <% end %>
+        </ul>
+      </div>
+      <% end %>
+      
       <% unless @related_media.empty? %>
       <div class="info_snippet" id="related_media">
         <h2>Related media...</h2>
@@ -56,19 +69,6 @@
   </div>
   
   <div class="extended_info">
-    <% features, description = @body_values_by_name.values_at("marketing:feature_list", "marketing:description").map { |values| (values || []).first.to_s.superscript } %>
-    
-    <% unless features.blank? %>
-    <div class="info_snippet">
-      <h2>Features</h2>
-      <ul>
-        <% features.split("\n").each do |feature| %>
-        <li><%= feature %></li>
-        <% end %>
-      </ul>
-    </div>
-    <% end %>
-    
     <% unless description.blank? %>
     <div class="info_snippet">
       <h2>Description</h2>

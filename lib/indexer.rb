@@ -18,9 +18,6 @@ module Indexer
   @@property_display_cache = {}
   @@sale_price_min_property_id = nil
   @@spellers = {}
-  @@tag_index = {}
-  @@tag_frequencies = nil
-  @@tags_by_product_id = nil
   @@text_filtering_index = {}
   @@text_finding_index = {}
   
@@ -69,7 +66,6 @@ module Indexer
         :product_relationship_cache => ProductRelationship.compile_index,
         :product_title_cache        => compile_product_title_cache,
         :property_display_cache     => compile_property_display_cache(properties),
-        :tag_index                  => compile_tag_index(properties, records),
         :text_filtering             => compile_filtering_index(records.select { |r| r.filterable }, :language_code, :text_value),
         :text_finding               => compile_text_finding_index(properties, records)
       }
@@ -153,9 +149,6 @@ module Indexer
       @@product_relationship_cache = indexes[:product_relationship_cache]
       @@product_title_cache        = indexes[:product_title_cache]
       @@property_display_cache     = indexes[:property_display_cache]
-      @@tag_index                  = indexes[:tag_index]
-      @@tag_frequencies            = nil
-      @@tags_by_product_id         = nil
       @@text_filtering_index       = indexes[:text_filtering]
       @@text_finding_index         = indexes[:text_finding]
     end
@@ -239,11 +232,6 @@ module Indexer
     end.inject { |union, product_ids| union & product_ids }
   end
   
-  def self.product_ids_for_tag(phrase, language_code)
-    return [] if phrase.blank? or not ensure_loaded
-    ((@@tag_index[language_code] || {})[phrase] || []).to_set
-  end
-  
   def self.product_relationships(product_id)
     @@product_relationship_cache[product_id] if ensure_loaded
   end
@@ -285,35 +273,6 @@ module Indexer
   
   def self.sale_price_min_property_id
     @@sale_price_min_property_id if ensure_loaded
-  end
-  
-  def self.tag_frequencies(language_code)
-    return {} unless ensure_loaded
-    
-    if @@tag_frequencies.nil?
-      @@tag_frequencies = {}
-      @@tag_index.each do |lcode, index|
-        @@tag_frequencies[lcode] = Hash[index.map { |phrase, product_ids| [phrase, product_ids.size] }]
-      end
-    end
-    
-    @@tag_frequencies[language_code]
-  end
-  
-  def self.tags_for_product_id(product_id, language_code)
-    return [] unless ensure_loaded
-    
-    if @@tags_by_product_id.nil?
-      @@tags_by_product_id = {}
-      @@tag_index.map do |lcode, index|
-        tags_by_product_id = @@tags_by_product_id[lcode] = {}
-        index.each do |phrase, product_ids|
-          product_ids.each { |pid| (tags_by_product_id[pid] ||= []) << phrase }
-        end
-      end
-    end
-    
-    (@@tags_by_product_id[language_code] || {})[product_id]
   end
   
   
@@ -475,24 +434,7 @@ module Indexer
     end
     cache
   end
-  
-  def self.compile_tag_index(properties, records)
-    property_names = %w(reference:category reference:tag).to_set
-    pd_ids = properties.select { |pd| property_names.include?(pd.name) }.map { |pd| pd.id }.to_set
     
-    index = {}
-    records.each do |record|
-      next unless pd_ids.include?(record.property_definition_id)
-      language = (index[record.language_code] ||= {})
-      (language[record.text_value] ||= []) << record.product_id
-    end
-    
-    index.each do |language, phrases|
-      phrases.each { |phrases, product_ids| product_ids.uniq! }
-    end
-    index
-  end
-  
   def self.compile_text_finding_index(properties, records)
     index = {}
     prod_ids_by_values_by_prop_ids = {}

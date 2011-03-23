@@ -77,16 +77,6 @@ class Products < Application
       property if @sibling_prod_ids_by_value_by_prop_ids.has_key?(property[:id])
     end.compact
     
-    # TODO: switch to category links rather than new finds
-    #       then delete indexers tag methods
-    @more_class = @body_values_by_name["reference:class"].first
-    @more_tags = (Indexer.tags_for_product_id(product_id, session.language) || [])
-    @more_counts = Hash[@more_tags.map { |tag| [tag, Indexer.product_ids_for_tag(tag, session.language).size] }]
-    @more_counts[@more_class] = Indexer.product_ids_for_phrase(@more_class, session.language).size
-    
-    @find_phrase = params["find"]
-    @path_names = @body_values_by_name.values_at("reference:category", "reference:class")
-    
     render
   end
   

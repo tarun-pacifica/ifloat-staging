@@ -2,7 +2,7 @@
 <%= partial "common/header" %>
 
 <div id="product">
-  <%= breadcrumbs(@find_phrase, @path_names, false) %>
+  <%= breadcrumbs(@body_values_by_name.values_at("reference:category", "reference:class"), false) %>
   
   <h1> <%= brand_title(@brand, @title) %> </h1>
   <hr class="terminator" />

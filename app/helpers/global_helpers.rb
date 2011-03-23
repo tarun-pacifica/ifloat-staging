@@ -11,10 +11,11 @@ module Merb
       image.nil? ? title.superscript : "#{image} <span>#{title.superscript}</span>"
     end
     
-    def breadcrumbs(phrase, category_path_names, filter_prompt = true)
+    def breadcrumbs(category_path_names, filter_prompt = true)
       crumbs = [category_link([], "All Categories", true)]
       
-      crumbs << category_link([], "\"#{phrase}\"") unless phrase.nil?
+      find_phrase = params["find"]
+      crumbs << category_link([], "\"#{find_phrase}\"") unless find_phrase.nil?
       
       crumbs += category_path_names.size.times.map { |i| category_link(category_path_names[0, i + 1]) }
       

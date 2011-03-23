@@ -17,6 +17,15 @@ function basket_panel_add(group) {
   $.post('/picked_products', data, basket_panel_load_handle, 'json');
 }
 
+function basket_panel_change_quantity(event, pick_id, quantity, unit) {
+  util_target(event).parent().html('<form onsubmit="return false"> <input name="quantity" type="text" value="' + quantity + '" size="4" />' + (unit ? unit : '') + ' <span class="change_quantity" onclick="basket_panel_change_quantity_apply(event, ' + pick_id + ')">apply</span></form>');
+}
+
+function basket_panel_change_quantity_apply(event, pick_id) {
+  var quantity = util_target(event).parent().find('input').val();
+  $.post('/picked_products/' + pick_id, {_method: 'PUT', quantity: quantity}, basket_panel_load_handle, 'json');
+}
+
 function basket_panel_delete(event, pick_id) {
   util_target(event).parent().fadeOut('fast');
   $.getJSON('/picked_products/' + pick_id + '/delete', basket_panel_load_handle);
@@ -124,7 +133,7 @@ function basket_panel_markup_item(pick, buy_now) {
   html.push('<span class="delete" onclick="basket_panel_delete(event, ' + pick.id + ')">X</span>');
   html.push('<p> <a href="' + pick.url + '">'+ util_superscript('text', pick.title_parts.join(' - ')) + '</a> </p>');
   
-  if(buy_now) html.push('<p class="quantity"> ' + (pick.unit ? pick.quantity + pick.unit : 'x' + pick.quantity) + '<span class="change_quantity" onclick="basket_panel_change_quantity(' + [pick.id, pick.quantity, pick.unit ? util_escape_attr_js(pick.unit) : ''].join(', ') + ')">change quantity</span> </p>');
+  if(buy_now) html.push('<p class="quantity"> ' + (pick.unit ? pick.quantity + pick.unit : 'x' + pick.quantity) + '<span class="change_quantity" onclick="basket_panel_change_quantity(event, ' + [pick.id, pick.quantity, util_escape_attr_js(pick.unit ? pick.unit : '')].join(', ') + ')">change quantity</span> </p>');
   
   html.push('<p class="money">' + pick.subtotal + '</p>');
   

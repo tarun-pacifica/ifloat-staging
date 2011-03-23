@@ -126,10 +126,9 @@ class PickedProducts < Application
     picks_by_group.to_json
   end
   
-  def update(id, group)
-    raise Unauthenticated unless group != "buy_later" or session.authenticated?
+  def update(id, quantity)
     pick = session.ensure_picked_product(id.to_i)
-    pick.group = group
+    pick.quantity = quantity
     pick.save
     index
   end

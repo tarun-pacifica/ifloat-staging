@@ -38,4 +38,13 @@
   
   basket_panel_load();
   product_links_wire_up(<%= (@product_ids || []).to_json %>);
+  
+  <% unless @child_link_background_urls.nil? %>
+  var background_urls = <%= @child_link_background_urls.to_json %>;
+  $('#categories .items a').each(function(i) {
+    var a = $(this)
+    $('<img />', {src: background_urls[i]}).appendTo(a);
+    a.css('height', 'auto');
+  });
+  <% end %>
 </script>

@@ -40,6 +40,21 @@ class Categories < Application
         children.map { |child| category_link(@path_names + [child]) }.sort
       end
     
+    if @path_names.size == 1
+      first_product_ids = children.sort.map { |child| Indexer.category_children_for_node(@path_names + [child]).first }
+      
+      checksums_by_product_id = {}
+      Indexer.image_checksums_for_product_ids(first_product_ids).each do |checksum, product_ids|
+        product_ids.each { |product_id| checksums_by_product_id[product_id] = checksum }
+      end
+      
+      assets_by_checksum = Asset.all(:checksum => checksums_by_product_id.values.uniq).hash_by(:checksum)
+      
+      @child_link_background_urls = first_product_ids.map do |product_id|
+        assets_by_checksum[checksums_by_product_id[product_id]].url(:tiny)
+      end
+    end
+    
     @canonical_path = ["/categories", root, sub].compact.join("/")
     @page_title = @path_names.join(" - ") unless @path_names.empty?
     @page_description = Indexer.category_definition(@path_names.last)

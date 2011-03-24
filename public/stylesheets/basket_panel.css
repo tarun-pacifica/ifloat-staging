@@ -51,6 +51,10 @@
   text-align: center;
 }
 
+#basket_panel .item.current {
+  background: #E0F0FF;
+}
+
 #basket_panel .item .delete {
   background: #CC0000;
   border-radius: 10px 10px 10px 10px;
@@ -163,7 +167,7 @@
 }
 
 #basket_panel_adder {
-  background: #F1F9FF;
+  background: #E0F0FF;
   border: 1px solid gray;
   border-top: none;
   padding: 10px;
@@ -219,7 +223,7 @@
 }
 
 #basket_panel_adder .add_other {
-  color: #80C4FD;
+  color: #30A0FB;
   margin: 0;
 }
 

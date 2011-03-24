@@ -33,9 +33,10 @@ function basket_panel_delete(event, pick_id) {
   $.getJSON('/picked_products/' + pick_id + '/delete', basket_panel_load_handle);
 }
 
-
+var basket_product_id = null;
 function basket_panel_load(product_id, price, unit_of_measure) {
   if(product_id) basket_panel_product_info = {product_id: product_id, price: price, uom: unit_of_measure};
+  basket_product_id = product_id;
   $.getJSON('/picked_products', basket_panel_load_handle);
 }
 
@@ -130,7 +131,10 @@ function basket_panel_markup_differentiate(section_count, klass) {
 }
 
 function basket_panel_markup_item(pick, buy_now) {
-  var html = ['<div class="item ' + (buy_now ? 'buy_now' : '') + '">'];
+  var classes = ['item'];
+  if(buy_now) classes.push('buy_now');
+  if(pick.product_id == basket_product_id) classes.push('current');
+  var html = ['<div class="' + classes.join(' ') + '">'];
   
   html.push('<span class="delete" onclick="basket_panel_delete(event, ' + pick.id + ')">X</span>');
   html.push('<p> <a href="' + pick.url + '">'+ util_superscript('text', pick.title_parts.join(' - ')) + '</a> </p>');

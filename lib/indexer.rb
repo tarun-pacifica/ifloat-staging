@@ -34,7 +34,7 @@ module Indexer
       end
     end
     
-    return (node.is_a?(Hash) ? node.keys : node).compact if only_product_ids.nil? # TODO: remove compact once data clean
+    return (node.is_a?(Hash) ? node.keys : node).compact if only_product_ids.nil?
     
     return (only_product_ids & node).to_a if node.is_a?(Array)
     

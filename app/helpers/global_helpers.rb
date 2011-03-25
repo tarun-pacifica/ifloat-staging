@@ -42,7 +42,7 @@ module Merb
       
       url += "?#{query_params.join('&')}" unless query_params.empty?
       name ||= path_names.last
-      on_hover = tooltip_attributes(Indexer.category_definition_for_node(path_names))
+      on_hover = (filters.empty? ? tooltip_attributes(Indexer.category_definition_for_node(path_names)) : "")
       "<a href=#{url.inspect} #{on_hover}>#{Merb::Parse.escape_xml(name)}</a>"
     end
     

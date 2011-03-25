@@ -32,14 +32,13 @@ class Brand
   # TODO: spec
   def product_ids_by_category_node(node_matcher)
     query =<<-SQL
-      SELECT DISTINCT(pv.product_id)
-      FROM property_values pv
-        INNER JOIN property_definitions pd ON pv.property_definition_id = pd.id
-      WHERE pd.name = 'marketing:brand'
+      SELECT DISTINCT(product_id)
+      FROM property_values
+      WHERE property_definition_id = ?
         AND text_value = ?
     SQL
     
-    product_ids = repository.adapter.select(query, name).to_set
+    product_ids = repository.adapter.select(query, Indexer.brand_property_id, name).to_set
     product_ids_by_node = {}
     walk_category_tree_for_product_ids(product_ids) do |node, node_product_ids|
       product_ids_by_node[node] = node_product_ids.to_a if node_matcher.zip(node).all? { |m, n| m == n }

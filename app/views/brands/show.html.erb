@@ -13,24 +13,13 @@
 </div>
 
 <div id="brand_products">
-  <% current_section = nil %>
   <% @product_links_by_node.sort.each do |node, links| %>
-  <% section, heading = node %>
   
-  <% unless section == current_section %>
-  <h2><%= section %></h2>
-  <% current_section = section %>
-  <% end %>
-  
-  <h3>
-    <%= heading %>
-    <% if @product_links_by_node.size == 1 %>
-    (<%= links.size %>) <a href="<%= @brand_url %>"> « back to all <%= @brand.name %> products </a>
-    <% end %>
-    <% if links.size > 8 and @product_links_by_node.size > 1 %>
-    <a href="<%= ([@brand_url] + node).join('/').tr(' ', '+') %>">show me all <%= links.size %></a>
-    <% end %>
-  </h3>
+  <div class="product_set_info">
+    <p class="section"><%= node.first %></p>
+    <p class="heading"><%= node.last %></p>
+    <% if links.size > 7 %> <p class="show_all"><%= @show_all_links_by_node[node] %></p> <% end %>
+  </div>
   
   <% if @product_links_by_node.size > 1 %>
   <div class="product_set">
@@ -53,10 +42,11 @@
 </div>
 
 <script type="text/javascript" charset="utf-8">
+  $('#basket_tab').hide();
   product_links_wire_up(<%= @product_ids.to_json %>);
   
   $(document).ready(function(){
-    var config = {display: 8, duration: 1000};
+    var config = {display: 7, duration: 1000};
     $('#brand_products .product_set').each(function() { $(this).tinycarousel(config) });
   });
 </script>

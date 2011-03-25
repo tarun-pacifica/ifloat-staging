@@ -34,7 +34,7 @@
   -webkit-border-radius: 0 0 10px 10px;
   color: white;
   margin: 0 10px 10px 10px;
-  padding: 15px;
+  padding: 15px 5px;
 }
 
 #brand_products h2 {
@@ -43,26 +43,33 @@
   margin: 0;
 }
 
-#brand_products h3 {
-  font-size: 16px;
-  font-weight: normal;
-  margin: 10px 0 5px 0;
+#brand_products .product_set_info {
+  float: left;
+  margin: 10px 20px 0 0;
+  width: 140px;
 }
 
-#brand_products h3 a {
+#brand_products .product_set_info a {
   color: #FEB330;
-  font-size: 12px;
-  margin-left: 5px;
   text-decoration: none;
 }
 
-#brand_products h3 a:hover {
+#brand_products .product_set_info a:hover {
   text-decoration: underline;
+}
+
+#brand_products .product_set_info p {
+  margin: 0 0 3px 0;
+  text-align: right;
+}
+
+#brand_products .product_set_info p.heading {
+  font-size: 16px;
 }
 
 #brand_products .product_set {
   height: 100px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   overflow: hidden;
 }
 
@@ -71,7 +78,7 @@
   height: 100%;
   overflow: hidden;
   position: relative;
-  width: 807px;
+  width: 707px;
 }
 
 #brand_products .product_set .buttons {

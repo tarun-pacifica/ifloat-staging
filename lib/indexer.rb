@@ -3,6 +3,7 @@ module Indexer
   SITEMAP_PATH = "public/sitemap.xml"
   
   @@auto_diff_property_id = nil
+  @@brand_property_id = nil
   @@category_definitions = {}
   @@category_tree = {}
   @@class_property_id = nil
@@ -23,6 +24,10 @@ module Indexer
   
   def self.auto_diff_property_id
     @@auto_diff_property_id if ensure_loaded
+  end
+  
+  def self.brand_property_id
+    @@brand_property_id if ensure_loaded
   end
   
   def self.category_children_for_node(path_names, only_product_ids = nil)
@@ -160,6 +165,7 @@ module Indexer
     end
     
     @@auto_diff_property_id = PropertyDefinition.first(:name => "auto:group_diff").id
+    @@brand_property_id = PropertyDefinition.first(:name => "marketing:brand").id
     @@class_property_id = PropertyDefinition.first(:name => "reference:class").id
     @@max_product_id = repository.adapter.select("SELECT max(id) FROM products").first
     @@sale_price_min_property_id = PropertyDefinition.first(:name => "sale:price_min").id

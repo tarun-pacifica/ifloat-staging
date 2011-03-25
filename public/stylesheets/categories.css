@@ -105,14 +105,9 @@
   color: #404040;
   display: block;
   float: left;
-  height: 97px;
+  height: 100px;
   margin: 7px 7px 0 0;
-  padding-top: 3px;
   text-align: center;
   text-decoration: none;
   width: 100px;
-}
-
-#categories .items img {
-  margin-top: 3px;
 }

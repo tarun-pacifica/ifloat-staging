@@ -96,7 +96,7 @@ class Categories < Application
     words = phrase.downcase.split.map { |word| Indexer.correct_spelling(word, session.language) }.compact
     return words if words.size <= 1
     
-    (words.size - 1).downto(1) do |i|
+    words.size.downto(1) do |i|
       hits = words.combination(i).map do |combo|
         spec = combo.join(" ")
         (Indexer.product_ids_for_phrase(spec, session.language).size > 0) ? spec : nil

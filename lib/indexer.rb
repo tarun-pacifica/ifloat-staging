@@ -198,7 +198,7 @@ module Indexer
   def self.product_ids_for_filters(product_ids, filters)
     return [] unless ensure_loaded
     
-    filters.map do |property_id, unit, value, label|
+    prod_id_sets = filters.map do |property_id, unit, value, label|
       prop_info = @@property_display_cache[property_id]
       next if prop_info.nil?
       
@@ -212,7 +212,9 @@ module Indexer
       index = (type == "text" ? @@text_filtering_index : @@numeric_filtering_index)
       values_by_product_id = ((index[unit] || {})[property_id] || {})
       product_ids.select { |product_id| (values_by_product_id[product_id] || []).include?(value) }
-    end.compact.inject { |union, ids| union & ids }
+    end.compact
+    
+    prod_id_sets.empty? ? [] : prod_id_sets.inject { |union, ids| union & ids }
   end
   
   def self.product_ids_for_image_checksum(checksum)

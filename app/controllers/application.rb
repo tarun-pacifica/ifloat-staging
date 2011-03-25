@@ -14,6 +14,7 @@ class Application < Merb::Controller
   end
   
   def categories_404(status = 404)
+    params["filters"] = params["find"] = nil
     @path_names = []
     @child_links = Indexer.category_children_for_node([]).map { |child| category_link(@path_names + [child]) }.sort
     @canonical_path = "/categories"

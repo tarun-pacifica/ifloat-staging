@@ -89,7 +89,7 @@ class Categories < Application
   
   def filtered_product_ids(product_ids)
     filters = (JSON.parse(params["filters"]) rescue [])
-    filters.empty? ? product_ids : Indexer.product_ids_for_filters(product_ids, filters)
+    (filters.empty? ? product_ids : Indexer.product_ids_for_filters(product_ids, filters))
   end
   
   def find_phrase_alternatives(phrase)

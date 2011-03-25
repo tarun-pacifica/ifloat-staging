@@ -115,6 +115,10 @@
   margin-left: 412px;
 }
 
+#product .extended_info h4 {
+  margin: 10px;
+}
+
 #product .properties {
   background: #D9E9F5;
   border: 1px solid silver;

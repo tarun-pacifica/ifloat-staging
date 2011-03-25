@@ -30,7 +30,7 @@ class Products < Application
     
     common_values, diff_values = @product.marshal_values(session.language, RANGE_SEPARATOR)
     
-    names = %w(marketing:brand marketing:description marketing:feature_list reference:category reference:class reference:wikipedia).to_set
+    names = %w(marketing:brand marketing:description marketing:feature_list reference:category reference:class reference:wikipedia sale:pack_quantity).to_set
     @body_values_by_name = {}
     @property_values = common_values.map do |info|
       raw_name = info[:raw_name]
@@ -53,8 +53,11 @@ class Products < Application
     
     prices_by_url = @product.prices_by_url(session.currency)
     @price_unit, price_divisor = UnitOfMeasure.unit_and_divisor_by_product_id([product_id])[product_id]
-    # TODO: generalise this once we have more than one partner
-    @price = money_uom(prices_by_url.values.first, session.currency, @price_unit, price_divisor)
+    @pack_quantity = [(@body_values_by_name["sale:pack_quantity"] || []).first.to_i, 1].max
+    
+    amount = prices_by_url.values.first # TODO: generalise this once we have more than one partner
+    @price = money_uom(amount, session.currency, @price_unit, price_divisor)
+    @price_each = money(amount / @pack_quantity, session.currency, @price_unit) if @pack_quantity > 1
     
     @product_links_by_rel_name, @rel_product_ids = marshal_product_links(Indexer.product_relationships(product_id))
     

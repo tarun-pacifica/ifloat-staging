@@ -103,7 +103,7 @@
 <div id="basket_panel"> </div>
 
 <script type="text/javascript" charset="utf-8">
-  basket_panel_load(<%= @product.id %>, <%= @price.to_json %>, <%= @price_unit.to_json %>);
+  basket_panel_load(<%= @product.id %>, <%= @price.to_json %>, <%= @price_unit.to_json %>, <%= @pack_quantity %>, <%= @price_each.to_json %>);
   product_links_wire_up(<%= @rel_product_ids.to_json %>);
   product_property_sections_init(<%= @property_ids_by_section.to_json %>);
   product_siblings_wire_up(<%= @sibling_prod_ids_by_value_by_prop_ids.to_json %>);

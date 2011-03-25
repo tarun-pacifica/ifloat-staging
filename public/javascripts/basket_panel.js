@@ -34,8 +34,8 @@ function basket_panel_delete(event, pick_id) {
 }
 
 var basket_product_id = null;
-function basket_panel_load(product_id, price, unit_of_measure) {
-  if(product_id) basket_panel_product_info = {product_id: product_id, price: price, uom: unit_of_measure};
+function basket_panel_load(product_id, price, unit_of_measure, pack_quantity, price_each) {
+  if(product_id) basket_panel_product_info = {product_id: product_id, price: price, uom: unit_of_measure, pack: pack_quantity, price_each: price_each};
   basket_product_id = product_id;
   $.getJSON('/picked_products', basket_panel_load_handle);
 }
@@ -55,6 +55,7 @@ function basket_panel_load_handle(picks_by_group) {
       if(info.price) {
         html.push('<div id="basket_panel_adder">');
         html.push('<p class="price">' + info.price + '</p>');
+        if(info.pack > 1) html.push('<p class="price_note">for ' + info.pack + ' at ' + info.price_each + ' each</p>');
         html.push('<p class="price_note">(Best partner price)</p>');
         html.push('<form onsubmit="$(\'#basket_panel_adder .add_basket\').click(); return false"> <label for="quantity">Quantity</label> <input name="quantity" type="text" value="1" size="4" />' + (info.uom ? info.uom : '') + '</form>');
         html.push('<div class="add_basket" onclick="basket_panel_add(\'buy_now\')">ADD TO BASKET</div>');

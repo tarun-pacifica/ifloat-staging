@@ -34,7 +34,7 @@ module Indexer
       end
     end
     
-    return (node.is_a?(Hash) ? node.keys : node).compact if only_product_ids.nil? # TODO: remove compact
+    return (node.is_a?(Hash) ? node.keys : node).compact if only_product_ids.nil? # TODO: remove compact once data clean
     
     return (only_product_ids & node).to_a if node.is_a?(Array)
     
@@ -53,7 +53,7 @@ module Indexer
     
     category_statement =
       case path_names.size
-      when 0 then "Categories include: #{children.friendly_join('and')}."
+      # when 0 then "Categories include: #{children.friendly_join('and')}."
       when 1 then "Product types include: #{children.friendly_join('and')}."
       else return definition
       end

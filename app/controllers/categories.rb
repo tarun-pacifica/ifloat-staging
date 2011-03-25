@@ -37,11 +37,11 @@ class Categories < Application
         product_links_by_node, @product_ids = marshal_product_links(:products => children)
         product_links_by_node[:products]
       else
-        children.map { |child| category_link(@path_names + [child]) }.sort
+        children.map { |child| category_link(@path_names + [child]) }
       end
     
     if @path_names.size == 1
-      first_product_ids = children.sort.map { |child| Indexer.category_children_for_node(@path_names + [child]).first }
+      first_product_ids = children.map { |child| Indexer.category_children_for_node(@path_names + [child]).first }
       
       checksums_by_product_id = {}
       Indexer.image_checksums_for_product_ids(first_product_ids).each do |checksum, product_ids|
@@ -57,7 +57,7 @@ class Categories < Application
     
     @canonical_path = ["/categories", root, sub].compact.join("/")
     @page_title = @path_names.join(" - ") unless @path_names.empty?
-    @page_description = Indexer.category_definition(@path_names.last)
+    @page_description = Indexer.category_definition_for_node(@path_names)
     render
   end
   
@@ -111,6 +111,6 @@ class Categories < Application
     path_names = [root, sub].compact.map { |name| name.tr("+", " ") }
     only_product_ids = nil
     only_product_ids = Indexer.product_ids_for_phrase(find_phrase, session.language) unless find_phrase.nil?
-    [path_names, Indexer.category_children_for_node(path_names, only_product_ids)]
+    [path_names, Indexer.category_children_for_node(path_names, only_product_ids).sort]
   end
 end

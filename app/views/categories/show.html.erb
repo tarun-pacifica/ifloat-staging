@@ -7,7 +7,7 @@
   <div class="find_bad">
     <p>Sorry, we couldn't find any products matching "<strong><%= Merb::Parse.escape_xml(@find_phrase) %></strong>".</p>
     <% unless @find_alternatives.empty? %>
-    <p>How about <%= friendly_list(@find_alternatives.map { |spec| '"' + finder_link(spec) + '"' }, "or") %>?</p>
+    <p>How about <%= @find_alternatives.map { |spec| '"' + finder_link(spec) + '"' }.friendly_join("or") %>?</p>
     <% end %>
   </div>
   

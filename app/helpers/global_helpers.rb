@@ -42,7 +42,7 @@ module Merb
       
       url += "?#{query_params.join('&')}" unless query_params.empty?
       name ||= path_names.last
-      on_hover = tooltip_attributes(Indexer.category_definition(name))
+      on_hover = tooltip_attributes(Indexer.category_definition_for_node(path_names))
       "<a href=#{url.inspect} #{on_hover}>#{Merb::Parse.escape_xml(name)}</a>"
     end
     
@@ -53,12 +53,6 @@ module Merb
       tip, tip_pos = params.values_at(:tip, :tip_pos)
       on_hover = tooltip_attributes(tip, tip_pos)
       "<span class=#{klass.inspect} onclick=\"finder_do('#{spec}')\" #{on_hover}>#{text}</span>"
-    end
-    
-    def friendly_list(items, andor)
-      return fallback if items.empty?
-      return items.first if items.size == 1
-      items[0..-2].join(", ") + " #{andor} #{items.last}"
     end
     
     def hidden_field(*args)

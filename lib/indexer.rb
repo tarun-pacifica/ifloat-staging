@@ -34,7 +34,7 @@ module Indexer
       end
     end
     
-    return (node.is_a?(Hash) ? node.keys : node) if only_product_ids.nil?
+    return (node.is_a?(Hash) ? node.keys : node).compact if only_product_ids.nil? # TODO: remove compact
     
     return (only_product_ids & node).to_a if node.is_a?(Array)
     
@@ -44,8 +44,21 @@ module Indexer
     end.compact
   end
   
-  def self.category_definition(category)
-    @@category_definitions[category] if ensure_loaded
+  def self.category_definition_for_node(path_names)
+    return nil unless ensure_loaded
+    
+    children = (category_children_for_node(path_names) || []).sort
+    definition = @@category_definitions[path_names.last]
+    return definition if children.empty?
+    
+    category_statement =
+      case path_names.size
+      when 0 then "Categories include: #{children.friendly_join('and')}."
+      when 1 then "Product types include: #{children.friendly_join('and')}."
+      else return definition
+      end
+    
+    [definition, category_statement].compact.join(" ")
   end
   
   def self.class_property_id
@@ -58,7 +71,7 @@ module Indexer
       records = text_records
       
       indexes = {
-        :category_definitions       => compile_category_definitions(properties),
+        :category_definitions       => compile_category_definitions(properties, records),
         :category_tree              => compile_category_tree(properties, records),
         :facility_cache             => compile_facility_cache,
         :image_checksums            => compile_image_checksum_index,
@@ -272,11 +285,35 @@ module Indexer
   private
   
   # TODO: extend to support multiple languages
-  def self.compile_category_definitions(properties)
-    property_names = %w(reference:category reference:class)
-    property_ids = properties.map { |pd| property_names.include?(pd.name) ? pd.id : nil }.compact
-    defs_by_value_by_property_id = PropertyValueDefinition.by_property_id(property_ids, "ENG")
-    defs_by_value_by_property_id.values.inject(:update)
+  def self.compile_category_definitions(properties, records)
+    property_names = %w(reference:category reference:class marketing:brand)
+    property_ids = properties.select { |pd| property_names.include?(pd.name) }.sort_by { |pd| property_names.index(pd.name) }.map { |pd| pd.id }
+    
+    defs_by_value_by_prop_id = PropertyValueDefinition.by_property_id(property_ids[0, 2], "ENG")
+    defs_by_value = defs_by_value_by_prop_id.values.inject(:update)
+    
+    values_by_prod_id_by_prop_id = {}
+    records.each do |record|
+      next unless property_ids.include?(record.property_definition_id)
+      values_by_prod_id = (values_by_prod_id_by_prop_id[record.property_definition_id] ||= {})
+      values_by_prod_id[record.product_id] = record.text_value
+    end
+    
+    brands_by_prod_id = values_by_prod_id_by_prop_id.delete(property_ids.last)
+    prod_ids_by_value = {}
+    values_by_prod_id_by_prop_id.each do |prop_id, values_by_prod_id|
+      values_by_prod_id.each do |prod_id, value|
+        (prod_ids_by_value[value] ||= []) << prod_id
+      end
+    end
+    
+    branded_defs_by_value = {}
+    (defs_by_value.keys | prod_ids_by_value.keys).each do |value|
+      brands = brands_by_prod_id.values_at(*prod_ids_by_value[value]).compact.uniq.sort
+      brand_statement = (brands.empty? ? nil : "Brands include: #{brands.friendly_join('and')}.")
+      branded_defs_by_value[value] = [defs_by_value[value], brand_statement].compact.join(" ")
+    end
+    branded_defs_by_value
   end
   
   def self.compile_category_tree(properties, records)

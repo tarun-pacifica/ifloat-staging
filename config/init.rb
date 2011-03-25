@@ -31,6 +31,10 @@ Merb::BootLoader.before_app_loads do
   # These methods are handy to have available in general
   
   class Array
+    def friendly_join(andor)
+      size <= 1 ? first : self[0..-2].join(", ") + " #{andor} #{last}"
+    end
+    
     def hash_by(method = nil)
       hash = {}
       each do |item|

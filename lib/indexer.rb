@@ -205,7 +205,7 @@ module Indexer
       type = prop_info[:type]
       
       if(type != "text")
-        values = value.split("..").map { |v| v.to_f }.uniq
+        values = value.to_s.split("..").map { |v| v.to_f }.uniq
         value = (values.size == 2 ? Range.new(*values) : values.first)
       end
       

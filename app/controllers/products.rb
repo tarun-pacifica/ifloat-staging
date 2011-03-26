@@ -57,7 +57,7 @@ class Products < Application
     
     amount = prices_by_url.values.first # TODO: generalise this once we have more than one partner
     @price = money_uom(amount, session.currency, @price_unit, price_divisor)
-    @price_each = money(amount / @pack_quantity, session.currency, @price_unit) if @pack_quantity > 1
+    @price_each = money((amount || 0) / @pack_quantity, session.currency, @price_unit) if @pack_quantity > 1
     
     @product_links_by_rel_name, @rel_product_ids = marshal_product_links(Indexer.product_relationships(product_id))
     

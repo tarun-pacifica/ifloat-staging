@@ -23,7 +23,7 @@ class PickedProducts < Application
       :url     => facility.primary_url,
       :picks   => session.picked_products,
       :from_ip => request.remote_ip,
-      :userish => session.userish)
+      :userish => session.userish) if Merb.environment == "production"
     
     @background_css = "white"
     @skip_copyright = true

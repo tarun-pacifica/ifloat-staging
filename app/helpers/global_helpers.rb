@@ -108,10 +108,6 @@ module Merb
       parts.join("<br/>")
     end
     
-    def partner_pick(pick)
-      pick.inspect
-    end
-    
     def product_data_table(infos)
       html = ['<table summary="properties">']
       html += infos.map do |info|

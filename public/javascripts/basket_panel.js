@@ -1,4 +1,4 @@
-var basket_panel_product_info = null;
+var basket_panel_product_info = {};
 function basket_panel_add(group) {
   if(group == 'buy_later' && ! $ifloat_header.authenticated) {
     login_open('Please login / register to add items to your future buys...');
@@ -28,15 +28,17 @@ function basket_panel_change_quantity_apply(event, pick_id) {
   $.post('/picked_products/' + pick_id, {_method: 'PUT', quantity: quantity}, basket_panel_load_handle, 'json');
 }
 
+function basket_panel_checkout() {
+  window.location = '/picked_products/buy/' + $ifloat_header.facility_id;
+}
+
 function basket_panel_delete(event, pick_id) {
   util_target(event).parent().fadeOut('fast');
   $.getJSON('/picked_products/' + pick_id + '/delete', basket_panel_load_handle);
 }
 
-var basket_product_id = null;
 function basket_panel_load(product_id, price, unit_of_measure, pack_quantity, price_each) {
   if(product_id) basket_panel_product_info = {product_id: product_id, price: price, uom: unit_of_measure, pack: pack_quantity, price_each: price_each};
-  basket_product_id = product_id;
   $.getJSON('/picked_products', basket_panel_load_handle);
 }
 
@@ -88,7 +90,7 @@ function basket_panel_load_handle_buy_now(picks_and_subtotal) {
   
   var html = [];
   for(var i in picks_and_subtotal) html.push(basket_panel_markup_item(picks_and_subtotal[i], true));
-  html.push('<div class="subtotal"> <p><span class="label">Sub-total</span> <span class="money">' + subtotal + ' </span></p> <div class="checkout">GO TO CHECKOUT</div> </div>');
+  html.push('<div class="subtotal"> <p><span class="label">Sub-total</span> <span class="money">' + subtotal + ' </span></p> <div class="checkout" onclick="basket_panel_checkout()">GO TO CHECKOUT</div> </div>');
   return html;
 }
 
@@ -134,7 +136,7 @@ function basket_panel_markup_differentiate(section_count, klass) {
 function basket_panel_markup_item(pick, buy_now) {
   var classes = ['item'];
   if(buy_now) classes.push('buy_now');
-  if(pick.product_id == basket_product_id) classes.push('current');
+  if(pick.product_id == basket_panel_product_info.product_id) classes.push('current');
   var html = ['<div class="' + classes.join(' ') + '">'];
   
   html.push('<span class="delete" onclick="basket_panel_delete(event, ' + pick.id + ')">X</span>');

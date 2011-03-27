@@ -314,7 +314,8 @@ class ImportSet
       properties = %w(auto:group_diff reference:class).map { |name| get!(PropertyDefinition, name) }
       agd, rc = properties
       
-      classes_by_group = {}
+      # TODO: re-evaluate rule
+      # classes_by_group = {}
       values_by_product_by_group = {}
       
       text_values.each do |tv|
@@ -328,8 +329,8 @@ class ImportSet
         when agd
           values_by_product = (values_by_product_by_group[group] ||= {})
           (values_by_product[product] ||= []) << value
-        when rc
-          (classes_by_group[group] ||= []) << value
+        # when rc
+        #   (classes_by_group[group] ||= []) << value
         end
       end
       
@@ -337,11 +338,11 @@ class ImportSet
         next if values_by_product.size == 1
         friendly_group = "#{group[0].attributes[:reference]} / #{group[1]}"
         
-        classes = classes_by_group[group].uniq
-        if classes.size > 1
-          error(Product, nil, nil, nil, "product reference group #{friendly_group} spans multiple classes: #{classes.inspect}")
-          next
-        end
+        # classes = classes_by_group[group].uniq
+        # if classes.size > 1
+        #   error(Product, nil, nil, nil, "product reference group #{friendly_group} spans multiple classes: #{classes.inspect}")
+        #   next
+        # end
         
         values_by_product.values.transpose.each_with_index do |diff_column, i|
           blank_count = diff_column.count { |v| v.blank? }

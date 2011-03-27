@@ -300,28 +300,29 @@ module Indexer
     defs_by_value_by_prop_id = PropertyValueDefinition.by_property_id(property_ids[0, 2], "ENG")
     defs_by_value = defs_by_value_by_prop_id.values.inject(:update)
     
-    values_by_prod_id_by_prop_id = {}
-    records.each do |record|
-      next unless property_ids.include?(record.property_definition_id)
-      values_by_prod_id = (values_by_prod_id_by_prop_id[record.property_definition_id] ||= {})
-      values_by_prod_id[record.product_id] = record.text_value
-    end
-    
-    brands_by_prod_id = values_by_prod_id_by_prop_id.delete(property_ids.last)
-    prod_ids_by_value = {}
-    values_by_prod_id_by_prop_id.each do |prop_id, values_by_prod_id|
-      values_by_prod_id.each do |prod_id, value|
-        (prod_ids_by_value[value] ||= []) << prod_id
-      end
-    end
-    
-    branded_defs_by_value = {}
-    (defs_by_value.keys | prod_ids_by_value.keys).each do |value|
-      brands = brands_by_prod_id.values_at(*prod_ids_by_value[value]).compact.uniq.sort
-      brand_statement = (brands.empty? ? nil : "Brands include: #{brands.friendly_join('and')}.")
-      branded_defs_by_value[value] = [defs_by_value[value], brand_statement].compact.join(" ")
-    end
-    branded_defs_by_value
+    # TODO: evaluate alternatives as these lists end up being too long in practice
+    # values_by_prod_id_by_prop_id = {}
+    # records.each do |record|
+    #   next unless property_ids.include?(record.property_definition_id)
+    #   values_by_prod_id = (values_by_prod_id_by_prop_id[record.property_definition_id] ||= {})
+    #   values_by_prod_id[record.product_id] = record.text_value
+    # end
+    # 
+    # brands_by_prod_id = values_by_prod_id_by_prop_id.delete(property_ids.last)
+    # prod_ids_by_value = {}
+    # values_by_prod_id_by_prop_id.each do |prop_id, values_by_prod_id|
+    #   values_by_prod_id.each do |prod_id, value|
+    #     (prod_ids_by_value[value] ||= []) << prod_id
+    #   end
+    # end
+    # 
+    # branded_defs_by_value = {}
+    # (defs_by_value.keys | prod_ids_by_value.keys).each do |value|
+    #   brands = brands_by_prod_id.values_at(*prod_ids_by_value[value]).compact.uniq.sort
+    #   brand_statement = (brands.empty? ? nil : "Brands include: #{brands.friendly_join('and')}.")
+    #   branded_defs_by_value[value] = [defs_by_value[value], brand_statement].compact.join(" ")
+    # end
+    # branded_defs_by_value
   end
   
   def self.compile_category_tree(properties, records)

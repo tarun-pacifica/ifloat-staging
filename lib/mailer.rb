@@ -88,24 +88,16 @@ module Mailer
       end
     
     when :purchase_started
-      values = params.values_at(:url, :one_off, :picks, :from_ip, :userish)
+      values = params.values_at(:url, :picks, :from_ip, :userish)
       return if values.any? { |v| v.nil? }
-      url, one_off, picks, from_ip, userish = values
+      url, picks, from_ip, userish = values
       
       product_ids = picks.map { |pick| pick.product_id }
-      product_ids << one_off unless one_off == 0
       products_by_id = Product.all(:id => product_ids).hash_by(:id)
       companies_by_id = Company.all(:id => products_by_id.values.map { |product| product.company_id }).hash_by(:id)
       
       report = ["Purchase started at #{url} from #{from_ip} (#{userish})"]
       report << ""
-      
-      unless one_off == 0
-        product = products_by_id[one_off]
-        company = companies_by_id[product.company_id]
-        report << "User performed a one-off 'buy now' on #{company.reference} / #{product.reference}"
-        report << ""
-      end
       
       report << "Picks..."
       report += picks.map do |pick|

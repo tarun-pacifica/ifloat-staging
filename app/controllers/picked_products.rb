@@ -15,14 +15,12 @@ class PickedProducts < Application
     mappings = facility.product_mappings(prod_ids_by_group.values.flatten)
     @partner_product_urls = facility.product_urls(mappings)
     
-    one_off_product_id = params[:product_id].to_i
-    purchase_product_ids = (one_off_product_id > 0 ? [one_off_product_id] : prod_ids_by_group["buy_now"]).to_set
+    purchase_product_ids = prod_ids_by_group["buy_now"].to_set
     @purchase_urls = facility.purchase_urls(mappings.select { |m| purchase_product_ids.include?(m.product_id) })
     return redirect("/") if @purchase_urls.empty?
     
     Mailer.deliver(:purchase_started,
       :url     => facility.primary_url,
-      :one_off => one_off_product_id,
       :picks   => session.picked_products,
       :from_ip => request.remote_ip,
       :userish => session.userish)
@@ -30,7 +28,7 @@ class PickedProducts < Application
     @background_css = "white"
     @skip_copyright = true
     @transitional = true
-    session.log!("GET", "picked_products_buy:#{one_off_product_id}:#{facility.primary_url}", request.remote_ip)
+    session.log!("GET", "picked_products_buy:#{facility.primary_url}", request.remote_ip)
     render
   end
   

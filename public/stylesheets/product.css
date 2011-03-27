@@ -119,65 +119,6 @@
   margin: 10px;
 }
 
-#product .properties {
-  background: #D9E9F5;
-  border: 1px solid silver;
-  margin-bottom: 10px;
-}
-
-#product .properties .sections {
-  border-right: 1px solid silver;
-  float: left;
-  margin-bottom: 15px;
-  margin-right: -150px;
-  width: 150px;
-}
-
-#product .properties .sections div {
-  background: #EDEDED;
-  background: -moz-linear-gradient(100% 100% 90deg, #FAFAFA, #DADADA);
-  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FAFAFA), to(#DADADA));
-  border-bottom: 1px solid silver;
-  color: #404040;
-  font-weight: bold;
-  padding: 10px;
-}
-
-#product .properties .sections div:hover {
-  color: black;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-#product .properties .sections div.selected {
-  background: #90C0FA;
-  background: -moz-linear-gradient(100% 100% 90deg, #A8D8FD, #78B3FA);
-  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#A8D8FD), to(#78B3FA));
-  border-radius: 0 5px 5px 0;
-  -moz-border-radius: 0 5px 5px 0;
-  -webkit-border-radius: 0 5px 5px 0;
-  color: black;
-  width: 140px;
-}
-
-#product .properties .sections div.selected:hover {
-  cursor: auto;
-  text-decoration: none;
-}
-
-#product .properties .values {
-  float: left;
-  margin-left: 150px;
-}
-
-#product .properties .values table {
-  margin: 10px 20px;
-}
-
-#product .properties .values table td {
-  padding: 3px;
-}
-
 #product .related_set {
   margin: 0 0 15px 10px;
 }

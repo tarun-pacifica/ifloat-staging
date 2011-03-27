@@ -1,109 +1,82 @@
-#compare_by_class table {
+#compare_by_class {
+  float: left;
+  margin-right: 165px;
+  padding: 5px 15px;
+}
+
+#compare_by_class h2 {
+  color: #404040;
+  font-size: 14px;
+  margin: 15px 0 5px 0;
+}
+
+#compare_by_class table.diff_values {
   width: 100%;
 }
 
-#compare_by_class table p {
+#compare_by_class table.diff_values p {
   margin: 0 0 5px 0;
 }
 
-#compare_by_class table td {
+#compare_by_class table.diff_values td {
   padding: 5px;
   vertical-align: top;
 }
 
-#compare_by_class table td.count {
+#compare_by_class table.diff_values td.count {
   color: #404040;
   font-weight: bold;
   text-align: center;
   vertical-align: bottom;
 }
 
-#compare_by_class table td.icon {
+#compare_by_class table.diff_values td.icon {
   text-align: center;
 }
 
-#compare_by_class table td.image img {
+#compare_by_class table.diff_values td.image img {
   border: 1px solid #D0D0D0;
   height: 100px;
   width: 100px;
 }
 
-#compare_by_class table td.image {
+#compare_by_class table.diff_values td.image {
   text-align: center;
 }
 
-#compare_by_class table td.image .pick_buttons {
-  margin: auto;
-  width: 172px;
-}
-
-#compare_by_class table td.image .pick_buttons div {
-  cursor: pointer;
-  float: left;
-  height: 23px;
-}
-
-#compare_by_class table td.image .pick_buttons div.buy_later {
-  background: url(/images/compare_by_class/buttons/buy_later.png) no-repeat;
-  width: 59px;
-}
-
-#compare_by_class table td.image .pick_buttons div.buy_now {
-  background: url(/images/compare_by_class/buttons/buy_now.png) no-repeat;
-  width: 57px;
-}
-
-#compare_by_class table td.image .pick_buttons div.reset {
-  background: url(/images/compare_by_class/buttons/reset.png) no-repeat;
-  width: 56px;
-}
-
-#compare_by_class table td.image .pick_buttons div:hover {
-  background-position: 0 -23px;
-}
-
-#compare_by_class table td.image .pick_buttons div:active {
-  background-position: 0 -46px;
-}
-
-#compare_by_class table td.product {
+#compare_by_class table.diff_values td.product {
   cursor: pointer;
   min-width: 178px;
 }
 
-#compare_by_class table tr.even td {
+#compare_by_class table.diff_values tr.even td {
   background: #F3F3F3;
 }
 
-#compare_by_class table tr.nav td {
+#compare_by_class table.diff_values tr.nav td {
   color: #404040;
   font-size: 16px;
   padding-bottom: 0;
 }
 
-#compare_by_class table tr.nav td:hover {
+#compare_by_class table.diff_values tr.nav td:hover {
   color: black;
   text-decoration: underline;
 }
 
-#compare_by_class table tr.nav td.maximize {
+#compare_by_class table.diff_values tr.nav td.maximize {
   cursor: pointer;
   text-align: right;
 }
 
-#compare_by_class table tr.nav td.minimize {
+#compare_by_class table.diff_values tr.nav td.minimize {
   cursor: pointer;
 }
 
-#compare_by_class table tr.odd td {
-  background: #DCE9F7;
+#compare_by_class table.diff_values tr.odd td {
+  background: #E0F0FF;
 }
 
-#compare_by_class table tr td.hover {
+#compare_by_class table.diff_values tr td.hover {
   background: #F9BD48;
-}
-
-#compare_by_class table ul {
-  margin: 0 0 5px 0;
-  padding-left: 15px;
 }

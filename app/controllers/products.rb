@@ -22,20 +22,14 @@ class Products < Application
     @product = Product.get(product_id)
     return categories_404(product_id < Indexer.max_product_id ? 410 : 404) if @product.nil?
     
-    common_values, diff_values = @product.marshal_values(session.language, RANGE_SEPARATOR)
+    @common_values, diff_values = @product.marshal_values(session.language, RANGE_SEPARATOR)
     
     names = %w(marketing:brand marketing:description marketing:feature_list reference:category reference:class reference:wikipedia sale:pack_quantity).to_set
     @body_values_by_name = {}
-    @property_values = common_values.map do |info|
+    @common_values.each do |info|
       raw_name = info[:raw_name]
       @body_values_by_name[raw_name] = info[:values] if names.include?(raw_name)
-      info[:dad] ? info : nil
-    end.compact.sort_by { |info| info[:seq_num] }
-    
-    @property_value_sections = ["Show All"] + @property_values.map { |info| info[:section] }.uniq
-    @property_ids_by_section = {}
-    @property_values.each { |info| (@property_ids_by_section[info[:section]] ||= []) << info[:id] }
-    @property_ids_by_section["Show All"] = @property_ids_by_section.values.flatten
+    end
     
     @brand = Brand.first(:name => @body_values_by_name["marketing:brand"])
     

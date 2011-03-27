@@ -109,7 +109,21 @@ module Merb
     end
     
     def product_data_table(infos)
-      html = ['<table summary="properties">']
+      infos = infos.select { |info| info[:dad] }.sort_by { |info| info[:seq_num] }
+      
+      sections = ["Show All"] + infos.map { |info| info[:section] }.uniq
+      property_ids_by_section = {}
+      infos.each { |info| (property_ids_by_section[info[:section]] ||= []) << info[:id] }
+      property_ids_by_section["Show All"] = property_ids_by_section.values.flatten
+      
+      html = ['<div id="common_values">']
+      
+      html << '<div class="sections">'
+      html += sections.map { |s| "<div>#{s}</div>" }
+      html << '</div>'
+      
+      html << '<div class="values">'
+      html << '<table summary="common values">'
       html += infos.map do |info|
         <<-HTML
           <tr id="property_#{info[:id]}">
@@ -119,6 +133,15 @@ module Merb
         HTML
       end
       html << '</table>'
+      html << '</div>'
+      
+      html << '<hr class="terminator" />'
+      html << '</div>'
+      
+      html << '<script type="text/javascript" charset="utf-8">'
+      html << "$(document).ready(function() { common_values_init(#{property_ids_by_section.to_json}) });"
+      html << '</script>'
+      
       html.join("\n")
     end
     

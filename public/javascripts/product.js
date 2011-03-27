@@ -1,26 +1,3 @@
-var product_property_ids_by_section = {};
-function product_property_sections_init(property_ids_by_section) {
-  product_property_ids_by_section = property_ids_by_section;
-  
-  var sections = $('#product .properties .sections div');
-  sections.click(product_property_section_select);
-  $(sections[1]).click();
-}
-
-function product_property_section_select(event) {
-  var properties = $('#product .properties');
-  properties.find('.sections div').removeClass('selected');
-  
-  var section = $(this);
-  section.addClass('selected');
-  
-  var all_values = properties.find('.values table tr');
-  all_values.hide();
-  
-  var property_ids = product_property_ids_by_section[section.text()]
-  for(var i in property_ids) $('#property_' + property_ids[i]).show();
-}
-
 function product_related_media_show(event) {
   util_target(event).hide();
   $('#product .related_media').fadeIn('fast');
@@ -58,7 +35,7 @@ function product_sibling_select() {
   selects.find('option').removeAttr('disabled');
   
   if(prod_ids.length == 0) return;
-
+  
   if(prod_ids.length == 1) {
     window.location = '/products/sibling-' + prod_ids[0];
     return;
@@ -77,7 +54,7 @@ function product_sibling_select() {
     }
     
     if(!disabled_values_exist) continue;
-        
+    
     var select = $('#sibling_property_' + prop_id + ' select');
     var options = select.find('option');
     

@@ -1,0 +1,58 @@
+#common_values {
+  background: #E0F0FF;
+  border: 1px solid silver;
+  margin-bottom: 10px;
+}
+
+#common_values .sections {
+  border-right: 1px solid silver;
+  float: left;
+  margin-bottom: 15px;
+  margin-right: -150px;
+  width: 150px;
+}
+
+#common_values .sections div {
+  background: #EDEDED;
+  background: -moz-linear-gradient(100% 100% 90deg, #FAFAFA, #DADADA);
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FAFAFA), to(#DADADA));
+  border-bottom: 1px solid silver;
+  color: #404040;
+  font-weight: bold;
+  padding: 10px;
+}
+
+#common_values .sections div:hover {
+  color: black;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+#common_values .sections div.selected {
+  background: #90C0FA;
+  background: -moz-linear-gradient(100% 100% 90deg, #A8D8FD, #78B3FA);
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#A8D8FD), to(#78B3FA));
+  border-radius: 0 5px 5px 0;
+  -moz-border-radius: 0 5px 5px 0;
+  -webkit-border-radius: 0 5px 5px 0;
+  color: black;
+  width: 140px;
+}
+
+#common_values .sections div.selected:hover {
+  cursor: auto;
+  text-decoration: none;
+}
+
+#common_values .values {
+  float: left;
+  margin-left: 150px;
+}
+
+#common_values .values table {
+  margin: 10px 20px;
+}
+
+#common_values .values table td {
+  padding: 3px;
+}

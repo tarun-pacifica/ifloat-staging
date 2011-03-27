@@ -31,3 +31,5 @@ function tooltip_show(event, text, relative_position) {
   
   tooltip.css('left', left + 'px').css('top', top + 'px').fadeIn('fast');
 }
+
+$(window).unload(tooltip_hide);

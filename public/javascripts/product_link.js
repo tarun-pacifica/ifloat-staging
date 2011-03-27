@@ -58,3 +58,5 @@ function product_links_wire_up_handle(products) {
     link.hover(product_link_popup, product_link_unpopup);
   }
 }
+
+$(window).unload(product_link_unpopup);

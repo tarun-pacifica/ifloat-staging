@@ -14,12 +14,6 @@ class Products < Application
     end.to_json
   end
   
-  def buy_now(id, facility_id)
-    raise NotFound unless Product.get(id)
-    session.add_picked_product(PickedProduct.new(:product_id => id, :group => "buy_now"))
-    redirect("/picked_products/buy/#{facility_id}?product_id=#{id}")
-  end
-  
   def show(id)
     product_id = id.to_i
     @canonical_path = Indexer.product_url(product_id)

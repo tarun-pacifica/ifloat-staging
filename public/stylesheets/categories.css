@@ -101,6 +101,7 @@
 }
 
 #categories .items a {
+  background: #E0F0FF;
   border: 1px solid silver;
   color: #404040;
   display: block;

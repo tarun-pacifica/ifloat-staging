@@ -40,11 +40,16 @@
   product_links_wire_up(<%= (@product_ids || []).to_json %>);
   
   <% unless @child_link_background_urls.nil? %>
+  var links = $('#categories .items a');
+  
+  var max_height = 0
+  links.each(function() { max_height = Math.max(max_height, $(this).find('span').outerHeight()) });
+  
   var background_urls = <%= @child_link_background_urls.to_json %>;
-  $('#categories .items a').each(function(i) {
+  links.each(function(i) {
     var a = $(this);
-    $('<img />', {src: background_urls[i], css: {'margin-top': '3px'}}).appendTo(a);
-    a.css('height', 'auto').css('padding-top', '3px');
+    $('<img />', {src: background_urls[i]}).prependTo(a);
+    a.css('height', 106 + max_height + 'px');
   });
   <% end %>
 </script>

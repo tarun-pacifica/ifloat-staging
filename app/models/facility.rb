@@ -41,10 +41,9 @@ class Facility
     repository.adapter.select(query, company_id, references, references)
   end
   
-  # TODO: spec
   def product_mappings(product_ids)
     mappings = ProductMapping.all(:company_id => company_id, :product_id => product_ids)
-    return {} if mappings.empty?
+    return [] if mappings.empty? # TODO: spec - was returning a hash previously
     
     query = "SELECT reference FROM facility_products WHERE facility_id = ? AND reference IN ?"
     all_refs = mappings.map { |m| m.reference_parts.first }
@@ -59,7 +58,7 @@ class Facility
     end
   end
   
-  def product_urls(mappings)
+  def product_urls_by_id(mappings)
     Hash[mappings.map { |m| [m.product_id, product_url(m)] }]
   end
   

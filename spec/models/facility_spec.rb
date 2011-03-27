@@ -105,7 +105,7 @@ describe Facility do
     end
   end
   
-  describe "product_urls" do
+  describe "product_urls_by_id" do
     before(:all) do
       @mappings = %w(ABCDE;k1=v1;k2=v2 EBCDA).map do |ref|
         ProductMapping.new(:product_id => rand(100), :reference => ref)
@@ -113,7 +113,7 @@ describe Facility do
     end
     
     after(:each) do
-      result = @facility.product_urls(@mappings)
+      result = @facility.product_urls_by_id(@mappings)
       @mappings.each { |m| result[m.product_id].should == @facility.product_url(m) }
     end
     

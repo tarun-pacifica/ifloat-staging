@@ -5,6 +5,7 @@
 
 #breadcrumbs a {
   color: #404040;
+  white-space: nowrap;
   text-decoration: none;
 }
 

@@ -25,7 +25,6 @@ class PickedProducts < Application
       :from_ip => request.remote_ip,
       :userish => session.userish) if Merb.environment == "production"
     
-    @background_css = "white"
     @skip_copyright = true
     @transitional = true
     session.log!("GET", "picked_products_buy:#{facility.primary_url}", request.remote_ip)

@@ -45,7 +45,7 @@
     <% end %>
   </head>
   
-  <body <%= "style=\"background: #{@background_css};\"" unless @background_css.nil? %>>
+  <body>
     <%= catch_content :for_layout %>
     
     <% unless @skip_copyright %>

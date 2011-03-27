@@ -48,10 +48,11 @@ class AutoObjectGenerator
       row_md5s_by_product_row_md5.group_by { |row_md5, object_row_md5s| @csvs.row_csv_name(row_md5) }
       
     %w(PH TS).zip(auto_row_md5s).each do |domain, row_md5s|
-      generated_count, error_count = 0, 0
       m = method("generate_#{domain.downcase}_values")
       
       row_md5s_by_product_row_md5_by_csv_name.each do |csv_name, row_md5s_by_product_row_md5|
+        row_count, generated_count, error_count = 0, 0, 0
+        
         row_md5s_by_product_row_md5.each do |row_md5, object_row_md5s|
           next unless (row_md5s & object_row_md5s).empty?
           
@@ -69,18 +70,19 @@ class AutoObjectGenerator
           errors += @objects.add(@csvs, auto_objects, row_md5).map { |e| error_for_row(e, row_md5) }
           @errors += errors
           
+          row_count += 1
           generated_count += auto_objects.size
           error_count += errors.size
         end
         
-        # CHANGE TO PER-CSV NAME
-      puts " - generated #{generated_count} #{domain} objects" if generated > 0
-      puts " ! #{error_count} errors while generating #{domain} objects" if error_count > 0
-      
-      # TODO: verifications before commit
-      
-      @objects.commit("auto_#{domain}") if error_count == 0
+        puts " - generated #{generated_count} #{domain} objects from #{row_count} rows of #{csv_name}" if generated_count > 0
+        puts " ! #{error_count} errors reported from #{csv_name} while generating #{domain} objects" if error_count > 0
+      end
     end
+      
+    # TODO: verifications before commit
+      
+    @objects.commit("auto_#{domain}") if error_count == 0
   end
   
   def generate_auto_part(value_refs, capitalize, superscript_units)

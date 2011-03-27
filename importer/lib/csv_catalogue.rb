@@ -3,6 +3,7 @@ class CSVCatalogue
   
   DATA_FILE_NAME = "rows_by_md5"
   ERROR_HEADERS = %w(csv error)
+  IMPROPER_NIL_VALUES = %w(n/a N/a n/A nil niL nIl nIL Nil NiL NIl).to_set
   INFO_FILE_NAME = "info"
   NIL_VALUES = %w(N/A NIL)
   SKIP_HEADER_MATCHER = /^(raw:)|(IMPORT)/
@@ -77,6 +78,7 @@ class CSVCatalogue
       row_errors = []
       row_errors += row.repeated_non_nil_values.map { |v| "duplicate header #{v.inspect} detected" } if row.header_row?
       row_errors << "blank cells detected in row #{row_index}" if row.has_nil_values?
+      row_errors << "improperly capitalized N/A / NIL values detected in row #{row_index}" if row.has_values_in(IMPROPER_NIL_VALUES)
       unless row_errors.empty?
         errors += row_errors
         row.header_row? ? break : next

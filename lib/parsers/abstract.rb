@@ -76,6 +76,7 @@ class AbstractParser
     value
   end
   
+  IMPROPER_NIL_VALUES = %w(n/a N/a n/A nil niL nIl nIL Nil NiL NIl).to_set
   def parse_fields(set, fields)
     first_pass = fields.nil?
     
@@ -88,6 +89,7 @@ class AbstractParser
       
       begin
         raise "blank field detected" if first_pass and value.blank?
+        raise "improperly capitalized N/A / NIL value" if IMPROPER_NIL_VALUES.include?(value)
         
         value.strip! unless value.nil?
         

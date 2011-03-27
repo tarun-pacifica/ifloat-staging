@@ -4,12 +4,13 @@ class PickedProducts < Application
     raise NotFound if facility.nil?
     return redirect("/") if facility.primary_url.nil?
     
-    bn_picks = session.picked_products.select { |pick| pick.group == "buy_now" }
-    return redirect("/") if bn_picks.empty?
+    picks = session.picked_products.select { |pick| pick.group == "buy_now" }
+    return redirect("/") if picks.empty?
     
-    bn_product_ids = bn_picks.map { |pick| pick.product_id }
-    mappings = facility.product_mappings(bn_product_ids)
-    @purchase_urls = facility.purchase_urls(mappings)
+    picks_by_product_id = picks.hash_by(:product_id)
+    mappings = facility.product_mappings(picks_by_product_id.keys)
+    mappings_with_quantities = mappings.map { |m| [m, picks_by_product_id[m.product_id].quantity] }
+    @purchase_urls = facility.purchase_urls(mappings_with_quantities)
     return redirect("/") if @purchase_urls.empty?
     
     Mailer.deliver(:purchase_started,

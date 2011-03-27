@@ -62,14 +62,15 @@ class Facility
     Hash[mappings.map { |m| [m.product_id, product_url(m)] }]
   end
   
-  def purchase_urls(mappings)
-    return [] if mappings.empty?
+  # TODO: respec now this takes mappings_with_quantites rather than just mappings
+  def purchase_urls(mappings_with_quantites)
+    return [] if mappings_with_quantites.empty?
     
     case primary_url
     when "marinestore.co.uk"
       endpoint = "http://marinestore.co.uk/Merchant2/merchant.mvc"
-      mappings.map do |mapping|
-        query = {"Action" => "ADPR", "Screen" => "BASK", "Store_Code" => "mrst", "Quantity" => "1"}
+      mappings_with_quantites.map do |mapping, quantity|
+        query = {"Action" => "ADPR", "Screen" => "BASK", "Store_Code" => "mrst", "Quantity" => quantity.to_s}
         query["Product_Code"], variations = mapping.reference_parts
         variations.each_with_index do |kv, i|
           query["Product_Attributes[#{i}]:code"] = kv[0]

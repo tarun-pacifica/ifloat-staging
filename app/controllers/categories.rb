@@ -1,14 +1,14 @@
 class Categories < Application
   def filter(root, sub, id)
     provides :js    
-    path_names, product_ids = path_names_and_children(root, sub)
+    path_names, product_ids = path_names_and_children(root, sub, found_product_ids)
     filter_detail(id.to_i, filtered_product_ids(product_ids)).to_json
   end
   
   def filters(root, sub)
     provides :js
     
-    path_names, product_ids = path_names_and_children(root, sub)
+    path_names, product_ids = path_names_and_children(root, sub, found_product_ids)
     return [].to_json if product_ids.empty?
     
     property_ids = Indexer.property_ids_for_product_ids(filtered_product_ids(product_ids), session.language)
@@ -22,7 +22,8 @@ class Categories < Application
   
   def show(root = nil, sub = nil)
     @find_phrase = params["find"]
-    @path_names, children = path_names_and_children(root, sub)
+    fpids = found_product_ids
+    @path_names, children = path_names_and_children(root, sub, fpids)
     
     children = filtered_product_ids(children) if children.first.is_a?(Integer)
     
@@ -32,28 +33,18 @@ class Categories < Application
       @find_bad = true
     end
     
+    child_paths = children.map { |child| @path_names + [child] }
+    @child_counts = child_paths.map { |path| Indexer.category_product_count_for_node(path, fpids) } unless children.first.is_a?(Integer)
+    
     @child_links =
       if children.first.is_a?(Integer)
         product_links_by_node, @product_ids = marshal_product_links(:products => children)
         product_links_by_node[:products]
       else
-        children.map { |child| category_link(@path_names + [child]) }
+        child_paths.map { |path| category_link(path) }
       end
     
-    if @path_names.size == 1
-      first_product_ids = children.map { |child| Indexer.category_children_for_node(@path_names + [child]).first }
-      
-      checksums_by_product_id = {}
-      Indexer.image_checksums_for_product_ids(first_product_ids).each do |checksum, product_ids|
-        product_ids.each { |product_id| checksums_by_product_id[product_id] = checksum }
-      end
-      
-      assets_by_checksum = Asset.all(:checksum => checksums_by_product_id.values.uniq).hash_by(:checksum)
-      
-      @child_link_background_urls = first_product_ids.map do |product_id|
-        assets_by_checksum[checksums_by_product_id[product_id]].url(:tiny)
-      end
-    end
+    @child_link_image_urls = child_paths.map { |path| Indexer.category_image_url_for_node(path) } if @path_names.size == 1
     
     @canonical_path = ["/categories", root, sub].compact.join("/")
     @page_title = @path_names.join(" - ") unless @path_names.empty?
@@ -107,10 +98,13 @@ class Categories < Application
     []
   end
   
-  def path_names_and_children(root, sub, find_phrase = params["find"])
+  def found_product_ids
+    phrase = params["find"]
+    phrase.nil? ? nil : Indexer.product_ids_for_phrase(phrase, session.language)
+  end
+  
+  def path_names_and_children(root, sub, only_product_ids)
     path_names = [root, sub].compact.map { |name| name.tr("+", " ") }
-    only_product_ids = nil
-    only_product_ids = Indexer.product_ids_for_phrase(find_phrase, session.language) unless find_phrase.nil?
     [path_names, Indexer.category_children_for_node(path_names, only_product_ids).sort]
   end
 end

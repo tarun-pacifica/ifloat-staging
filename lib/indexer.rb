@@ -5,6 +5,7 @@ module Indexer
   @@auto_diff_property_id = nil
   @@brand_property_id = nil
   @@category_definitions = {}
+  @@category_image_urls = nil
   @@category_tree = {}
   @@class_property_id = nil
   @@facility_cache = {}
@@ -64,6 +65,47 @@ module Indexer
       end
     
     [definition, category_statement].compact.join(" ")
+  end
+  
+  def self.category_image_url_for_node(path_names)
+    return nil unless ensure_loaded
+    
+    # TODO: make this less of a hack once category images are DB driven
+    if @@category_image_urls.nil?
+      product_ids_by_class = {}
+      @@category_tree.each do |category, prod_ids_by_class|
+        prod_ids_by_class.each do |klass, product_ids|
+          product_ids_by_class[klass] = product_ids.first
+        end
+      end
+      
+      checksums_by_product_id = {}
+      image_checksums_for_product_ids(product_ids_by_class.values).each do |checksum, product_ids|
+        product_ids.each { |product_id| checksums_by_product_id[product_id] = checksum }
+      end
+      
+      assets_by_checksum = Asset.all(:checksum => checksums_by_product_id.values.uniq).hash_by(:checksum)
+      @@category_image_urls = {}
+      product_ids_by_class.each do |klass, product_id|
+        @@category_image_urls[klass] = assets_by_checksum[checksums_by_product_id[product_id]].url(:tiny)
+      end
+    end
+    
+    @@category_image_urls[path_names.last]
+  end
+  
+  def self.category_product_count_for_node(path_names, only_product_ids = nil)
+    return nil unless ensure_loaded
+    
+    node = path_names.inject(@@category_tree) do |node, name|
+      if (node.is_a?(Hash) and node.has_key?(name)) then node[name]
+      else return nil
+      end
+    end
+    
+    integer_collector = proc { |node| node.is_a?(Array) ? node : node.values.map(&integer_collector) }
+    all_product_ids = integer_collector.call(node).flatten
+    (only_product_ids.nil? ? all_product_ids : only_product_ids & all_product_ids).size
   end
   
   def self.class_property_id
@@ -152,6 +194,7 @@ module Indexer
     File.open(COMPILED_PATH) do |f|
       indexes = Marshal.load(f)
       @@category_definitions       = indexes[:category_definitions]
+      @@category_image_urls        = nil
       @@category_tree              = indexes[:category_tree]
       @@facility_cache             = indexes[:facility_cache]
       @@image_checksum_index       = indexes[:image_checksums]

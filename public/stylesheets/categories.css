@@ -112,3 +112,8 @@
   text-decoration: none;
   width: 100px;
 }
+
+#categories .items a:hover {
+  border: 1px solid gray;
+  color: black;
+}

@@ -94,20 +94,6 @@ module Indexer
     @@category_image_urls[path_names.last]
   end
   
-  def self.category_product_count_for_node(path_names, only_product_ids = nil)
-    return nil unless ensure_loaded
-    
-    node = path_names.inject(@@category_tree) do |node, name|
-      if (node.is_a?(Hash) and node.has_key?(name)) then node[name]
-      else return nil
-      end
-    end
-    
-    integer_collector = proc { |node| node.is_a?(Array) ? node : node.values.map(&integer_collector) }
-    all_product_ids = integer_collector.call(node).flatten
-    (only_product_ids.nil? ? all_product_ids : only_product_ids & all_product_ids).size
-  end
-  
   def self.class_property_id
     @@class_property_id if ensure_loaded
   end

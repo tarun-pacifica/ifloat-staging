@@ -39,14 +39,9 @@
   basket_panel_load();
   product_links_wire_up(<%= (@product_ids || []).to_json %>);
   
+  <% unless @child_link_image_urls.nil? %>
   var links = $('#categories .items a');
   
-  <% unless @child_counts.nil? %>
-  var counts = <%= @child_counts.to_json %>;
-  links.find('span').each(function(i) { $(this).append('<br />(' + counts[i] + ')') });
-  <% end %>
-  
-  <% unless @child_link_image_urls.nil? %>
   var max_height = 0
   links.each(function() { max_height = Math.max(max_height, $(this).find('span').outerHeight()) });
   

@@ -34,7 +34,6 @@ class Categories < Application
     end
     
     child_paths = children.map { |child| @path_names + [child] }
-    @child_counts = child_paths.map { |path| Indexer.category_product_count_for_node(path, fpids) } unless children.first.is_a?(Integer)
     
     @child_links =
       if children.first.is_a?(Integer)

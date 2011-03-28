@@ -1,9 +1,4 @@
 #brand_info {
-  background: white;
-  border: 1px solid silver;
-  border-radius: 10px 10px 0 0;
-  -moz-border-radius: 10px 10px 0 0;
-  -webkit-border-radius: 10px 10px 0 0;
   margin: 10px 10px 0 10px;
   padding: 10px;
 }
@@ -12,45 +7,56 @@
   float: left;
 }
 
+#brand_info .logo {
+  font-size: 24px;
+  font-weight: bold;
+  min-height: 10px;
+  text-align: center;
+  width: 180px;
+}
+
+#brand_info .logo a {
+  color: #404040;
+  text-decoration: none;
+}
+
+#brand_info .logo a:hover {
+  color: black;
+  text-decoration: underline;
+}
+
 #brand_info .description {
   color: gray;
+  font-size: 16px;
   margin-left: 5px;
+  width: 735px;
 }
 
 #brand_info h1 {
+  color: #404040;
   margin: 5px 0 0 0;
   font-size: 16px;
 }
 
 #brand_info p {
-  color: gray;
   margin: 0;
 }
 
 #brand_products {
-  background: #3E3E3E;
-  border-radius: 0 0 10px 10px;
-  -moz-border-radius: 0 0 10px 10px;
-  -webkit-border-radius: 0 0 10px 10px;
   color: white;
   margin: 0 10px 10px 10px;
   padding: 15px 5px;
 }
 
-#brand_products h2 {
-  font-size: 24px;
-  font-weight: normal;
-  margin: 0;
-}
-
 #brand_products .product_set_info {
+  color: #404040;
   float: left;
-  margin: 10px 20px 0 0;
+  margin: 10px 10px 0 0;
   width: 140px;
 }
 
 #brand_products .product_set_info a {
-  color: #FEB330;
+  color: #30A0FB;
   text-decoration: none;
 }
 
@@ -68,8 +74,14 @@
 }
 
 #brand_products .product_set {
+  background: #404040;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  float: left;
   height: 100px;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
+  padding: 5px;
   overflow: hidden;
 }
 

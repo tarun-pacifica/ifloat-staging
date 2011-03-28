@@ -3,10 +3,9 @@
 
 <div id="brand_info">
   <div class="logo">
-    <a href="<%= @brand_url %>"> <%= brand_image(@brand) %> </a>
+    <a href="<%= @canonical_path %>"> <%= brand_image(@brand) || @brand.name.superscript %> </a>
   </div>
   <div class="description">
-    <h1><%= @brand.name.superscript %></h1>
     <p><%= @brand.description.to_s.superscript %></p>
   </div>
   <hr class="terminator" />
@@ -21,7 +20,6 @@
     <% if links.size > 7 %> <p class="show_all"><%= @show_all_links_by_node[node] %></p> <% end %>
   </div>
   
-  <% if @product_links_by_node.size > 1 %>
   <div class="product_set">
     <a class="buttons prev" href="#"></a>
     <div class="viewport">
@@ -31,12 +29,8 @@
     </div>
     <a class="buttons next" href="#"></a>
   </div>
-  <% else %>
-  <div class="product_set_all">
-    <%= links.join(" ") %>
-    <hr class="terminator">
-  </div>
-  <% end %>
+  
+  <hr class="terminator">
   
   <% end %>
 </div>

@@ -47,8 +47,8 @@ class Facility
     
     query = "SELECT reference FROM facility_products WHERE facility_id = ? AND reference IN ?"
     all_refs = mappings.map { |m| m.reference_parts.first }
-    available_refs = repository.adapter.select(query, id, all_refs).to_set
-    mappings.select { |m| available_refs.include?(m.reference_parts.first) }
+    available_refs = repository.adapter.select(query, id, all_refs).map { |r| r.upcase }.to_set
+    mappings.select { |m| available_refs.include?(m.reference_parts.first.upcase) }
   end
   
   def product_url(mapping)

@@ -1,4 +1,4 @@
-var basket_panel_product_info = {};
+var basket_panel_product_info = null;
 function basket_panel_add(group) {
   if(group == 'buy_later' && ! $ifloat_header.authenticated) {
     login_open('Please login / register to add items to your future buys...');
@@ -136,7 +136,7 @@ function basket_panel_markup_differentiate(section_count, klass) {
 function basket_panel_markup_item(pick, buy_now) {
   var classes = ['item'];
   if(buy_now) classes.push('buy_now');
-  if(pick.product_id == basket_panel_product_info.product_id) classes.push('current');
+  if(basket_panel_product_info && pick.product_id == basket_panel_product_info.product_id) classes.push('current');
   var html = ['<div class="' + classes.join(' ') + '">'];
   
   html.push('<span class="delete" onclick="basket_panel_delete(event, ' + pick.id + ')">X</span>');

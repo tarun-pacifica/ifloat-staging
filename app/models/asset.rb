@@ -12,7 +12,7 @@
 class Asset
   include DataMapper::Resource
   
-  BUCKETS = %w(brand_logos products property_icons)
+  BUCKETS = %w(brand_logos category_images products property_icons)
   IMAGE_FORMAT = /\.(gif|jpeg|jpg|png|tif|tiff)$/
   NAME_FORMAT = /^([\w\-\.]+?)\.([a-z]{3,})$/
   

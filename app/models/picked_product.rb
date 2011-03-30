@@ -11,7 +11,7 @@
 class PickedProduct
   include DataMapper::Resource
   
-  GROUPS = {"buy_later" => "Future Buys", "buy_now" => "Basket", "compare" => "Differentiate List"}
+  GROUPS = {"buy_later" => "Future Buys", "buy_now" => "Basket", "compare" => "Compare List"}
   
   property :id,           Serial
   property :created_at,   DateTime, :default => proc { DateTime.now }

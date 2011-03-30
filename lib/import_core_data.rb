@@ -676,10 +676,13 @@ def build_asset_csv
           errors <<  [nil, "unable to read GM.identify report line: #{line.inspect}"]
           next
         end
-
+        
         asset = assets_by_path[$1]
-        if asset.nil? then errors << [nil, "unable to associate GM.identify report line: #{line.inspect}"]
-        else asset << $3
+        if asset.nil?
+          errors << [nil, "unable to associate GM.identify report line: #{line.inspect}"]
+        else
+          asset << $3
+          errors << [$1, "category image not 100x100 (#{$3})"] if asset[0] == "category_image" and $3 != "100x100"
         end
       end
     end

@@ -43,7 +43,7 @@ class Categories < Application
         child_paths.map { |path| category_link(path) }
       end
     
-    @child_link_image_urls = child_paths.map { |path| Indexer.category_image_url_for_node(path) } if @path_names.size == 1
+    @child_link_image_urls = child_paths.map { |path| Indexer.category_image_url_for_node(path) } if @path_names.size <= 1
     
     @canonical_path = ["/categories", root, sub].compact.join("/")
     @page_title = @path_names.join(" - ") unless @path_names.empty?

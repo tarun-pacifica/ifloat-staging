@@ -171,6 +171,8 @@ class ImportSet
     all_products = @objects.select { |object| object.klass == Product }
     error(Product, nil, nil, nil, "> 50,000 products (sitemap would be invalid)") if all_products.size > 50000
     
+    text_values = @objects.select { |o| o.klass == TextPropertyValue }
+    
     stopwatch("ensured all products have a 400x400 primary image") do
       (all_products - pias_by_product.keys).each do |product|
         error(Product, product.path, product.row, nil, "no primary image specified")
@@ -206,6 +208,21 @@ class ImportSet
       end
     end
     
+    stopwatch("ensured all categories have an image") do
+      images = @objects.map do |o|
+        next unless o.klass == Asset and o.attributes[:bucket] == "category_images"
+        o.attributes[:name] =~ Asset::NAME_FORMAT ? $1 : raise("unable to parse #{o.attributes[:name]}")
+      end.compact.to_set
+      
+      properties = %w(reference:category reference:class).map { |key| get!(PropertyDefinition, key) }.to_set
+      text_values.map do |tv|
+        tv.attributes[:text_value] if properties.include?(tv.attributes[:definition])
+      end.compact.uniq.each do |c|
+        image_name = c.downcase.tr(" ", "_")
+        error(Asset, nil, nil, nil, "no image provided for category #{c.inspect}") unless images.include?(image_name)
+      end
+    end
+    
     stopwatch("handled orphaned PickedProducts") do
       db_companies = Company.all.hash_by(:reference)
       orphaned_product_ids = []
@@ -233,8 +250,6 @@ class ImportSet
       end
     end
     
-    text_values = @objects.select { |o| o.klass == TextPropertyValue }
-    
     stopwatch("ensured no blank summaries") do
       property = get!(PropertyDefinition, "marketing:summary")
       products_with_summaries = text_values.map { |tv| tv.attributes[:definition] == property ? tv.attributes[:product] : nil }.compact.uniq
@@ -244,7 +259,7 @@ class ImportSet
     end
     
     stopwatch("ensured no blank / invalid category values") do
-      properties = %w(reference:category reference:class).map! { |key| get!(PropertyDefinition, key) }.to_set
+      properties = %w(reference:category reference:class).map { |key| get!(PropertyDefinition, key) }.to_set
       
       properties_by_product = {}
       text_values.each do |tv|
@@ -311,38 +326,21 @@ class ImportSet
     end
     
     stopwatch("ensured all grouped products are adequately differentiated") do
-      properties = %w(auto:group_diff reference:class).map { |name| get!(PropertyDefinition, name) }
-      agd, rc = properties
+      agd = get!(PropertyDefinition, "auto:group_diff")
       
-      # TODO: re-evaluate rule
-      # classes_by_group = {}
       values_by_product_by_group = {}
       
       text_values.each do |tv|
-        property = tv.attributes[:definition]
-        next unless properties.include?(property)
-        
+        next unless tv.attributes[:definition] == agd
         product, value = tv.attributes.values_at(:product, :text_value)
         group = product.attributes.values_at(:company, :reference_group)
-        
-        case property
-        when agd
-          values_by_product = (values_by_product_by_group[group] ||= {})
-          (values_by_product[product] ||= []) << value
-        # when rc
-        #   (classes_by_group[group] ||= []) << value
-        end
+        values_by_product = (values_by_product_by_group[group] ||= {})
+        (values_by_product[product] ||= []) << value
       end
       
       values_by_product_by_group.each do |group, values_by_product|
         next if values_by_product.size == 1
         friendly_group = "#{group[0].attributes[:reference]} / #{group[1]}"
-        
-        # classes = classes_by_group[group].uniq
-        # if classes.size > 1
-        #   error(Product, nil, nil, nil, "product reference group #{friendly_group} spans multiple classes: #{classes.inspect}")
-        #   next
-        # end
         
         values_by_product.values.transpose.each_with_index do |diff_column, i|
           blank_count = diff_column.count { |v| v.blank? }

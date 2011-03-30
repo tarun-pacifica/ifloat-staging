@@ -5,7 +5,7 @@ module Indexer
   @@auto_diff_property_id = nil
   @@brand_property_id = nil
   @@category_definitions = {}
-  @@category_image_urls = nil
+  @@category_image_urls = {}
   @@category_tree = {}
   @@class_property_id = nil
   @@facility_cache = {}
@@ -69,29 +69,8 @@ module Indexer
   
   def self.category_image_url_for_node(path_names)
     return nil unless ensure_loaded
-    
-    # TODO: make this less of a hack once category images are DB driven
-    if @@category_image_urls.nil?
-      product_ids_by_class = {}
-      @@category_tree.each do |category, prod_ids_by_class|
-        prod_ids_by_class.each do |klass, product_ids|
-          product_ids_by_class[klass] = product_ids.first
-        end
-      end
-      
-      checksums_by_product_id = {}
-      image_checksums_for_product_ids(product_ids_by_class.values).each do |checksum, product_ids|
-        product_ids.each { |product_id| checksums_by_product_id[product_id] = checksum }
-      end
-      
-      assets_by_checksum = Asset.all(:checksum => checksums_by_product_id.values.uniq).hash_by(:checksum)
-      @@category_image_urls = {}
-      product_ids_by_class.each do |klass, product_id|
-        @@category_image_urls[klass] = assets_by_checksum[checksums_by_product_id[product_id]].url(:tiny)
-      end
-    end
-    
-    @@category_image_urls[path_names.last]
+    stem = path_names.last.to_s.downcase.tr(" ", "_")
+    @@category_image_urls[stem]
   end
   
   def self.class_property_id
@@ -105,6 +84,7 @@ module Indexer
       
       indexes = {
         :category_definitions       => compile_category_definitions(properties, records),
+        :category_image_urls        => compile_category_image_urls,
         :category_tree              => compile_category_tree(properties, records),
         :facility_cache             => compile_facility_cache,
         :image_checksums            => compile_image_checksum_index,
@@ -180,7 +160,7 @@ module Indexer
     File.open(COMPILED_PATH) do |f|
       indexes = Marshal.load(f)
       @@category_definitions       = indexes[:category_definitions]
-      @@category_image_urls        = nil
+      @@category_image_urls        = indexes[:category_image_urls]
       @@category_tree              = indexes[:category_tree]
       @@facility_cache             = indexes[:facility_cache]
       @@image_checksum_index       = indexes[:image_checksums]
@@ -352,6 +332,10 @@ module Indexer
     #   branded_defs_by_value[value] = [defs_by_value[value], brand_statement].compact.join(" ")
     # end
     # branded_defs_by_value
+  end
+  
+  def self.compile_category_image_urls()
+    Hash[Asset.all(:bucket => "category_images").map { |a| [a.name =~ Asset::NAME_FORMAT ? $1 : nil, a.url] }]
   end
   
   def self.compile_category_tree(properties, records)

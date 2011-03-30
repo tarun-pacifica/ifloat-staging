@@ -71,8 +71,11 @@ class ImportableAssets
         end
         
         image = images_by_path[$1]
-        if image.nil? then error(nil, "unable to associate GM.identify report line: #{line.inspect}")
-        else image[:pixel_size] = $3
+        if image.nil?
+          error(nil, "unable to associate GM.identify report line: #{line.inspect}")
+        else
+          image[:pixel_size] = $3
+          error($1, "category image not 100x100 (#{$3})") if image[:bucket] == "category_image" and $3 != "100x100"
         end
       end
       

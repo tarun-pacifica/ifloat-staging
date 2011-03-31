@@ -102,7 +102,7 @@ module Merb
     
     def money_uom(amount, currency, unit, divisor)
       return money(amount, currency, unit) if divisor.nil?
-        
+      
       parts = [money(amount, currency)]
       parts << "(" + money(amount / divisor, currency, unit) + ")" unless divisor == 0
       parts.join("<br/>")
@@ -110,37 +110,36 @@ module Merb
     
     def product_data_table(infos)
       infos = infos.select { |info| info[:dad] }.sort_by { |info| info[:seq_num] }
+      infos_by_property_id = infos.hash_by { |info| info[:id] }
       
-      sections = ["Show All"] + infos.map { |info| info[:section] }.uniq
       property_ids_by_section = {}
       infos.each { |info| (property_ids_by_section[info[:section]] ||= []) << info[:id] }
-      property_ids_by_section["Show All"] = property_ids_by_section.values.flatten
       
       html = ['<div id="common_values">']
       
-      html << '<div class="sections">'
-      html += sections.map { |s| "<div>#{s}</div>" }
-      html << '</div>'
-      
-      html << '<div class="values">'
-      html << '<table summary="common values">'
-      html += infos.map do |info|
-        <<-HTML
-          <tr id="property_#{info[:id]}">
-            <td class="icon"> #{property_icon(info)} </td>
-            <td class="summary"> #{product_value_summary(info)} </td>
-          </tr>
-        HTML
+      infos.map { |info| info[:section] }.uniq.each do |section|
+        html << "<h3>#{section}</h3>"
+        
+        property_ids_by_section[section].each do |property_id|
+          info = infos_by_property_id[property_id]
+          html << <<-HTML
+            <table summary="value data">
+              <tr id="property_#{info[:id]}">
+                <td class="icon"> #{property_icon(info)} </td>
+                <td class="summary"> #{product_value_summary(info)} </td>
+              </tr>
+            </table>
+          HTML
+        end
+        
+        html << '<hr class="terminator" />'
       end
-      html << '</table>'
+      
       html << '</div>'
       
-      html << '<hr class="terminator" />'
-      html << '</div>'
-      
-      html << '<script type="text/javascript" charset="utf-8">'
-      html << "$(document).ready(function() { common_values_init(#{property_ids_by_section.to_json}) });"
-      html << '</script>'
+      # html << '<script type="text/javascript" charset="utf-8">'
+      # html << "$(document).ready(function() { common_values_init(#{property_ids_by_section.to_json}) });"
+      # html << '</script>'
       
       html.join("\n")
     end

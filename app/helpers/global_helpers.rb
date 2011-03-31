@@ -137,10 +137,6 @@ module Merb
       
       html << '</div>'
       
-      # html << '<script type="text/javascript" charset="utf-8">'
-      # html << "$(document).ready(function() { common_values_init(#{property_ids_by_section.to_json}) });"
-      # html << '</script>'
-      
       html.join("\n")
     end
     

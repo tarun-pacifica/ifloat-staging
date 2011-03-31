@@ -258,6 +258,17 @@ class ImportSet
       end
     end
     
+    stopwatch("ensured at least one property hierarchy value per product") do
+      agd = get!(PropertyDefinition, "auto:group_diff")
+      ok_products = text_values.map do |tv|
+        product = tv.attributes[:product]
+        product if product.attributes[:reference_group].nil? or tv.attributes[:definition] == agd
+      end.compact.uniq
+      (all_products - ok_products).each do |product|
+        error(Product, product.path, product.row, nil, "no property hierarchy value generated")
+      end
+    end
+    
     stopwatch("ensured no blank / invalid category values") do
       properties = %w(reference:category reference:class).map { |key| get!(PropertyDefinition, key) }.to_set
       

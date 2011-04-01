@@ -32,7 +32,7 @@ module Merb
     end
     
     def category_link(path_names, name = nil, ignore_find = false, filters = [])
-      url = ("/categories/" + path_names.join("/")).tr(" ", "+")
+      url = category_url(path_names)
       
       query_params = []
       
@@ -44,6 +44,10 @@ module Merb
       name ||= path_names.last
       on_hover = (filters.empty? ? tooltip_attributes(Indexer.category_definition_for_node(path_names)) : "")
       "<a href=#{url.inspect} #{on_hover}><span>#{Merb::Parse.escape_xml(name)}</span></a>"
+    end
+    
+    def category_url(path_names)
+      ("/categories/" + path_names.join("/")).tr(" ", "+")
     end
     
     def finder_link(spec, params = {})

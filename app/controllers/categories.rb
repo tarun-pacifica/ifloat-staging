@@ -28,7 +28,11 @@ class Categories < Application
     children = filtered_product_ids(children) if children.first.is_a?(Integer)
     
     if children.empty?
-      return categories_404 if @find_phrase.blank? or path_names_and_children(root, sub, nil).last.empty?
+      if @find_phrase.blank? or path_names_and_children(root, sub, nil).last.empty?
+        redirection = redirection_for(@path_names)
+        return redirection.nil? ? categories_404 : redirect(redirection, :status => 301)
+      end
+      
       @find_alternatives = find_phrase_alternatives(@find_phrase)
       @find_bad = true
     end
@@ -105,5 +109,20 @@ class Categories < Application
   def path_names_and_children(root, sub, only_product_ids)
     path_names = [root, sub].compact.map { |name| name.tr("+", " ") }
     [path_names, Indexer.category_children_for_node(path_names, only_product_ids).sort]
+  end
+  
+  # TODO: remove once redirects no longer required
+  def build_redirects
+    redirects = {}
+    FasterCSV.foreach(Merb.root / "config" / "category_redirects.csv", :encoding => "UTF-8") do |row|
+      old_path_names, new_path_names = row[1..2].map { |f| f.split("/") }
+      redirects[old_path_names] = category_url(new_path_names)
+    end
+    redirects
+  end
+  
+  # TODO: remove once redirects no longer required
+  def redirection_for(path_names)
+    (@@redirects ||= build_redirects)[path_names]
   end
 end

@@ -15,7 +15,7 @@ end
 users = [
   {:name => "Andre Ben Hamou", :nickname => "Andre", :login => "andre@bluetheta.com", :password => "fl04t3r", :admin => true},
   {:name => "Tom Cunliffe", :nickname => "Tom", :login => "snugberth@aol.com", :password => "ab5fd34"},
-  {:name => "Graeme Clark", :nickname => "Graeme", :login => "graeme.clark@att.biz", :password => "TND7%$58", :admin => true},
+  {:name => "Graeme Clark", :nickname => "Graeme", :login => "admin@ifloat.biz", :password => "TND7%$58", :admin => true},
   # {:name => "William Mackay", :nickname => "William", :login => "w.mackay@clear.net.nz", :password => "ff51641ea"},
   {:name => "Michael Allan", :nickname => "Michael", :login => "mhjallan@googlemail.com", :password => "tr33fr0g", :admin => true},
   # {:name => "Nigel Calder", :nickname => "Nigel", :login => "ncalder@earthlink.net", :password => "gt45tx17"},

@@ -59,6 +59,8 @@ DataMapper::Model.sorted_descendants(extra_dependency_rules).each { |model| gene
 mail_fail("generating row objects") if generator.write_errors(ERROR_CSV_PATH)
 objects.summarize
 
+# need some sort of class / category index for verifications - as don't really want to load the entire product set into memory ??
+
 
 puts "Generating any missing auto objects..."
 generator = AutoObjectGenerator.new(csvs, objects)

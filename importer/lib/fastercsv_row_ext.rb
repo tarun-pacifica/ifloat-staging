@@ -4,7 +4,7 @@ class FasterCSV::Row
   end
   
   def has_values_in(set)
-    any? { |header, value| set.includes?(value) }
+    any? { |header, value| set.include?(value) }
   end
   
   def repeated_non_nil_values

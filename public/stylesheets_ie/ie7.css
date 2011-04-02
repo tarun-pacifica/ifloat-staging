@@ -1,12 +1,10 @@
+html {
+  overflow: auto;
+}
+
 hr.terminator {
   visibility: hidden;
 }
-/* TODO: use some variation of display:block & margin:-7px 0 to reduce ludicrous extra spacing - approach does not work in filter panels */
-/* SEE: http://en.blog.improveit.com.br/articles/2008/09/27/margins-on-the-hr-tag-a-case-solved */
-
-/*#header .find_bar {
-  margin-left: -415px;
-}*/
 
 #login_register form {
   margin-top: 10px;
@@ -20,3 +18,10 @@ hr.terminator {
 #login_register form p.submit {
   margin-bottom: 15px;
 }
+
+#categories .items a span {
+  display: block;
+}
+
+/* TODO: use some variation of display:block & margin:-7px 0 to reduce ludicrous extra spacing on terminating HRs - approach does not work in filter panels */
+/* SEE: http://en.blog.improveit.com.br/articles/2008/09/27/margins-on-the-hr-tag-a-case-solved */

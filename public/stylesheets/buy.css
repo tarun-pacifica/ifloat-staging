@@ -38,6 +38,7 @@
 }
 
 #buy_separator {
+  background: #30A0FB;
   background: -moz-linear-gradient(100% 100% 90deg, gray, white);
   background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(gray), to(white));
   height: 5px;

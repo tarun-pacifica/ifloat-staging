@@ -46,7 +46,7 @@
 
 #compare_by_class table.diff_values td.product {
   cursor: pointer;
-  min-width: 178px;
+  min-width: 160px;
 }
 
 #compare_by_class table.diff_values tr.even td {

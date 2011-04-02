@@ -78,11 +78,11 @@ class AutoObjectGenerator
         puts " - generated #{generated_count} #{domain} objects from #{row_count} rows of #{csv_name}" if generated_count > 0
         puts " ! #{error_count} errors reported from #{csv_name} while generating #{domain} objects" if error_count > 0
       end
+      
+      # TODO: verifications before commit
+      
+      @objects.commit("auto_#{domain}")
     end
-      
-    # TODO: verifications before commit
-      
-    @objects.commit("auto_#{domain}") if error_count == 0
   end
   
   def generate_auto_part(value_refs, capitalize, superscript_units)
@@ -137,6 +137,40 @@ class AutoObjectGenerator
   end
   
   def generate_ts_values(product, klass, value_refs_by_property_name, row_md5)
-    [[], []]
+    diff_objects, errors = [], []
+    
+    strategy = ObjectRef.for(TitleStrategy, [klass])
+    return [[], error_no_strategy(:ts, klass, row_md5)] unless @objects.has_ref?(strategy)
+    
+    TitleStrategy::TITLE_PROPERTIES.each_with_index.map do |title, i|
+      rendered_parts = []
+      strategy[title].each do |part|
+        if part == "-"
+          rendered_parts << "-" unless rendered_parts.empty? or rendered_parts.last == "-"
+        elsif part == "product.reference"
+          rendered_parts << product[:reference]
+        else
+          value_refs = value_refs_by_property_name[part]
+          notDescription = (title != :description)
+          rendered_parts << generate_auto_part(value_refs, notDescription, notDescription) unless value_refs.nil?
+        end
+      end
+      rendered_parts.pop while rendered_parts.last == "-"
+      
+      if rendered_parts.empty? then errors << error_for_row("empty #{title} title")
+      else diff_objects << {
+          :class => TextPropertyValue,
+          :definition => @at_property,
+          :product => product,
+          :auto_generated => true,
+          :sequence_number => i + 1,
+          :language_code => "ENG",
+          :text_value => rendered_parts.join(" "),
+          :title_strategy => strategy
+        }
+      end
+    end
+    
+    [diff_objects, errors]
   end
 end

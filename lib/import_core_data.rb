@@ -170,9 +170,11 @@ class ImportSet
     
     all_products = @objects.select { |object| object.klass == Product }
     error(Product, nil, nil, nil, "> 50,000 products (sitemap would be invalid)") if all_products.size > 50000
+    # TODO: port
     
     text_values = @objects.select { |o| o.klass == TextPropertyValue }
     
+    # PORTED
     stopwatch("ensured all products have a 400x400 primary image") do
       (all_products - pias_by_product.keys).each do |product|
         error(Product, product.path, product.row, nil, "no primary image specified")
@@ -250,6 +252,7 @@ class ImportSet
       end
     end
     
+    # PORTED
     stopwatch("ensured no blank summaries") do
       property = get!(PropertyDefinition, "marketing:summary")
       products_with_summaries = text_values.map { |tv| tv.attributes[:definition] == property ? tv.attributes[:product] : nil }.compact.uniq
@@ -258,6 +261,7 @@ class ImportSet
       end
     end
     
+    # PORTED
     stopwatch("ensured at least one property hierarchy value per product") do
       agd = get!(PropertyDefinition, "auto:group_diff")
       ok_products = text_values.map do |tv|
@@ -269,6 +273,7 @@ class ImportSet
       end
     end
     
+    # PORTED
     stopwatch("ensured no blank / invalid category values") do
       properties = %w(reference:category reference:class).map { |key| get!(PropertyDefinition, key) }.to_set
       
@@ -288,6 +293,7 @@ class ImportSet
     end
     
     # TODO: generalize to non-English titles when ready
+    # TODO: PORT NON-DUP TEST
     stopwatch("ensured no blank / duplicated titles and produced report") do
       at, rc = %w(auto:title reference:class).map! { |key| get!(PropertyDefinition, key) }
       values_by_heading_by_product = {}
@@ -368,6 +374,7 @@ class ImportSet
       end
     end
     
+    # TODO: factor out into tool
     stopwatch("ensured no missing marinestore.co.uk product variants") do
       property = get!(PropertyDefinition, "reference:class")
       classes_by_product = {}

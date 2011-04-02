@@ -41,7 +41,10 @@ class AbstractParser
       end
     end if errors.empty?
     
-    errors.empty? ? [generate_objects(parsed_by_header), []] : [[], errors]
+    objects = generate_objects(parsed_by_header)
+    errors += validate_objects(objects).map { |error| [nil, error] } if respond_to?(:validate_objects)
+    
+    [errors.empty? ? objects : [], errors]
   end
   
   

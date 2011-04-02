@@ -1,5 +1,5 @@
 class ProductParser < AbstractParser
-  REQUIRED_HEADERS = REQUIRED_VALUE_HEADERS = %w(company.reference product.reference reference:class::1 marketing:brand::1)
+  REQUIRED_HEADERS = REQUIRED_VALUE_HEADERS = %w(company.reference product.reference reference:category::1 reference:class::1 marketing:brand::1 marketing:summary::1)
   
   SPECIAL_VALUE_VALIDITIES = {
     "AUTO" => [:values].to_set,
@@ -104,8 +104,12 @@ class ProductParser < AbstractParser
     end
   end
   
+  CATEGORY_PROPERTY_NAMES = %w(reference:category reference:class).to_set
   def parse_value(value, fields, klass, property, seq_num, unit)
     return parse_value_auto(fields, klass, property, seq_num, unit) if value == "AUTO"
+    
+    raise "value may only contain (a-z, hyphens or spaces)" if
+      CATEGORY_PROPERTY_NAMES.include?(property[:name]) and not value =~ /^[A-Za-z\- ]+$/
     
     attributes = {:class => klass, :definition => property, :auto_generated => false, :sequence_number => seq_num}
     attributes.update(klass.parse_or_error(value))
@@ -172,5 +176,20 @@ class ProductParser < AbstractParser
       else 1
       end
     end.sort.map { |index, headed_values| headed_values }
+  end
+  
+  def validate_objects(objects)
+    errors = []
+    
+    image_attachments = objects.select { |o| o[:class] == Attachment and o[:role] == "image" }
+    images = image_attachments.sort_by { |a| a[:sequence_number] }.map { |a| a[:asset] }
+    if images.empty?
+      errors << "no primary image"
+    else
+      size = images.first[:pixel_size]
+      errors << "primary image not 400x400 (#{size})" unless size == "400x400"
+    end
+    
+    errors
   end
 end

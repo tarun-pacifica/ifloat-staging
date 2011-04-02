@@ -46,7 +46,7 @@ class AutoObjectGenerator
     
     row_md5s_by_product_row_md5_by_csv_name =
       row_md5s_by_product_row_md5.group_by { |row_md5, object_row_md5s| @csvs.row_csv_name(row_md5) }
-      
+    
     %w(PH TS).zip(auto_row_md5s).each do |domain, row_md5s|
       m = method("generate_#{domain.downcase}_values")
       

@@ -115,7 +115,7 @@ class Categories < Application
   def build_redirects
     redirects = {}
     FasterCSV.foreach(Merb.root / "config" / "category_redirects.csv", :encoding => "UTF-8") do |row|
-      old_path_names, new_path_names = row[1..2].map { |f| f.split("/") }
+      old_path_names, new_path_names = row[0, 2].map { |f| f.split("/") }
       redirects[old_path_names] = category_url(new_path_names)
     end
     redirects

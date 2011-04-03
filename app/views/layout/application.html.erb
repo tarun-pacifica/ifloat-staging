@@ -10,8 +10,9 @@
     
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     
-    <% @page_description ||= "ifloat® is an innovative marine leisure nautical products website. The site offers a sophisticated and powerful approach to finding marine leisure, boating and nautical products from a comprehensive database and aims to provide the single most valuable boating, sailing/yachting products resource on the internet." %>
+    <% unless @page_description.nil? %>
     <meta name="description" content=<%= @page_description.attribute_escape.inspect %> />
+    <% end %>
     
     <% unless @canonical_path.nil? %> <link rel="canonical" href="<%= @canonical_path %>" /> <% end %>
     

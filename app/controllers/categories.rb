@@ -55,6 +55,7 @@ class Categories < Application
     @canonical_path = ["/categories", root, sub].compact.join("/")
     @page_title = @path_names.join(" - ") unless @path_names.empty?
     @page_description = Indexer.category_definition_for_node(@path_names)
+    @page_description ||= "ifloat® is an innovative marine leisure nautical products website. The site offers a sophisticated and powerful approach to finding marine leisure, boating and nautical products from a comprehensive database and aims to provide the single most valuable boating, sailing/yachting products resource on the internet." if @path_names.empty?
     render
   end
   

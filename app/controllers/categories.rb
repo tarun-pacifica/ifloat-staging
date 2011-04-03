@@ -1,12 +1,15 @@
 class Categories < Application
   def filter(root, sub, id)
-    provides :js    
+    provides :js
+    headers["Cache-Control"] = "max-age=0"
+    
     path_names, product_ids = path_names_and_children(root, sub, found_product_ids)
     filter_detail(id.to_i, filtered_product_ids(product_ids)).to_json
   end
   
   def filters(root, sub)
     provides :js
+    headers["Cache-Control"] = "max-age=0"
     
     path_names, product_ids = path_names_and_children(root, sub, found_product_ids)
     return [].to_json if product_ids.empty?

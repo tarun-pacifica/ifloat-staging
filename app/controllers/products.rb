@@ -1,6 +1,14 @@
 class Products < Application
+  def autocomplete(term)
+    provides :js
+    headers["Cache-Control"] = "max-age=0"
+    
+    Indexer.autocomplete(term).to_json
+  end
+  
   def batch(ids)
     provides :js
+    headers["Cache-Control"] = "max-age=0"
     
     product_ids = ids.split("_").map { |id| id.to_i }.uniq[0, 100]
     images_by_product_id = Product.primary_images_by_product_id(product_ids)

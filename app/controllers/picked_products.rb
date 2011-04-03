@@ -81,6 +81,7 @@ class PickedProducts < Application
   
   def index
     provides :js
+    headers["Cache-Control"] = "max-age=0"
     
     picks = session.picked_products
     product_ids = picks.map { |pick| pick.product_id }

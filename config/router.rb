@@ -17,6 +17,7 @@ Merb::Router.prepare do
   match('/picked_products/products_for/:klass').to(:controller => 'picked_products', :action => 'compare_by_class')
   resources :picked_products
   
+  match('/products/autocomplete').to(:controller => 'products', :action => 'autocomplete')
   match('/products/batch/:ids').to(:controller => 'products', :action => 'batch')
   match('/products/:junk-:id', :junk => /[\w\-.]+/).to(:controller => 'products', :action => 'show')
   resources :products

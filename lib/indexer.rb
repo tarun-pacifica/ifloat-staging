@@ -27,6 +27,24 @@ module Indexer
     @@auto_diff_property_id if ensure_loaded
   end
   
+  def self.autocomplete(phrase, language_code)
+    return [] unless ensure_loaded
+    
+    words = normalized_find_words(phrase)
+    w = words.pop
+    
+    found_product_ids = nil
+    found_product_ids = product_ids_for_phrase(words.join(" "), language_code) unless words.empty?
+    
+    index = (@@text_finding_index[language_code] || {})
+    matches = index.select do |word, product_ids|
+      word[0, w.size] == w and (found_product_ids.nil? ? true : (not (found_product_ids & product_ids).empty?))
+    end
+    
+    weighted_matches = matches.sort_by { |word, product_ids| -product_ids.size }
+    weighted_matches.map { |match, product_ids| (words + [match]).join(" ") }
+  end
+  
   def self.brand_property_id
     @@brand_property_id if ensure_loaded
   end

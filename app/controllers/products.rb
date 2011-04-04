@@ -3,7 +3,7 @@ class Products < Application
     provides :js
     headers["Cache-Control"] = "max-age=0"
     
-    Indexer.autocomplete(term).to_json
+    Indexer.autocomplete(term, session.language)[0, 10].to_json
   end
   
   def batch(ids)

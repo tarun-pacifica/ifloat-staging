@@ -1,0 +1,22 @@
+ul.ui-autocomplete {
+  font-size: 14px;
+  padding: 5px 10px;
+  position: absolute;
+  width: 255px;
+}
+
+ul.ui-autocomplete li {
+  list-style: none;
+}
+
+ul.ui-autocomplete li a {
+  padding: 2px;
+}
+
+ul.ui-autocomplete li a.ui-state-hover {
+  background: #90C0FA;
+  background: -moz-linear-gradient(100% 100% 90deg, #A8D8FD, #78B3FA);
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#A8D8FD), to(#78B3FA));
+  border: none;
+  cursor: pointer;
+}

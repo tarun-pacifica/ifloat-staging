@@ -1,6 +1,6 @@
 # merb -i -r lib/conflate_product_csvs.rb
 
-COMPILED_CSV_PATH = "/tmp/all_ms_products.csv"
+COMPILED_CSV_PATH = "/tmp/all_products.csv"
 CSV_REPO = "../ifloat_csvs"
 
 properties_by_name = PropertyDefinition.all.hash_by { |property| property.name }
@@ -11,11 +11,9 @@ universal_r = 0
 puts "=== Conflating Product CSVS ==="
 Dir[CSV_REPO / "products" / "*.csv"].each do |path|
   start = Time.now
-  FasterCSV.foreach(path, :headers => :first_row, :return_headers => true) do |row|
-    (row.include?("mapping.reference.GBR-02934378") ? next : break) if row.header_row?
+  FasterCSV.foreach(path, :headers => :first_row, :return_headers => false) do |row|
+    next if row["IMPORT"] == "N"
     
-    next if row["mapping.reference.GBR-02934378"] == "N/A"
-
     row.each do |header, value|
       universal_column = (universal_columns[header] ||= [])
       universal_column[universal_r] = value

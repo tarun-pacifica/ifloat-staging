@@ -169,8 +169,8 @@ class ImportSet
     pias_by_product = stopwatch("derived primary image list") { primary_image_attachments }
     
     all_products = @objects.select { |object| object.klass == Product }
+    # PORTED
     error(Product, nil, nil, nil, "> 50,000 products (sitemap would be invalid)") if all_products.size > 50000
-    # TODO: port
     
     text_values = @objects.select { |o| o.klass == TextPropertyValue }
     

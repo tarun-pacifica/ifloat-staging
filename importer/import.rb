@@ -47,8 +47,8 @@ csvs.summarize
 
 
 puts "Recovering object state..."
-objects = ObjectCatalogue.new(OBJECT_INDEX_DIR)
-objects.delete_obsolete(csvs.row_md5s)
+objects = ObjectCatalogue.new(csvs, OBJECT_INDEX_DIR)
+objects.delete_obsolete
 objects.summarize
 
 
@@ -59,12 +59,12 @@ DataMapper::Model.sorted_descendants(extra_dependency_rules).each { |model| gene
 mail_fail("generating row objects") if generator.write_errors(ERROR_CSV_PATH)
 objects.summarize
 
-# need some sort of class / category index for verifications - as don't really want to load the entire product set into memory ??
-
-
 puts "Generating any missing auto objects..."
 generator = AutoObjectGenerator.new(csvs, objects)
 generator.generate
 mail_fail("generating auto objects") if generator.write_errors(ERROR_CSV_PATH)
 objects.summarize
 
+puts "Running global integriy checks..."
+objects.verifier.verify(csvs)
+mail_fail("verifying global integrity") if objects.verifier.write_errors(ERROR_CSV_PATH)

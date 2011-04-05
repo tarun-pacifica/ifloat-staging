@@ -1,4 +1,9 @@
 module ErrorWriter
+  # TODO: use in all includers if possible
+  def error_for_row(message, row_md5)
+    [@csvs.row_csv_name(row_md5), @csvs.row_index(row_md5), message]
+  end
+  
   def write_errors(to_path)
     return false if @errors.empty?
     

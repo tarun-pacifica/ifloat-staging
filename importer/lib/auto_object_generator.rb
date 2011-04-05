@@ -17,10 +17,6 @@ class AutoObjectGenerator
     end
   end
   
-  def error_for_row(message, row_md5)
-    [@csvs.row_csv_name(row_md5), @csvs.row_index(row_md5), message]
-  end
-  
   def error_no_strategy(type, for_class, row_md5)
     type = {:ph => "property hierarchy", :ts => "title strategy"}[type]
     error_for_row("no #{type} for reference:class #{for_class.inspect}", row_md5)

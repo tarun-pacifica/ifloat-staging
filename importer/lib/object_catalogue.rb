@@ -3,10 +3,12 @@ class ObjectCatalogue
     @@default
   end
   
-  attr_reader :rows_by_ref
+  attr_reader :rows_by_ref, :verifier
   
-  def initialize(dir)
+  def initialize(csv_catalogue, dir)
     @@default = self
+    
+    @csvs = csv_catalogue
     
     @data_dir, @refs_dir, @rows_dir = %w(data refs rows).map { |d| dir / d }
     dirs_with_groups = [@data_dir, @refs_dir, @rows_dir].map do |d|
@@ -16,8 +18,8 @@ class ObjectCatalogue
     groups_by_dir = Hash[dirs_with_groups]
     
     common_groups = groups_by_dir.values.inject(:&)
-    groups_by_dir.each do |dir, names|
-      (names - common_groups).map { |name| dir / name }.delete_and_log("orphaned #{File.basename(dir)}")
+    groups_by_dir.each do |d, names|
+      (names - common_groups).map { |name| d / name }.delete_and_log("orphaned #{File.basename(d)}")
     end
     
     @groups_by_ref = {}
@@ -41,15 +43,18 @@ class ObjectCatalogue
     
     @data_by_ref = {}
     @refs_to_write = []
+    
+    delete_obsolete
+    @verifier = ObjectCatalogueVerifier.new(dir, csv_catalogue, self)
   end
   
-  def add(csv_catalogue, objects, *row_md5s)
+  def add(objects, *row_md5s)
     objects.each do |object|
       ref, value_md5 = ObjectRef.from_object(object)
       
       if has_ref?(ref)
         existing_rows = @rows_by_ref[ref].map do |row_md5|
-          csv_catalogue.row_info(row_md5).values_at(:name, :index).join(":")
+          @csvs.row_info(row_md5).values_at(:name, :index).join(":")
         end.join(", ")
         existing_rows = "unknown csvs / rows" if existing_rows.blank?
         return ["duplicate of #{object[:class]} from #{existing_rows}"]
@@ -60,6 +65,7 @@ class ObjectCatalogue
       @vals_by_ref[ref] = value_md5
       
       @refs_to_write << ref
+      @verifier.added(ref, object)
     end
     
     []
@@ -85,6 +91,8 @@ class ObjectCatalogue
       data.update(set)
       File.open(path, "w") { |f| Marshal.dump(data, f) }
     end
+    
+    @verifier.committed
   end
   
   def data_for(ref)
@@ -101,11 +109,15 @@ class ObjectCatalogue
     @data_by_ref.update(data_by_ref)[ref]
   end
   
-  def delete_obsolete(row_md5s)
-    row_md5s = row_md5s.to_set
+  def delete_obsolete
+    row_md5s = @csvs.row_md5s.to_set
     
     obsolete_groups = []
-    obsolete_refs = @rows_by_ref.map { |ref, rows| ref if (row_md5s & rows).size != rows.size }.compact
+    refs_by_row = {}
+    @rows_by_ref.each do |ref, rows|
+      rows.each { |row| (refs_by_row[row] ||= []) << ref }
+    end
+    obsolete_refs = refs_by_row.values_at(*(refs_by_row.keys.to_set - row_md5s)).flatten.uniq
     
     obsolete_refs.group_by { |ref| @groups_by_ref.delete(ref) }.each do |name, refs|
       obsolete_groups << name
@@ -124,9 +136,19 @@ class ObjectCatalogue
       @data_by_ref.delete(ref)
       @rows_by_ref.delete(ref)
       @vals_by_ref.delete(ref)
+      @verifier.deleted(ref)
     end
     
     puts " - deleted #{obsolete_refs.size} objects in #{obsolete_groups.size} groups" unless obsolete_refs.empty?
+  end
+  
+  def each(&block)
+    Dir[@data_dir / "*"].each do |path|
+      # TODO: remove once marshal stops blowing up in ruby 1.8
+      GC.disable
+      File.open(path) { |f| Marshal.load(f) }.each(&block)
+      GC.enable
+    end
   end
   
   def has_ref?(ref)

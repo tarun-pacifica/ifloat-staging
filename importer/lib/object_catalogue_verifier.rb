@@ -102,4 +102,15 @@ class ObjectCatalogueVerifier
       @errors << error_for_row(r_row, "has the same primary image as #{fr_ident} but #{problem}")
     end
   end
+  
+  # AFTER AUTO
+  # 
+  # need the title values by product
+  #  - "ensured no blank / duplicated titles"
+  # 
+  # need the agd values by product
+  #  - ""ensured all grouped products are adequately differentiated"
+  # 
+  # handling orphaned pick_products / purchases should be handled JIT when they are marked as potentially invalid
+  # - user driven data not part of core
 end

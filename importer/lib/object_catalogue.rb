@@ -36,16 +36,19 @@ class ObjectCatalogue
       end
     end
     
+    most_recent_commit = nil
     @rows_by_ref = {}
     common_groups.each do |name|
-      @rows_by_ref.update(File.open(@rows_dir / name) { |f| Marshal.load(f) })
+      path = @rows_dir / name
+      most_recent_commit = [most_recent_commit, File.mtime(path)].compact.max
+      @rows_by_ref.update(File.open(path) { |f| Marshal.load(f) })
     end
     
     @data_by_ref = {}
     @refs_to_write = []
     
     delete_obsolete
-    @verifier = ObjectCatalogueVerifier.new(dir, csv_catalogue, self)
+    @verifier = ObjectCatalogueVerifier.new(dir, csv_catalogue, self, most_recent_commit)
   end
   
   def add(objects, *row_md5s)

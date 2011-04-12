@@ -1,5 +1,6 @@
 User-Agent: *
 Disallow: /picked_products
+Disallow: /products/autocomplete
 Disallow: /purchases
 Disallow: /users
 Sitemap: http://www.ifloat.biz/sitemap.xml

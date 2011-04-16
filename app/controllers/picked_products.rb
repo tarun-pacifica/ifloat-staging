@@ -28,6 +28,7 @@ class PickedProducts < Application
   def create(product_id, group, quantity)
     raise Unauthenticated unless group != "buy_later" or session.authenticated?
     raise NotFound unless Product.get(product_id)
+    quantity = [1, quantity.to_i].max if group == "buy_now"
     session.add_picked_product(PickedProduct.new(:product_id => product_id, :group => group, :quantity => quantity))
     index
   end

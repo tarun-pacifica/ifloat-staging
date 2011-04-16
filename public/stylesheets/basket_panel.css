@@ -223,8 +223,17 @@
 }
 
 #basket_panel_adder .add_other {
-  color: #30A0FB;
-  margin: 0;
+  background: #90C0FA;
+  background: -moz-linear-gradient(100% 100% 90deg, #A8D8FD, #78B3FA);
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#A8D8FD), to(#78B3FA));
+  border: 1px solid silver;
+  border-radius: 5px 5px 5px 5px;
+  -moz-border-radius: 5px 5px 5px 5px;
+  -webkit-border-radius: 5px 5px 5px 5px;
+  color: #404040;
+  margin: 5px 0;
+  padding: 7px;
+  text-align: center;
 }
 
 #basket_panel_adder .add_other:hover {

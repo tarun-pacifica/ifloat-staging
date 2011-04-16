@@ -120,7 +120,7 @@ class PickedProducts < Application
   
   def update(id, quantity)
     pick = session.ensure_picked_product(id.to_i)
-    pick.quantity = quantity
+    pick.quantity = quantity if quantity.to_i > 0
     pick.save
     index
   end

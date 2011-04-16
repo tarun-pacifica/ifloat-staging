@@ -690,7 +690,7 @@ def build_asset_csv
     assets_by_path = assets.hash_by { |bucket, company_ref, name, path, checksum| path }
     assets_by_path.keys.map { |k| k =~ /(jpg|png)$/ ? k.inspect : nil }.compact.each_slice(500) do |paths|
       `gm identify #{paths.join(" ")} 2>&1`.lines.each do |line|
-        unless line =~ /^(.+?\.(jpg|png)).*?(\d+x\d+)/
+        unless line =~ /^(.+?\.(jpg|png))[\[ ].*?(\d+x\d+)/
           errors <<  [nil, "unable to read GM.identify report line: #{line.inspect}"]
           next
         end

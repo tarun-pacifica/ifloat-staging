@@ -42,10 +42,12 @@
         <% @sibling_properties.each do |property| %>
           <div class="sibling" id="sibling_property_<%= property[:id] %>">
             <%= property_icon(property) %>
-            <select onchange="product_sibling_select()">
-              <option> <%= property[:name] %>... </option>
-              <% @sibling_prod_ids_by_value_by_prop_ids[property[:id]].keys.sort_by { |v| property[:type] == 'text'  ? v : v.to_f }.each do |v| %>
-              <option> <%= v %> </option>
+            <select onchange="product_sibling_select(event)">
+              <% @sibling_prod_ids_by_value_by_prop_ids[property[:id]].sort_by do |v, pids|
+                   property[:type] == 'text' ? v : v.to_f
+                 end.each do |v, pids| %>
+              <% selected = (pids.include?(@product.id) ? 'selected="selected"' : '') %>
+              <option <%= selected %>> <%= v %> </option>
               <% end %>
             </select>
           </div>

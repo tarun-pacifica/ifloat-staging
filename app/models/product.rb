@@ -167,7 +167,7 @@ class Product
       prod_ids_and_values = prod_ids_and_values_by_seq_num[seq_num]
       next if prod_ids_and_values.nil?
       next if prod_ids_and_values.map { |pid, val| val }.uniq.size == 1
-      [property, prod_ids_and_values.select { |pid, val| pid != id }]
+      [property, prod_ids_and_values]
     end.compact
   end
   

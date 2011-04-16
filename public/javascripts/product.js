@@ -4,72 +4,45 @@ function product_related_media_show(event) {
 }
 
 var product_sibling_prod_ids_by_value_by_prop_ids = {};
-function product_sibling_select() {
-  var siblings = $('#pick_sibling .sibling');
+function product_sibling_prod_ids(sibling) {
+  var prop_id = sibling.attr('id').split('_')[2];
+  var value = sibling.find('select').val();
+  return product_sibling_prod_ids_by_value_by_prop_ids[prop_id][value];
+}
+
+function product_sibling_reset(sibling, acceptable_prod_ids) {
+  var prop_id = sibling.attr('id').split('_')[2];
+  var product_sibling_prod_ids_by_value = product_sibling_prod_ids_by_value_by_prop_ids[prop_id];
   
-  var prod_id_intersection = null;
-  siblings.each(function () {
-    var prop_id = $(this).attr('id').split('_')[2];
-    var value = $(this).find('select').val();
-    
-    var prod_ids = product_sibling_prod_ids_by_value_by_prop_ids[prop_id][value];
-    if(prod_ids) {
-      if(prod_id_intersection) {
-        var old_intersection = prod_id_intersection;
-        prod_id_intersection = {};
-        for(var i in prod_ids) {
-          var prod_id = prod_ids[i];
-          if(old_intersection[prod_id]) prod_id_intersection[prod_id] = true
-        }
-      } else {
-        prod_id_intersection = util_hash_from_array(prod_ids, true);
-      }
+  for(var value in product_sibling_prod_ids_by_value) {
+    var prod_ids = product_sibling_prod_ids_by_value[value];
+    if(util_intersection(acceptable_prod_ids, prod_ids).length == 0) continue;
+    sibling.find('select').val(value);
+    break;
+  }
+}
+
+function product_sibling_select(event, repeat) {
+  var chosen_sibling = util_target(event).parent();
+  var chosen_prod_ids = product_sibling_prod_ids(chosen_sibling);
+  
+  var global_intersection = chosen_prod_ids.slice(0);
+  
+  $('#pick_sibling .sibling').not(chosen_sibling).each(function () {
+    var prod_ids = product_sibling_prod_ids($(this));
+    if(!prod_ids) {
+      product_sibling_reset($(this), chosen_prod_ids);
+      return;
     }
+    
+    var local_intersection = util_intersection(chosen_prod_ids, prod_ids);
+    if(local_intersection.length == 0) product_sibling_reset($(this), chosen_prod_ids);
+    else global_intersection = util_intersection(global_intersection, local_intersection);
   });
   
-  var prod_ids = [];
-  for(prod_id in prod_id_intersection) prod_ids.push(prod_id);
-  
-  var selects = siblings.find('select')
-  selects.removeAttr('disabled');
-  selects.find('option').removeAttr('disabled');
-  
-  if(prod_ids.length == 0) return;
-  
-  if(prod_ids.length == 1) {
-    window.location = '/products/sibling-' + prod_ids[0];
-    return;
-  }
-  
-  for(var prop_id in product_sibling_prod_ids_by_value_by_prop_ids) {
-    var prod_ids_by_value = product_sibling_prod_ids_by_value_by_prop_ids[prop_id];
-    var disabled_values_exist = false, enabled_values = [];
-    
-    for(var value in prod_ids_by_value) {
-      var enabled = false;
-      var prod_ids = prod_ids_by_value[value];
-      for(var i in prod_ids) enabled = (enabled || prod_id_intersection[prod_ids[i]]);
-      if(enabled) enabled_values.push(value);
-      else disabled_values_exist = true;
-    }
-    
-    if(!disabled_values_exist) continue;
-    
-    var select = $('#sibling_property_' + prop_id + ' select');
-    var options = select.find('option');
-    
-    if(enabled_values.length == 0) {
-      select.attr('disabled', 'disabled');
-      continue;
-    }
-    
-    var enabled_values = util_hash_from_array(enabled_values, true);
-    
-    options.each(function(index) {
-      var option = $(this);
-      if(index > 0 && !enabled_values[option.val()]) option.attr('disabled', 'disabled');
-    });
-  }
+  if(global_intersection.length == 1) window.location = '/products/sibling-' + global_intersection[0];
+  else if(repeat) console.log('avoiding infinite loop in product_sibling_select');
+  else product_sibling_select(event, true);
 }
 
 function product_siblings_wire_up(prod_ids_by_value_by_prop_ids) {

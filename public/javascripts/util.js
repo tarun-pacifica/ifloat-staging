@@ -57,6 +57,18 @@ function util_escape_attr_js(string) {
   return "'" + util_escape_attr(string).replace(RegExp("'", 'g'), "\\'") + "'";
 }
 
+function util_intersection(array1, array2) {
+  var intersection = [];
+  
+  var hash1 = util_hash_from_array(array1, true);
+  for(var i in array2) {
+    var a = array2[i];
+    if(hash1[a]) intersection.push(a);
+  }
+  
+  return intersection;
+}
+
 function util_group_by(array, property) {
   var grouped = {};
   for(var i in array) {
@@ -72,6 +84,12 @@ function util_hash_from_array(keys, value) {
   var hash = {};
   for(var i in keys) hash[keys[i]] = value;
   return hash;
+}
+
+function util_hash_keys(hash) {
+  var keys = [];
+  for(key in hash) keys.push(key);
+  return keys;
 }
 
 function util_highlight_column(event, action, col_class) {

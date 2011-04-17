@@ -12,7 +12,7 @@ class Purchases < Application
     response = Purchase.parse_response(params)
     purchase = facility.purchases.new(:ip_address => request.remote_ip, :response => response)
     session.add_purchase(purchase)
-    Mailer.deliver(:purchase_completed, :purchase => purchase, :userish => session.userish)
+    Mailer.deliver(:purchase_completed, :purchase => purchase, :userish => session.userish(request))
     
     references = response[:items].map { |item| item["reference"] }.compact.uniq
     implied_product_ids = facility.product_ids_for_refs(references).to_set

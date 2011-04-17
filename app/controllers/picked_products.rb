@@ -17,7 +17,7 @@ class PickedProducts < Application
       :url     => facility.primary_url,
       :picks   => session.picked_products,
       :from_ip => request.remote_ip,
-      :userish => session.userish) if Merb.environment == "production"
+      :userish => session.userish(request)) if Merb.environment == "production"
     
     @skip_copyright = true
     @transitional = true

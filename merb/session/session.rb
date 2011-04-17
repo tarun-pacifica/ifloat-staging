@@ -133,9 +133,11 @@ module Merb
       User.get(user_id)
     end
     
-    def userish
+    def userish(request)
       u = user
-      u.nil? ? "session #{session_id}" : "user #{u.id} (#{u.name} / #{u.login})"
+      ident = (u.nil? ? "session #{session_id}" : "user #{u.id} (#{u.name} / #{u.login})")
+      browser = (request.env["HTTP_USER_AGENT"] || "unknown browser")
+      "#{ident} using #{browser}"
     end
     
     

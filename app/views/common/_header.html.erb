@@ -14,7 +14,7 @@
 </div>
 
 <script type="text/javascript" charset="utf-8">
-  var $ifloat_header = {facility_id: <%= Indexer.facilities.values.first[:id] %>};
+  var $ifloat_header = {facility: <%= Indexer.facilities.values.first.to_json %>}
   
   $(document).ready(function() {
     login_update();

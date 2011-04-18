@@ -166,6 +166,11 @@
   text-decoration: underline;
 }
 
+#basket_panel a.advert {
+  display: block;
+  margin-top: 10px;
+}
+
 #basket_panel_adder {
   background: #E0F0FF;
   border: 1px solid gray;

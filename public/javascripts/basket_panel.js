@@ -80,6 +80,8 @@ function basket_panel_load_handle(picks_by_group) {
     basket_panel_load_handle_compare(picks_by_group.compare)
   );
   
+  html.push('<a class="advert" href="http://marinestore.co.uk/_about.html" target="_blank_"><img src="/images/partner/facilities/marinestore.co.uk.jpg" alt="MarineStore"/></a>');
+  
   $('#basket_panel').html(html.join(' '));
 }
 

@@ -1,5 +1,5 @@
 module AssetStore
-  COMMON_METHODS = [:delete_obsolete, :url, :url_direct, :write].to_set
+  COMMON_METHODS = [:bytes_by_name_by_bucket, :delete_obsolete, :url, :url_direct, :write].to_set
   
   @@engine = nil
   
@@ -39,12 +39,25 @@ module AssetStore
       "#{@url_stem}/#{bucket}/#{name}"
     end
   end
-    
+  
   
   class Local < Abstract
     def initialize(config)
       @required_keys = [:local_root]
       super
+    end
+    
+    def bytes_by_name_by_bucket
+      bytes_by_name_by_bucket = {}
+      Dir[@local_root / "*"].each do |bucket_path|
+        next unless File.directory?(bucket_path)
+        bucket = File.basename(bucket_path)
+        bytes_by_name = (bytes_by_name_by_bucket[bucket] ||= {})
+        Dir[bucket_path / "*"].each do |path|
+          bytes_by_name[File.basename(path)] = File.size(path)
+        end
+      end
+      bytes_by_name_by_bucket
     end
     
     def delete(bucket, name)
@@ -95,6 +108,18 @@ module AssetStore
       super
     end
     
+    def bytes_by_name_by_bucket
+      bytes_by_name_by_bucket = {}
+      container do |c|
+        c.objects_detail.each do |path, info|
+          dir, name = path.split("/")
+          bytes_by_name = (bytes_by_name_by_bucket[dir] ||= {})
+          bytes_by_name[name] = info[:bytes].to_i
+        end
+      end
+      bytes_by_name_by_bucket
+    end
+    
     def container
       @connection ||= (CloudFiles::Connection.new(@user, @key) rescue nil)
       return nil if @connection.nil?
@@ -102,7 +127,7 @@ module AssetStore
       begin
         @cont ||= @connection.container(@container)
       rescue
-      end      
+      end
       return nil if @cont.nil?
       
       yield @cont rescue nil

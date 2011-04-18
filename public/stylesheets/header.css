@@ -27,9 +27,15 @@
   color: white;
 }
 
-#header img {
+#header .logo img {
   margin: 10px 0 0 15px;
   vertical-align: bottom;
+}
+
+#header .advert {
+  position: absolute;
+  left: 480px;
+  top: 45px;
 }
 
 #header .find_bar {

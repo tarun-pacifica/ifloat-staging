@@ -1,5 +1,5 @@
 module Conversion
-  EXCEPTIONS = %w(EU US-female US-male UK).to_set
+  EXCEPTIONS = %w(EU US-female US-male UK UK-child).to_set
   
   # conversion of v (unit 1) to V (unit 2): V = av + b
   # each mapping value is of the form [a, b]

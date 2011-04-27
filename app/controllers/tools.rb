@@ -18,12 +18,12 @@ class Tools < Application
   end
   
   def ms_variant_reporter
+    @expected_name = "provide.xml.zip"
     file = params[:file]
     return render if file.nil?
     
-    expected_name = "provide.xml"
-    unless file[:filename] == expected_name
-      @error = "expected a file named #{expected_name.inspect} but you supplied one named #{file[:filename].inspect}"
+    unless file[:filename] == @expected_name
+      @error = "expected a file named #{@expected_name.inspect} but you supplied one named #{file[:filename].inspect}"
       return render
     end
     
@@ -74,8 +74,16 @@ class Tools < Application
     
     to_csv_path = "/tmp/ms_variant_report.csv"
     GC.disable
-    missing = Partners::MarineStore.dump_report(file[:tempfile].path, to_csv_path, includer, guesser)
+    begin
+      Zip::ZipFile.foreach(file[:tempfile].path) do |entry|
+        Partners::MarineStore.dump_report(entry.get_input_stream, to_csv_path, includer, guesser)
+        break
+      end
+    rescue Exception => e
+      @error = "unexpected error while attempting to decompress / parse the supplied file: #{e}"
+    end
     GC.enable
+    return render unless @error.nil?
     
     file_name = "ms_variant_report_#{DateTime.now.strftime('%Y%m%d_%H%M')}.csv"
     send_data(File.read(to_csv_path), :filename => file_name, :type => "text/csv")

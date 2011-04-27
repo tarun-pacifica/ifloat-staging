@@ -13,3 +13,4 @@ public/javascripts/compiled.js
 public/sitemap.xml
 public/stylesheets/compiled.css
 vendor/bundle
+vendor/ruby

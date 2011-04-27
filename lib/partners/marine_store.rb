@@ -10,12 +10,12 @@ module Partners
       references
     end
     
-    def self.dump_report(from_xml_path, to_csv_path, includer, guesser)
+    def self.dump_report(from_xml_file_handle, to_csv_path, includer, guesser)
       lines_written = 0
       
       FasterCSV.open(to_csv_path, "w") do |csv|
         csv << ["guesses", "reference", "notes"]
-        options_by_product_code(from_xml_path).each do |product_code, options|
+        options_by_product_code(from_xml_file_handle).each do |product_code, options|
           traverse_or_report(product_code, options.to_a) do |product_code, reference, notes|
             next unless includer.call(reference)
             csv << [guesser.call(product_code), reference, notes]
@@ -27,10 +27,10 @@ module Partners
       lines_written
     end
     
-    def self.options_by_product_code(from_xml_path)
+    def self.options_by_product_code(from_xml_file_handle)
       options_by_product_code = {}
       
-      Nokogiri::XML::DocumentFragment.parse(File.open(from_xml_path).read).children.each do |node|
+      Nokogiri::XML::DocumentFragment.parse(from_xml_file_handle.read).children.each do |node|
         next unless node.name == "ProductAttributeOption_Add"
         product_code, option_code = node.attributes.values_at("product_code", "attribute_code").map { |a| a.text }
         value = node.css("Code").text

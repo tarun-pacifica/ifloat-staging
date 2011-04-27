@@ -99,6 +99,7 @@ GEM
     treetop (1.4.9)
       polyglot (>= 0.3.1)
     uuidtools (2.1.1)
+    zip (2.0.2)
 
 PLATFORMS
   ruby
@@ -124,3 +125,4 @@ DEPENDENCIES
   nokogiri (= 1.4.4)
   rspec (= 2.3.0)
   thin (= 1.2.7)
+  zip (= 2.0.2)

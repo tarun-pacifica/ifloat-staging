@@ -1,6 +1,6 @@
 <div id="ms_variant_reporter">
   <h1>MarineStore Variant Reporter</h1>
-  <p>Select a <strong>provide.xml</strong> to upload...</p>
+  <p>Select a <strong><%= @expected_name %></strong> to upload...</p>
   <form action="/tools/ms_variant_reporter" method="post" enctype="multipart/form-data">
     <input type="file" name="file" />
     <input type="submit" value="upload" />

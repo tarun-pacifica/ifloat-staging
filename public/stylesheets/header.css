@@ -28,14 +28,22 @@
 }
 
 #header .logo img {
-  margin: 10px 0 0 15px;
+  margin: 10px 0 5px 20px;
   vertical-align: bottom;
 }
 
 #header .advert {
   position: absolute;
-  left: 480px;
-  top: 29px;
+  left: 200px;
+  top: 15px;
+}
+
+#header .strapline {
+  color: #20A5FF;
+  font-size: 14px;
+  position: absolute;
+  left: 200px;
+  top: 102px;
 }
 
 #header .find_bar {

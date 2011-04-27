@@ -16,6 +16,8 @@ require "lib" / "mailer"
 require "lib" / "password"
 require "lib" / "speller"
 
+require "lib" / "partners" / "marine_store"
+
 use_orm :datamapper
 use_test :rspec
 use_template_engine :erb

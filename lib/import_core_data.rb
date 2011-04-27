@@ -155,7 +155,7 @@ class ImportSet
         stopwatch(klass) { class_stats << [klass, import_class(klass, objects_by_class.delete(klass))] }
         break unless @errors.empty?
       end
-
+      
       @adapter.pop_transaction
       if @errors.empty? then transaction.commit
       else transaction.rollback
@@ -373,58 +373,6 @@ class ImportSet
         end
       end
     end
-    
-    # TODO: factor out into tool
-    stopwatch("ensured no missing marinestore.co.uk product variants") do
-      property = get!(PropertyDefinition, "reference:class")
-      classes_by_product = {}
-      classes_by_product_ref = {}
-      text_values.each do |tv|
-        next unless tv.attributes[:definition] == property
-        klass, product = tv.attributes.values_at(:text_value, :product)
-        classes_by_product[product] = klass
-        (classes_by_product_ref[product.attributes[:reference].upcase] ||= []) << klass
-      end
-      
-      marine_store = get!(Company, "GBR-02934378")
-      mappings = @objects.select { |o| o.klass == ProductMapping and o.attributes[:company] == marine_store }
-      classes_by_ms_prod_code = {}
-      full_ms_refs = []
-      mappings.each do |m|
-        klass = classes_by_product[m.attributes[:product]]
-        next if klass.nil?
-        
-        ref = m.attributes[:reference].upcase
-        prod_code = ref.split(";").first
-        (classes_by_ms_prod_code[prod_code] ||= []) << klass
-        full_ms_refs << ref
-      end
-      full_ms_refs = full_ms_refs.to_set
-      
-      includer = proc { |ref| not full_ms_refs.include?(ref.upcase) }
-      
-      guesser = proc do |prod_code|
-        justification = ""
-        
-        prod_code = prod_code.upcase
-        classes = classes_by_ms_prod_code[prod_code]
-        justification = "from products with MS mappings starting with #{prod_code}" unless classes.nil?
-        
-        if classes.nil? and prod_code =~ /^[A-Z]{2}([A-Z0-9]+)/
-          classes = classes_by_product_ref[$1]
-          justification = "from products with the reference #{$1}" unless classes.nil?
-        end
-        
-        return "" if classes.nil?
-        classes.uniq.sort.join(", ") + " (#{justification})"
-      end
-      
-      require "lib" / "partners" / "marine_store"
-      from_xml_path = CSV_REPO / "partners" / "marinestore.co.uk" / "provide.xml"
-      to_csv_path = "/tmp/ms_variant_refs_missing.csv"
-      missing = Partners::MarineStore.dump_report(from_xml_path, to_csv_path, includer, guesser)
-      warn "#{missing} marinestore.co.uk references missing: #{to_csv_path}" if missing > 0
-    end
   end
   
   def write_errors(path)
@@ -448,6 +396,14 @@ class ImportSet
   end
   
   def import_class(klass, objects)
+    # TODO: change on-disk storage model for assets to include bucket dir so that we can simply sync the entire set
+    # if klass == Asset
+      # bytes_by_name_by_bucket = AssetStore.bytes_by_name_by_bucket
+      # for every DB asset that does not appear in the asset store
+      # set the asset's DB checksum to "", forcing an update
+      # DEBUG NOTES HERE AS SUCH
+    # end
+    
     relationships = {}
     klass.relationships.each do |attribute, relationship|
       relationships[attribute.to_sym] = relationship.child_key.first.name
@@ -549,12 +505,12 @@ class ImportSet
       rescue Exception => e
         errors = [e.message]
       end
-    
+      
       unless errors.nil?
         errors.each { |message| error(klass, object.path, object.row, nil, message) }
         action = :skipped
       end
-    
+      
       stats[action] += 1
     end
     stats

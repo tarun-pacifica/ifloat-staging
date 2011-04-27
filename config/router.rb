@@ -3,6 +3,7 @@ Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
   match('/prelaunch/:action').to(:controller => 'prelaunch')
   
+  match('/tools').to(:controller => 'tools', :action => 'index')
   match('/tools/:action(.:ext)').to(:controller => 'tools')
   
   match('/about_us').to(:controller => 'application', :action => 'about_us')

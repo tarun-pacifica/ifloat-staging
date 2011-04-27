@@ -7,11 +7,11 @@ begin
   Merb::DataMapperSessionStore.all.each do |session|
     picked_product_ids += (session.data["picked_product_ids"] || [])
   end
-    
+  
   ControllerError.obsolete.destroy!
   
   PickedProduct.all(:user_id => nil, :id.not => picked_product_ids).destroy!
-    
+  
   User.expired.destroy!
   
 rescue Exception => e

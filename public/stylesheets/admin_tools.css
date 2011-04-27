@@ -1,3 +1,36 @@
+#all_tools {
+  margin: 10px;
+}
+
+#all_tools h1 {
+  font-size: 18px;
+}
+
+#all_tools li {
+  font-size: 14px;
+  padding: 2px;
+}
+
+#all_tools ul {
+  padding-left: 20px;
+}
+
+#ms_variant_reporter {
+  margin: 10px;
+}
+
+#ms_variant_reporter h1 {
+  font-size: 18px;
+}
+
+#ms_variant_reporter span.error {
+  background: #FFFF99;
+  border: 2px solid red;
+  display: inline;
+  margin-left: 10px;
+  padding: 10px;
+}
+
 #property_icons h1 {
   color: white;
   margin: 0;

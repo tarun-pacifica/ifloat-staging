@@ -13,6 +13,10 @@ class Application < Merb::Controller
     @redacted_params = params
   end
   
+  def about_us
+    render
+  end
+  
   def categories_404(status = 404)
     params["filters"] = params["find"] = nil
     @path_names = []

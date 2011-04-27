@@ -5,6 +5,8 @@ Merb::Router.prepare do
   
   match('/tools/:action(.:ext)').to(:controller => 'tools')
   
+  match('/about_us').to(:controller => 'application', :action => 'about_us')
+  
   match('/brands/:name').to(:controller => 'brands', :action => 'show')
   
   match('/categories').to(:controller => 'categories', :action => 'show').name(:categories)

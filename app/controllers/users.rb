@@ -63,7 +63,7 @@ class Users < Application
   def track(url)
     session.log!("GET", url, request.remote_ip) if
       case url
-      when "/"                       then true
+      when "/", "/about_us"          then true
       when %r(^/brands/(.+?)/(.+?)$) then valid_category_path($2) and not Brand.first(:name => $1).nil?
       when %r(^/brands/(.+?)/?$)     then not Brand.first(:name => $1).nil?
       when %r(^/categories/?$)       then true

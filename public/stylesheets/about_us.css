@@ -1,0 +1,68 @@
+#about_us {
+  margin: 10px 30px;
+}
+
+#about_us h1, h2 {
+  color: #20A5FF;
+  margin-bottom: 0;
+}
+
+#about_us h3 {
+  color: gray;
+  font-style: italic;
+  font-weight: normal;
+  margin: 0;
+}
+
+#about_us .image {
+  margin-top: 15px;
+}
+
+#about_us .image div {
+  color: gray;
+  font-style: italic;
+  margin-top: 5px;
+}
+
+#about_us .section1 .image {
+  float: left;
+  margin-right: -527px;
+}
+
+#about_us .section1 .image div {
+  text-align: right;
+}
+
+#about_us .section1 .text {
+  float: left;
+  margin-left: 542px;
+}
+
+#about_us .section2 .image {
+  float: right;
+  margin-left: -559px;
+}
+
+#about_us .section2 .text {
+  float: right;
+  margin-right: 574px;
+}
+
+#about_us .section2 h2 {
+  text-align: right;
+}
+
+#about_us .section2 p {
+  text-align: right;
+}
+
+#about_us .use_section {
+  float: left;
+  padding-right: 10px;
+  width: 48%;
+}
+
+#about_us .use_section.second {
+  border-left: 1px solid gray;
+  padding: 0 0 0 10px;
+}

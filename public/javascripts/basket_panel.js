@@ -134,7 +134,7 @@ function basket_panel_load_handle_compare(picks) {
 
 function basket_panel_markup_differentiate(section_count, klass) {
   if(section_count < 2) return '';
-  return '<div class="item compare"> <a class="compare" href="/picked_products/products_for/' + klass + '"> Compare ' + klass + ' </a> </div>';
+  return '<div class="item compare"> <a class="compare" href="/picked_products/products_for/' + klass + '">Compare</a> </div>';
 }
 
 function basket_panel_markup_item(pick, buy_now) {

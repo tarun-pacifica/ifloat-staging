@@ -14,6 +14,7 @@ class Application < Merb::Controller
   end
   
   def about_us
+    @page_description = "The history behind ifloat®, the new and unique marine leisure product marketing site."
     render
   end
   

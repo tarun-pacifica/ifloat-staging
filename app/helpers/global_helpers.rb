@@ -41,8 +41,14 @@ module Merb
       query_params << "filters=#{URI.encode(filters.to_json)}" unless filters.empty?
       
       url += "?#{query_params.join('&')}" unless query_params.empty?
+      image_url = Indexer.category_image_url_for_node(path_names)
       name ||= path_names.last
-      "<a href=#{url.inspect}><span>#{Merb::Parse.escape_xml(name)}</span></a>"
+      <<-HTML
+        <a href=#{url.inspect}>
+        <img src="#{image_url}" alt="#{name.attribute_escape}" />
+        <span>#{Merb::Parse.escape_xml(name)}</span>
+        </a>
+      HTML
     end
     
     def category_url(path_names)

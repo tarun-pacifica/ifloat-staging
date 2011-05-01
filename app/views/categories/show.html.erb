@@ -39,15 +39,8 @@
   basket_panel_load();
   product_links_wire_up(<%= (@product_ids || []).to_json %>);
   
-  <% unless @child_link_image_urls.nil? %>
   var links = $('#categories .items a');
-  
   var max_height = 0
   links.each(function() { max_height = Math.max(max_height, $(this).find('span').outerHeight()) });
-  
-  var image_urls = <%= @child_link_image_urls.to_json %>;
-  links.each(function(i) {
-    $(this).css('height', 106 + max_height + 'px').prepend('<img src="' + image_urls[i] + '" />')
-  });
-  <% end %>
+  links.each(function() { $(this).css('height', 106 + max_height + 'px') });
 </script>

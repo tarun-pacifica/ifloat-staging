@@ -40,18 +40,14 @@ class Categories < Application
       @find_bad = true
     end
     
-    child_paths = children.map { |child| @path_names + [child] }
-    
     @child_links =
       if children.first.is_a?(Integer)
         product_links_by_node, @product_ids = marshal_product_links(:products => children)
         product_links_by_node[:products]
       else
-        child_paths.map { |path| category_link(path) }
+        children.map { |child| category_link(@path_names + [child]) }
       end
-    
-    @child_link_image_urls = child_paths.map { |path| Indexer.category_image_url_for_node(path) } if @path_names.size <= 1
-    
+        
     @canonical_path = ["/categories", root, sub].compact.join("/")
     @page_title = @path_names.join(" - ") unless @path_names.empty?
     @page_description = Indexer.category_definition_for_node(@path_names)

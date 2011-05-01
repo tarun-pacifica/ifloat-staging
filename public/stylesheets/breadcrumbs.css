@@ -21,3 +21,7 @@
 #breadcrumbs a.filter {
   color: #30A0FB;
 }
+
+#breadcrumbs a img {
+  display: none;
+}

@@ -73,6 +73,10 @@
   font-size: 16px;
 }
 
+#brand_products .product_set_info p.show_all img {
+  display: none;
+}
+
 #brand_products .product_set {
   float: left;
   height: 102px;

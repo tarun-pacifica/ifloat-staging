@@ -55,9 +55,68 @@
   height: 50px;
 }
 
+#header .find_bar .categories {
+  float: left;
+  padding-left: 14px;
+}
+
+#header .find_bar .categories a.show_all {
+  background: #EDEDED;
+  background: -moz-linear-gradient(100% 100% 90deg, #FAFAFA, #DADADA);
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FAFAFA), to(#DADADA));
+  border: 1px solid #6D87A1;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  color: black;
+  font-size: 14px;
+  font-weight: normal;
+  display: block;
+  margin-top: 9px;
+  padding: 7px 0 6px 0;
+  position: absolute;
+  width: 170px;
+  text-align: center;
+  text-decoration: none;
+  z-index: 110;
+}
+
+#header .find_bar .categories a.show_all:hover {
+  text-decoration: underline;
+}
+
+#header .find_bar .categories ul {
+  background: white;
+  border: 1px solid #6D87A1;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  display: none;
+  list-style: none;
+  margin-top: 9px;
+  padding: 40px 10px 10px 10px;
+  position: absolute;
+  width: 150px;
+  z-index: 100;
+}
+
+#header .find_bar .categories ul a {
+  color: gray;
+  text-decoration: none;
+}
+
+#header .find_bar .categories ul a:hover {
+  color: black;
+  text-decoration: underline;
+}
+
+#header .find_bar .categories ul img {
+  display: none;
+}
+
 #header .find_bar .finder {
   float: left;
-  margin: 7px 0 0 25px;
+  margin: 7px 0 0 198px;
 }
 
 #header .find_bar .finder #finder_specification {

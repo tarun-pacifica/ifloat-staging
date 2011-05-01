@@ -16,7 +16,7 @@ class Brands < Application
     product_ids_by_node.keys.each do |node|
       brand_filter = [Indexer.brand_property_id, "ENG", name, nil]
       count = @product_links_by_node[node].size
-      @show_all_links_by_node[node] = category_link(node, "show all #{count}", false, [brand_filter])
+      @show_all_links_by_node[node] = category_link(node, "show all #{count}", [brand_filter])
     end
     
     @page_description = @brand.description

@@ -35,17 +35,15 @@
 <script type="text/javascript" charset="utf-8">
   var $ifloat_header = {facility: <%= Indexer.facilities.values.first.to_json %>}
   
-  var all_categories = $('#header .find_bar .categories a.show_all');
-  var all_categories_bottom = all_categories.offset().top + all_categories.outerHeight();
-  var category_list = all_categories.next();
-  all_categories.mouseenter(function() { category_list.stop(true, true).fadeIn('fast') });
-  all_categories.mouseleave(function(e) {
-    if(e.pageY < all_categories_bottom) category_list.stop(true, true).fadeOut('fast')
-  });
-  category_list.mouseleave(function() { category_list.stop(true, true).fadeOut('fast') });
-  
   $(document).ready(function() {
     login_update();
     <% if @async_tracking %> $.get("/users/track", {url: window.location.pathname, r: Math.random()});<% end %>
+    
+    var all_categories = $('#header .find_bar .categories a.show_all');
+    var all_categories_bottom = all_categories.offset().top + all_categories.outerHeight();
+    var category_list = all_categories.next();
+    all_categories.mouseenter(function() { category_list.show() });
+    all_categories.mouseleave(function(e) { if(e.pageY < all_categories_bottom) category_list.hide() });
+    category_list.mouseleave(function() { category_list.hide() });
   });
 </script>

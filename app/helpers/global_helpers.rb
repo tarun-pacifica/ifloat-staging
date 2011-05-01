@@ -12,7 +12,7 @@ module Merb
     end
     
     def breadcrumbs(category_path_names, filter_prompt = true)
-      crumbs = [category_link([], "All Categories", true)]
+      crumbs = []
       
       find_phrase = params["find"]
       crumbs << category_link([], "\"#{find_phrase}\"") unless find_phrase.nil?
@@ -23,7 +23,7 @@ module Merb
       filters.each_with_index do |filter, i|
         property_id, unit, value, label = filter
         label = (label.nil? ? value : label.gsub(Application::RANGE_SEPARATOR, "-"))
-        crumbs << category_link(category_path_names, label, false, filters[0, i + 1])
+        crumbs << category_link(category_path_names, label, filters[0, i + 1])
       end
       
       crumbs << '<a class="filter" href="#" onclick="category_filters_show(); return false">Filter your results</a>' if filter_prompt and category_path_names.size == 2
@@ -31,13 +31,13 @@ module Merb
       '<div id="breadcrumbs">' + crumbs.join(" &rarr; ") + '</div>'
     end
     
-    def category_link(path_names, name = nil, ignore_find = false, filters = [])
+    def category_link(path_names, name = nil, filters = [])
       url = category_url(path_names)
       
       query_params = []
       
       find_phrase = params["find"]
-      query_params << "find=#{find_phrase}" unless ignore_find or find_phrase.nil?
+      query_params << "find=#{find_phrase}" unless find_phrase.nil?
       query_params << "filters=#{URI.encode(filters.to_json)}" unless filters.empty?
       
       url += "?#{query_params.join('&')}" unless query_params.empty?

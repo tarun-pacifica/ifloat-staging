@@ -2,7 +2,12 @@
   margin: 10px 30px;
 }
 
-#about_us h1, h2 {
+#about_us h1 {
+  color: #20A5FF;
+  margin-bottom: 0;
+}
+
+#about_us h2 {
   color: #20A5FF;
   margin-bottom: 0;
 }

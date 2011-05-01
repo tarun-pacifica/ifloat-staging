@@ -124,11 +124,15 @@ module Merb
       property_ids_by_section = {}
       infos.each { |info| (property_ids_by_section[info[:section]] ||= []) << info[:id] }
       
-      html = ['<div id="common_values">']
+      html = ['<table id="common_values">']
       
+      parity = :odd
       infos.map { |info| info[:section] }.uniq.each do |section|
-        html << "<h3>#{section}</h3>"
+        html << "<tr class=\"#{parity}\">"
+        parity = (parity == :odd ? :even : :odd)
         
+        html << "<td class=\"section\">#{section}</td>"
+        html << "<td>"
         property_ids_by_section[section].each do |property_id|
           info = infos_by_property_id[property_id]
           html << <<-HTML
@@ -140,11 +144,12 @@ module Merb
             </table>
           HTML
         end
+        html << "</td>"
         
-        html << '<hr class="terminator" />'
+        html << "</tr>"
       end
       
-      html << '</div>'
+      html << '</table>'
       
       html.join("\n")
     end

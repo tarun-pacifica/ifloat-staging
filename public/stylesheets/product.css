@@ -20,39 +20,33 @@
   margin-left: 185px;
 }
 
+#product p.summary {
+  color: gray;
+}
+
+#product h2 {
+  color: #20A5FF;
+  font-size: 16px;
+  font-weight: normal;
+  margin: 0;
+}
+
 #product .info_snippet {
-  border: 1px solid silver;
-  border-radius: 5px;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
   font-size: 14px;
   margin-bottom: 10px;
 }
 
-#product .info_snippet h2 {
-  background: #EDEDED;
-  background: -moz-linear-gradient(100% 100% 90deg, #FAFAFA, #DADADA);
-  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FAFAFA), to(#DADADA));
-  border-bottom: 1px solid silver;
-  border-radius: 5px 5px 0 0;
-  -moz-border-radius: 5px 5px 0 0;
-  -webkit-border-radius: 5px 5px 0 0;
-  font-size: 14px;
-  font-weight: normal;
-  margin: 0;
-  padding: 5px 10px;
-}
-
 #product .info_snippet p {
-  margin: 10px;
+  margin: 5px 10px 10px 10px;
 }
 
 #product .info_snippet ul {
-  margin: 10px;
+  margin: 5px 10px 10px 10px;
   padding-left: 15px;
 }
 
 #product #pick_sibling {
+  margin-bottom: 5px;
   padding: 0 0 5px 10px;
 }
 
@@ -64,26 +58,6 @@
 #product #pick_sibling select {
   margin-left: 5px;
   width: 275px;
-}
-
-#product #related_anchors {
-  margin: 10px 0;
-}
-
-#product #related_anchors a {
-  background: #3453FA;
-  background: -moz-linear-gradient(100% 100% 90deg, #2A9DFB, #381AFA);
-  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#2A9DFB), to(#381AFA));
-  border-radius: 5px;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
-  color: white;
-  padding: 5px 10px;
-  text-decoration: none;
-}
-
-#product #related_anchors a:hover {
-  text-decoration: underline;
 }
 
 #product .main_info {
@@ -134,7 +108,7 @@
 }
 
 #product .related_media {
-  display: none;
+  margin-top: 10px;
 }
 
 #product .related_media a {
@@ -148,5 +122,19 @@
 }
 
 #product .related_media table {
-  margin: 5px;
+  background: #E0F0FF;
+  border: 1px solid silver;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  margin: 5px 0 0 0;
+  width: 100%;
+}
+
+#product .related_media table td {
+  padding: 3px;
+}
+
+#product .related_media table td.icon {
+  width: 30px;
 }

@@ -33,7 +33,7 @@ begin
   end
     
   bak_path = BACKUP_DIR / Time.now.strftime("%Y%m%dT%H%M%S.sql.bz")
-  system "mysqldump5 --defaults-file=#{cnf_path.inspect} #{config[:database]} | bzip2 > #{bak_path.inspect}"    
+  system "mysqldump --defaults-file=#{cnf_path.inspect} #{config[:database]} | bzip2 > #{bak_path.inspect}"    
   AssetStore.write(BackupAsset.new(bak_path))
     
 rescue Exception => e

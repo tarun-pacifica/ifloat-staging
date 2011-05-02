@@ -4,27 +4,14 @@ class ObjectCatalogueVerifier
   ERROR_HEADERS = %w(csv row error)
   TEXT_PROP_NAMES = %w(reference:category reference:class).to_set
   
-  def initialize(dir, csv_catalogue, object_catalogue, index_newer_than)
+  def initialize(dir, csv_catalogue)
     @csvs = csv_catalogue
-    
-    FileUtils.mkpath(dir)
-    @index_path = dir / "verifier_index"
-    
-    if File.exist?(@index_path) and File.mtime(@index_path) > index_newer_than
-      @data = File.open(@index_path) { |f| Marshal.load(f) }
-    else
-      puts " ! (re)building verifier index"
-      @data = {:cibr => {}, :pibr => {}, :pbr => {}, :tvbpnbr => {}}
-      object_catalogue.each(&method(:added))
-      committed
-    end
-    
-    @category_images_by_ref          = @data[:cibr]
-    @primary_images_by_ref           = @data[:pibr]
-    @products_by_ref                 = @data[:pbr]
-    @text_values_by_prop_name_by_ref = @data[:tvbpnbr]
-    
     @errors = []
+    
+    @category_images_by_ref          = {}
+    @primary_images_by_ref           = {}
+    @products_by_ref                 = {}
+    @text_values_by_prop_name_by_ref = {}
   end
   
   def added(ref, data)
@@ -37,21 +24,17 @@ class ObjectCatalogueVerifier
       asset = data[:asset]
       return unless data[:role] == "image" and asset[:sequence_number] = 1
       @primary_images_by_ref[data[:product]] = data
-      
+    
     when Product
       @products_by_ref[ref] = data
-      
+    
     when TextPropertyValue
       prop_name = data[:definition][:name]
       return unless TEXT_PROP_NAMES.include?(prop_name)
       text_values_by_prop_name = (@text_values_by_prop_name_by_ref[data[:product]] ||= {})
       text_values_by_prop_name[prop_name] = data
-      
+    
     end
-  end
-  
-  def committed
-    File.open(@index_path, "w") { |f| Marshal.dump(@data, f) }
   end
   
   def deleted(ref)

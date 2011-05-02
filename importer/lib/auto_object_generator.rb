@@ -63,7 +63,7 @@ class AutoObjectGenerator
           klass = value_refs_by_property_name["reference:class"].first[:text_value]
           
           auto_objects, errors = m.call(product, klass, value_refs_by_property_name, row_md5)
-          errors += @objects.add(@csvs, auto_objects, row_md5).map { |e| error_for_row(e, row_md5) }
+          errors += @objects.add(auto_objects, row_md5).map { |e| error_for_row(e, row_md5) }
           @errors += errors
           
           row_count += 1
@@ -107,7 +107,7 @@ class AutoObjectGenerator
     while seq_num += 1 do
       hierarchy = ObjectRef.for(PropertyHierarchy, [klass, seq_num])
       unless @objects.has_ref?(hierarchy)
-        return [[], error_no_strategy(:ph, klass, row_md5)] if seq_num == 1
+        return [[], [error_no_strategy(:ph, klass, row_md5)]] if seq_num == 1
         break
       end
       
@@ -136,7 +136,7 @@ class AutoObjectGenerator
     diff_objects, errors = [], []
     
     strategy = ObjectRef.for(TitleStrategy, [klass])
-    return [[], error_no_strategy(:ts, klass, row_md5)] unless @objects.has_ref?(strategy)
+    return [[], [error_no_strategy(:ts, klass, row_md5)]] unless @objects.has_ref?(strategy)
     
     TitleStrategy::TITLE_PROPERTIES.each_with_index.map do |title, i|
       rendered_parts = []
@@ -153,7 +153,7 @@ class AutoObjectGenerator
       end
       rendered_parts.pop while rendered_parts.last == "-"
       
-      if rendered_parts.empty? then errors << error_for_row("empty #{title} title")
+      if rendered_parts.empty? then errors << error_for_row("empty #{title} title", row_md5)
       else diff_objects << {
           :class => TextPropertyValue,
           :definition => @at_property,

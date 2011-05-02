@@ -48,7 +48,9 @@ class ObjectCatalogue
     @refs_to_write = []
     
     delete_obsolete
-    @verifier = ObjectCatalogueVerifier.new(dir, csv_catalogue, self, most_recent_commit)
+    
+    @verifier = ObjectCatalogueVerifier.new(dir, csv_catalogue)
+    each(&@verifier.method(:added))
   end
   
   def add(objects, *row_md5s)
@@ -94,8 +96,6 @@ class ObjectCatalogue
       data.update(set)
       File.open(path, "w") { |f| Marshal.dump(data, f) }
     end
-    
-    @verifier.committed
   end
   
   def data_for(ref)
@@ -139,7 +139,7 @@ class ObjectCatalogue
       @data_by_ref.delete(ref)
       @rows_by_ref.delete(ref)
       @vals_by_ref.delete(ref)
-      @verifier.deleted(ref)
+      @verifier.deleted(ref) unless @verifier.nil?
     end
     
     puts " - deleted #{obsolete_refs.size} objects in #{obsolete_groups.size} groups" unless obsolete_refs.empty?

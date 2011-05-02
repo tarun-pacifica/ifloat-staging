@@ -31,11 +31,13 @@ begin
     f.puts "user=#{config[:username]}"
     f.puts "password=#{config[:password]}"
   end
-    
+  
   bak_path = BACKUP_DIR / Time.now.strftime("%Y%m%dT%H%M%S.sql.bz")
-  system "mysqldump --defaults-file=#{cnf_path.inspect} #{config[:database]} | bzip2 > #{bak_path.inspect}"    
+  system "mysqldump --defaults-file=#{cnf_path.inspect} #{config[:database]} | bzip2 > #{bak_path.inspect}"
   AssetStore.write(BackupAsset.new(bak_path))
-    
+  
+  # TODO: cleanup backups older than 12 months locally and on the server
+  
 rescue Exception => e
   Mailer.deliver(:exception, :exception => e, :whilst => "backing up database")
   

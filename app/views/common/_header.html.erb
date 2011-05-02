@@ -21,7 +21,7 @@
       <a href="/categories" class="show_all">All Categories</a>
       <ul>
         <% Indexer.category_children_for_node([]).each do |name| %>
-        <li><%= category_link([name]) %></li>
+        <li><%= category_link([name], nil, [], nil) %></li>
         <% end %>
       </ul>
     </div>

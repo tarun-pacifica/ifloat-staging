@@ -31,12 +31,11 @@ module Merb
       '<div id="breadcrumbs">' + crumbs.join(' <span class="chevron"></span> ') + '</div> <hr class="terminator" />'
     end
     
-    def category_link(path_names, name = nil, filters = [])
+    def category_link(path_names, name = nil, filters = [], find_phrase = params["find"])
       url = category_url(path_names)
       
       query_params = []
       
-      find_phrase = params["find"]
       query_params << "find=#{find_phrase}" unless find_phrase.nil?
       query_params << "filters=#{URI.encode(filters.to_json)}" unless filters.empty?
       

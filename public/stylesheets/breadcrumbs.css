@@ -4,9 +4,18 @@
 }
 
 #breadcrumbs a {
+  background: #F5F5F5;
   color: #404040;
-  white-space: nowrap;
+  display: block;
+  float: left;
+  padding: 5px 15px;
   text-decoration: none;
+  
+  border: 1px solid #6D87A1;
+  border-radius: 5px 0 0 5px;
+  -moz-border-radius: 5px 0 0 5px;
+  -webkit-border-radius: 5px 0 0 5px;
+
 }
 
 #breadcrumbs a:hover {
@@ -15,13 +24,30 @@
 }
 
 #breadcrumbs a:last-child {
-  font-weight: bold;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
 }
 
 #breadcrumbs a.filter {
-  color: #30A0FB;
+  background: #4DBBF7;
+  background: -moz-linear-gradient(100% 100% 90deg, #87DAF5, #2AA0FB);
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#87DAF5), to(#2AA0FB));
+  color: white;
 }
 
 #breadcrumbs a img {
   display: none;
+}
+
+#breadcrumbs span.chevron {
+  border: solid transparent;
+  border-left-color: #6D87A1;
+  border-width: 15px 0 15px 15px;
+  display: block;
+  float: left;
+  font-size: 0;
+  height: 0;
+  line-height: 0;
+  margin-right: 5px;
 }

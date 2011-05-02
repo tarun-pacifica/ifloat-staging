@@ -42,5 +42,7 @@
   var links = $('#categories .items a');
   var max_height = 0
   links.each(function() { max_height = Math.max(max_height, $(this).find('span').outerHeight()) });
+  <% if @path_names.size < 2 %>
   links.each(function() { $(this).css('height', 106 + max_height + 'px') });
+  <% end %>
 </script>

@@ -28,7 +28,7 @@ module Merb
       
       crumbs << '<a class="filter" href="#" onclick="category_filters_show(); return false">Filter your results</a>' if filter_prompt and category_path_names.size == 2
       
-      '<div id="breadcrumbs">' + crumbs.join(" &rarr; ") + '</div>'
+      '<div id="breadcrumbs">' + crumbs.join(' <span class="chevron"></span> ') + '</div> <hr class="terminator" />'
     end
     
     def category_link(path_names, name = nil, filters = [])

@@ -237,6 +237,7 @@ module Indexer
       end
       
       index = (type == "text" ? @@text_filtering_index : @@numeric_filtering_index)
+      unit = nil if unit.blank?
       values_by_product_id = ((index[unit] || {})[property_id] || {})
       product_ids.select { |product_id| (values_by_product_id[product_id] || []).include?(value) }
     end.compact

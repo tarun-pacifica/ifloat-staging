@@ -58,8 +58,8 @@ module Mailer
       Mail.deliver do |mail|
         Mailer.envelope(mail, action, :admin, :sysadmin)
         body report.join("\n")
-      end    
-      
+      end
+    
     when :password_reset
       user = params[:user]
       return if user.nil?

@@ -80,7 +80,7 @@ module Mailer
       report << "Total: #{response.values_at('total', 'currency').join(' ').inspect}"
       report << ""
       report << "Items..."
-      report += response[:items].map { |item| item.inspect }
+      report += (response[:items] || []).map { |item| item.inspect }
       
       Mail.deliver do |mail|
         Mailer.envelope(mail, action, :admin, :admin)

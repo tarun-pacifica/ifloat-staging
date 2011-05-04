@@ -99,12 +99,12 @@ class Tools < Application
       @purchases.each do |purchase|
         fields = [purchase.id]
         fields << purchase.facility.primary_url
-        fields << purchase.response["reference"]
+        fields << purchase.response[:reference]
         fields << purchase.completed_at.strftime("%Y-%m-%d %H:%M:%S")
         fields << purchase.session.created_at.strftime("%Y-%m-%d %H:%M:%S")
-        fields << purchase.response["total"]
-        fields << purchase.response["currency"]
-        fields << (purchase.response["items"] || []).map do |item|
+        fields << purchase.response[:total]
+        fields << purchase.response[:currency]
+        fields << purchase.response[:items].map do |item|
           "#{item['quantity']} x #{item['reference']} (#{item['name']})"
         end.join(", ")
         csv << fields

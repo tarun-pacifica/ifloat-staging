@@ -59,7 +59,7 @@ module Mailer
         Mailer.envelope(mail, action, :admin, :sysadmin)
         body report.join("\n")
       end
-    
+      
     when :password_reset
       user = params[:user]
       return if user.nil?
@@ -76,11 +76,11 @@ module Mailer
       
       report = ["Purchase #{purchase.id} completed at #{facility.primary_url} from #{purchase.ip_address} (#{userish})"]
       report << "Date: #{purchase.completed_at.strftime('%B %d, %Y at %H:%M:%S')}"
-      report << "#{facility.name} reference: #{response['reference'].inspect}"
-      report << "Total: #{response.values_at('total', 'currency').join(' ').inspect}"
+      report << "#{facility.name} reference: #{response[:reference].inspect}"
+      report << "Total: #{response.values_at(:total, :currency).join(' ').inspect}"
       report << ""
       report << "Items..."
-      report += (response[:items] || []).map { |item| item.inspect }
+      report += response[:items].map { |item| item.inspect }
       
       Mail.deliver do |mail|
         Mailer.envelope(mail, action, :admin, :admin)

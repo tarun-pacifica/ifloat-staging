@@ -15,16 +15,16 @@
     <% @purchases.each do |purchase| %>
     <tr>
       <td class="id"><%= purchase.id %></td>
-      <td><%= purchase.facility.primary_url %> <br/> <%= h purchase.response["reference"] %></td>
+      <td><%= purchase.facility.primary_url %> <br/> <%= h purchase.response[:reference] %></td>
       <td>
         <%= purchase.completed_at.strftime("%Y-%m-%d %H:%M:%S") %> <br />
         <%= purchase.session.created_at.strftime("%Y-%m-%d %H:%M:%S") %>
       </td>
       
-      <td class="total"><%= purchase.response.values_at("total", "currency").join(" ") %></td>
+      <td class="total"><%= purchase.response.values_at(:total, :currency).join(" ") %></td>
       <td>
         <ul>
-          <% (purchase.response["items"] || []).each do |item| %>
+          <% purchase.response[:items].each do |item| %>
           <li><%= item["quantity"] %> x <%= h item["reference"] %> (<%= h item["name"] %>)</li>
           <% end %>
         </ul>

@@ -89,6 +89,31 @@ class Tools < Application
     send_data(File.read(to_csv_path), :filename => file_name, :type => "text/csv")
   end
   
+  def purchase_reporter
+    @purchases = Purchase.all(:order => [:completed_at])
+    return render if params[:ext].nil?
+    
+    to_csv_path = "/tmp/purchase_report.csv"
+    FasterCSV.open(to_csv_path, "w") do |csv|
+      csv << %w(ID Facility Order Completed Cookie Total Currency Items)
+      @purchases.each do |purchase|
+        fields = [purchase.id]
+        fields << purchase.facility.primary_url
+        fields << purchase.response["reference"]
+        fields << purchase.completed_at.strftime("%Y-%m-%d %H:%M:%S")
+        fields << purchase.session.created_at.strftime("%Y-%m-%d %H:%M:%S")
+        fields << purchase.response["total"]
+        fields << purchase.response["currency"]
+        fields << purchase.response["items"].map do |item|
+          "#{item['quantity']} x #{item['reference']} (#{item['name']})"
+        end.join(", ")
+        csv << fields
+      end
+    end
+    
+    file_name = "purchase_report_#{DateTime.now.strftime('%Y%m%d_%H%M')}.csv"
+    send_data(File.read(to_csv_path), :filename => file_name, :type => "text/csv")
+  end
   
   private
   

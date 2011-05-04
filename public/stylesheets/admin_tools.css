@@ -1,8 +1,8 @@
-#all_tools {
+.admin_tools {
   margin: 10px;
 }
 
-#all_tools h1 {
+.admin_tools h1 {
   font-size: 18px;
 }
 
@@ -13,14 +13,6 @@
 
 #all_tools ul {
   padding-left: 20px;
-}
-
-#ms_variant_reporter {
-  margin: 10px;
-}
-
-#ms_variant_reporter h1 {
-  font-size: 18px;
 }
 
 #ms_variant_reporter span.error {
@@ -39,7 +31,7 @@
 #property_icons table {
   float: left;
   font-size: 14px;
-  margin: 10px 0 0 10px;
+  margin: 0 10px 10px 0;
 }
 
 #property_icons table td {
@@ -59,4 +51,31 @@
   background: blue;
   color: orange;
   padding: 5px;
+}
+
+#purchase_reporter table {
+  border-collapse: collapse;
+}
+
+#purchase_reporter table th {
+  border: 1px solid silver;
+  padding: 5px;
+}
+
+#purchase_reporter table td {
+  border: 1px solid silver;
+  padding: 5px;
+}
+
+#purchase_reporter table td.id {
+  text-align: right;
+}
+
+#purchase_reporter table td.total {
+  text-align: right;
+}
+
+#purchase_reporter table td ul {
+  margin: 0;
+  padding: 0 0 0 20px;
 }

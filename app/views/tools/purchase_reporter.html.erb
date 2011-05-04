@@ -1,0 +1,35 @@
+<div id="purchase_reporter" class="admin_tools">
+  <h1>Purchase Reporter</h1>
+  
+  <p>Download this report as a <a href="/tools/purchase_reporter.csv">CSV</a></p>
+  
+  <table summary="purchases">
+    <tr>
+      <th>ID</th>
+      <th>Facility / Order</th>
+      <th>Completed / Cookie</th>
+      <th>Total</th>
+      <th>Items</th>
+    </tr>
+    
+    <% @purchases.each do |purchase| %>
+    <tr>
+      <td class="id"><%= purchase.id %></td>
+      <td><%= purchase.facility.primary_url %> <br/> <%= h purchase.response["reference"] %></td>
+      <td>
+        <%= purchase.completed_at.strftime("%Y-%m-%d %H:%M:%S") %> <br />
+        <%= purchase.session.created_at.strftime("%Y-%m-%d %H:%M:%S") %>
+      </td>
+      
+      <td class="total"><%= purchase.response.values_at("total", "currency").join(" ") %></td>
+      <td>
+        <ul>
+          <% purchase.response["items"].each do |item| %>
+          <li><%= item["quantity"] %> x <%= h item["reference"] %> (<%= h item["name"] %>)</li>
+          <% end %>
+        </ul>
+     </td>
+    </tr>
+    <% end %>
+  </table>
+</div>

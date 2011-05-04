@@ -1,35 +1,37 @@
-<div id="property_icons">
-	<table summary="associated">
-		<tr> <th colspan="2"><h1>Properties</h1></th> </tr>
-		
-		<% section = nil %>		
-		<% @properties.each do |info| %>
-		
-		<% s = info[:raw_name].split(":").first %>
-		<% unless s == section %>
-		<% section = s %>
-		<tr> <th colspan="2"><%= section %></th> </tr>
-		<% end %>
-		
-		<tr>
-			<td><img src=<%= info[:icon_url].inspect %> alt=<%= info[:raw_name].inspect %> /></td>
-			<% shown = (info[:dad] or info[:fil]) %>
-			<td class="<%= shown ? (info[:icon_url] == @blank_icon_url ? "blank" : "") : "not_needed" %>">
-				<%= info[:raw_name] %> <br/>
-				<%= info[:section] %> / <%= info[:name] %>
-			</td>
-		</tr>
-		
-		<% end %>
-	</table>
-	
-	<table summary="unassociated">
-		<tr> <th colspan="2"><h1>Unassociated</h1></th> </tr>
-		<% @unused_icons.each do |asset| %>
-		<tr>
-			<td><img src=<%= asset.url.inspect %> alt=<%= asset.name.inspect %> /></td>
-			<td><%= asset.name %></td>
-		</tr>
-		<% end %>
-	</table>
+<div id="property_icons" class="admin_tools">
+  <table summary="associated">
+    <tr> <th colspan="2"><h1>Properties</h1></th> </tr>
+    
+    <% section = nil %>   
+    <% @properties.each do |info| %>
+    
+    <% s = info[:raw_name].split(":").first %>
+    <% unless s == section %>
+    <% section = s %>
+    <tr> <th colspan="2"><%= section %></th> </tr>
+    <% end %>
+    
+    <tr>
+      <td><img src=<%= info[:icon_url].inspect %> alt=<%= info[:raw_name].inspect %> /></td>
+      <% shown = (info[:dad] or info[:fil]) %>
+      <td class="<%= shown ? (info[:icon_url] == @blank_icon_url ? "blank" : "") : "not_needed" %>">
+        <%= info[:raw_name] %> <br/>
+        <%= info[:section] %> / <%= info[:name] %>
+      </td>
+    </tr>
+    
+    <% end %>
+  </table>
+  
+  <table summary="unassociated">
+    <tr> <th colspan="2"><h1>Unassociated</h1></th> </tr>
+    <% @unused_icons.each do |asset| %>
+    <tr>
+      <td><img src=<%= asset.url.inspect %> alt=<%= asset.name.inspect %> /></td>
+      <td><%= asset.name %></td>
+    </tr>
+    <% end %>
+  </table>
+  
+  <hr class="terminator" />
 </div>

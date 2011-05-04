@@ -24,7 +24,7 @@
       <td class="total"><%= purchase.response.values_at("total", "currency").join(" ") %></td>
       <td>
         <ul>
-          <% purchase.response["items"].each do |item| %>
+          <% (purchase.response["items"] || []).each do |item| %>
           <li><%= item["quantity"] %> x <%= h item["reference"] %> (<%= h item["name"] %>)</li>
           <% end %>
         </ul>

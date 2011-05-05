@@ -19,10 +19,10 @@
   var callback_count = callback_urls.length;
   function handle_partner_callback(event) {
     callback_count -= 1;
-    if(callback_count == callback_urls.length) {
-      for(var i in callback_urls) { load_partner_callback(callback_urls[i]) };
-    } else if(callback_count == 0) {
+    if(callback_count == 0) {
       partner_store.attr('src', <%= @purchase_urls.last.to_json %>);
+    } else if(callback_count == callback_urls.length) {
+      for(var i in callback_urls) { load_partner_callback(callback_urls[i]) };
     }
   }
   function load_partner_callback(url) {

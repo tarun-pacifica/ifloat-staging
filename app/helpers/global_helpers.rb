@@ -14,12 +14,16 @@ module Merb
     def breadcrumbs(category_path_names, filter_prompt = true)
       crumbs = []
       
+      filters = (JSON.parse(params["filters"]) rescue [])
+      
       find_phrase = params["find"]
-      crumbs << category_link([], "\"#{find_phrase}\"") unless find_phrase.nil?
+      unless find_phrase.nil?
+        crumbs << category_link([], find_phrase.inspect, [], find_phrase, "find_phrase")
+        crumbs.last << category_link(category_path_names, 'X', filters, nil, "unfind")
+      end
       
       crumbs += category_path_names.size.times.map { |i| category_link(category_path_names[0, i + 1]) }
       
-      filters = (JSON.parse(params["filters"]) rescue [])
       filters.each_with_index do |filter, i|
         property_id, unit, value, label = filter
         label = (label.nil? ? value : label.gsub(Application::RANGE_SEPARATOR, "-"))
@@ -31,7 +35,7 @@ module Merb
       '<div id="breadcrumbs">' + crumbs.join(' <span class="chevron"></span> ') + '</div> <hr class="terminator" />'
     end
     
-    def category_link(path_names, name = nil, filters = [], find_phrase = params["find"])
+    def category_link(path_names, name = nil, filters = [], find_phrase = params["find"], klass = nil)
       url = category_url(path_names)
       
       query_params = []
@@ -40,14 +44,11 @@ module Merb
       query_params << "filters=#{URI.encode(filters.to_json)}" unless filters.empty?
       
       url += "?#{query_params.join('&')}" unless query_params.empty?
+      klass = (klass.nil? ? "" : "class=\"#{klass}\"")
       image_url = Indexer.category_image_url_for_node(path_names)
       name ||= path_names.last
-      <<-HTML
-        <a href=#{url.inspect}>
-        <img src="#{image_url}" alt="#{name.attribute_escape}" />
-        <span>#{Merb::Parse.escape_xml(name)}</span>
-        </a>
-      HTML
+      image = (image_url.nil? ? "" : "<img src=\"#{image_url}\" alt=\"#{name.attribute_escape}\" />")
+      "<a href=#{url.inspect} #{klass}> #{image} <span>#{Merb::Parse.escape_xml(name)}</span> </a>"
     end
     
     def category_url(path_names)

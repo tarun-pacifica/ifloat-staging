@@ -5,17 +5,15 @@
 
 #breadcrumbs a {
   background: #F5F5F5;
+  border: 1px solid #6D87A1;
+  border-radius: 5px 0 0 5px;
+  -moz-border-radius: 5px 0 0 5px;
+  -webkit-border-radius: 5px 0 0 5px;
   color: #404040;
   display: block;
   float: left;
   padding: 5px 15px;
   text-decoration: none;
-  
-  border: 1px solid #6D87A1;
-  border-radius: 5px 0 0 5px;
-  -moz-border-radius: 5px 0 0 5px;
-  -webkit-border-radius: 5px 0 0 5px;
-
 }
 
 #breadcrumbs a:hover {
@@ -27,6 +25,24 @@
   border-radius: 5px;
   -moz-border-radius: 5px;
   -webkit-border-radius: 5px;
+}
+
+#breadcrumbs a.unfind {
+  background: #C00000;
+  border-bottom-left-radius: 0;
+  -moz-border-bottom-left-radius: 0;
+  -webkit-border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+  -moz-border-top-left-radius: 0;
+  -webkit-border-top-left-radius: 0;
+  border-left: none;
+  color: white;
+  padding: 5px;
+}
+
+#breadcrumbs a.unfind:hover {
+  background: red;
+  text-decoration: none;
 }
 
 #breadcrumbs a.filter {

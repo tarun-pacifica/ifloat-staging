@@ -46,16 +46,14 @@ function category_filters_icon(filter) {
 function category_filters_show() {
   var filter_panel = $('#categories .filters');
   $.getJSON(category_filters_url('filters'), category_filters_show_handle);
-  spinner_show('Retrieving filters...');
+  // spinner_show('Retrieving filters...'); // TODO: remove if we settle on always showing filters
 }
 
 function category_filters_show_handle(filters) {
   var filter_panel = $('#categories .filters');
+  // spinner_hide(); // TODO: remove if we settle on always showing filters
   
-  if(filters.length == 0) {
-    spinner_hide();
-    return;
-  }
+  if(filters.length == 0) return;
   
   var filters_by_section = util_group_by(filters, 'section');
   
@@ -65,48 +63,28 @@ function category_filters_show_handle(filters) {
     if(sections.length == 0 || (sections[sections.length - 1] != section)) sections.push(section);
   }
   
-  var row_count = 0;
-  var rows = [[]];
+  var html = [];
+  
   for(var i in sections) {
     var section = sections[i];
-    var section_count = Math.max(filters_by_section[section].length, 2);
-    if(row_count + section_count <= 9) {
-      rows[rows.length - 1].push(section);
-      row_count += section_count;
-    } else {
-      rows.push([section]);
-      row_count = section_count;
-    }
-  }
-  
-  var html = ['<h2>Choose a filter...</h2>'];
-  for(var i in rows) {
-    var row = rows[i];
-    html.push('<div class="row ' + (i % 2 ? 'even' : 'odd') + '">');
+    html.push('<div class="section ' + (i % 2 ? 'even' : 'odd') + '">');
+    html.push('<h3>' + section + '</h3>');
     
-    for(var j in row) {
-      var section = row[j];
-      html.push('<div class="section">');
-      html.push('<h3>' + section + '</h3>');
-      
-      var filters = filters_by_section[section];
-      for(var k in filters) {
-        var filter = filters[k];
-        html.push('<div class="filter">');
-        html.push(category_filters_icon(filter));
-        html.push('</div>');
-      }
-      
+    var filters = filters_by_section[section];
+    for(var j in filters) {
+      var filter = filters[j];
+      html.push('<div class="filter">');
+      html.push(category_filters_icon(filter));
       html.push('</div>');
     }
     
-    html.push('<hr class="terminator" />');
-    html.push('</div>');
+    html.push('</div>')
   }
   
-  filter_panel.html(html.join(' '));
+  html.push('<hr class="terminator" />');
+  
+  filter_panel.append(html.join(' '));
   filter_panel.fadeIn('fast');
-  spinner_hide();
 }
 
 function category_filters_url(intermediate_path, new_filter) {

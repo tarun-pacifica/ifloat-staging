@@ -11,7 +11,8 @@ module Merb
       image.nil? ? title.superscript : "#{image} <span>#{title.superscript}</span>"
     end
     
-    def breadcrumbs(category_path_names, filter_prompt = true)
+    # TODO: remove support entirely for filter_prompt if we decide always to show filters
+    def breadcrumbs(category_path_names, filter_prompt = false)
       crumbs = []
       
       filters = (JSON.parse(params["filters"]) rescue [])

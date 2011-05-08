@@ -27,42 +27,27 @@
 }
 
 #categories .filters {
-  background: #404040;
-  border-radius: 5px;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
   display: none;
-  margin-top: 5px;
-  padding: 10px;
-  width: 735px;
+  margin: 5px 0;
 }
 
 #categories .filters h2 {
-  color: white;
+  color: #20A5FF;
   font-weight: normal;
-  margin: 0 0 10px 0;
-}
-
-#categories .filters .even {
-  background: #E0F0FF;
-}
-
-#categories .filters .odd {
-  background: white;
-}
-
-#categories .filters .row {
-  border-bottom: 1px solid silver;
+  margin: 10px 0 5px 0;
 }
 
 #categories .filters .section {
-  border-left: 1px dashed gray;
+  border: 1px solid #6D81A1;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
   float: left;
-  margin-left: -1px;
+  margin: 1px;
 }
 
-#categories .filters .section:first-child {
-  border-left: none;
+#categories .filters .section.even {
+  background: #E0F0FF;
 }
 
 #categories .filters .section .filter {
@@ -75,9 +60,8 @@
   font-weight: normal;
   height: 21px;
   margin: 0;
-  padding: 5px 0 0 5px;
+  padding: 5px 5px 0 5px;
   white-space: nowrap;
-  width: 151px;
 }
 
 #categories .filters .section img.property_icon {

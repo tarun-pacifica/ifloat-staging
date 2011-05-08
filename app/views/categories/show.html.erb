@@ -15,7 +15,7 @@
   
   <%= breadcrumbs(@path_names) %>
   
-  <div class="filters"> </div>
+  <div class="filters"> <h2>Filter your <%= "result".pluralize_count(@child_links.size) %> by...</h2> </div>
   
   <div class="items">
     <%= @child_links.join(" ") %>
@@ -35,6 +35,8 @@
   
   var items = $('#categories .items a');
   if(items.length == 1) window.location = items.attr('href');
+  
+  <% unless @path_names.size < 2 %>category_filters_show();<% end %>
   
   basket_panel_load();
   product_links_wire_up(<%= (@product_ids || []).to_json %>);

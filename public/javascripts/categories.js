@@ -11,6 +11,7 @@ function category_filters_choose(index) {
 function category_filters_configure(filter_id) {
   $.getJSON(category_filters_url('filter/' + filter_id), category_filters_configure_handle);
   spinner_show('Retrieving filter values...');
+  tooltip_hide(); // needed by Firefox
 }
 
 function category_filters_configure_handle(filter) {

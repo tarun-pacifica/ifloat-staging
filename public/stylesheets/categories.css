@@ -37,6 +37,19 @@
   margin: 10px 0 5px 0;
 }
 
+#categories .filters h2 span {
+  color: #404040;
+  display: block;
+  font-size: 14px;
+  margin: 5px 0 0 5px;
+}
+
+#categories .filters h2 span:hover {
+  color: black;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 #categories .filters .section {
   border: 1px solid #6D81A1;
   border-radius: 5px;

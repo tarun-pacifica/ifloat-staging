@@ -1,3 +1,8 @@
+var category_filters_back_buffer = null;
+function category_filters_back() {
+  $('#categories .filters').html(category_filters_back_buffer);
+}
+
 var category_filters_choose_values = null;
 function category_filters_choose(index) {
   window.location = category_filters_url(null, category_filters_choose_values[index]);
@@ -28,13 +33,14 @@ function category_filters_configure_handle(filter) {
     return;
   }
   
-  var html = ['<h2>Choose a ' + filter.name + ' value...</h2>'];
+  var html = ['<h2>Choose a ' + filter.name + ' value... <span onclick="category_filters_back()">« back to all filters</span></h2>'];
   
   html.push('<ul>');
   for(var i in all_values) html.push('<li onclick="category_filters_choose(' + i + ')">' + util_superscript('text', all_values[i]) + '</li>');
   html.push('</ul>');
   
   var filter_panel = $('#categories .filters');
+  category_filters_back_buffer = filter_panel.html();
   filter_panel.html(html.join(' '));
   spinner_hide();
 }

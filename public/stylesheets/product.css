@@ -21,7 +21,8 @@
 }
 
 #product p.summary {
-  color: gray;
+  color: #2030A0;
+  font-size: 14px;
 }
 
 #product h2 {

@@ -110,7 +110,7 @@ module Indexer
         :product_relationship_cache => ProductRelationship.compile_index,
         :product_title_cache        => compile_product_title_cache,
         :property_display_cache     => compile_property_display_cache(properties),
-        :text_filtering             => compile_filtering_index(records.select { |r| r.filterable }, :language_code, :text_value),
+        :text_filtering             => compile_text_filtering_index(records.select { |r| r.filterable }),
         :text_finding               => compile_text_finding_index(properties, records)
       }
       
@@ -142,18 +142,34 @@ module Indexer
   end
   
   def self.filterable_values_for_property_id(property_id, product_ids, language_code)
-    return {} if product_ids.empty? or not ensure_loaded
+    return [] if product_ids.empty? or not ensure_loaded
     
-    values_by_root_key = {}
-    filtering_indexes(language_code).each do |root_key, products_by_property_id|
-      values_by_product_id = products_by_property_id[property_id]
-      next if values_by_product_id.nil?
+    property_info = @@property_display_cache[property_id]
+    return [] if property_info.nil?
+    
+    if property_info[:type] == "text"
+      values_by_prod_id_by_prop_id = @@text_filtering_index[language_code]
+      return [] if values_by_prod_id_by_prop_id.nil?
+      values_by_prod_id = values_by_prod_id_by_prop_id[property_id]
+      return [] if values_by_prod_id_by_prop_id.nil?
+      values_by_prod_id.values_at(*product_ids).compact.flatten.uniq.sort
       
-      values_by_root_key[root_key] = values_by_product_id.values_at(*product_ids).flatten.compact.uniq.sort_by do |value|
-        value.is_a?(Range) ? [value.first, value.last] : [value]
+    else
+      values_by_unit_by_seq_by_prod_id = @@numeric_filtering_index[property_id]
+      return [] if values_by_unit_by_seq_by_prod_id.nil?
+      all_expanded_values = []
+      values_by_unit_by_seq_by_prod_id.values_at(*product_ids).compact.map(&:values).flatten.each do |values_by_unit|
+        expanded_values = []
+        values_by_unit.each do |unit, value|
+          (value.is_a?(Range) ? [value.first, value.last] : [value]).each_with_index do |v, i|
+            (expanded_values[i] ||= {})[unit.to_s] = v
+          end
+        end
+        all_expanded_values += expanded_values.map(&:sort)
       end
+      all_expanded_values.uniq.sort
+      
     end
-    values_by_root_key
   end
   
   def self.image_checksums_for_product_ids(product_ids)
@@ -222,24 +238,33 @@ module Indexer
     @@max_product_id if ensure_loaded
   end
   
-  def self.product_ids_for_filters(product_ids, filters)
+  def self.product_ids_for_filters(product_ids, filters, language_code)
     return [] unless ensure_loaded
     
-    prod_id_sets = filters.map do |property_id, unit, value, label|
+    prod_id_sets = filters.map do |filter|
+      property_id, *values = filter
       prop_info = @@property_display_cache[property_id]
       next if prop_info.nil?
       
-      type = prop_info[:type]
-      
-      if(type != "text")
-        values = value.to_s.split("..").map { |v| v.to_f }.uniq
-        value = (values.size == 2 ? Range.new(*values) : values.first)
+      if (prop_info[:type] == "text")
+        filter_value = values.first
+        values_by_prod_id = ((@@text_filtering_index[language_code] || {})[property_id] || {})
+        product_ids.select { |prod_id| (values_by_prod_id[prod_id] || []).include?(filter_value) }
+        
+      else
+        fu1, fv1, fu2, fv2 = values.map(&:first).flatten
+        return [] unless fu1 == fu2 and fv1 <= fv2 # bomb out as filter invalid
+        values_by_unit_by_seq_by_prod_id = (@@numeric_filtering_index[property_id] || {})
+        product_ids.select do |prod_id|
+          (values_by_unit_by_seq_by_prod_id[prod_id] || {}).any? do |seq, values_by_unit|
+            v = values_by_unit[fu1]
+            next if v.nil?
+            v1, v2 = (v.is_a?(Range) ? [v.first, v.last] : [v, v])
+            v2 >= fv1 and v1 <= fv2
+          end
+        end
+        
       end
-      
-      index = (type == "text" ? @@text_filtering_index : @@numeric_filtering_index)
-      unit = nil if unit.blank?
-      values_by_product_id = ((index[unit] || {})[property_id] || {})
-      product_ids.select { |product_id| (values_by_product_id[product_id] || []).include?(value) }
     end.compact
     
     prod_id_sets.empty? ? [] : prod_id_sets.inject { |union, ids| union & ids }
@@ -248,21 +273,6 @@ module Indexer
   def self.product_ids_for_image_checksum(checksum)
     return nil unless ensure_loaded
     (@@product_ids_by_checksum ||= @@image_checksum_index.keys.group_by { |id| @@image_checksum_index[id] })[checksum]
-  end
-  
-  def self.product_ids_for_property_ids(property_ids, language_code)
-    return [] if property_ids.empty? or not ensure_loaded
-    
-    product_id_sets_by_property_id = {}
-    filtering_indexes(language_code).each do |root_key, products_by_property_id|
-      property_ids.each do |property_id|
-        values_by_product_id = products_by_property_id[property_id]
-        next if values_by_product_id.nil?
-        product_id_set = (product_id_sets_by_property_id[property_id] ||= Set.new)
-        product_id_set.merge(values_by_product_id.keys)
-      end
-    end
-    product_id_sets_by_property_id.values.inject { |union, product_ids| union & product_ids }
   end
   
   def self.product_ids_for_phrase(phrase, language_code)
@@ -297,20 +307,16 @@ module Indexer
     return [] if product_ids.empty? or not ensure_loaded
     
     product_ids = product_ids.to_set
-    property_ids = Set.new
+    property_ids = []
     
-    filtering_indexes(language_code).each do |root_key, products_by_property_id|
-      products_by_property_id.each do |property_id, values_by_product_id|
-        matching_product_ids = (product_ids & values_by_product_id.keys)
-        
-        next if matching_product_ids.empty?
-        property_ids << property_id and next if matching_product_ids.size < product_ids.size
-        next if values_by_product_id.values_at(*product_ids).uniq.size == 1
-        property_ids << property_id        
-      end
+    each_filtering_index(language_code) do |prop_id, things_by_prod_id|
+      matching_product_ids = (product_ids & things_by_prod_id.keys)
+      next if matching_product_ids.empty?
+      property_ids << prop_id and next if matching_product_ids.size < product_ids.size
+      property_ids << prop_id unless things_by_prod_id.values_at(*product_ids).uniq.size == 1
     end
     
-    property_ids
+    property_ids.to_set
   end
   
   def self.sale_price_min_property_id
@@ -395,28 +401,7 @@ module Indexer
     end
     facility_info_by_url
   end
-  
-  def self.compile_filtering_index(records, root_key, *value_keys)
-    index = {}
-    records.each do |record|
-      root = (index[record[root_key]] ||= {})
-      property = (root[record.property_definition_id] ||= {})
-      values = (property[record.product_id] ||= [])
-      
-      record_values = value_keys.map { |k| v = record[k]; v.is_a?(String) ? v : v.to_f }.uniq
-      if record_values.size == 2 then values << Range.new(*record_values)
-      else values.concat(record_values)
-      end
-    end
     
-    index.each do |r, properties|
-      properties.each do |property_id, products|
-        products.each { |product_id, values| values.uniq! }
-      end
-    end
-    index
-  end
-  
   def self.compile_image_checksum_index
     query =<<-SQL
       SELECT p.id, a.checksum
@@ -436,17 +421,27 @@ module Indexer
   
   def self.compile_numeric_filtering_index
     query =<<-SQL
-      SELECT pv.product_id, pv.property_definition_id, pv.unit, pv.min_value, pv.max_value
+      SELECT pv.product_id, pv.property_definition_id, pv.unit, pv.min_value, pv.max_value, pv.sequence_number
       FROM property_values pv
         INNER JOIN property_definitions pd ON pv.property_definition_id = pd.id
       WHERE pd.filterable = ?
         AND (pv.min_value IS NOT NULL OR pv.max_value IS NOT NULL)
     SQL
     
-    records = repository.adapter.select(query, true)
-    compile_filtering_index(records, :unit, :min_value, :max_value)
+    values_by_unit_by_seq_by_prod_id_by_prop_id = {}
+    repository.adapter.select(query, true).each do |record|
+      values = [record.min_value, record.max_value].uniq.map { |v| v.to_f }
+      value = (values.size == 1 ? values.first : Range.new(*values))
+      
+      values_by_unit_seq_by_prod_id =
+        (values_by_unit_by_seq_by_prod_id_by_prop_id[record.property_definition_id] ||= {})
+      values_by_unit_by_seq = (values_by_unit_seq_by_prod_id[record.product_id] ||= {})
+      values_by_unit = (values_by_unit_by_seq[record.sequence_number] ||= {})
+      values_by_unit[record.unit] = value
+    end
+    values_by_unit_by_seq_by_prod_id_by_prop_id
   end
-    
+  
   def self.compile_product_title_cache
     query =<<-SQL
       SELECT product_id, property_definition_id, text_value, sequence_number
@@ -505,7 +500,25 @@ module Indexer
     end
     cache
   end
+  
+  def self.compile_text_filtering_index(records)
+    values_by_prod_id_by_prop_id_by_lang = {}
     
+    records.each do |record|
+      values_by_prod_id_by_prop_id = (values_by_prod_id_by_prop_id_by_lang[record.language_code] ||= {})
+      values_by_prod_id = (values_by_prod_id_by_prop_id[record.property_definition_id] ||= {})
+      (values_by_prod_id[record.product_id] ||= []) << record.text_value
+    end
+    
+    values_by_prod_id_by_prop_id_by_lang.each do |lang, values_by_prod_id_by_prop_id|
+      values_by_prod_id_by_prop_id.each do |prop_id, values_by_prod_id|
+        values_by_prod_id.each { |prod_id, values| values.uniq! }
+      end
+    end
+    
+    values_by_prod_id_by_prop_id_by_lang
+  end
+  
   def self.compile_text_finding_index(properties, records)
     index = {}
     prod_ids_by_values_by_prop_ids = {}
@@ -539,11 +552,9 @@ module Indexer
     index
   end
   
-  def self.filtering_indexes(language_code)
-    indexes = @@numeric_filtering_index.to_a
-    text_index = @@text_filtering_index[language_code]
-    indexes << [language_code, text_index] unless text_index.nil?
-    indexes
+  def self.each_filtering_index(language_code, &block)
+    @@numeric_filtering_index.each(&block)
+    (@@text_filtering_index[language_code] || {}).each(&block)
   end
   
   def self.normalized_find_words(phrase)

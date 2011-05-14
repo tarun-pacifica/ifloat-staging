@@ -26,8 +26,18 @@ module Merb
       crumbs += category_path_names.size.times.map { |i| category_link(category_path_names[0, i + 1]) }
       
       filters.each_with_index do |filter, i|
-        property_id, unit, value, label = filter
-        label = (label.nil? ? value : label.gsub(Application::RANGE_SEPARATOR, "-"))
+        property_id, v1, v2 = filter
+        
+        label = v1.to_s
+        if v1.is_a?(Array) and v2.is_a?(Array)
+          v1, v2 = [v1, v2].map(&:first)
+          if v1.is_a?(Array) and v2.is_a?(Array)
+            prop_info = (Indexer.property_display_cache[property_id] || {})
+            klass = PropertyType.value_class(prop_info[:type])
+            label = klass.format(v1[1].to_f, v2[1].to_f, " - ", v1[0], :verbose => true) unless klass.nil?
+          end
+        end
+        
         crumbs << category_link(category_path_names, label, filters[0, i + 1])
       end
       

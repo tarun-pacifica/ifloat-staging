@@ -47,7 +47,7 @@ class Categories < Application
       else
         children.map { |child| category_link(@path_names + [child]) }
       end
-        
+    
     @canonical_path = ["/categories", root, sub].compact.join("/")
     @page_title = @path_names.join(" - ") unless @path_names.empty?
     @page_description = Indexer.category_definition_for_node(@path_names)
@@ -62,28 +62,25 @@ class Categories < Application
     prop_info = Indexer.property_display_cache[property_id]
     return [] if prop_info.nil? or product_ids.empty?
     
-    definitions = (PropertyValueDefinition.by_property_id([property_id], session.language)[property_id] || {})
-    type = prop_info[:type]
-    value_class = PropertyType.value_class(type)
+    values = Indexer.filterable_values_for_property_id(property_id, product_ids, session.language)
     
-    values_by_unit = {}
-    Indexer.filterable_values_for_property_id(property_id, product_ids, session.language).each do |unit, values|
-      extra_values =
-        if type == "text" then values.map { |v| definitions[v] }
-        else values.map do |value|
-            v1, v2 = (value.is_a?(Range) ? [value.first, value.last] : [value, value])
-            value_class.format(v1, v2, RANGE_SEPARATOR, unit, :verbose => true)
-          end
-        end
-      values_by_unit[unit] = values.zip(extra_values)
+    if prop_info[:type] == "text"
+      defs_by_value = (PropertyValueDefinition.by_property_id([property_id], session.language)[property_id] || {})
+      prop_info.merge(:values => values.zip(defs_by_value.values_at(*values)))
+      
+    else
+      klass = PropertyType.value_class(prop_info[:type])
+      formatted = values.map do |units_with_values|
+        units_with_values.map { |u, v| klass.format(v, v, nil, u, :verbose => true) }.join(" / ")
+      end
+      prop_info.merge(:values => values.zip(formatted))
+      
     end
-    
-    prop_info.merge(:values_by_unit => values_by_unit)
   end
   
   def filtered_product_ids(product_ids)
     filters = (JSON.parse(params["filters"]) rescue [])
-    (filters.empty? ? product_ids : Indexer.product_ids_for_filters(product_ids, filters))
+    (filters.empty? ? product_ids : Indexer.product_ids_for_filters(product_ids, filters, session.language))
   end
   
   def find_phrase_alternatives(phrase)

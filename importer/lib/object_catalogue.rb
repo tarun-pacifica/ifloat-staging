@@ -99,7 +99,6 @@ class ObjectCatalogue
   end
   
   def data_for(ref)
-    puts "DATA FOR #{ref.inspect}"
     data = @data_by_ref[ref]
     return data unless data.nil?
     

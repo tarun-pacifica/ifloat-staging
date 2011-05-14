@@ -210,6 +210,7 @@ class ImportSet
       end
     end
     
+    # PORTED
     stopwatch("ensured all categories have an image") do
       images = @objects.map do |o|
         next unless o.klass == Asset and o.attributes[:bucket] == "category_images"

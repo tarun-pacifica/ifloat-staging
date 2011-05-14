@@ -19,21 +19,21 @@ class ObjectCatalogueVerifier
     
     when Asset
       @category_images_by_ref[ref] = data if data[:bucket] == "category_images"
-    
+      
     when Attachment
       asset = data[:asset]
       return unless data[:role] == "image" and asset[:sequence_number] = 1
       @primary_images_by_ref[data[:product]] = data
-    
+      
     when Product
       @products_by_ref[ref] = data
-    
+      
     when TextPropertyValue
       prop_name = data[:definition][:name]
       return unless TEXT_PROP_NAMES.include?(prop_name)
       text_values_by_prop_name = (@text_values_by_prop_name_by_ref[data[:product]] ||= {})
       text_values_by_prop_name[prop_name] = data
-    
+      
     end
   end
   
@@ -54,7 +54,16 @@ class ObjectCatalogueVerifier
   end
   
   def verify_all_categories_have_images
-    raise "to implement" # TODO
+    cat_image_names = @category_images.map do |image|
+      image[:name] =~ Asset::NAME_FORMAT ? $1 : raise("unable to parse #{o.attributes[:name]}")
+    end.to_set
+    
+    prop_names = %w(reference:category reference:class)
+    cat_names = @text_values_by_prop_name_by_ref.map do |ref, tvs_by_pn|
+      tvs_by_pn.values_at(*prop_names)
+    end.flatten.compact.to_set
+    
+    @errors += (cat_names - cat_image_names).sort.map { |n| [nil, nil, "no image provided for category #{n.inspect}"] }
   end
   
   def verify_product_count_is_safe

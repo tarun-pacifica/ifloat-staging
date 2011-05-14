@@ -254,6 +254,7 @@ module Indexer
       else
         fu1, fv1, fu2, fv2 = values.map(&:first).flatten
         return [] unless fu1 == fu2 and fv1 <= fv2 # bomb out as filter invalid
+        fu1 = nil if fu1.blank?
         values_by_unit_by_seq_by_prod_id = (@@numeric_filtering_index[property_id] || {})
         product_ids.select do |prod_id|
           (values_by_unit_by_seq_by_prod_id[prod_id] || {}).any? do |seq, values_by_unit|

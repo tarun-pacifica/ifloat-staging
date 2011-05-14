@@ -56,7 +56,7 @@ class ObjectCatalogueVerifier
   
   # TODO: double check that no data loading from disk occurs during verification
   def verify
-    steps = %w(all_categories_have_images no_orphaned_purchases product_count_is_safe same_image_means_same_group unique_titles well_differentiated_siblings)
+    steps = %w(all_categories_have_images no_orphaned_purchases product_count_is_safe same_image_means_same_group unique_titles well_differentiated_siblings no_orphaned_picks)
     
     steps.each do |step|
       puts " - #{step.tr('-', ' ')}"
@@ -77,12 +77,34 @@ class ObjectCatalogueVerifier
     @errors += (cat_names - cat_image_names).sort.map { |n| [nil, nil, "no image provided for category #{n.inspect}"] }
   end
   
-  def no_orphaned_purchases
-    Purchase.all_facility_primary_keys.each do |actual_company_ref, facility_url|
-      if @companies_by_ref.values.find { |c| c[:reference] == actual_company_ref }.nil?
-        @errors << [nil, nil, "unable to delete company with facility with user-referenced purchases: #{actual_company_ref} / #{facility_url}"]
-      elsif @facilities_by_ref.values.find { |f| f[:primary_url] == facility_url }.nil?
-         @errors << [nil, nil, "unable to delete facility with user-referenced purchases: #{actual_company_ref} / #{facility_url}"]
+  # this method is run last as it has side effects and so shouldn't run unless we're error-free
+  def verify_no_orphaned_picks
+    db_companies = Company.all.hash_by(:reference)
+    orphaned_product_ids = []
+    
+    companies_by_ref = @companies_by_ref.values.hash_by { |c| c[:reference] }
+    products_by_ref = @products_by_ref.values.hash_by { |p| p[:reference] }
+    
+    PickedProduct.all_primary_keys.each do |company_ref, product_ref|
+      if (not companies_by_ref.has_key?(company_ref))
+        error(Company, nil, nil, nil, "unable to delete company with user-referenced product: #{company_ref} / #{product_ref}")
+      elsif (not products_by_ref.has_key?(product_ref))
+        orphaned_product_ids << db_companies[company_ref].products.first(:reference => product_ref).id
+      end
+    end
+    
+    PickedProduct.handle_orphaned(orphaned_product_ids) if orphaned_product_ids.any? and @errors.empty?
+  end
+  
+  def verify_no_orphaned_purchases
+    companies_by_ref = @companies_by_ref.values.hash_by { |c| c[:reference] }
+    facilities_by_url = @facilities_by_ref.values.hash_by { |f| f[:primary_url] }
+    
+    Purchase.all_facility_primary_keys.each do |company_ref, facility_url|
+      if (not companies_by_ref.has_key?(company_ref))
+        @errors << [nil, nil, "unable to delete company with facility with user-referenced purchases: #{company_ref} / #{facility_url}"]
+      elsif (not facilities_by_url.has_key?(facility_url))
+         @errors << [nil, nil, "unable to delete facility with user-referenced purchases: #{company_ref} / #{facility_url}"]
       end
     end
   end

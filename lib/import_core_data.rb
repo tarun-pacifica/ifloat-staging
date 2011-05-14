@@ -227,6 +227,7 @@ class ImportSet
       end
     end
     
+    # PORTED
     stopwatch("handled orphaned PickedProducts") do
       db_companies = Company.all.hash_by(:reference)
       orphaned_product_ids = []

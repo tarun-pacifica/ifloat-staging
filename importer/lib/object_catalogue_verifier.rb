@@ -49,8 +49,9 @@ class ObjectCatalogueVerifier
     @text_values_by_prop_name_by_ref.delete(ref)
   end
   
+  # TODO: double check that no data loading from disk occurs during verification
   def verify
-    steps = %w(all_categories_have_images product_count_is_safe same_image_means_same_group unique_titles well_differentiated_siblings)
+    steps = %w(all_categories_have_images no_orphaned_purchases product_count_is_safe same_image_means_same_group unique_titles well_differentiated_siblings)
     
     steps.each do |step|
       puts " - #{step.tr('-', ' ')}"
@@ -69,6 +70,16 @@ class ObjectCatalogueVerifier
     end.flatten.to_set
     
     @errors += (cat_names - cat_image_names).sort.map { |n| [nil, nil, "no image provided for category #{n.inspect}"] }
+  end
+  
+  def no_orphaned_purchases
+    Purchase.all_facility_primary_keys.each do |actual_company_ref, facility_url|
+      if @companies_by_ref.values.find { |c| c[:reference] == actual_company_ref }.nil?
+        @errors << [nil, nil, "unable to delete company with facility with user-referenced purchases: #{actual_company_ref} / #{facility_url}"]
+      elsif @facilities_by_ref.values.find { |f| f[:primary_url] == facility_url }.nil?
+         @errors << [nil, nil, "unable to delete facility with user-referenced purchases: #{actual_company_ref} / #{facility_url}"]
+      end
+    end
   end
   
   def verify_product_count_is_safe
@@ -154,7 +165,4 @@ class ObjectCatalogueVerifier
     location = @csvs.row_info(@objects.rows_by_ref(prod_ref)).first.values_at(:name, :index).join(":")
     "#{company[:reference]} / #{product[:reference]} (#{location})"
   end
-  
-  # handling orphaned pick_products / purchases should be handled JIT when they are marked as potentially invalid
-  # - user driven data not part of core
 end

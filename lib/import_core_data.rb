@@ -243,6 +243,7 @@ class ImportSet
       PickedProduct.handle_orphaned(orphaned_product_ids) if orphaned_product_ids.any? and @errors.empty?
     end
     
+    # PORTED
     stopwatch("ensured no orphaned Purchases") do
       Purchase.all_facility_primary_keys.each do |company_ref, facility_url|
         company = get(Company, company_ref)

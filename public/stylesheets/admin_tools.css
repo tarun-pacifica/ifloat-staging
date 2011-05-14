@@ -71,6 +71,10 @@
   text-align: right;
 }
 
+#purchase_reporter table td.days {
+  text-align: right;
+}
+
 #purchase_reporter table td.total {
   text-align: right;
 }

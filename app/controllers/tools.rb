@@ -95,13 +95,14 @@ class Tools < Application
     
     to_csv_path = "/tmp/purchase_report.csv"
     FasterCSV.open(to_csv_path, "w") do |csv|
-      csv << %w(ID Facility Order Completed Cookie Total Currency Items)
+      csv << %w(ID Facility Order Completed Cookie Days Total Currency Items)
       @purchases.each do |purchase|
         fields = [purchase.id]
         fields << purchase.facility.primary_url
         fields << purchase.response[:reference]
         fields << purchase.completed_at.strftime("%Y-%m-%d %H:%M:%S")
         fields << purchase.session.created_at.strftime("%Y-%m-%d %H:%M:%S")
+        fields << (purchase.completed_at - purchase.session.created_at).to_i
         fields << purchase.response[:total]
         fields << purchase.response[:currency]
         fields << purchase.response[:items].map do |item|

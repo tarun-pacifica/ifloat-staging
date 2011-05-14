@@ -75,7 +75,7 @@ class NumericPropertyValue < PropertyValue
       while(denominator < 128) do
         numerator = (remainder * denominator)
         n = numerator.to_i
-        return "#{i} #{n}/#{denominator}" if n == numerator
+        return(i == 0 ? "#{n}/#{denominator}" : "#{i} #{n}/#{denominator}") if n == numerator
         denominator *= 2
       end
     end

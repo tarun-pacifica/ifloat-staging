@@ -343,6 +343,7 @@ class ImportSet
       end
     end
     
+    # PORTED
     stopwatch("ensured all grouped products are adequately differentiated") do
       agd = get!(PropertyDefinition, "auto:group_diff")
       

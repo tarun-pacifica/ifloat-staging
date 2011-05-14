@@ -2,13 +2,14 @@ class ObjectCatalogueVerifier
   include ErrorWriter
   
   ERROR_HEADERS = %w(csv row error)
-  TEXT_PROP_NAMES = %w(auto:title reference:category reference:class).to_set
+  TEXT_PROP_NAMES = %w(auto:group_diff auto:title reference:category reference:class).to_set
   
   def initialize(dir, csv_catalogue)
     @csvs = csv_catalogue
     @errors = []
     
     @category_images_by_ref          = {}
+    @companies_by_ref                = {}
     @primary_images_by_ref           = {}
     @products_by_ref                 = {}
     @text_values_by_prop_name_by_ref = {}
@@ -25,6 +26,9 @@ class ObjectCatalogueVerifier
       return unless data[:role] == "image" and asset[:sequence_number] = 1
       @primary_images_by_ref[data[:product]] = data
       
+    when Company
+      @companies_by_ref[ref] = data
+      
     when Product
       @products_by_ref[ref] = data
       
@@ -39,13 +43,14 @@ class ObjectCatalogueVerifier
   
   def deleted(ref)
     @category_images_by_ref.delete(ref)
+    @companies_by_ref.delete(ref)
     @primary_images_by_ref.delete(ref)
     @products_by_ref.delete(ref)
     @text_values_by_prop_name_by_ref.delete(ref)
   end
   
   def verify
-    steps = %w(all_categories_have_images product_count_is_safe same_image_means_same_group unique_titles)
+    steps = %w(all_categories_have_images product_count_is_safe same_image_means_same_group unique_titles well_differentiated_siblings)
     
     steps.each do |step|
       puts " - #{step.tr('-', ' ')}"
@@ -78,7 +83,7 @@ class ObjectCatalogueVerifier
       first_ref = first_refs_by_checksum[checksum]
       first_refs_by_checksum[checksum] = ref and next if first_ref.nil?
       
-      fr_group, r_group = [first_ref, ref].map { |r| r[:reference_group] }
+      fr_group, r_group = [first_ref, ref].map { |r| @products_by_ref[r][:reference_group] }
       next unless fr_group.nil? or fr_group != r_group
       
       problem = "their reference_group values differ (#{r_group.inspect} vs #{fr_group.inspect})"
@@ -109,19 +114,47 @@ class ObjectCatalogueVerifier
     end
   end
   
+  def verify_well_differentiated_siblings
+    values_by_ref_by_group = {}
+    
+    text_values_by_prop_name_by_ref.each do |ref, tvs_by_pn|
+      (tvs_by_pn["auto:group_diff"] || []).each do |tv|
+        group = @products_by_ref[ref].attributes.values_at(:company, :reference_group)
+        values_by_ref = (values_by_ref_by_group[group] ||= {})
+        (values_by_product[ref] ||= []) << tv[:text_value]
+      end
+    end
+    
+    values_by_ref_by_group.each do |group, values_by_ref|
+      next if values_by_ref.size == 1
+      friendly_group = "#{@companies_by_ref[group[0]][:reference]} / #{group[1]}"
+      
+      values_by_ref.values.transpose.each_with_index do |diff_column, i|
+        blank_count = diff_column.count { |v| v.blank? }
+        next if blank_count == 0 or blank_count == diff_column.size
+        colliding_row = @objects.rows_by_ref(values_by_ref.keys.first).first
+        @errors << error_for_row(colliding_row, "differentiating values from property set #{i + 1} are a mixture of values and blanks: #{diff_column.inspect} (group: #{friendly_group})")
+      end
+      
+      values_by_ref.to_a.combination(2) do |a, b|
+        ref1, values1 = a
+        ref2, values2 = b
+        colliding_row = @objects.rows_by_ref(ref2).first
+        @errors << error_for_row(colliding_row, "has the same differentiating values #{values1.inspect} as #{ident(ref1)} (group: #{friendly_group})") if values1 == values2
+      end
+    end
+  end
+  
   
   private
   
-  def ident(product)
-    location = @csvs.row_info(@objects.rows_by_ref(product)).first.values_at(:name, :index).join(":")
-    "#{product[:company][:reference]} / #{product[:reference]} (#{location})"
+  def ident(prod_ref)
+    product = @products_by_ref[prod_ref]
+    company = @companies_by_ref[product[:company]]
+    location = @csvs.row_info(@objects.rows_by_ref(prod_ref)).first.values_at(:name, :index).join(":")
+    "#{company[:reference]} / #{product[:reference]} (#{location})"
   end
   
-  # AFTER AUTO
-  # 
-  # need the agd values by product
-  #  - ""ensured all grouped products are adequately differentiated"
-  # 
   # handling orphaned pick_products / purchases should be handled JIT when they are marked as potentially invalid
   # - user driven data not part of core
 end

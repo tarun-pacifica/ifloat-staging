@@ -187,6 +187,7 @@ class ImportSet
       end
     end
     
+    # PORTED
     stopwatch("ensured all checksum groups map to product group subsets") do
       first_products_by_checksum = {}
       

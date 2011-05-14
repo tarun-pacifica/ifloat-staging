@@ -10,6 +10,7 @@ class ObjectCatalogueVerifier
     
     @category_images_by_ref          = {}
     @companies_by_ref                = {}
+    @facilities_by_ref               = {}
     @primary_images_by_ref           = {}
     @products_by_ref                 = {}
     @text_values_by_prop_name_by_ref = {}
@@ -28,7 +29,10 @@ class ObjectCatalogueVerifier
       
     when Company
       @companies_by_ref[ref] = data
-      
+    
+    when Facility
+      @facilities_by_ref[ref] = data
+    
     when Product
       @products_by_ref[ref] = data
       
@@ -44,6 +48,7 @@ class ObjectCatalogueVerifier
   def deleted(ref)
     @category_images_by_ref.delete(ref)
     @companies_by_ref.delete(ref)
+    @facilities_by_ref.delete(ref)
     @primary_images_by_ref.delete(ref)
     @products_by_ref.delete(ref)
     @text_values_by_prop_name_by_ref.delete(ref)

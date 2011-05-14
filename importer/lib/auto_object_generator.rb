@@ -75,8 +75,6 @@ class AutoObjectGenerator
         puts " ! #{error_count} errors reported from #{csv_name} while generating #{domain} objects" if error_count > 0
       end
       
-      # TODO: verifications before commit
-      
       @objects.commit("auto_#{domain}")
     end
   end

@@ -29,14 +29,12 @@ def mail_fail(whilst)
   exit 1
 end
 
-
 puts "Scanning asset repository for updates..."
 assets = ImportableAssets.new(REPO_DIRS["assets"], ASSET_CSV_PATH, ASSET_VARIANT_DIR, ASSET_WATERMARK_PATH)
 unless assets.update
   assets.write_errors(ERROR_CSV_PATH)
   mail_fail("compiling assets")
 end
-
 
 puts "Scanning CSV repository for updates..."
 csvs = CSVCatalogue.new(CSV_INDEX_DIR)
@@ -45,12 +43,10 @@ mail_fail("compiling CSVs") if csvs.write_errors(ERROR_CSV_PATH)
 csvs.delete_obsolete
 csvs.summarize
 
-
 puts "Recovering object state..."
 objects = ObjectCatalogue.new(csvs, OBJECT_INDEX_DIR)
 objects.delete_obsolete
 objects.summarize
-
 
 puts "Generating any missing row objects..."
 generator = RowObjectGenerator.new(csvs, objects)

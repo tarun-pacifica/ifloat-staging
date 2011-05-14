@@ -294,8 +294,7 @@ class ImportSet
       end
     end
     
-    # TODO: generalize to non-English titles when ready
-    # TODO: PORT NON-DUP TEST
+    # PORTED
     stopwatch("ensured no blank / duplicated titles and produced report") do
       at, rc = %w(auto:title reference:class).map! { |key| get!(PropertyDefinition, key) }
       values_by_heading_by_product = {}

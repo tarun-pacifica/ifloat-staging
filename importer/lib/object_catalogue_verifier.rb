@@ -2,7 +2,7 @@ class ObjectCatalogueVerifier
   include ErrorWriter
   
   ERROR_HEADERS = %w(csv row error)
-  TEXT_PROP_NAMES = %w(reference:category reference:class).to_set
+  TEXT_PROP_NAMES = %w(auto:title reference:category reference:class).to_set
   
   def initialize(dir, csv_catalogue)
     @csvs = csv_catalogue
@@ -45,7 +45,7 @@ class ObjectCatalogueVerifier
   end
   
   def verify
-    steps = %w(all_categories_have_images product_count_is_safe same_image_means_same_group)
+    steps = %w(all_categories_have_images product_count_is_safe same_image_means_same_group unique_titles)
     
     steps.each do |step|
       puts " - #{step.tr('-', ' ')}"
@@ -60,8 +60,8 @@ class ObjectCatalogueVerifier
     
     prop_names = %w(reference:category reference:class)
     cat_names = @text_values_by_prop_name_by_ref.map do |ref, tvs_by_pn|
-      tvs_by_pn.values_at(*prop_names)
-    end.flatten.compact.to_set
+      tvs_by_pn.values_at(*prop_names).compact.flatten.map { |tv| tv[:text_value] }
+    end.flatten.to_set
     
     @errors += (cat_names - cat_image_names).sort.map { |n| [nil, nil, "no image provided for category #{n.inspect}"] }
   end
@@ -81,24 +81,43 @@ class ObjectCatalogueVerifier
       fr_group, r_group = [first_ref, ref].map { |r| r[:reference_group] }
       next unless fr_group.nil? or fr_group != r_group
       
-      fr_company, fr_prod_ref = first_ref.attributes.values_at(:company, :reference)
-      fr_company_ref = fr_company[:reference]
-      
-      fr_row, r_row = [first_ref, ref].map { |r| @objects.rows_by_ref(r).first }
-      fr_location = @csvs.row_info(fr_row).values_at(:name, :index).join(":")
-      fr_ident = "#{fr_company_ref} / #{fr_prod_ref} (#{fr_location})"
-      
       problem = "their reference_group values differ (#{r_group.inspect} vs #{fr_group.inspect})"
       problem = "neither have a reference_group value set" if fr_group == r_group
       
-      @errors << error_for_row(r_row, "has the same primary image as #{fr_ident} but #{problem}")
+      colliding_row = @objects.rows_by_ref(ref).first
+      @errors << error_for_row(colliding_row, "has the same primary image as #{ident(first_ref)} but #{problem}")
     end
   end
   
+  # TODO: generalize to non-English titles when ready
+  def verify_unique_titles
+    first_refs_by_value_by_heading = {}
+    text_values_by_prop_name_by_ref.each do |ref, tvs_by_pn|
+      (tvs_by_pn["auto:title"] || []).each do |tv|
+        heading = TitleStrategy::TITLE_PROPERTIES[tv[:sequence_number] - 1]
+        refs_by_value = (first_refs_by_value_by_heading[heading] ||= {})
+        
+        value = tv[:text_value]
+        existing_ref = first_ref_by_value[value]
+        if existing_ref.nil?
+          first_refs_by_value[value] = ref
+        else
+          colliding_row = @objects.rows_by_ref(ref).first
+          @errors << error_for_row(colliding_row, "has the same #{heading} title as #{ident(existing_ref)}: #{value}")
+        end
+      end
+    end
+  end
+  
+  
+  private
+  
+  def ident(product)
+    location = @csvs.row_info(@objects.rows_by_ref(product)).first.values_at(:name, :index).join(":")
+    "#{product[:company][:reference]} / #{product[:reference]} (#{location})"
+  end
+  
   # AFTER AUTO
-  # 
-  # need the title values by product
-  #  - "ensured no blank / duplicated titles"
   # 
   # need the agd values by product
   #  - ""ensured all grouped products are adequately differentiated"

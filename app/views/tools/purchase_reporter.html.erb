@@ -13,7 +13,7 @@
       <th>Items</th>
     </tr>
     
-    <% @purchases.each do |purchase| %>
+    <% @purchases.reverse_each do |purchase| %>
     <tr>
       <td class="id"><%= purchase.id %></td>
       <td><%= purchase.facility.primary_url %> <br/> <%= h purchase.response[:reference] %></td>

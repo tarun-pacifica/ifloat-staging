@@ -95,7 +95,7 @@ class Tools < Application
     
     to_csv_path = "/tmp/purchase_report.csv"
     FasterCSV.open(to_csv_path, "w") do |csv|
-      csv << %w(ID Facility Order Completed Cookie Days Item Quantity Price Total Net)
+      csv << %w(ID Facility Order Completed Cookie Days Item Description Quantity Price Total Net)
       
       @purchases.each do |purchase|
         fields = [purchase.id]
@@ -109,7 +109,7 @@ class Tools < Application
           quantity = i['quantity'].to_i
           price = i['price'].to_f
           total = quantity * price
-          csv << fields.dup.push("#{i['reference']} (#{i['name']})", quantity, "%0.2f" % price, "%0.2f" % total, "%0.2f" % (total / 1.2))
+          csv << fields.dup.push(i['reference'], i['name'], quantity, "%0.2f" % price, "%0.2f" % total, "%0.2f" % (total / 1.2))
         end
       end
     end

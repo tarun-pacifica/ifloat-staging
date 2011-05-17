@@ -2,7 +2,7 @@ class AutoObjectGenerator
   include ErrorWriter
   
   ERROR_HEADERS = %w(csv row error)
-  PROPERTY_VALUE_CLASSES = PropertyValue.descendants.map { |d| [d] + d.descendants.to_a }.flatten.uniq
+  VALUE_CLASSES = PropertyValue.descendants.map { |d| [d] + d.descendants.to_a }.flatten.to_set
   
   def initialize(csv_catalogue, object_catalogue)
     @csvs = csv_catalogue
@@ -25,72 +25,67 @@ class AutoObjectGenerator
   def generate
     return unless @errors.empty?
     
-    product_row_md5s, *auto_row_md5s = [/^products\//, /^property_hierarchies/, /^title_strategies/].map do |matcher|
-      @csvs.infos_for_name(matcher).map { |info| info[:row_md5s] }.flatten.to_set
+    product_data_by_ref = {}
+    product_refs_by_class = {Product => [], PropertyHierarchy => [], TitleStrategy => []}
+    value_refs_by_product_ref = {}
+    @objects.each do |ref, data|
+      klass = data[:class]
+      if klass == Product
+        product_data_by_ref[ref] = data
+        product_refs_by_class[Product] << ref
+      elsif VALUE_CLASSES.include?(klass)
+        product_ref = data[:product]
+        auto_class =
+          if data[:property_hierarchy] then PropertyHierarchy
+          elsif data[:title_strategy]  then TitleStrategy
+          else nil
+          end
+        product_refs_by_class[auto_class] << product_ref unless auto_class.nil?
+        (value_refs_by_product_ref[product_ref] ||= []) << ref
+      end
     end
     
-    refs_by_product_row_md5 = {}
-    row_md5s_by_product_row_md5 = {}
-    
-    @objects.rows_by_ref.each do |ref, object_row_md5s|
-      primary_row_md5 = object_row_md5s.first
-      next unless product_row_md5s.include?(primary_row_md5)
+    all_product_refs = product_refs_by_class.delete(Product).to_set
+    product_refs_by_class.each do |klass, refs|
+      error_count, product_count = 0, 0
+      refs_to_generate = all_product_refs - refs
+      refs_to_generate.delete_if { |ref| product_data_by_ref[ref][:reference_group].nil? } if klass == PropertyHierarchy
+      m = method("generate_#{klass.to_s.gsub(/[^A-Z]/, '').downcase}_values")
       
-      (refs_by_product_row_md5[primary_row_md5] ||= []) << ref
-      (row_md5s_by_product_row_md5[primary_row_md5] ||= []).concat(object_row_md5s)
-    end
-    
-    row_md5s_by_product_row_md5_by_csv_name =
-      row_md5s_by_product_row_md5.group_by { |row_md5, object_row_md5s| @csvs.row_csv_name(row_md5) }
-    
-    %w(PH TS).zip(auto_row_md5s).each do |domain, row_md5s|
-      m = method("generate_#{domain.downcase}_values")
-      
-      row_md5s_by_product_row_md5_by_csv_name.each do |csv_name, row_md5s_by_product_row_md5|
-        row_count, generated_count, error_count = 0, 0, 0
-        
-        row_md5s_by_product_row_md5.each do |row_md5, object_row_md5s|
-          next unless (row_md5s & object_row_md5s).empty?
+      refs_to_generate.each_slice(500).each do |refs|
+        refs.each do |ref|
+          values_by_property_name = (value_refs_by_product_ref[ref] || []).group_by { |v| v[:definition][:name] }
+          product_class = values_by_property_name["reference:class"].first[:text_value]
+          row_md5 = @objects.rows_by_ref[ref]
           
-          refs_by_class = refs_by_product_row_md5[row_md5].group_by { |ref| ref[:class] }
-          
-          product = refs_by_class[Product].first
-          next if domain == "PH" and product[:reference_group].nil?
-          
-          value_refs = refs_by_class.values_at(*PROPERTY_VALUE_CLASSES).flatten.compact
-          value_refs_by_property_name = value_refs.group_by { |v| v[:definition][:name] }
-          
-          klass = value_refs_by_property_name["reference:class"].first[:text_value]
-          
-          auto_objects, errors = m.call(product, klass, value_refs_by_property_name, row_md5)
+          auto_objects, errors = m.call(ref, product_data_by_ref[ref], product_class, values_by_property_name, row_md5)
           errors += @objects.add(auto_objects, row_md5).map { |e| error_for_row(e, row_md5) }
           @errors += errors
           
-          row_count += 1
-          generated_count += auto_objects.size
+          product_count += 1 unless auto_objects.empty?
           error_count += errors.size
         end
         
-        puts " - generated #{generated_count} #{domain} objects from #{row_count} rows of #{csv_name}" if generated_count > 0
-        puts " ! #{error_count} errors reported from #{csv_name} while generating #{domain} objects" if error_count > 0
+        puts " - generated #{klass} objects for #{product_count}/#{refs_to_generate.size} products" if product_count > 0
       end
       
-      @objects.commit("auto_#{domain}")
+      puts " ! #{error_count} errors reported while generating #{klass} objects" if error_count > 0
+      @objects.commit("auto_#{klass}")
     end
   end
   
-  def generate_auto_part(value_refs, capitalize, superscript_units)
-    klass = value_refs.first[:class]
-    value_refs = value_refs.sort_by { |v| v[:sequence_number] }
+  def generate_auto_part(values, capitalize, superscript_units)
+    klass = values.first[:class]
+    values = values.sort_by { |v| v[:sequence_number] }
     
     if klass == TextPropertyValue
-      part = value_refs.map { |v| v[:text_value] }.join(", ")
+      part = values.map { |v| v[:text_value] }.join(", ")
       capitalize ? part.gsub!(/(^|\s)\S/) { $&.upcase } : part
     else
-      min_seq_num = value_refs.first[:sequence_number]
-      value_refs = value_refs.select { |v| v[:sequence_number] == min_seq_num }
-      value_refs = value_refs.sort_by { |v| v[:unit].to_s }
-      formatted_values = value_refs.map do |v|
+      min_seq_num = values.first[:sequence_number]
+      values = values.select { |v| v[:sequence_number] == min_seq_num }
+      values = values.sort_by { |v| v[:unit].to_s }
+      formatted_values = values.map do |v|
         value = klass.format(v[:min_value], v[:max_value], "-", v[:unit])
         superscript_units ? value.superscript_numeric : value
       end
@@ -98,7 +93,7 @@ class AutoObjectGenerator
     end
   end
   
-  def generate_ph_values(product, klass, value_refs_by_property_name, row_md5)
+  def generate_ph_values(product_ref, product, klass, values_by_property_name, row_md5)
     diff_objects = []
     
     seq_num = 0
@@ -111,14 +106,14 @@ class AutoObjectGenerator
       
       rendered_parts = []
       hierarchy[:property_names].map do |name|
-        value_refs = value_refs_by_property_name[name]
-        rendered_parts << generate_auto_part(value_refs, false, false) unless value_refs.nil?
+        values = values_by_property_name[name]
+        rendered_parts << generate_auto_part(values, false, false) unless values.nil?
       end
       
       diff_objects << {
         :class => TextPropertyValue,
         :definition => @agd_property,
-        :product => product,
+        :product => product_ref,
         :auto_generated => true,
         :sequence_number => seq_num,
         :language_code => "ENG",
@@ -130,8 +125,8 @@ class AutoObjectGenerator
     [diff_objects, []]
   end
   
-  def generate_ts_values(product, klass, value_refs_by_property_name, row_md5)
-    diff_objects, errors = [], []
+  def generate_ts_values(product_ref, product, klass, values_by_property_name, row_md5)
+    title_objects, errors = [], []
     
     strategy = ObjectRef.for(TitleStrategy, [klass])
     return [[], [error_no_strategy(:ts, klass, row_md5)]] unless @objects.has_ref?(strategy)
@@ -144,18 +139,18 @@ class AutoObjectGenerator
         elsif part == "product.reference"
           rendered_parts << product[:reference]
         else
-          value_refs = value_refs_by_property_name[part]
+          values = values_by_property_name[part]
           notDescription = (title != :description)
-          rendered_parts << generate_auto_part(value_refs, notDescription, notDescription) unless value_refs.nil?
+          rendered_parts << generate_auto_part(values, notDescription, notDescription) unless values.nil?
         end
       end
       rendered_parts.pop while rendered_parts.last == "-"
       
       if rendered_parts.empty? then errors << error_for_row("empty #{title} title", row_md5)
-      else diff_objects << {
+      else title_objects << {
           :class => TextPropertyValue,
           :definition => @at_property,
-          :product => product,
+          :product => product_ref,
           :auto_generated => true,
           :sequence_number => i + 1,
           :language_code => "ENG",
@@ -165,6 +160,6 @@ class AutoObjectGenerator
       end
     end
     
-    [diff_objects, errors]
+    [title_objects, errors]
   end
 end

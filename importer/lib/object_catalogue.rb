@@ -49,7 +49,7 @@ class ObjectCatalogue
     
     delete_obsolete
     
-    @verifier = ObjectCatalogueVerifier.new(dir, csv_catalogue)
+    @verifier = ObjectCatalogueVerifier.new(csv_catalogue, self)
     each(&@verifier.method(:added))
   end
   
@@ -59,7 +59,7 @@ class ObjectCatalogue
       
       if has_ref?(ref)
         existing_rows = @rows_by_ref[ref].map do |row_md5|
-          @csvs.row_info(row_md5).values_at(:name, :index).join(":")
+          [@csvs.row_csv_name(row_md5), @csvs.row_index(row_md5)].join(":")
         end.join(", ")
         existing_rows = "unknown csvs / rows" if existing_rows.blank?
         return ["duplicate of #{object[:class]} from #{existing_rows}"]

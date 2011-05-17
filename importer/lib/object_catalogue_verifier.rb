@@ -4,8 +4,9 @@ class ObjectCatalogueVerifier
   ERROR_HEADERS = %w(csv row error)
   TEXT_PROP_NAMES = %w(auto:group_diff auto:title reference:category reference:class).to_set
   
-  def initialize(dir, csv_catalogue)
+  def initialize(csv_catalogue, object_catalogue)
     @csvs = csv_catalogue
+    @objects = object_catalogue
     @errors = []
     
     @category_images_by_ref          = {}
@@ -17,30 +18,30 @@ class ObjectCatalogueVerifier
   end
   
   def added(ref, data)
-    case data[:class]
+    case data[:class].to_s
     
-    when Asset
+    when "Asset"
       @category_images_by_ref[ref] = data if data[:bucket] == "category_images"
       
-    when Attachment
+    when "Attachment"
       asset = data[:asset]
-      return unless data[:role] == "image" and asset[:sequence_number] = 1
+      return unless data[:role] == "image" and asset[:sequence_number] == 1
       @primary_images_by_ref[data[:product]] = data
       
-    when Company
+    when "Company"
       @companies_by_ref[ref] = data
-    
-    when Facility
+      
+    when "Facility"
       @facilities_by_ref[ref] = data
-    
-    when Product
+      
+    when "Product"
       @products_by_ref[ref] = data
       
-    when TextPropertyValue
-      prop_name = data[:definition][:name]
+    when "TextPropertyValue"
+      prop_name = data[:definition][:name] # TODO: need to move this into memory rather than trigger a retieval
       return unless TEXT_PROP_NAMES.include?(prop_name)
       text_values_by_prop_name = (@text_values_by_prop_name_by_ref[data[:product]] ||= {})
-      text_values_by_prop_name[prop_name] = data
+      (text_values_by_prop_name[prop_name] ||= []) << data
       
     end
   end
@@ -65,13 +66,13 @@ class ObjectCatalogueVerifier
   end
   
   def verify_all_categories_have_images
-    cat_image_names = @category_images.map do |image|
+    cat_image_names = @category_images_by_ref.values.map do |image|
       image[:name] =~ Asset::NAME_FORMAT ? $1 : raise("unable to parse #{o.attributes[:name]}")
     end.to_set
     
     prop_names = %w(reference:category reference:class)
     cat_names = @text_values_by_prop_name_by_ref.map do |ref, tvs_by_pn|
-      tvs_by_pn.values_at(*prop_names).compact.flatten.map { |tv| tv[:text_value] }
+      tvs_by_pn.values_at(*prop_names).compact.flatten.map { |tv| tv[:text_value].downcase.tr(" ", "_") }
     end.flatten.to_set
     
     @errors += (cat_names - cat_image_names).sort.map { |n| [nil, nil, "no image provided for category #{n.inspect}"] }
@@ -87,7 +88,7 @@ class ObjectCatalogueVerifier
     
     PickedProduct.all_primary_keys.each do |company_ref, product_ref|
       if (not companies_by_ref.has_key?(company_ref))
-        error(Company, nil, nil, nil, "unable to delete company with user-referenced product: #{company_ref} / #{product_ref}")
+        @errors << [nil, nil,"unable to delete company with user-referenced product: #{company_ref} / #{product_ref}"]
       elsif (not products_by_ref.has_key?(product_ref))
         orphaned_product_ids << db_companies[company_ref].products.first(:reference => product_ref).id
       end
@@ -98,13 +99,13 @@ class ObjectCatalogueVerifier
   
   def verify_no_orphaned_purchases
     companies_by_ref = @companies_by_ref.values.hash_by { |c| c[:reference] }
-    facilities_by_url = @facilities_by_ref.values.hash_by { |f| f[:primary_url] }
+    facilities_by_name = @facilities_by_ref.values.hash_by { |f| f[:name] }
     
-    Purchase.all_facility_primary_keys.each do |company_ref, facility_url|
+    Purchase.all_facility_primary_keys.each do |company_ref, facility_name|
       if (not companies_by_ref.has_key?(company_ref))
         @errors << [nil, nil, "unable to delete company with facility with user-referenced purchases: #{company_ref} / #{facility_url}"]
-      elsif (not facilities_by_url.has_key?(facility_url))
-         @errors << [nil, nil, "unable to delete facility with user-referenced purchases: #{company_ref} / #{facility_url}"]
+      elsif (not facilities_by_name.has_key?(facility_name))
+        @errors << [nil, nil, "unable to delete facility with user-referenced purchases: #{company_ref} / #{facility_url}"]
       end
     end
   end
@@ -127,26 +128,28 @@ class ObjectCatalogueVerifier
       problem = "their reference_group values differ (#{r_group.inspect} vs #{fr_group.inspect})"
       problem = "neither have a reference_group value set" if fr_group == r_group
       
-      colliding_row = @objects.rows_by_ref(ref).first
-      @errors << error_for_row(colliding_row, "has the same primary image as #{ident(first_ref)} but #{problem}")
+      colliding_row = @objects.rows_by_ref[ref].first
+      @errors << error_for_row("has the same primary image as #{ident(first_ref)} but #{problem}", colliding_row)
     end
   end
   
   # TODO: generalize to non-English titles when ready
   def verify_unique_titles
     first_refs_by_value_by_heading = {}
-    text_values_by_prop_name_by_ref.each do |ref, tvs_by_pn|
+    @text_values_by_prop_name_by_ref.each do |ref, tvs_by_pn|
       (tvs_by_pn["auto:title"] || []).each do |tv|
         heading = TitleStrategy::TITLE_PROPERTIES[tv[:sequence_number] - 1]
-        refs_by_value = (first_refs_by_value_by_heading[heading] ||= {})
+        first_refs_by_value = (first_refs_by_value_by_heading[heading] ||= {})
         
         value = tv[:text_value]
-        existing_ref = first_ref_by_value[value]
+        existing_ref = first_refs_by_value[value]
         if existing_ref.nil?
           first_refs_by_value[value] = ref
         else
-          colliding_row = @objects.rows_by_ref(ref).first
-          @errors << error_for_row(colliding_row, "has the same #{heading} title as #{ident(existing_ref)}: #{value}")
+          p ref, ref.attributes
+          p @objects.rows_by_ref.size
+          colliding_row = @objects.rows_by_ref[ref].first
+          @errors << error_for_row("has the same #{heading} title as #{ident(existing_ref)}: #{value}", colliding_row)
         end
       end
     end
@@ -155,11 +158,11 @@ class ObjectCatalogueVerifier
   def verify_well_differentiated_siblings
     values_by_ref_by_group = {}
     
-    text_values_by_prop_name_by_ref.each do |ref, tvs_by_pn|
+    @text_values_by_prop_name_by_ref.each do |ref, tvs_by_pn|
       (tvs_by_pn["auto:group_diff"] || []).each do |tv|
-        group = @products_by_ref[ref].attributes.values_at(:company, :reference_group)
+        group = @products_by_ref[ref].values_at(:company, :reference_group)
         values_by_ref = (values_by_ref_by_group[group] ||= {})
-        (values_by_product[ref] ||= []) << tv[:text_value]
+        (values_by_ref[ref] ||= []) << tv[:text_value]
       end
     end
     
@@ -170,15 +173,16 @@ class ObjectCatalogueVerifier
       values_by_ref.values.transpose.each_with_index do |diff_column, i|
         blank_count = diff_column.count { |v| v.blank? }
         next if blank_count == 0 or blank_count == diff_column.size
-        colliding_row = @objects.rows_by_ref(values_by_ref.keys.first).first
-        @errors << error_for_row(colliding_row, "differentiating values from property set #{i + 1} are a mixture of values and blanks: #{diff_column.inspect} (group: #{friendly_group})")
+        colliding_row = @objects.rows_by_ref[values_by_ref.keys.first].first
+        @errors << error_for_row("differentiating values from property set #{i + 1} are a mixture of values and blanks: #{diff_column.inspect} (group: #{friendly_group})", colliding_row)
       end
       
       values_by_ref.to_a.combination(2) do |a, b|
         ref1, values1 = a
         ref2, values2 = b
-        colliding_row = @objects.rows_by_ref(ref2).first
-        @errors << error_for_row(colliding_row, "has the same differentiating values #{values1.inspect} as #{ident(ref1)} (group: #{friendly_group})") if values1 == values2
+        next unless values1 == values2
+        colliding_row = @objects.rows_by_ref[ref2].first
+        @errors << error_for_row("has the same differentiating values #{values1.inspect} as #{ident(ref1)} (group: #{friendly_group})", colliding_row)
       end
     end
   end
@@ -189,7 +193,9 @@ class ObjectCatalogueVerifier
   def ident(prod_ref)
     product = @products_by_ref[prod_ref]
     company = @companies_by_ref[product[:company]]
-    location = @csvs.row_info(@objects.rows_by_ref(prod_ref)).first.values_at(:name, :index).join(":")
+    row = @objects.rows_by_ref[prod_ref].first
+    # TODO: factor this location code (used in a few places) into csv_catalague as @csvs.location(row_md5)
+    location = [@csvs.row_csv_name(row), @csvs.row_index(row)].join(":")
     "#{company[:reference]} / #{product[:reference]} (#{location})"
   end
 end

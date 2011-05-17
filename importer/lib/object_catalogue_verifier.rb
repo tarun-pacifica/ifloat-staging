@@ -139,6 +139,7 @@ class ObjectCatalogueVerifier
     @text_values_by_prop_name_by_ref.each do |ref, tvs_by_pn|
       (tvs_by_pn["auto:title"] || []).each do |tv|
         heading = TitleStrategy::TITLE_PROPERTIES[tv[:sequence_number] - 1]
+        next if heading == :image
         first_refs_by_value = (first_refs_by_value_by_heading[heading] ||= {})
         
         value = tv[:text_value]
@@ -146,8 +147,6 @@ class ObjectCatalogueVerifier
         if existing_ref.nil?
           first_refs_by_value[value] = ref
         else
-          p ref, ref.attributes
-          p @objects.rows_by_ref.size
           colliding_row = @objects.rows_by_ref[ref].first
           @errors << error_for_row("has the same #{heading} title as #{ident(existing_ref)}: #{value}", colliding_row)
         end

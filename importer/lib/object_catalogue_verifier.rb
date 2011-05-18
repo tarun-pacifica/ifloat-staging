@@ -60,7 +60,7 @@ class ObjectCatalogueVerifier
     steps = %w(all_categories_have_images no_orphaned_purchases product_count_is_safe same_image_means_same_group unique_titles well_differentiated_siblings no_orphaned_picks)
     
     steps.each do |step|
-      puts " - #{step.tr('-', ' ')}"
+      puts " - #{step.tr('_', ' ')}"
       send("verify_#{step}")
     end
   end
@@ -158,11 +158,11 @@ class ObjectCatalogueVerifier
     values_by_ref_by_group = {}
     
     @text_values_by_prop_name_by_ref.each do |ref, tvs_by_pn|
-      (tvs_by_pn["auto:group_diff"] || []).each do |tv|
-        group = @products_by_ref[ref].values_at(:company, :reference_group)
-        values_by_ref = (values_by_ref_by_group[group] ||= {})
-        (values_by_ref[ref] ||= []) << tv[:text_value]
-      end
+      group = @products_by_ref[ref].values_at(:company, :reference_group)
+      values_by_ref = (values_by_ref_by_group[group] ||= {})
+      text_values = tvs_by_pn["auto:group_diff"]
+      next if text_values.nil?
+      values_by_ref[ref] = text_values.sort_by { |tv| tv[:sequence_number] }.map { |tv| tv[:text_value] }
     end
     
     values_by_ref_by_group.each do |group, values_by_ref|

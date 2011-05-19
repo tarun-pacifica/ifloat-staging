@@ -9,6 +9,7 @@ class ObjectCatalogueVerifier
     @objects = object_catalogue
     @errors = []
     
+    @asset_checksums_by_ref          = {}
     @category_images_by_ref          = {}
     @companies_by_ref                = {}
     @facilities_by_ref               = {}
@@ -21,12 +22,12 @@ class ObjectCatalogueVerifier
     case data[:class].to_s
     
     when "Asset"
+      @asset_checksums_by_ref[ref] = data[:checksum]
       @category_images_by_ref[ref] = data if data[:bucket] == "category_images"
       
     when "Attachment"
-      asset = data[:asset]
-      return unless data[:role] == "image" and asset[:sequence_number] == 1
-      @primary_images_by_ref[data[:product]] = data
+      return unless data[:role] == "image" and data[:sequence_number] == 1
+      @primary_images_by_ref[data[:product]] = data[:asset]
       
     when "Company"
       @companies_by_ref[ref] = data
@@ -38,7 +39,7 @@ class ObjectCatalogueVerifier
       @products_by_ref[ref] = data
       
     when "TextPropertyValue"
-      prop_name = data[:definition][:name] # TODO: need to move this into memory rather than trigger a retieval
+      prop_name = data[:definition][:name] # OK that this triggers a data_for
       return unless TEXT_PROP_NAMES.include?(prop_name)
       text_values_by_prop_name = (@text_values_by_prop_name_by_ref[data[:product]] ||= {})
       (text_values_by_prop_name[prop_name] ||= []) << data
@@ -47,6 +48,7 @@ class ObjectCatalogueVerifier
   end
   
   def deleted(ref)
+    @asset_checksums_by_ref.delete(ref)
     @category_images_by_ref.delete(ref)
     @companies_by_ref.delete(ref)
     @facilities_by_ref.delete(ref)
@@ -55,7 +57,6 @@ class ObjectCatalogueVerifier
     @text_values_by_prop_name_by_ref.delete(ref)
   end
   
-  # TODO: double check that no data loading from disk occurs during verification
   def verify
     steps = %w(all_categories_have_images no_orphaned_purchases product_count_is_safe same_image_means_same_group unique_titles well_differentiated_siblings no_orphaned_picks)
     
@@ -117,12 +118,12 @@ class ObjectCatalogueVerifier
   def verify_same_image_means_same_group
     first_refs_by_checksum = {}
     
-    @primary_images_by_ref.each do |ref, image|
-      checksum = image[:checksum]
+    @primary_images_by_ref.each do |product_ref, asset_ref|
+      checksum = @asset_checksums_by_ref[asset_ref]
       first_ref = first_refs_by_checksum[checksum]
-      first_refs_by_checksum[checksum] = ref and next if first_ref.nil?
+      (first_refs_by_checksum[checksum] = product_ref and next) if first_ref.nil?
       
-      fr_group, r_group = [first_ref, ref].map { |r| @products_by_ref[r][:reference_group] }
+      fr_group, r_group = [first_ref, product_ref].map { |r| @products_by_ref[r][:reference_group] }
       next unless fr_group.nil? or fr_group != r_group
       
       problem = "their reference_group values differ (#{r_group.inspect} vs #{fr_group.inspect})"
@@ -133,7 +134,6 @@ class ObjectCatalogueVerifier
     end
   end
   
-  # TODO: generalize to non-English titles when ready
   def verify_unique_titles
     first_refs_by_value_by_heading = {}
     @text_values_by_prop_name_by_ref.each do |ref, tvs_by_pn|

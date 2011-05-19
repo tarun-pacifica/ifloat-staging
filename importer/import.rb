@@ -61,6 +61,6 @@ generator.generate
 mail_fail("generating auto objects") if generator.write_errors(ERROR_CSV_PATH)
 objects.summarize
 
-puts "Running global integriy checks..."
+puts "Running global integrity checks..."
 objects.verifier.verify
 mail_fail("verifying global integrity") if objects.verifier.write_errors(ERROR_CSV_PATH)

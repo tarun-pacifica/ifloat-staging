@@ -4,7 +4,7 @@ describe PickedProduct do
 
   describe "creation" do   
     before(:each) do
-      @pick = PickedProduct.new(:product_id => 1, :user_id => 1, :group => "buy_now", :cached_brand => "Marlow", :cached_class => "Rope", :cached_unit => "m", :quantity => 1, :invalidated => false)
+      @pick = PickedProduct.new(:product_id => 1, :user_id => 1, :group => "buy_now", :cached_brand => "Marlow", :cached_class => "Rope", :quantity => 1, :invalidated => false)
     end
     
     it "should succeed with valid data" do
@@ -43,9 +43,9 @@ describe PickedProduct do
       @pick.should_not be_valid
     end
     
-    it "should fail without a quantity" do
+    it "should succeed without a quantity" do
       @pick.quantity = nil
-      @pick.should_not be_valid
+      @pick.should be_valid
     end
     
     it "should fail without an invalidated state" do
@@ -74,26 +74,6 @@ describe PickedProduct do
     
     it "all_primary_keys should return the unique combinations of [comp-ref, prod-ref] from all picked products" do
       PickedProduct.all_primary_keys.should == [["GBR-Ford", "GBR-FORD-CAR"], ["GBR-Opal", "GBR-OPAL-CAR"]]
-    end
-    
-    it "handle_orphaned should record warning messages for all non-anonymous orphaned picks in the users' inboxes" do
-      count = Message.count
-      PickedProduct.handle_orphaned(@products.first.id)
-      Message.count.should == count + 1
-      message, pick = Message.last, @picks.first
-      [message.user_id, message.value].should == [pick.user_id, pick.orphaned_message]
-      @to_destroy << message
-    end
-    
-    it "handle_orphaned should record warning messages for all anonymous orphaned picks in the sessions' inboxes" do
-      pick = @picks.last
-      session = Merb::DataMapperSessionStore.create(:session_id => "1234", :data => {"picked_product_ids" => [pick.id]})
-      @to_destroy << session
-      count = Message.count
-      PickedProduct.handle_orphaned(@products.last.id)
-      Message.count.should == count
-      session.reload
-      session.data["messages"].should == [pick.orphaned_message]
     end
   end
 end

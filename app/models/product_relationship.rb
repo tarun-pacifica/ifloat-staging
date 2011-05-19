@@ -31,16 +31,16 @@ class ProductRelationship
   property :id, Serial
   property :name, String, :unique_index => :val_per_company_per_prod_per_prop_per_name
   property :value, String, :required => true, :unique_index => :val_per_company_per_prod_per_prop_per_name, :index => true
-  property :bidirectional, Boolean, :required => true # TODO: spec
+  property :bidirectional, Boolean, :required => true
 
-  belongs_to :company, :required => false
+  belongs_to :company
     property :company_id, Integer, :unique_index => :val_per_company_per_prod_per_prop_per_name
   belongs_to :product
-    property :product_id, Integer, :unique_index => :val_per_company_per_prod_per_prop_per_name
-  belongs_to :property_definition, :required => false
+    property :product_id, Integer, :required => true, :unique_index => :val_per_company_per_prod_per_prop_per_name
+  belongs_to :property_definition
     property :property_definition_id, Integer, :unique_index => :val_per_company_per_prod_per_prop_per_name
   
-  validates_within :name, :set => NAMES.keys.to_set
+  validates_within :name, :set => NAMES.keys
   
   # TODO: spec
   def self.compile_index

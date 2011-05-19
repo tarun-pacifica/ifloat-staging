@@ -102,17 +102,20 @@ module Merb
       return [] if picked_product_ids.empty?
       picks = PickedProduct.all(:id => picked_product_ids, :order => [:created_at])
       update_picked_product_title_values(picks.select { |pick| pick.invalidated? }, true)
+      to_delete, picks = picks.partition(&:invalidated?)
+      queue_messages(*to_delete.map(&:orphaned_message)) unless to_delete.empty?
+      to_delete.each(&:destroy)
       picks
     end
     
-    def queue_message(value)
-      (self[:messages] ||= []) << value
+    def queue_messages(*values)
+      (self[:messages] ||= []).concat(values)
     end
     
     def remove_picked_products(picks)
       ids = picked_product_ids
       pick_ids = picks.map { |pick| pick.id }
-      PickedProduct.all(:id => pick_ids).destroy!      
+      PickedProduct.all(:id => pick_ids).destroy!
       self[:picked_product_ids] = (ids - pick_ids)
     end
     

@@ -16,13 +16,14 @@ describe ProductRelationship do
     end
   end
 
-  describe "creation" do   
+  describe "creation" do
     before(:each) do
       @relationship = ProductRelationship.new(:company_id => 1,
                                               :product_id => 1,
                                               :property_definition => @text_property,
-                                              :name => "used_on",
-                                              :value => "Astra")
+                                              :name => "is_used_on",
+                                              :value => "Astra",
+                                              :bidirectional => true)
     end
     
     it "should succeed with valid data" do
@@ -63,6 +64,11 @@ describe ProductRelationship do
       @relationship.value = nil
       @relationship.should_not be_valid
     end
+    
+    it "should fail without a bidirectional indication" do
+      @relationship.bidirectional = nil
+      @relationship.should_not be_valid
+    end
   end
 
   describe "creation with existing relationship for a company, product and property definition" do
@@ -71,7 +77,7 @@ describe ProductRelationship do
       @relationship = ProductRelationship.create(:company_id => 1,
                                                  :product_id => 1,
                                                  :property_definition => @text_property,
-                                                 :name => "used_on",
+                                                 :name => "is_used_on",
                                                  :value => "Astra")
     end
     
@@ -82,17 +88,17 @@ describe ProductRelationship do
     
     it "should succeed with a different company" do
       ProductRelationship.new(:company_id => 2, :product_id => 1, :property_definition => @text_property,
-                              :name => "used_on", :value => "Astra").should be_valid
+                              :name => "is_used_on", :value => "Astra").should be_valid
     end
     
     it "should succeed with a different product" do
       ProductRelationship.new(:company_id => 1, :product_id => 2, :property_definition => @text_property,
-                              :name => "used_on", :value => "Astra").should be_valid
+                              :name => "is_used_on", :value => "Astra").should be_valid
     end
     
     it "should succeed with a different property definition" do
       ProductRelationship.new(:company_id => 1, :product_id => 1, :property_definition => @text_property2,
-                              :name => "used_on", :value => "Astra").should be_valid
+                              :name => "is_used_on", :value => "Astra").should be_valid
     end
     
     it "should succeed with a different name" do
@@ -102,12 +108,12 @@ describe ProductRelationship do
     
     it "should succeed with a different value" do
       ProductRelationship.new(:company_id => 1, :product_id => 1, :property_definition => @text_property,
-                              :name => "used_on", :value => "Polo").should be_valid
+                              :name => "is_used_on", :value => "Polo").should be_valid
     end
     
     it "should fail with the same value" do
       ProductRelationship.new(:company_id => 1, :product_id => 1, :property_definition => @text_property,
-                              :name => "used_on", :value => "Astra").should_not be_valid
+                              :name => "is_used_on", :value => "Astra").should_not be_valid
     end
   end
   
@@ -124,7 +130,7 @@ describe ProductRelationship do
       end
       
       @products[0].relationships.create(:name => "goes_well_with", :property_definition => @text_property, :value => "Earring")
-      @products[1].relationships.create(:name => "used_on", :value => "ABC0")
+      @products[1].relationships.create(:name => "is_used_on", :value => "ABC0")
     end
     
     after(:all) do
@@ -146,7 +152,7 @@ describe ProductRelationship do
     
     it "should yield the necklace (used) for the clasp" do
       ProductRelationship.related_products(@products[1]).should == {
-        "used_on" => [ @products[0] ]
+        "is_used_on" => [ @products[0] ]
       }
     end
     
@@ -185,8 +191,8 @@ describe ProductRelationship do
       
       @products[0].relationships.create(:name => "goes_well_with", :value => "Earring",
                                         :company => @sparklies, :property_definition => @text_property)
-      @products[1].relationships.create(:name => "used_on", :value => "ABC0", :company => @sparklies)
-      @products[2].relationships.create(:name => "used_on", :value => "ABC0", :company => @tinselies)
+      @products[1].relationships.create(:name => "is_used_on", :value => "ABC0", :company => @sparklies)
+      @products[2].relationships.create(:name => "is_used_on", :value => "ABC0", :company => @tinselies)
     end
     
     after(:all) do
@@ -208,7 +214,7 @@ describe ProductRelationship do
     end
     
     it "should yield the Sparklies necklace (used) for the Sparklies clasp" do
-      ProductRelationship.related_products(@products[1]).should == { "used_on" => [ @products[0] ] }
+      ProductRelationship.related_products(@products[1]).should == { "is_used_on" => [ @products[0] ] }
     end
     
     it "should yield the Sparklies necklace (goes well) for the Sparklies Earring" do

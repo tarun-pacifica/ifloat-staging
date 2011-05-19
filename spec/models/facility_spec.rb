@@ -64,7 +64,7 @@ describe Facility do
     end
     
     it "should return an empty hash if no product IDs are specified" do
-      Facility.new(:id => 1, :company_id => 1).product_mappings([]).should == {}
+      Facility.new(:id => 1, :company_id => 1).product_mappings([]).should == []
     end
   end
   
@@ -129,7 +129,7 @@ describe Facility do
   describe "purchase_urls" do
     before(:all) do
       @mappings = %w(ABCDE;k1=v1;k2=v2 EBCDA).map do |ref|
-        ProductMapping.new(:product_id => rand(100), :reference => ref)
+        [ProductMapping.new(:product_id => rand(100), :reference => ref), 1]
       end
     end
     

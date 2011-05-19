@@ -11,13 +11,13 @@ end
 # TODO: reactivate once this isn't a 5 second bottleneck
 # DataMapper.auto_migrate! if Merb.orm == :datamapper
 
-# DataMapper::Model.descendants.each do |model|
-#   begin
-#     model.auto_migrate!
-#   rescue
-#     warn "auto_migration failed on #{model}"
-#   end
-# end
+DataMapper::Model.descendants.each do |model|
+  begin
+    model.auto_migrate!
+  rescue
+    warn "auto_migration failed on #{model}"
+  end
+end
 
 class BeValid
   def initialize

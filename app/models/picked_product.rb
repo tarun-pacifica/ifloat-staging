@@ -37,27 +37,6 @@ class PickedProduct
     repository(:default).adapter.select(query).map { |record| [record.cref, record.pref] }
   end
   
-  def self.handle_orphaned(product_ids)
-    anonymous_picks_by_id = {}
-    
-    PickedProduct.all(:product_id => product_ids).each do |pick|
-      if pick.user_id.nil? then anonymous_picks_by_id[pick.id] = pick
-      else Message.create(:user_id => pick.user_id, :value => pick.orphaned_message)
-      end
-    end
-    
-    Merb::DataMapperSessionStore.all.each do |session|
-      (session.data["picked_product_ids"] || []).each do |session_pick_id|
-        pick = anonymous_picks_by_id[session_pick_id]
-        next if pick.nil?
-        messages = (session.data["messages"] || []) + [pick.orphaned_message]
-        session.update(:data => session.data.merge("messages" => messages))
-      end
-    end
-    
-    PickedProduct.all(:product_id => product_ids).destroy!
-  end
-  
   def orphaned_message
     "Discontinued #{cached_brand} #{cached_class} removed from your #{GROUPS[group]}."
   end

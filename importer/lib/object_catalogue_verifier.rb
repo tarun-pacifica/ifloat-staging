@@ -79,7 +79,6 @@ class ObjectCatalogueVerifier
     @errors += (cat_names - cat_image_names).sort.map { |n| [nil, nil, "no image provided for category #{n.inspect}"] }
   end
   
-  # this method is run last as it has side effects and so shouldn't run unless we're error-free
   def verify_no_orphaned_picks
     db_companies = Company.all.hash_by(:reference)
     orphaned_product_ids = []
@@ -88,14 +87,9 @@ class ObjectCatalogueVerifier
     products_by_ref = @products_by_ref.values.hash_by { |p| p[:reference] }
     
     PickedProduct.all_primary_keys.each do |company_ref, product_ref|
-      if (not companies_by_ref.has_key?(company_ref))
-        @errors << [nil, nil,"unable to delete company with user-referenced product: #{company_ref} / #{product_ref}"]
-      elsif (not products_by_ref.has_key?(product_ref))
-        orphaned_product_ids << db_companies[company_ref].products.first(:reference => product_ref).id
-      end
+      next unless companies_by_ref.has_key?(company_ref)
+      @errors << [nil, nil,"unable to delete company with user-referenced product: #{company_ref} / #{product_ref}"]
     end
-    
-    PickedProduct.handle_orphaned(orphaned_product_ids) if orphaned_product_ids.any? and @errors.empty?
   end
   
   def verify_no_orphaned_purchases

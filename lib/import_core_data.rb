@@ -233,8 +233,7 @@ class ImportSet
       orphaned_product_ids = []
       
       PickedProduct.all_primary_keys.each do |company_ref, product_ref|
-        company = get(Company, company_ref)
-        next unless company.nil?
+        next unless get(Company, company_ref).nil?
         error(Company, nil, nil, nil, "unable to delete company with user-referenced product: #{company_ref} / #{product_ref}")
       end
     end

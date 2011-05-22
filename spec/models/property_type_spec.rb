@@ -4,7 +4,7 @@ describe PropertyType do
 
   describe "creation" do   
     before(:each) do
-      @type = PropertyType.new(:core_type => "numeric", :name => "weight", :valid_units => ["kg", "lb"])
+      @type = PropertyType.new(:core_type => "numeric", :name => "weight", :units => ["kg", "lb"])
     end
     
     it "should succeed with valid data" do
@@ -31,38 +31,38 @@ describe PropertyType do
       @type.should_not be_valid
     end
     
-    it "should fail without an array for its valid units" do
-      @type.valid_units = nil
-      @type.should_not be_valid
-    end
-    
-    it "should fail with an empty array for its valid units" do
-      @type.valid_units = []
-      @type.should_not be_valid
-    end
-    
-    it "should fail with repeated valid units" do
-      @type.valid_units = ["kg", "lb", "kg"]
-      @type.should_not be_valid
-    end
-    
-    it "should succeed with a single nil for its valid units" do
-      @type.valid_units = [nil]
+    it "should succeed without an array for its units" do
+      @type.units = nil
       @type.should be_valid
     end
     
-    it "should fail with a nil AND other values for its valid units" do
-      @type.valid_units = ["kg", nil, "lb"]
+    it "should succeed with an empty array for its units" do
+      @type.units = []
+      @type.should be_valid
+    end
+    
+    it "should fail with repeated units" do
+      @type.units = ["kg", "lb", "kg"]
+      @type.should_not be_valid
+    end
+    
+    it "should succeed with a single nil for its units" do
+      @type.units = [nil]
+      @type.should be_valid
+    end
+    
+    it "should fail with a nil AND other values for its units" do
+      @type.units = ["kg", nil, "lb"]
       @type.should_not be_valid
     end
     
     it "should fail with invalid units" do
-      @type.valid_units = ["kg", "sq. kilometers"]
+      @type.units = ["kg", "sq. kilometers"]
       @type.should_not be_valid
     end
     
-    it "should fail with pairs of valid units with no known conversion" do
-      @type.valid_units = ["kg", "mi"]
+    it "should fail with pairs of units with no known conversion" do
+      @type.units = ["kg", "mi"]
       @type.should_not be_valid
     end
   end
@@ -109,7 +109,6 @@ describe PropertyType do
       PropertyType::CORE_TYPES.keys.each do |name|
         klass = PropertyType.new(:core_type => name).value_class
         klass.should_not == PropertyValue
-        # TODO: find out why a simple 'kind_of?' check fails here
         klass.ancestors.include?(PropertyValue).should be_true 
       end
     end
@@ -117,7 +116,7 @@ describe PropertyType do
   
   describe "unit" do
     before(:each) do
-      @type = PropertyType.new(:core_type => "numeric", :name => "weight", :valid_units => ["kg"])
+      @type = PropertyType.new(:core_type => "numeric", :name => "weight", :units => ["kg"])
     end
     
     it "validation should validate a known unit" do
@@ -160,8 +159,8 @@ describe PropertyType do
       type.mandatory_units.should == []
     end
     
-    it "should equal the valid units" do
-      type = PropertyType.new(:core_type => "numeric", :name => "weight", :valid_units => ["kg", "lb"])
+    it "should equal the units" do
+      type = PropertyType.new(:core_type => "numeric", :name => "weight", :units => ["kg", "lb"])
       type.mandatory_units.should == ["kg", "lb"]
     end
   end

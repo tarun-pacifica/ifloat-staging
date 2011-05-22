@@ -18,7 +18,7 @@ class Product
   
   has n, :attachments
   has n, :mappings, :model => "ProductMapping"
-  has n, :product_relationships
+  has n, :product_relationships # needs to be named this way as 'relationships' collides with DM
   has n, :values, :model => "PropertyValue"
   
   # TODO: spec

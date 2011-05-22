@@ -1,7 +1,7 @@
 require "merb-core"
 
 Merb.start_environment(:testing => true, :adapter => 'runner', :environment => ENV['MERB_ENV'] || 'test')
- 
+
 RSpec.configure do |config|
   # config.include(Merb::Test::ViewHelper)
   # config.include(Merb::Test::RouteHelper)

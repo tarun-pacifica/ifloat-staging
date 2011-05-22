@@ -45,11 +45,6 @@ describe ProductRelationship do
       @relationship.should be_valid
     end
     
-    it "should fail with a numeric property definition" do
-      @relationship.property_definition = @numeric_property
-      @relationship.should_not be_valid
-    end
-    
     it "should fail without a name" do
       @relationship.name = nil
       @relationship.should_not be_valid
@@ -70,52 +65,6 @@ describe ProductRelationship do
       @relationship.should_not be_valid
     end
   end
-
-  describe "creation with existing relationship for a company, product and property definition" do
-    before(:all) do
-      @text_property2 = @text_type.definitions.create(:name => "marketing:edition", :sequence_number => 1)
-      @relationship = ProductRelationship.create(:company_id => 1,
-                                                 :product_id => 1,
-                                                 :property_definition => @text_property,
-                                                 :name => "is_used_on",
-                                                 :value => "Astra")
-    end
-    
-    after(:all) do
-      @text_property2.destroy
-      @relationship.destroy
-    end
-    
-    it "should succeed with a different company" do
-      ProductRelationship.new(:company_id => 2, :product_id => 1, :property_definition => @text_property,
-                              :name => "is_used_on", :value => "Astra").should be_valid
-    end
-    
-    it "should succeed with a different product" do
-      ProductRelationship.new(:company_id => 1, :product_id => 2, :property_definition => @text_property,
-                              :name => "is_used_on", :value => "Astra").should be_valid
-    end
-    
-    it "should succeed with a different property definition" do
-      ProductRelationship.new(:company_id => 1, :product_id => 1, :property_definition => @text_property2,
-                              :name => "is_used_on", :value => "Astra").should be_valid
-    end
-    
-    it "should succeed with a different name" do
-      ProductRelationship.new(:company_id => 1, :product_id => 1, :property_definition => @text_property,
-                              :name => "works_with", :value => "Astra").should be_valid
-    end
-    
-    it "should succeed with a different value" do
-      ProductRelationship.new(:company_id => 1, :product_id => 1, :property_definition => @text_property,
-                              :name => "is_used_on", :value => "Polo").should be_valid
-    end
-    
-    it "should fail with the same value" do
-      ProductRelationship.new(:company_id => 1, :product_id => 1, :property_definition => @text_property,
-                              :name => "is_used_on", :value => "Astra").should_not be_valid
-    end
-  end
   
   describe "related products within a single company" do
     before(:all) do
@@ -124,20 +73,20 @@ describe ProductRelationship do
       @products = []
       ["Necklace", "Clasp", "Earring"].each_with_index do |thing, i|
         product = Product.create(:company => @sparklies, :reference => "ABC#{i}")
-        TextPropertyValue.create(:product => product, :definition => @text_property,
-                                 :value => thing, :language_code => "ENG")
+        TextPropertyValue.create(:product => product, :definition => @text_property, :sequence_number => 1,
+                                 :text_value => thing, :language_code => "ENG", :auto_generated => false)
         @products << product
       end
       
-      @products[0].relationships.create(:name => "goes_well_with", :property_definition => @text_property, :value => "Earring")
-      @products[1].relationships.create(:name => "is_used_on", :value => "ABC0")
+      @products[0].product_relationships.create(:name => "goes_well_with", :property_definition => @text_property, :value => "Earring", :bidirectional => true)
+      @products[1].product_relationships.create(:name => "is_used_on", :value => "ABC0", :bidirectional => true)
     end
     
     after(:all) do
       @sparklies.destroy
       
       @products.each do |product|
-        product.relationships.destroy!
+        product.product_relationships.destroy!
         product.values.destroy!
         product.destroy
       end
@@ -163,10 +112,15 @@ describe ProductRelationship do
     end
     
     it "should be completely described by compile_index" do
+      p1, p2, p3 = @products.map(&:id)
       ProductRelationship.compile_index.should == {
-        
+        p1 => {"goes_well_with" => [p3], "uses" => [p2]},
+        p2 => {"is_used_on" => [p1]},
+        p3 => {"goes_well_with" => [p1]}
       }
     end
+    
+    it "should have specs that test uni-directional relationships"
   end
   
   describe "related products across multiple companies" do
@@ -177,22 +131,25 @@ describe ProductRelationship do
       @products = []
       ["Necklace", "Clasp", "Earring"].each_with_index do |thing, i|
         product = Product.create(:company => @sparklies, :reference => "ABC#{i}")
-        TextPropertyValue.create(:product => product, :definition => @text_property,
-                                 :value => thing, :language_code => "ENG")
+        TextPropertyValue.create(:product => product, :definition => @text_property, :sequence_number => 1,
+                                 :text_value => thing, :language_code => "ENG", :auto_generated => false)
         @products << product
       end
       
       ["Clasp", "Earring"].each_with_index do |thing, i|
         product = Product.create(:company => @tinselies, :reference => "CBA#{i}")
-        TextPropertyValue.create(:product => product, :definition => @text_property,
-                                 :value => thing, :language_code => "ENG")
+        TextPropertyValue.create(:product => product, :definition => @text_property, :sequence_number => 1,
+                                 :text_value => thing, :language_code => "ENG", :auto_generated => false)
         @products << product
       end
       
-      @products[0].relationships.create(:name => "goes_well_with", :value => "Earring",
-                                        :company => @sparklies, :property_definition => @text_property)
-      @products[1].relationships.create(:name => "is_used_on", :value => "ABC0", :company => @sparklies)
-      @products[2].relationships.create(:name => "is_used_on", :value => "ABC0", :company => @tinselies)
+      @products[0].product_relationships.create(:name => "goes_well_with", :value => "Earring",
+                                                :company => @sparklies, :property_definition => @text_property,
+                                                :bidirectional => true)
+      @products[1].product_relationships.create(:name => "is_used_on", :value => "ABC0", :company => @sparklies,
+                                                :bidirectional => true)
+      @products[2].product_relationships.create(:name => "is_used_on", :value => "ABC0", :company => @tinselies,
+                                                :bidirectional => true)
     end
     
     after(:all) do
@@ -200,7 +157,7 @@ describe ProductRelationship do
       @tinselies.destroy
       
       @products.each do |product|
-        product.relationships.destroy!
+        product.product_relationships.destroy!
         product.values.destroy!
         product.destroy
       end
@@ -228,6 +185,8 @@ describe ProductRelationship do
     it "should yield no related products for the Tinselies earring" do
       ProductRelationship.related_products(@products[4]).should == {}
     end
+    
+    it "should have specs that test uni-directional relationships"
   end
   
 end

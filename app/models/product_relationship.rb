@@ -32,7 +32,7 @@ class ProductRelationship
   property :name, String, :unique_index => :val_per_company_per_prod_per_prop_per_name
   property :value, String, :required => true, :unique_index => :val_per_company_per_prod_per_prop_per_name, :index => true
   property :bidirectional, Boolean, :required => true
-
+  
   belongs_to :company
     property :company_id, Integer, :unique_index => :val_per_company_per_prod_per_prop_per_name
   belongs_to :product
@@ -146,7 +146,7 @@ class ProductRelationship
       product_ids = (product_ids_by_relationship[implied_name] ||= [])
       product_ids << record.product_id
     end
-  
+    
     # backward property relationships
     query =<<-EOS
       SELECT r.name, r.product_id

@@ -1,6 +1,6 @@
 # = Summary
 #
-# At the top of the chain of the property classes is the PropertyType. These objects govern the storage semantics and the acceptable units of every related PropertyValue. There should be comparitively few of these and their core types correspond to the four PropertyValue types (see CORE_TYPES for a complete list of allowed values).
+# At the top of the chain of the property classes is the PropertyType. These objects govern the storage semantics and the acceptable units of every related PropertyValue. There should be comparitively few of these and their core types correspond to the three PropertyValue types (see CORE_TYPES for a complete list of allowed values).
 #
 # === Sample Data
 #
@@ -29,12 +29,10 @@ class PropertyType
   validates_with_method :units, :method => :validate_numeric_units, :if => :numeric?
   validates_within :core_type, :set => CORE_TYPES.keys, :if => :core_type
   
-  # TODO: rearrange spec
   def self.value_class(core_type)
     Kernel.const_get(CORE_TYPES[core_type])
   end
   
-  # TODO: rearrange spec
   def self.validate_unit(unit, name, core_type, valid_units)
     if core_type == "numeric"
       valid_units = [nil] if valid_units.blank?

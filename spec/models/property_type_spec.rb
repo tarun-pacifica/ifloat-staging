@@ -46,12 +46,7 @@ describe PropertyType do
       @type.should_not be_valid
     end
     
-    it "should succeed with a single nil for its units" do
-      @type.units = [nil]
-      @type.should be_valid
-    end
-    
-    it "should fail with a nil AND other values for its units" do
+    it "should fail with a nil as one of its units" do
       @type.units = ["kg", nil, "lb"]
       @type.should_not be_valid
     end
@@ -63,43 +58,6 @@ describe PropertyType do
     
     it "should fail with pairs of units with no known conversion" do
       @type.units = ["kg", "mi"]
-      @type.should_not be_valid
-    end
-  end
-
-  describe "creation with existing type" do
-    before(:all) do
-      @type = PropertyType.create(:core_type => "text", :name => "text")
-    end
-    
-    after(:all) do
-      @type.destroy
-    end
-    
-    it "should succeed with the same core type and a different name" do
-      PropertyType.new(:core_type => "text", :name => "prose").should be_valid
-    end
-    
-    it "should fail with the same core type and name" do
-      PropertyType.new(:core_type => "text", :name => "text").should_not be_valid
-    end
-    
-    it "should fail with a different core type and the same name" do
-      PropertyType.new(:core_type => "decimal", :name => "text").should_not be_valid
-    end
-  end
-  
-  describe "modification" do
-    before(:all) do
-      @type = PropertyType.create(:core_type => "text", :name => "text")
-    end
-    
-    after(:all) do
-      @type.destroy
-    end
-    
-    it "should fail with a different core type" do
-      @type.core_type = "date"
       @type.should_not be_valid
     end
   end
@@ -120,49 +78,16 @@ describe PropertyType do
     end
     
     it "validation should validate a known unit" do
-      @type.validate_unit("kg").should be_true
+      @type.validate_unit("kg").should == true
     end
     
     it "validation should not validate an unknown unit" do
-      @type.validate_unit("lb").should_not be_true
+      @type.validate_unit("lb").should_not == true
     end
     
-    it "addition of a new unit should succeed, allowing that unit to validate" do
-      @type.add_unit("lb")
-      @type.should be_valid
-      @type.validate_unit("lb").should be_true
-    end
-    
-    it "deletion of a known unit should succeed, preventing that unit from validating" do
-      @type.add_unit("lb")
-      @type.delete_unit("lb")
-      @type.should be_valid
-      @type.validate_unit("lb").should_not be_true
-    end
-    
-    it "deletion of an unknown unit should succeed" do
-      @type.delete_unit("bushels")
-      @type.should be_valid
-    end
-    
-    it "should raise an error if attempting to alter the units for a core type that doesn't use the units mechanism" do
-      @type.core_type = "currency"
-      @type.valid_units = nil
-      proc { @type.add_unit("lb") }.should raise_error
-      proc { @type.delete_unit("lb") }.should raise_error
+    it "validation should insist on nil for all but the numeric core type" do
+      @type.core_type = "text"
+      @type.validate_unit("kg").should_not == true
     end
   end
-  
-  describe "mandatory units" do
-    it "should be empty by default" do
-      type = PropertyType.new(:core_type => "currency", :name => "amount")
-      type.mandatory_units.should == []
-    end
-    
-    it "should equal the units" do
-      type = PropertyType.new(:core_type => "numeric", :name => "weight", :units => ["kg", "lb"])
-      type.mandatory_units.should == ["kg", "lb"]
-    end
-  end
-  
 end

@@ -31,28 +31,6 @@ describe PropertyDefinition do
       @property.should_not be_valid
     end
   end
-
-  describe "creation with existing property" do
-    before(:all) do
-      @property = PropertyDefinition.create(:property_type_id => 1, :name => "physical:size", :sequence_number => 1)
-    end
-    
-    after(:all) do
-      @property.destroy
-    end
-    
-    it "should succeed with a different key" do
-      PropertyDefinition.new(:property_type_id => 1, :name => "physical:weight", :sequence_number => 2).should be_valid
-    end
-    
-    it "should fail with the same key" do
-      PropertyDefinition.new(:property_type_id => 1, :name => "physical:size", :sequence_number => 2).should_not be_valid
-    end
-    
-    it "should fail with the same sequence number" do
-      PropertyDefinition.new(:property_type_id => 1, :name => "physical:weight", :sequence_number => 1).should_not be_valid
-    end
-  end
   
   describe "friendly naming" do
     before(:all) do

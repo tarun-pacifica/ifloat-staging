@@ -39,7 +39,6 @@ class PropertyDefinition
   has n, :values, :model => "PropertyValue"
   has n, :translations
   
-  # TODO: spec
   def self.friendly_name_sections(properties, language_code)
     property_ids = properties.map { |property| property.id }
     
@@ -70,5 +69,9 @@ class PropertyDefinition
       end
     end
     urls
+  end
+  
+  def friendly_name_sections(language_code)
+    PropertyDefinition.friendly_name_sections([self], language_code)[self.id]
   end
 end

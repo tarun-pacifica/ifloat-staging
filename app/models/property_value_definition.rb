@@ -17,12 +17,12 @@ class PropertyValueDefinition
   property :definition, Text, :required => true, :lazy => false
   
   belongs_to :property_type
-    property :property_type_id, Integer, :unique_index => :val_per_lang_per_prop_type
+    property :property_type_id, Integer, :required => true, :unique_index => :val_per_lang_per_prop_type
   
   # TODO: spec
   def self.by_property_id(property_ids, language_code)
     return {} if property_ids.empty?
-
+    
     query =<<-EOS
       SELECT pd.id, pvd.value, pvd.definition
       FROM property_value_definitions pvd
@@ -31,7 +31,7 @@ class PropertyValueDefinition
       WHERE pvd.language_code = ?
         AND pd.id IN ?
     EOS
-
+    
     defs_by_prop_id = {}
     repository.adapter.select(query, language_code, property_ids).each do |record|
       (defs_by_prop_id[record.id] ||= {})[record.value] = record.definition

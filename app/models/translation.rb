@@ -15,5 +15,5 @@ class Translation
   property :value, Text, :required => true, :lazy => false
   
   belongs_to :property_definition
-    property :property_definition_id, Integer, :unique_index => :lang_per_prop
+    property :property_definition_id, Integer, :required => true, :unique_index => :lang_per_prop
 end

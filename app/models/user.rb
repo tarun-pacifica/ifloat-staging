@@ -25,7 +25,6 @@ class User
   
   UNCONFIRMED_EXPIRY_HOURS = 24
   
-  # TODO: update spec with field definitions
   property :id,             Serial
   property :name,           String,    :required => true
   property :nickname,       String
@@ -36,7 +35,6 @@ class User
   property :send_marketing, Boolean,   :required => true, :default => false
   property :created_at,     DateTime,  :required => true, :default => proc { DateTime.now }
   property :created_from,   IPAddress, :required => true
-  # TODO: spec
   property :confirm_key,    String,    :required => true, :default => proc { Password.gen_string(16) }
   property :confirmed_at,   DateTime
   
@@ -50,12 +48,10 @@ class User
     self.login = login.downcase unless login.nil?
   end
   
-  # TODO: spec
   validates_with_block :password, :if => proc { |u| u.attribute_dirty?(:password) and not u.password.blank? } do
     (password == @confirmation) || [false, "Password doesn't match confirmation"]
   end
   
-  # TODO: spec
   before :save do
     unless Password.hashed?(password)
       @plain_password = password
@@ -63,14 +59,12 @@ class User
     end
   end
   
-  # TODO: spec (and add password checks to spec given now not nullable)
   def self.authenticate(login, pass)
     user = User.first(:login => login)
     return nil if user.nil?
     Password.match?(user.password, pass) ? user : nil
   end
   
-  # TODO: spec
   def self.expired
     all(:confirmed_at => nil, :created_at.lt => UNCONFIRMED_EXPIRY_HOURS.hours.ago)
   end
@@ -86,7 +80,6 @@ class User
     disabled_at.nil? or disabled_at > DateTime.now
   end
   
-  # TODO: spec
   def reset_password
     @plain_password = Password.gen_string(8)
     self.password = Password.hash(@plain_password)

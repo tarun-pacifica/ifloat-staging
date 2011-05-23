@@ -16,7 +16,7 @@ module Password
   end
   
   def self.hashed?(pass)
-    pass =~ FORMAT
+    (pass =~ FORMAT) == 0
   end
   
   def self.match?(hashed_pass, pass)

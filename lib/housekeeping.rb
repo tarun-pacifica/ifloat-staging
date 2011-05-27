@@ -33,11 +33,11 @@ exit if File.exist?(checkpoint_path) and File.mtime(checkpoint_path) > repo_mtim
 success = true
 Dir[PRICES_REPO / "*"].each do |path|
   next unless File.directory?(path)
-
+  
   url = File.basename(path)
   facility = facilities_by_url[url]
   next if facility.nil?
-
+  
   begin
     product_info_by_ref = YAML.load(File.open(path / "prices.yaml"))
     reports = facility.update_products(product_info_by_ref)

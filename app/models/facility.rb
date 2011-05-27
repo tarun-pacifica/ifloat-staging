@@ -123,7 +123,7 @@ class Facility
     adapter.pop_transaction
     transaction.commit
     
-    mappings_by_fp_ref = ProductMapping.all(:company_id => company_id).group_by { |pm| pm.reference_parts.first }
+    mappings_by_fp_ref = ProductMapping.all(:company_id => company_id).group_by { |pm| pm.reference_parts.first.upcase }
     product_ids = mappings_by_fp_ref.values.flatten.map { |mapping| mapping.product_id }
     classes_by_product_id = {}
     Product.values_by_property_name_by_product_id(product_ids, "ENG", "reference:class").each do |product_id, vbpn|

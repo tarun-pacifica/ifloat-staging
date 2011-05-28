@@ -198,6 +198,22 @@ module Merb
       "<img class=\"property_icon\" src=\"#{info[:icon_url]}\" alt=\"#{info[:name]}\" #{on_hover} />"
     end
     
+    def sibling_value_set(property, prod_ids_by_value, product_id)
+      options = prod_ids_by_value.sort_by { |v, pids| property[:type] == 'text' ? v : v.to_f }.map do |v, pids|
+        selected = (pids.include?(product_id) ? 'selected="selected"' : '')
+        "<option #{selected}> #{v} </option>"
+      end
+      
+      <<-HTML
+      <div class="sibling" id="sibling_property_#{property[:id]}">
+        #{property_icon(property)}
+        <select onchange="product_sibling_select(event)">
+          #{options}
+        </select>
+      </div>
+      HTML
+    end
+    
     def tooltip(value, tip, position = :right)
       on_hover = tooltip_attributes(tip, position)
       "<span class=\"defined\" #{on_hover}>#{value}</span>"

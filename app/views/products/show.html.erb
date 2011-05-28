@@ -34,17 +34,7 @@
       <% unless @sibling_properties.empty? %>
       <div id="pick_sibling">
         <% @sibling_properties.each do |property| %>
-          <div class="sibling" id="sibling_property_<%= property[:id] %>">
-            <%= property_icon(property) %>
-            <select onchange="product_sibling_select(event)">
-              <% @sibling_prod_ids_by_value_by_prop_ids[property[:id]].sort_by do |v, pids|
-                   property[:type] == 'text' ? v : v.to_f
-                 end.each do |v, pids| %>
-              <% selected = (pids.include?(@product.id) ? 'selected="selected"' : '') %>
-              <option <%= selected %>> <%= v %> </option>
-              <% end %>
-            </select>
-          </div>
+          <%= sibling_value_set(property, @sibling_prod_ids_by_value_by_prop_ids[property[:id]], @product.id) %>
         <% end %>
       </div>
       <% end %>

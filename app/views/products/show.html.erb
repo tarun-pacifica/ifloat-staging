@@ -32,11 +32,11 @@
     
     <div class="other">
       <% unless @sibling_properties.empty? %>
-      <div id="pick_sibling">
+      <table id="pick_sibling">
         <% @sibling_properties.each do |property| %>
-          <%= sibling_value_set(property, @sibling_prod_ids_by_value_by_prop_ids[property[:id]], @product.id) %>
+        <%= sibling_value_set(property, @sibling_prod_ids_by_value_by_prop_ids[property[:id]], @product.id) %>
         <% end %>
-      </div>
+      </table>
       <% end %>
       
       <% unless @product_links_by_rel_name.empty? %>

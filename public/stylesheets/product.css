@@ -52,8 +52,30 @@
 }
 
 #product #pick_sibling img.property_icon {
-  padding-bottom: 5px;
   vertical-align: middle;
+}
+
+#product #pick_sibling span {
+  border: 1px solid silver;
+  color: #404040;
+  float: left;
+  margin: 3px;
+  padding: 2px;
+}
+
+#product #pick_sibling span:hover {
+  border-color: gray;
+  background-color: #E0F0FF;
+  color: black;
+  cursor: pointer;
+}
+
+#product #pick_sibling span.selected {
+  background: #404040;
+  border-color: gray;
+  color: white;
+  cursor: auto;
+  font-weight: bold;
 }
 
 #product #pick_sibling select {

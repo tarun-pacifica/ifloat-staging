@@ -85,11 +85,6 @@
   float: left;
 }
 
-#categories .filters .choices h3 {
-  color: #6D81A1;
-  margin: 0 10px 3px 0;
-}
-
 #categories .filters .choices ul {
   background: #F5F5F5;
   border: 1px solid #6D81A1;

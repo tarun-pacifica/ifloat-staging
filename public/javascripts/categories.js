@@ -3,44 +3,22 @@ function category_filters_back() {
   $('#categories .filters').html(category_filters_back_buffer);
 }
 
-var category_filters_chosen = null;
 var category_filters_choose_filter = null;
-function category_filters_choose(step, index) {
+function category_filters_choose(index) {
   var filter = category_filters_choose_filter;
-  var values = filter.values;
+  var new_filter = [filter.id];
   
-  if(filter.type == 'text') {
-    window.location = category_filters_url(null, [filter.id, values[index][0]]);
-    return;
+  if(filter.bucketed) {
+    var values = filter.bucketed_values[index];
+    new_filter.push(values[0][0], values[values.length - 1][0]);
+  } else if(filter.type != 'text') {
+    var value = filter.values[index][0];
+    new_filter.push(value, value);
+  } else {
+    new_filter.push(filter.values[index][0]);
   }
   
-  var other_step = (step == 'from' ? 'to' : 'from');
-  var other_index = category_filters_chosen[other_step];
-  if(other_index && (step == 'from' ? other_index < index : other_index > index)) return;
-  
-  category_filters_chosen[step] = index;
-  if(other_index == undefined && (step == 'from' ? index == values.length - 1 : index == 0)) category_filters_chosen[other_step] = index;
-  
-  var from = category_filters_chosen.from, to = category_filters_chosen.to;
-  if(from != undefined && to != undefined) {
-    window.location = category_filters_url(null, [filter.id, values[from][0], values[to][0]]);
-    return;
-  }
-  
-  var filters = $('#categories .filters');
-  var choice_list_items = filters.find('.step_' + step + ' li');
-  var other_list_items = filters.find('.step_' + other_step + ' li');
-  
-  choice_list_items.css('font-weight', 'normal');
-  choice_list_items.eq(index).css('font-weight', 'bold');
-  
-  var item_lists = [choice_list_items, other_list_items];
-  for(var i in item_lists) {
-    var list = item_lists[i];
-    list.css('opacity', '1.0');
-    var strike_selector = (step == 'from' ? 'lt' : 'gt');
-    list.filter(':' + strike_selector + '(' + index + ')').css('opacity', '0.5');
-  }
+  window.location = category_filters_url(null, new_filter);
 }
 
 function category_filters_configure(filter_id) {
@@ -59,14 +37,25 @@ function category_filters_configure_handle(filter) {
     return;
   }
   
-  category_filters_chosen = {};
   category_filters_choose_filter = filter;
   
-  var choice = (filter.type == 'text' ? 'value' : 'range');
+  var max_choices = 6;
+  if(filter.type != 'text' && values.length > max_choices) {
+    var bucket_size = Math.ceil(values.length / max_choices);
+    filter.bucketed = true;
+    filter.bucketed_values = [];
+    var b = 0, bucket = null;
+    for(var i in values) {
+      if(b == 0) filter.bucketed_values.push(bucket = []);
+      bucket.push(values[i]);
+      b = (b + 1) % bucket_size;
+    }
+  }
+  
+  var choice = (filter.bucketed ? 'range' : 'value');
   var html = ['<h2>Choose a ' + filter.name + ' ' + choice + '... <span onclick="category_filters_back()">« back to all filters</span></h2>'];
   
-  var steps = (filter.type == 'text' ? [null] : ['from', 'to']);
-  for(var i in steps) category_filters_configure_handle_list(values, steps[i], html);
+  category_filters_configure_handle_list(filter, html);
   html.push('<hr class="terminator" />');
   
   var filter_panel = $('#categories .filters');
@@ -74,19 +63,20 @@ function category_filters_configure_handle(filter) {
   filter_panel.html(html.join(' '));
 }
 
-function category_filters_configure_handle_list(values, step, html) {
-  html.push('<div class="choices step_' + step + '">');
+function category_filters_configure_handle_list(filter, html) {
+  var values = (filter.bucketed ? filter.bucketed_values : filter.values);
   
-  if(step) {
-    html.push('<h3>' + step + '</h3>');
-    step = util_escape_attr_js(step);
-  }
+  html.push('<div class="choices">');
   
   html.push('<ul>');
   for(var i in values) {
     var v = values[i];
-    var formatted = util_superscript('text', (typeof(v[0]) == 'string' ? util_defined(v[0], v[1]) : v[1]));
-    html.push('<li onclick="category_filters_choose(' + step + ', ' + i + ')">' + formatted + '</li>');
+    
+    var formatted = v[1];
+    if(filter.bucketed) { formatted = v[0][1] + ' &mdash; ' + v[v.length - 1][1]; }
+    else if(typeof(v[0]) == 'string') { formatted = util_superscript('text', util_defined(v[0], v[1])); }
+    
+    html.push('<li onclick="category_filters_choose(' + i + ')">' + formatted + '</li>');
   }
   html.push('</ul>');
   

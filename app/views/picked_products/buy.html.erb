@@ -9,24 +9,26 @@
 <iframe id="partner_store" name="partner_store" src="/preparing_basket.html"></iframe>
 
 <script type="text/javascript">
-  var height = $('#buy').outerHeight() + $('#buy_separator').outerHeight();
-  var partner_store = $('#partner_store');
-  function auto_size_partner_store() { partner_store.height($(window).height() - height + 'px'); }
-  auto_size_partner_store();
-  $(window).resize(auto_size_partner_store);
-  
-  var callback_urls = <%= @purchase_urls[0..-2].to_json %>;
-  var callback_count = callback_urls.length;
-  function handle_partner_callback(event) {
-    callback_count -= 1;
-    if(callback_count == 0) {
-      partner_store.attr('src', <%= @purchase_urls.last.to_json %>);
-    } else if(callback_count == callback_urls.length) {
-      for(var i in callback_urls) { load_partner_callback(callback_urls[i]) };
+  $(document).ready(function() {
+    var height = $('#buy').outerHeight() + $('#buy_separator').outerHeight();
+    var partner_store = $('#partner_store');
+    function auto_size_partner_store() { partner_store.height($(window).height() - height + 'px'); }
+    auto_size_partner_store();
+    $(window).resize(auto_size_partner_store);
+    
+    var callback_urls = <%= @purchase_urls[0..-2].to_json %>;
+    var callback_count = callback_urls.length;
+    function handle_partner_callback(event) {
+      callback_count -= 1;
+      if(callback_count == 0) {
+        partner_store.attr('src', <%= @purchase_urls.last.to_json %>);
+      } else if(callback_count == callback_urls.length) {
+        for(var i in callback_urls) { load_partner_callback(callback_urls[i]) };
+      }
     }
-  }
-  function load_partner_callback(url) {
-    if(url) $(new Image()).error(handle_partner_callback).load(handle_partner_callback).attr('src', url);
-  }
-  load_partner_callback(callback_urls.shift());
+    function load_partner_callback(url) {
+      if(url) $(new Image()).error(handle_partner_callback).load(handle_partner_callback).attr('src', url);
+    }
+    load_partner_callback(callback_urls.shift());
+  });
 </script>

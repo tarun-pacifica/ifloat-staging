@@ -27,24 +27,26 @@
 <div id="basket_panel"> </div>
 
 <script type="text/javascript" charset="utf-8">
-  var query_string = window.location.search;
-  $('a.product').each(function() {
-    var a = $(this);
-    a.attr('href', a.attr('href') + query_string);
+  $(document).ready(function() {
+    var query_string = window.location.search;
+    $('a.product').each(function() {
+      var a = $(this);
+      a.attr('href', a.attr('href') + query_string);
+    });
+    
+    var items = $('#categories .items a');
+    if(items.length == 1) window.location = items.attr('href');
+    
+    <% unless @path_names.size < 2 %>category_filters_show();<% end %>
+    
+    basket_panel_load();
+    product_links_wire_up(<%= (@product_ids || []).to_json %>);
+    
+    var links = $('#categories .items a');
+    var max_height = 0
+    links.each(function() { max_height = Math.max(max_height, $(this).find('span').outerHeight()) });
+    <% if @path_names.size < 2 %>
+    links.each(function() { $(this).css('height', 106 + max_height + 'px') });
+    <% end %>
   });
-  
-  var items = $('#categories .items a');
-  if(items.length == 1) window.location = items.attr('href');
-  
-  <% unless @path_names.size < 2 %>category_filters_show();<% end %>
-  
-  basket_panel_load();
-  product_links_wire_up(<%= (@product_ids || []).to_json %>);
-  
-  var links = $('#categories .items a');
-  var max_height = 0
-  links.each(function() { max_height = Math.max(max_height, $(this).find('span').outerHeight()) });
-  <% if @path_names.size < 2 %>
-  links.each(function() { $(this).css('height', 106 + max_height + 'px') });
-  <% end %>
 </script>

@@ -7,22 +7,24 @@
 </div>
 
 <script type="text/javascript" charset="utf-8">
-  var spec_field = $('#finder_specification');
-  var tempter = 'What can we find for you?';
-  
-  function tempt() {
-    if(spec_field.val() == '') { spec_field.val(tempter); }
-    if(spec_field.val() == tempter) { spec_field.css('color', 'gray'); }
-  }
-  
-  function untempt() {
-    spec_field.css('color', 'black');
-    if(spec_field.val() == tempter) { spec_field.val(''); }
-  }
-  
-  tempt();
-  spec_field.blur(tempt);
-  spec_field.focus(untempt);
-  
-  spec_field.autocomplete({source: "/products/autocomplete"});
+  $(document).ready(function() {
+    var spec_field = $('#finder_specification');
+    var tempter = 'What can we find for you?';
+    
+    function tempt() {
+      if(spec_field.val() == '') { spec_field.val(tempter); }
+      if(spec_field.val() == tempter) { spec_field.css('color', 'gray'); }
+    }
+    
+    function untempt() {
+      spec_field.css('color', 'black');
+      if(spec_field.val() == tempter) { spec_field.val(''); }
+    }
+    
+    tempt();
+    spec_field.blur(tempt);
+    spec_field.focus(untempt);
+    
+    spec_field.autocomplete({source: "/products/autocomplete"});
+  });
 </script>

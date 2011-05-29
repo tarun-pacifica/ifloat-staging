@@ -60,7 +60,9 @@
 <div id="basket_panel"> </div>
 
 <script type="text/javascript" charset="utf-8">
-  basket_panel_load();
-  product_links_wire_up(<%= @images_by_product_id.keys.to_json %>);
-  util_carousel_table('#compare_by_class table.diff_values', [0], [1, 2, 3, 4]);
+  $(document).ready(function() {
+    basket_panel_load();
+    product_links_wire_up(<%= @images_by_product_id.keys.to_json %>);
+    util_carousel_table('#compare_by_class table.diff_values', [0], [1, 2, 3, 4]);
+  });
 </script>

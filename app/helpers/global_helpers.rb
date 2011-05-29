@@ -216,15 +216,17 @@ module Merb
       end
     end
     alias :sibling_value_set_date :sibling_value_set_numeric
+    alias :sibling_value_set_text :sibling_value_set_numeric
     
-    def sibling_value_set_text(prod_ids_by_value, product_id)
-      options = prod_ids_by_value.sort_by { |v, pids| v }.map do |v, pids|
-        selected = (pids.include?(product_id) ? 'selected="selected"' : '')
-        "<option #{selected}> #{v} </option>"
-      end
-      
-      "<select class=\"value\" onchange=\"product_sibling_select(event)\">#{options}</select>"
-    end
+    # TODO: consider removal if we stick with span-only items on the detail page
+    # def sibling_value_set_text(prod_ids_by_value, product_id)
+    #   options = prod_ids_by_value.sort_by { |v, pids| v }.map do |v, pids|
+    #     selected = (pids.include?(product_id) ? 'selected="selected"' : '')
+    #     "<option #{selected}> #{v} </option>"
+    #   end
+    #   
+    #   "<select class=\"value\" onchange=\"product_sibling_select(event)\">#{options}</select>"
+    # end
     
     def tooltip(value, tip, position = :right)
       on_hover = tooltip_attributes(tip, position)

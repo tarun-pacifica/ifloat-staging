@@ -31,7 +31,7 @@
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js"></script>
     <script src="/javascripts/compiled.js" type="text/javascript" charset="utf-8"></script>
     
-    <% unless Merb.environment == "production" %>
+    <% if Merb.environment == "production" %>
     <script type="text/javascript">
     var _gaq = _gaq || [];
     _gaq.push(['_setAccount', 'UA-18470174-1']);

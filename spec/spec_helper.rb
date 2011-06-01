@@ -9,13 +9,13 @@ RSpec.configure do |config|
 end
 
 # TODO: reactivate once this isn't a 5 second bottleneck
-# DataMapper::Model.descendants.each do |model|
-#   begin
-#     model.auto_migrate!
-#   rescue
-#     warn "auto_migration failed on #{model}"
-#   end
-# end if Merb.orm == :datamapper
+DataMapper::Model.descendants.each do |model|
+  begin
+    # model.auto_migrate!
+  rescue
+    warn "auto_migration failed on #{model}"
+  end
+end if Merb.orm == :datamapper
 
 class BeValid
   def initialize

@@ -15,7 +15,7 @@ describe ProductRelationship do
       entity.destroy
     end
   end
-
+  
   describe "creation" do
     before(:each) do
       @relationship = ProductRelationship.new(:company_id => 1,
@@ -79,7 +79,7 @@ describe ProductRelationship do
       end
       
       @products[0].product_relationships.create(:name => "goes_well_with", :property_definition => @text_property, :value => "Earring", :bidirectional => true)
-      @products[1].product_relationships.create(:name => "is_used_on", :value => "ABC0", :bidirectional => true)
+      @products[1].product_relationships.create(:name => "is_used_on", :value => "ABC0", :bidirectional => false)
     end
     
     after(:all) do
@@ -93,34 +93,25 @@ describe ProductRelationship do
     end
     
     it "should yield the clasp (used) and the earring (goes well) for the necklace" do
-      ProductRelationship.related_products(@products[0]).should == {
-        "uses" => [ @products[1] ],
-        "goes_well_with" => [ @products[2] ]
-      }
+      ProductRelationship.related_products(@products[0]).should == { "goes_well_with" => [ @products[2] ] }
     end
     
     it "should yield the necklace (used) for the clasp" do
-      ProductRelationship.related_products(@products[1]).should == {
-        "is_used_on" => [ @products[0] ]
-      }
+      ProductRelationship.related_products(@products[1]).should == { "is_used_on" => [ @products[0] ] }
     end
     
     it "should yield the necklace (goes well) for the earring" do
-      ProductRelationship.related_products(@products[2]).should == {
-        "goes_well_with" => [ @products[0] ]
-      }
+      ProductRelationship.related_products(@products[2]).should == { "goes_well_with" => [ @products[0] ] }
     end
     
     it "should be completely described by compile_index" do
       p1, p2, p3 = @products.map(&:id)
       ProductRelationship.compile_index.should == {
-        p1 => {"goes_well_with" => [p3], "uses" => [p2]},
+        p1 => {"goes_well_with" => [p3]},
         p2 => {"is_used_on" => [p1]},
         p3 => {"goes_well_with" => [p1]}
       }
     end
-    
-    it "should have specs that test uni-directional relationships"
   end
   
   describe "related products across multiple companies" do
@@ -147,7 +138,7 @@ describe ProductRelationship do
                                                 :company => @sparklies, :property_definition => @text_property,
                                                 :bidirectional => true)
       @products[1].product_relationships.create(:name => "is_used_on", :value => "ABC0", :company => @sparklies,
-                                                :bidirectional => true)
+                                                :bidirectional => false)
       @products[2].product_relationships.create(:name => "is_used_on", :value => "ABC0", :company => @tinselies,
                                                 :bidirectional => true)
     end
@@ -164,10 +155,7 @@ describe ProductRelationship do
     end
     
     it "should yield the the Sparklies clasp (used) and the Sparklies Earring for the Sparklies necklace" do
-      ProductRelationship.related_products(@products[0]).should == {
-        "uses" => [ @products[1] ],
-        "goes_well_with" => [ @products[2] ]
-      }
+      ProductRelationship.related_products(@products[0]).should == { "goes_well_with" => [ @products[2] ] }
     end
     
     it "should yield the Sparklies necklace (used) for the Sparklies clasp" do
@@ -177,7 +165,7 @@ describe ProductRelationship do
     it "should yield the Sparklies necklace (goes well) for the Sparklies Earring" do
       ProductRelationship.related_products(@products[2]).should == { "goes_well_with" => [ @products[0] ] }
     end
-
+    
     it "should yield no related products for the Tinselies clasp" do
       ProductRelationship.related_products(@products[3]).should == {}
     end
@@ -186,7 +174,6 @@ describe ProductRelationship do
       ProductRelationship.related_products(@products[4]).should == {}
     end
     
-    it "should have specs that test uni-directional relationships"
   end
   
 end

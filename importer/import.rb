@@ -3,9 +3,9 @@ $KCODE = "UTF-8" unless RUBY_VERSION =~ /^1\.9\./
 REPO_DIRS = Hash[["assets", "csvs"].map { |d| [d, Merb.root / ".." / "ifloat_#{d}"] }]
 
 ASSET_CSV_PATH       = REPO_DIRS["csvs"] / "assets.csv"
-ASSET_VARIANT_DIR    = "/tmp/ifloat_asset_variants_new"
+ASSET_VARIANT_DIR    = "/tmp" / "ifloat_asset_variants_new"
 ASSET_WATERMARK_PATH = Merb.root / "public" / "images" / "common" / "watermark.png"
-ERROR_CSV_PATH       = "/tmp/ifloat_errors.csv"
+ERROR_CSV_PATH       = "/tmp" / "ifloat_errors.csv"
 
 THIS_DIR             = Merb.root / "importer"
 INDEXES_DIR          = THIS_DIR / "indexes"
@@ -46,6 +46,7 @@ csvs.summarize
 puts "Recovering object state..."
 objects = ObjectCatalogue.new(csvs, OBJECT_INDEX_DIR)
 objects.delete_obsolete
+objects.init_verifier
 objects.summarize
 
 puts "Generating any missing row objects..."

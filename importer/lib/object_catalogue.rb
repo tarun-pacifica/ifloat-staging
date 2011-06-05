@@ -47,10 +47,7 @@ class ObjectCatalogue
     @data_by_ref = {}
     @refs_to_write = []
     
-    delete_obsolete
-    
     @verifier = ObjectCatalogueVerifier.new(csv_catalogue, self)
-    each(&@verifier.method(:added))
   end
   
   def add(objects, *row_md5s)
@@ -70,7 +67,7 @@ class ObjectCatalogue
       @vals_by_ref[ref] = value_md5
       
       @refs_to_write << ref
-      @verifier.added(ref, object)
+      @verifier.added(ref, object) # consider deferring so verifier is empty until all objects are finalized
     end
     
     []
@@ -122,6 +119,13 @@ class ObjectCatalogue
     end
     obsolete_refs = refs_by_row.values_at(*(refs_by_row.keys.to_set - row_md5s)).flatten.uniq
     
+    # any object with parents (A and B) in two different rows might be deleted because A is removed
+    # unfortunately, because other items produced from B might still exist, the importer wouldn't know that
+    # it needed to completely refresh B - thus we allow row obsolescence to propagate up to a child object's
+    # primary parent row (which will be the row already marked obsolete in all other cases)
+    implictly_obsolete_rows = @rows_by_ref.values_at(*obsolete_refs).map(&:first)
+    obsolete_refs = (obsolete_refs + refs_by_row.values_at(*implictly_obsolete_rows).flatten).uniq
+    
     obsolete_refs.group_by { |ref| @groups_by_ref.delete(ref) }.each do |name, refs|
       obsolete_groups << name
       
@@ -139,7 +143,6 @@ class ObjectCatalogue
       @data_by_ref.delete(ref)
       @rows_by_ref.delete(ref)
       @vals_by_ref.delete(ref)
-      @verifier.deleted(ref) unless @verifier.nil?
     end
     
     puts " - deleted #{obsolete_refs.size} objects in #{obsolete_groups.size} groups" unless obsolete_refs.empty?
@@ -156,6 +159,11 @@ class ObjectCatalogue
   
   def has_ref?(ref)
     @vals_by_ref.has_key?(ref)
+  end
+  
+  def init_verifier
+    each(&@verifier.method(:added))
+    puts " - initialized verifier"
   end
   
   def row_md5_chain(object)

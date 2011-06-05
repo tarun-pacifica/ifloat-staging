@@ -10,7 +10,7 @@ class ObjectCatalogueVerifier
     @errors = []
     
     @asset_checksums_by_ref          = {}
-    @category_images_by_ref          = {}
+    @category_images                 = []
     @companies_by_ref                = {}
     @facilities_by_ref               = {}
     @primary_images_by_ref           = {}
@@ -23,7 +23,7 @@ class ObjectCatalogueVerifier
     
     when "Asset"
       @asset_checksums_by_ref[ref] = data[:checksum]
-      @category_images_by_ref[ref] = data if data[:bucket] == "category_images"
+      @category_images << data if data[:bucket] == "category_images"
       
     when "Attachment"
       return unless data[:role] == "image" and data[:sequence_number] == 1
@@ -47,16 +47,6 @@ class ObjectCatalogueVerifier
     end
   end
   
-  def deleted(ref)
-    @asset_checksums_by_ref.delete(ref)
-    @category_images_by_ref.delete(ref)
-    @companies_by_ref.delete(ref)
-    @facilities_by_ref.delete(ref)
-    @primary_images_by_ref.delete(ref)
-    @products_by_ref.delete(ref)
-    @text_values_by_prop_name_by_ref.delete(ref)
-  end
-  
   def verify
     steps = %w(all_categories_have_images no_orphaned_purchases product_count_is_safe same_image_means_same_group unique_titles well_differentiated_siblings no_orphaned_picks)
     
@@ -67,7 +57,7 @@ class ObjectCatalogueVerifier
   end
   
   def verify_all_categories_have_images
-    cat_image_names = @category_images_by_ref.values.map do |image|
+    cat_image_names = @category_images.map do |image|
       image[:name] =~ Asset::NAME_FORMAT ? $1 : raise("unable to parse #{o.attributes[:name]}")
     end.to_set
     
@@ -87,7 +77,7 @@ class ObjectCatalogueVerifier
     products_by_ref = @products_by_ref.values.hash_by { |p| p[:reference] }
     
     PickedProduct.all_primary_keys.each do |company_ref, product_ref|
-      next unless companies_by_ref.has_key?(company_ref)
+      next if companies_by_ref.has_key?(company_ref)
       @errors << [nil, nil,"unable to delete company with user-referenced product: #{company_ref} / #{product_ref}"]
     end
   end

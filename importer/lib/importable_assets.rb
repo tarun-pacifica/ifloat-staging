@@ -39,6 +39,11 @@ class ImportableAssets
     assets
   end
   
+  def relative_path(path)
+    raise "unable to extract relative path from #{path.inspect}" unless path =~ /^#{@source_dir}\/(.+)/
+    $1
+  end
+  
   def scan_asset(a)
     path_parts = a[:relative_path].split("/")
     error(a, "not in a bucket/company(/class) directory") and return a unless (3..4).include?(path_parts.size)
@@ -104,8 +109,7 @@ class ImportableAssets
     scan_size = paths_to_scan.size
     
     scanned = paths_to_scan.each_with_index.map do |path, i|
-      raise "unable to extract relative path from #{path.inspect}" unless path =~ /^#{@source_dir}\/(.+)/
-      a = {:path => path, :relative_path => $1, :mtime => mtimes_by_path[path]}
+      a = {:path => path, :relative_path => relative_path(path), :mtime => mtimes_by_path[path]}
       empty_paths.include?(path) ? error(a, "empty file") : scan_asset(a)
       puts " - #{i + 1}/#{scan_size} #{a[:relative_path]}"
       a
@@ -114,7 +118,7 @@ class ImportableAssets
     @all = unchanged + scanned
     @all.group_by { |a| a.values_at(:company_ref, :name) }.each do |key, assets|
       first, *rest = assets
-      rest.each { |a| error(a, "duplicate of #{head[:relative_path]}") }
+      rest.each { |a| error(a, "duplicate of #{relative_path(first[:path])}") }
     end
     return false unless @errors.empty?
     

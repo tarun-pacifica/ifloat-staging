@@ -134,7 +134,7 @@ describe Facility do
     end
     
     it "should return the set of MarineStore purchase URLs" do
-      Facility.new(:primary_url => "marinestore.co.uk").purchase_urls(@mappings).map { |u| u.to_s }.should ==  %w(http://marinestore.co.uk/Merchant2/merchant.mvc?Action=ADPR&Product_Attributes%5B0%5D%3Acode=k1&Product_Attributes%5B0%5D%3Avalue=v1&Product_Attributes%5B1%5D%3Acode=k2&Product_Attributes%5B1%5D%3Avalue=v2&Product_Code=ABCDE&Quantity=1&Screen=BASK&Store_Code=mrst http://marinestore.co.uk/Merchant2/merchant.mvc?Action=ADPR&Product_Code=EBCDA&Quantity=1&Screen=BASK&Store_Code=mrst http://marinestore.co.uk/Merchant2/merchant.mvc?Screen=BASK&Store_Code=mrst)
+      Facility.new(:primary_url => "marinestore.co.uk").purchase_urls(@mappings).map { |u| u.to_s }.should ==  %w(http://marinestore.co.uk/Merchant2/merchant.mvc?Action=ADPR&Product_Attributes%5B0%5D%3Acode=k1&Product_Attributes%5B0%5D%3Avalue=v1&Product_Attributes%5B1%5D%3Acode=k2&Product_Attributes%5B1%5D%3Avalue=v2&Product_Code=ABCDE&Quantity=1&Screen=BASK&Store_Code=mrst http://marinestore.co.uk/Merchant2/merchant.mvc?Action=ADPR&Product_Code=EBCDA&Quantity=1&Screen=BASK&Store_Code=mrst http://marinestore.co.uk/Merchant2/merchant.mvc?Screen=CHECKOUT&Store_Code=mrst)
     end
     
     it "should return an empty array otherwise" do

@@ -27,19 +27,15 @@ class Product
     db_values = NumericPropertyValue.all(attributes).map
     db_values += TextPropertyValue.all(attributes.merge(:language_code => language_code))
     
-    product_ids = db_values.map { |value| value.product_id }.uniq
-    property_ids = db_values.map { |value| value.property_definition_id }.uniq
+    db_values_by_property_id = db_values.group_by(&:property_definition_id)
+    definitions_by_property_id = PropertyValueDefinition.by_property_id(db_values_by_property_id.keys, language_code)
     
-    definitions_by_property_id = PropertyValueDefinition.by_property_id(property_ids, language_code)
-    
-    comp_keys_by_value = {}
-    db_values.each do |value|
-      comp_keys_by_value[value] = value.comparison_key
-    end
+    all_product_count = db_values.map(&:product_id).uniq.size
+    comp_keys_by_value = Hash[db_values.zip(db_values.map(&:comparison_key))]
     
     common_values, diff_values = [], []
     
-    db_values.group_by { |value| value.property_definition_id }.each do |property_id, values|
+    db_values_by_property_id.each do |property_id, values|
       definitions = definitions_by_property_id[property_id]
       prop_info = Indexer.property_display_cache[property_id]
       values_by_product_id = values.group_by { |value| value.product_id }
@@ -47,7 +43,7 @@ class Product
       common = false
       unless forced_diff_names.include?(prop_info[:raw_name])
         comp_keys = values_by_product_id.map { |product_id, values| comp_keys_by_value.values_at(*values).sort }
-        common = (comp_keys.size == product_ids.size and comp_keys.uniq.size == 1)
+        common = (comp_keys.size == all_product_count and comp_keys.uniq.size == 1)
       end
       
       values_by_product_id.each do |product_id, values|

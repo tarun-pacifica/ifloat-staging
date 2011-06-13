@@ -38,7 +38,7 @@ class Product
     db_values_by_property_id.each do |property_id, values|
       definitions = definitions_by_property_id[property_id]
       prop_info = Indexer.property_display_cache[property_id]
-      values_by_product_id = values.group_by { |value| value.product_id }
+      values_by_product_id = values.group_by(&:product_id)
       
       common = false
       unless forced_diff_names.include?(prop_info[:raw_name])
@@ -50,7 +50,7 @@ class Product
         value_info = prop_info.merge(:product_id => product_id)
         value_info[:comp_key] = comp_keys_by_value.values_at(*values).min
         value_info[:values] = values.sort_by { |value| [value.sequence_number, comp_keys_by_value[value]] }.map { |value| value.to_s(range_sep) }
-        value_info[:definitions] = value_info[:values].map { |v| definitions[v] } unless definitions.nil?
+        value_info[:definitions] = definitions.values_at(*value_info[:values]) unless definitions.nil?
         
         (common ? common_values : diff_values) << value_info
         break if common

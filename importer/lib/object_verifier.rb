@@ -1,4 +1,4 @@
-class ObjectCatalogueVerifier
+class ObjectVerifier
   include ErrorWriter
   
   ERROR_HEADERS = %w(csv row error)
@@ -16,9 +16,10 @@ class ObjectCatalogueVerifier
     @primary_images_by_ref           = {}
     @products_by_ref                 = {}
     @text_values_by_prop_name_by_ref = {}
+    @objects.each(&method(:add))
   end
   
-  def added(ref, data)
+  def add(ref, data)
     case data[:class].to_s
     
     when "Asset"

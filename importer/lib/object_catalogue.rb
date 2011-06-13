@@ -3,7 +3,7 @@ class ObjectCatalogue
     @@default
   end
   
-  attr_reader :rows_by_ref, :verifier
+  attr_reader :rows_by_ref
   
   def initialize(csv_catalogue, dir)
     @@default = self
@@ -46,8 +46,6 @@ class ObjectCatalogue
     
     @data_by_ref = {}
     @refs_to_write = []
-    
-    @verifier = ObjectCatalogueVerifier.new(csv_catalogue, self)
   end
   
   def add(objects, *row_md5s)
@@ -67,7 +65,6 @@ class ObjectCatalogue
       @vals_by_ref[ref] = value_md5
       
       @refs_to_write << ref
-      @verifier.added(ref, object) # consider deferring so verifier is empty until all objects are finalized
     end
     
     []
@@ -159,11 +156,6 @@ class ObjectCatalogue
   
   def has_ref?(ref)
     @vals_by_ref.has_key?(ref)
-  end
-  
-  def init_verifier
-    each(&@verifier.method(:added))
-    puts " - initialized verifier"
   end
   
   def row_md5_chain(object)

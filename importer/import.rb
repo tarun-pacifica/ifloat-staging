@@ -46,7 +46,6 @@ csvs.summarize
 puts "Recovering object state..."
 objects = ObjectCatalogue.new(csvs, OBJECT_INDEX_DIR)
 objects.delete_obsolete
-objects.init_verifier
 objects.summarize
 
 puts "Generating any missing row objects..."
@@ -63,5 +62,6 @@ mail_fail("generating auto objects") if generator.write_errors(ERROR_CSV_PATH)
 objects.summarize
 
 puts "Running global integrity checks..."
-objects.verifier.verify
-mail_fail("verifying global integrity") if objects.verifier.write_errors(ERROR_CSV_PATH)
+verifier = ObjectVerifier.new(csvs, objects)
+verifier.verify
+mail_fail("verifying global integrity") if verifier.write_errors(ERROR_CSV_PATH)

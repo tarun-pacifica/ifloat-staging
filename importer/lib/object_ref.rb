@@ -66,4 +66,8 @@ class ObjectRef < String
   def attributes
     ObjectCatalogue.default.data_for(self)
   end
+  
+  def row_md5s
+    ObjectCatalogue.default.row_md5s_by_ref[self]
+  end
 end

@@ -33,7 +33,7 @@
 </div>
 
 <script type="text/javascript" charset="utf-8">
-  var $ifloat_header = {facility: <%= Indexer.facilities.values.first.to_json %>}
+  var $ifloat_header = {facility: <%= Indexer.facilities.values.first.keep(:id, :description).to_json %>}
   
   $(document).ready(function() {
     login_update();

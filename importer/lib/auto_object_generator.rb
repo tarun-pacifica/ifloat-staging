@@ -56,7 +56,7 @@ class AutoObjectGenerator
         refs.each do |ref|
           values_by_property_name = (value_refs_by_product_ref[ref] || []).group_by { |v| v[:definition][:name] }
           product_class = values_by_property_name["reference:class"].first[:text_value]
-          row_md5 = @objects.rows_by_ref[ref].first
+          row_md5 = @objects.row_md5s_by_ref[ref].first
           
           auto_objects, errors = m.call(ref, product_data_by_ref[ref], product_class, values_by_property_name, row_md5)
           errors += @objects.add(auto_objects, row_md5).map { |e| error_for_row(e, row_md5) }

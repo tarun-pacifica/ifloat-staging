@@ -41,6 +41,6 @@ class RowObjectGenerator
   end
   
   def row_md5s_to_parse
-    @row_md5s_to_parse ||= (@csvs.row_md5s - @objects.rows_by_ref.values.flatten.uniq)
+    @row_md5s_to_parse ||= (@csvs.row_md5s - @objects.row_md5s_by_ref.values.flatten.uniq)
   end
 end

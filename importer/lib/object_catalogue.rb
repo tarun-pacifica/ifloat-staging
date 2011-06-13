@@ -3,7 +3,7 @@ class ObjectCatalogue
     @@default
   end
   
-  attr_reader :rows_by_ref
+  attr_reader :row_md5s_by_ref
   
   def initialize(csv_catalogue, dir)
     @@default = self
@@ -37,11 +37,11 @@ class ObjectCatalogue
     end
     
     most_recent_commit = nil
-    @rows_by_ref = {}
+    @row_md5s_by_ref = {}
     common_groups.each do |name|
       path = @rows_dir / name
       most_recent_commit = [most_recent_commit, File.mtime(path)].compact.max
-      @rows_by_ref.update(File.open(path) { |f| Marshal.load(f) })
+      @row_md5s_by_ref.update(File.open(path) { |f| Marshal.load(f) })
     end
     
     @data_by_ref = {}
@@ -53,13 +53,13 @@ class ObjectCatalogue
       ref, value_md5 = ObjectRef.from_object(object)
       
       if has_ref?(ref)
-        existing_rows = @rows_by_ref[ref].map(&@csvs.method(:location)).join(", ")
-        existing_rows = "unknown csvs / rows" if existing_rows.blank?
-        return ["duplicate of #{object[:class]} from #{existing_rows}"]
+        existing_row_md5s = @row_md5s_by_ref[ref].map(&@csvs.method(:location)).join(", ")
+        existing_row_md5s = "unknown csvs / rows" if existing_row_md5s.blank?
+        return ["duplicate of #{object[:class]} from #{existing_row_md5s}"]
       end
       
       @data_by_ref[ref] = object
-      @rows_by_ref[ref] = (row_md5s + row_md5_chain(object)).flatten.uniq
+      @row_md5s_by_ref[ref] = (row_md5s + row_md5_chain(object)).flatten.uniq
       @vals_by_ref[ref] = value_md5
       
       @refs_to_write << ref
@@ -72,17 +72,17 @@ class ObjectCatalogue
     return if @refs_to_write.empty?
     
     data_by_ref = {}
-    rows_by_ref = {}
+    row_md5s_by_ref = {}
     vals_by_ref = {}
     @refs_to_write.each do |ref|
       data_by_ref[ref] = @data_by_ref.delete(ref)
-      rows_by_ref[ref] = @rows_by_ref[ref]
+      row_md5s_by_ref[ref] = @row_md5s_by_ref[ref]
       vals_by_ref[ref] = @vals_by_ref[ref]
       @groups_by_ref[ref] = group
     end
     @refs_to_write.clear
     
-    {@data_dir => data_by_ref, @refs_dir => vals_by_ref, @rows_dir => rows_by_ref}.each do |dir, set|
+    {@data_dir => data_by_ref, @refs_dir => vals_by_ref, @rows_dir => row_md5s_by_ref}.each do |dir, set|
       path = dir / group
       data = (File.open(path) { |f| Marshal.load(f) } rescue {})
       data.update(set)
@@ -105,21 +105,21 @@ class ObjectCatalogue
   end
   
   def delete_obsolete
-    row_md5s = @csvs.row_md5s.to_set
+    all_row_md5s = @csvs.row_md5s.to_set
     
     obsolete_groups = []
-    refs_by_row = {}
-    @rows_by_ref.each do |ref, rows|
-      rows.each { |row| (refs_by_row[row] ||= []) << ref }
+    refs_by_row_md5 = {}
+    @row_md5s_by_ref.each do |ref, row_md5s|
+      row_md5s.each { |row_md5| (refs_by_row_md5[row_md5] ||= []) << ref }
     end
-    obsolete_refs = refs_by_row.values_at(*(refs_by_row.keys.to_set - row_md5s)).flatten.uniq
+    obsolete_refs = refs_by_row_md5.values_at(*(refs_by_row_md5.keys.to_set - all_row_md5s)).flatten.uniq
     
     # any object with parents (A and B) in two different rows might be deleted because A is removed
     # unfortunately, because other items produced from B might still exist, the importer wouldn't know that
     # it needed to completely refresh B - thus we allow row obsolescence to propagate up to a child object's
     # primary parent row (which will be the row already marked obsolete in all other cases)
-    implictly_obsolete_rows = @rows_by_ref.values_at(*obsolete_refs).map(&:first)
-    obsolete_refs = (obsolete_refs + refs_by_row.values_at(*implictly_obsolete_rows).flatten).uniq
+    implictly_obsolete_row_md5s = @row_md5s_by_ref.values_at(*obsolete_refs).map(&:first)
+    obsolete_refs = (obsolete_refs + refs_by_row_md5.values_at(*implictly_obsolete_row_md5s).flatten).uniq
     
     obsolete_refs.group_by { |ref| @groups_by_ref.delete(ref) }.each do |name, refs|
       obsolete_groups << name
@@ -136,7 +136,7 @@ class ObjectCatalogue
     
     obsolete_refs.each do |ref|
       @data_by_ref.delete(ref)
-      @rows_by_ref.delete(ref)
+      @row_md5s_by_ref.delete(ref)
       @vals_by_ref.delete(ref)
     end
     
@@ -160,7 +160,7 @@ class ObjectCatalogue
     case object
     when Array     then object.map { |v| row_md5_chain(v) }
     when Hash      then object.values.map { |v| row_md5_chain(v) }
-    when ObjectRef then @rows_by_ref[object]
+    when ObjectRef then @row_md5s_by_ref[object]
     else []
     end
   end

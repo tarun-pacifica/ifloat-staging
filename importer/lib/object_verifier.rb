@@ -114,8 +114,8 @@ class ObjectVerifier
       problem = "their reference_group values differ (#{r_group.inspect} vs #{fr_group.inspect})"
       problem = "neither have a reference_group value set" if fr_group == r_group
       
-      colliding_row = @objects.rows_by_ref[ref].first
-      @errors << error_for_row("has the same primary image as #{ident(first_ref)} but #{problem}", colliding_row)
+      colliding_row_md5 = @objects.row_md5s_by_ref[ref].first
+      @errors << error_for_row("has the same primary image as #{ident(first_ref)} but #{problem}", colliding_row_md5)
     end
   end
   
@@ -132,8 +132,8 @@ class ObjectVerifier
         if existing_ref.nil?
           first_refs_by_value[value] = ref
         else
-          colliding_row = @objects.rows_by_ref[ref].first
-          @errors << error_for_row("has the same #{heading} title as #{ident(existing_ref)}: #{value}", colliding_row)
+          colliding_row_md5 = @objects.row_md5s_by_ref[ref].first
+          @errors << error_for_row("has the same #{heading} title as #{ident(existing_ref)}: #{value}", colliding_row_md5)
         end
       end
     end
@@ -157,16 +157,16 @@ class ObjectVerifier
       values_by_ref.values.transpose.each_with_index do |diff_column, i|
         blank_count = diff_column.count { |v| v.blank? }
         next if blank_count == 0 or blank_count == diff_column.size
-        colliding_row = @objects.rows_by_ref[values_by_ref.keys.first].first
-        @errors << error_for_row("differentiating values from property set #{i + 1} are a mixture of values and blanks: #{diff_column.inspect} (group: #{friendly_group})", colliding_row)
+        colliding_row_md5 = @objects.row_md5s_by_ref[values_by_ref.keys.first].first
+        @errors << error_for_row("differentiating values from property set #{i + 1} are a mixture of values and blanks: #{diff_column.inspect} (group: #{friendly_group})", colliding_row_md5)
       end
       
       values_by_ref.to_a.combination(2) do |a, b|
         ref1, values1 = a
         ref2, values2 = b
         next unless values1 == values2
-        colliding_row = @objects.rows_by_ref[ref2].first
-        @errors << error_for_row("has the same differentiating values #{values1.inspect} as #{ident(ref1)} (group: #{friendly_group})", colliding_row)
+        colliding_row_md5 = @objects.row_md5s_by_ref[ref2].first
+        @errors << error_for_row("has the same differentiating values #{values1.inspect} as #{ident(ref1)} (group: #{friendly_group})", colliding_row_md5)
       end
     end
   end
@@ -177,7 +177,7 @@ class ObjectVerifier
   def ident(prod_ref)
     product = @products_by_ref[prod_ref]
     company = @companies_by_ref[product[:company]]
-    row_md5 = @objects.rows_by_ref[prod_ref].first
+    row_md5 = @objects.row_md5s_by_ref[prod_ref].first
     "#{company[:reference]} / #{product[:reference]} (#{@csvs.location(row_md5)})"
   end
 end

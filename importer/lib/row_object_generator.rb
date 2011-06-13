@@ -28,7 +28,7 @@ class RowObjectGenerator
         if row_objects.empty? and errors.empty? then errors << [nil, "no objects parsed from this row"]
         else errors += @objects.add(row_objects, row_md5).map { |e| [nil, e] }
         end
-        @errors += errors.map { |col, e| [csv_info[:name], @csvs.row_index(row_md5), col, e] }
+        @errors += errors.map { |col, e| @csvs.location(row_md5, nil) + [col, e] }
         
         parsed_count += row_objects.size
         error_count += errors.size

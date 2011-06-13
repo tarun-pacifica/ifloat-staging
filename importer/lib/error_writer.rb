@@ -1,7 +1,7 @@
 module ErrorWriter
   # TODO: use in all includers if possible
   def error_for_row(message, row_md5)
-    [@csvs.row_csv_name(row_md5), @csvs.row_index(row_md5), message]
+    @csvs.location(row_md5, nil) << message
   end
   
   def write_errors(to_path)

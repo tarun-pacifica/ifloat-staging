@@ -53,9 +53,7 @@ class ObjectCatalogue
       ref, value_md5 = ObjectRef.from_object(object)
       
       if has_ref?(ref)
-        existing_rows = @rows_by_ref[ref].map do |row_md5|
-          [@csvs.row_csv_name(row_md5), @csvs.row_index(row_md5)].join(":")
-        end.join(", ")
+        existing_rows = @rows_by_ref[ref].map(&@csvs.method(:location)).join(", ")
         existing_rows = "unknown csvs / rows" if existing_rows.blank?
         return ["duplicate of #{object[:class]} from #{existing_rows}"]
       end

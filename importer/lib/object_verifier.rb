@@ -177,9 +177,7 @@ class ObjectVerifier
   def ident(prod_ref)
     product = @products_by_ref[prod_ref]
     company = @companies_by_ref[product[:company]]
-    row = @objects.rows_by_ref[prod_ref].first
-    # TODO: factor this location code (used in a few places) into csv_catalague as @csvs.location(row_md5)
-    location = [@csvs.row_csv_name(row), @csvs.row_index(row)].join(":")
-    "#{company[:reference]} / #{product[:reference]} (#{location})"
+    row_md5 = @objects.rows_by_ref[prod_ref].first
+    "#{company[:reference]} / #{product[:reference]} (#{@csvs.location(row_md5)})"
   end
 end

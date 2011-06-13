@@ -111,12 +111,9 @@ class CSVCatalogue
     @info_by_csv_md5.map { |md5, info| info[:name] =~ matcher ? info.merge(:md5 => md5) : nil }.compact
   end
   
-  def row_csv_name(row_md5)
-    @names_by_row_md5[row_md5]
-  end
-  
-  def row_index(row_md5)
-    @indexes_by_row_md5[row_md5]
+  def location(row_md5, join_with = ":")
+    fields = [@names_by_row_md5[row_md5], @indexes_by_row_md5[row_md5]]
+    join_with.nil? ? fields : fields.join(join_with)
   end
   
   def row_md5s

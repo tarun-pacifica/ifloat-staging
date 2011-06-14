@@ -77,7 +77,7 @@ class Facility
           query["Product_Attributes[#{i}]:value"] = kv[1]
         end
         query_url(query)
-      end << query_url("Screen" => "CHECKOUT", "Store_Code" => "mrst")
+      end << query_url("Screen" => "BASK", "Store_Code" => "mrst")
     else []
     end
   end

@@ -6,6 +6,10 @@
   font-size: 18px;
 }
 
+.admin_tools h2 {
+  font-size: 14px;
+}
+
 #all_tools li {
   font-size: 14px;
   padding: 2px;
@@ -13,6 +17,12 @@
 
 #all_tools ul {
   padding-left: 20px;
+}
+
+#importer p.error {
+  background: #FFFF99;
+  border: 2px solid red;
+  padding: 10px;
 }
 
 #ms_variant_reporter span.error {

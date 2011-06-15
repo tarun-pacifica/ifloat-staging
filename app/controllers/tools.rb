@@ -17,6 +17,54 @@ class Tools < Application
     render
   end
   
+  IMPORTER_CHECKPOINT_PATH = "/tmp/ifloat_importer.running"
+  IMPORTER_ERROR_PATH = "/tmp/ifloat_importer_errors.csv"
+  IMPORTER_LOG_PATH = "/tmp/ifloat_importer.log"
+  def importer
+    @error_csv_mtime = (File.mtime(IMPORTER_ERROR_PATH) rescue nil)
+    @importer_running_since = (File.mtime(IMPORTER_CHECKPOINT_PATH) rescue nil)
+    
+    unless @importer_running_since.nil? or @importer_running_since > 1.hour.ago
+      @error = "the importer has been running for more than an hour - contact tech support"
+      return render
+    end
+    
+    operation = params[:operation]
+    unless @importer_running_since.nil? or operation.nil?
+      @error = "cannot run #{operation} operation while the importer is running"
+      return render
+    end
+    
+    case operation
+    when "import"
+      # mark import as being in progress (touch checkpoint file)
+      # start import with checkpoint file params - redirect STDERR / STDOUT to log file
+      # may also need to supply an error CSV output path?
+    when "remove"
+      # remove path recursively
+      # use git rmpath if tracked
+    when "revert"
+      # checkout old path recursively
+      # only available for modified, tracked paths
+    when "upload"
+      # validate file
+      # move file into relevant DIR
+    end
+    
+    render
+  end
+  
+  def importer_error_report
+    send_data(File.read(IMPORTER_ERROR_PATH), :filename => File.basename(IMPORTER_ERROR_PATH), :type => "text/csv")
+  end
+  
+  def importer_log
+    stat = (File.stat(IMPORTER_LOG_PATH) rescue nil)
+    log = (stat.nil? or stat.zero?) ? "{log empty}" : File.read(IMPORTER_LOG_PATH)
+    log += "\n\n{importer finished}" unless File.exist?(IMPORTER_CHECKPOINT_PATH)
+    log
+  end
+  
   def ms_variant_reporter
     @expected_name = "provide.xml.zip"
     file = params[:file]

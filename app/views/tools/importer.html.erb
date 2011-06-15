@@ -1,0 +1,29 @@
+<div id="importer" class="admin_tools">
+  <h1>Importer (Report Only)</h1>
+  
+  <% unless @error.nil? %> <p class="error"><%= @error%></p> <% end %>
+  
+  <% unless @error_csv_mtime.nil? %> <p><a href="/tools/importer_error_report">Download the error report</a> from <%= @error_csv_mtime.strftime('%H:%M:%S (%B %d, %Y)') %></p> <% end %>
+  
+  <% if @importer_running_since.nil? %>
+  
+  
+  <% else %>
+  <p>Importer running since: <strong><%= @importer_running_since.strftime('%H:%M:%S') %></strong></p>
+  <h2>Progress...</h2>
+  <code id="log">{retrieving log}</code>
+  
+  <% end %>
+</div>
+
+<% unless @importer_running_since.nil? %>
+<script type="text/javascript" charset="utf-8">
+  function update_log() { $.get('/tools/importer_log', update_log_handler); }
+  update_log();
+  
+  function update_log_handler(log) {
+    $('#log').text(log);
+    log.match('{importer finished}$') ? window.location.reload() : setTimeout(update_log, 1000);
+  }
+</script>
+<% end %>

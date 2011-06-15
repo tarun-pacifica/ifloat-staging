@@ -3,15 +3,31 @@
   
   <% unless @error.nil? %> <p class="error"><%= @error%></p> <% end %>
   
-  <% unless @error_csv_mtime.nil? %> <p><a href="/tools/importer_error_report">Download the error report</a> from <%= @error_csv_mtime.strftime('%H:%M:%S (%B %d, %Y)') %></p> <% end %>
+  <% unless @error_csv_mtime.nil? %> <p><a href="/tools/importer_error_report">Download</a> the error report from <%= @error_csv_mtime.strftime('%H:%M:%S (%B %d, %Y)') %></p> <% end %>
   
   <% if @importer_running_since.nil? %>
+  <% @changes_by_group.sort.each do |group, changes| %>
+  <h2><%= group %> Changes</h2>
+  <% available = @available_by_group[group] %>
+  <% unless available.empty? %>
+  <form action="/tools/importer?operation=remove_<%= group %>" method="post">
+    <%= submit "Remove" %>
+    <select name="path">
+      <% available.each do |path| %>
+      <option value="<%= path.attribute_escape %>"><option1><%= path %></option>
+      <% end %>
+    </select>
+  </form>
+  <% end %>
   
+  <% unless changes == "{none}" %><p><a href="/tools/importer?operation=revert_<%= group %>">Undo</a> all <%= group.downcase %> changes</p><% end %>
+  <pre><%= changes %></pre>
+  <% end %>
   
   <% else %>
   <p>Importer running since: <strong><%= @importer_running_since.strftime('%H:%M:%S') %></strong></p>
   <h2>Progress...</h2>
-  <code id="log">{retrieving log}</code>
+  <pre id="log">{retrieving log}</pre>
   
   <% end %>
 </div>

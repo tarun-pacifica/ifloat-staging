@@ -18,12 +18,11 @@ class Tools < Application
   end
   
   IMPORTER_CHECKPOINT_PATH = "/tmp/ifloat_importer.running"
+  IMPORTER_DATA_DIRS = Hash[%w(Asset CSV).map { |group| [group, Merb.root / ".." / "ifloat_#{group.downcase}s"] }]
   IMPORTER_ERROR_PATH = "/tmp/ifloat_importer_errors.csv"
   IMPORTER_LOG_PATH = "/tmp/ifloat_importer.log"
   def importer
-    @error_csv_mtime = (File.mtime(IMPORTER_ERROR_PATH) rescue nil)
     @importer_running_since = (File.mtime(IMPORTER_CHECKPOINT_PATH) rescue nil)
-    
     unless @importer_running_since.nil? or @importer_running_since > 1.hour.ago
       @error = "the importer has been running for more than an hour - contact tech support"
       return render
@@ -40,15 +39,21 @@ class Tools < Application
       # mark import as being in progress (touch checkpoint file)
       # start import with checkpoint file params - redirect STDERR / STDOUT to log file
       # may also need to supply an error CSV output path?
-    when "remove"
-      # remove path recursively
-      # use git rmpath if tracked
-    when "revert"
-      # checkout old path recursively
-      # only available for modified, tracked paths
+    when /^remove_(Asset|CSV)$/
+      path = params[:path]
+      FileUtils.rmtree(IMPORTER_DATA_DIRS[$1] / path) unless path.blank?
+    when /^revert_(Asset|CSV)$/
+      dir = IMPORTER_DATA_DIRS[$1]
+      @error = git_revert(dir)
     when "upload"
       # validate file
       # move file into relevant DIR
+    end
+    
+    if @importer_running_since.nil?
+      @available_by_group = Hash[IMPORTER_DATA_DIRS.map { |group, path| [group, git_available(group, path)] }]
+      @changes_by_group = Hash[IMPORTER_DATA_DIRS.map { |group, path| [group, git_changes(path)] }]
+      @error_csv_mtime = (File.mtime(IMPORTER_ERROR_PATH) rescue nil)
     end
     
     render
@@ -170,5 +175,35 @@ class Tools < Application
   
   def ensure_authenticated
     redirect "/" unless Merb.environment == "development" or session.admin?
+  end
+  
+  def git_available(group, dir)
+    glob = (group == "Asset" ? (dir / "*" / "*") : (dir / "**" / "**.csv"))
+    matcher = /^#{dir}\/(.+?)$/
+    Dir[glob].map { |path| path =~ matcher; $1 }.reject { |path| path == "assets.csv" }
+  end
+  
+  def git_changes(dir)
+    report = `git --git-dir=#{dir}/.git --work-tree=#{dir} status -s 2>&1`
+    return "unable to get the git status of #{dir.inspect}: #{report}" unless $?.success?
+    
+    statuses = {"?" => "  added", "D" => "deleted", "M" => "updated"}
+    report = report.lines.map do |line|
+      return "unable to parse #{line.inspect} from the git status for #{dir.inspect}" unless line =~ /^(.)(.) (.+?)$/
+      x, y, path = $1, $2, $3
+      "#{statuses[y]}: #{path}"
+    end.join("\n")
+    
+    report.blank? ? "{none}" : report
+  end
+  
+  def git_revert(dir)
+    report = `git --git-dir=#{dir}/.git --work-tree=#{dir} clean -df 2>&1`
+    return "unable to clean #{dir.inspect}: #{report}" unless $?.success?
+    
+    report = `git --git-dir=#{dir}/.git --work-tree=#{dir} reset --hard`
+    return "unable to reset #{dir.inspect}: #{report}" unless $?.success?
+    
+    nil
   end
 end

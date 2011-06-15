@@ -27,8 +27,13 @@
     <% unless @skip_javascript %>
     
     <link rel="stylesheet" href="/stylesheets/ui/ui.css" type="text/css" media="screen" charset="utf-8" />
+    <% if Merb.environment == "development" %>
+    <script type="text/javascript" src="/javascripts/dev_local/jquery.min.js"></script>
+    <script type="text/javascript" src="/javascripts/dev_local/jquery-ui.min.js"></script>
+    <% else %>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js"></script>
+    <% end %>
     <script src="/javascripts/compiled.js" type="text/javascript" charset="utf-8"></script>
     
     <% if Merb.environment == "production" %>

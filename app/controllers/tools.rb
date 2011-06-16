@@ -21,6 +21,7 @@ class Tools < Application
   IMPORTER_DATA_DIRS = Hash[%w(Asset CSV).map { |group| [group, Merb.root / ".." / "ifloat_#{group.downcase}s"] }]
   IMPORTER_ERROR_PATH = "/tmp/ifloat_importer_errors.csv"
   IMPORTER_LOG_PATH = "/tmp/ifloat_importer.log"
+  IMPORTER_SUCCESS_PATH = "/tmp/ifloat_importer.success"
   IMPORTER_UNZIP_DIR = "/tmp/ifloat_importer_unzips"
   def importer
     @importer_running_since = (File.mtime(IMPORTER_CHECKPOINT_PATH) rescue nil)
@@ -35,11 +36,25 @@ class Tools < Application
       return render
     end
     
+    # TODO: what to do when a success - i.e. need to emphasize no error report somehow - do we have enough state to do this?
     case operation
     when "import"
-      # mark import as being in progress (touch checkpoint file)
-      # start import with checkpoint file params - redirect STDERR / STDOUT to log file
-      # may also need to supply an error CSV output path?
+      @importer_running_since = Time.now
+      FileUtils.touch(IMPORTER_CHECKPOINT_PATH)
+      [IMPORTER_ERROR_PATH, IMPORTER_LOG_PATH, IMPORTER_SUCCESS_PATH].each do |path|
+        File.delete(path) if File.exist?(path)
+      end
+      
+      fork do
+        $stdout = $stderr = File.open(IMPORTER_LOG_PATH, "w")
+        $stdout.sync = $stderr.sync = true
+        begin
+          require Merb.root / "importer" / "import"
+        ensure
+          File.delete(IMPORTER_CHECKPOINT_PATH)
+          File.touch(IMPORTER_SUCCESS_PATH) unless File.exist?(IMPORTER_ERROR_PATH)
+        end
+      end
       
     when /^remove_(Asset|CSV)$/
       path = params[:path]
@@ -70,6 +85,7 @@ class Tools < Application
       @available_by_group = Hash[IMPORTER_DATA_DIRS.map { |group, path| [group, git_available(group, path)] }]
       @changes_by_group = Hash[IMPORTER_DATA_DIRS.map { |group, path| [group, git_changes(path)] }]
       @error_csv_mtime = (File.mtime(IMPORTER_ERROR_PATH) rescue nil)
+      @success_time = (File.mtime(IMPORTER_SUCCESS_PATH) rescue nil)
       @upload_info_by_group = {"Asset" => ["an asset ZIP", Asset::BUCKETS], "CSV" => ["a CSV", %w(/ products)]}
     end
     
@@ -231,10 +247,11 @@ class Tools < Application
     from_path = file[:tempfile].path
     
     if ext == ".zip"
+      name = File.basename(name, ext)
+      return "the supplied file's name was not a company reference" unless name =~ Company::REFERENCE_FORMAT
+      
       FileUtils.rmtree(IMPORTER_UNZIP_DIR)
       FileUtils.mkpath(IMPORTER_UNZIP_DIR)
-      
-      name = File.basename(name, ext)
       unzip_path = IMPORTER_UNZIP_DIR / name
       return "failed to unzip the supplied file" unless system("unzip", from_path, "-d", IMPORTER_UNZIP_DIR)
       return "unzipping the supplied file did not produce a folder called #{name.inspect}" unless File.directory?(unzip_path)

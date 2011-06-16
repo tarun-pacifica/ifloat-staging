@@ -5,7 +5,7 @@ REPO_DIRS = Hash[["assets", "csvs"].map { |d| [d, Merb.root / ".." / "ifloat_#{d
 ASSET_CSV_PATH       = REPO_DIRS["csvs"] / "assets.csv"
 ASSET_VARIANT_DIR    = "/tmp" / "ifloat_asset_variants_new"
 ASSET_WATERMARK_PATH = Merb.root / "public" / "images" / "common" / "watermark.png"
-ERROR_CSV_PATH       = "/tmp" / "ifloat_errors.csv"
+ERROR_CSV_PATH       = "/tmp" / "ifloat_importer_errors.csv"
 
 THIS_DIR             = Merb.root / "importer"
 INDEXES_DIR          = THIS_DIR / "indexes"

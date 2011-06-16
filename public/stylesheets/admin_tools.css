@@ -25,6 +25,16 @@
   padding: 10px;
 }
 
+#importer span.error {
+  color: red;
+  font-weight: bold;
+}
+
+#importer span.success {
+  color: green;
+  font-weight: bold;
+}
+
 #ms_variant_reporter span.error {
   background: #FFFF99;
   border: 2px solid red;

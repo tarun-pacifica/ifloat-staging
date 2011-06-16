@@ -3,9 +3,13 @@
   
   <% unless @error.nil? %> <p class="error"><%= @error%></p> <% end %>
   
-  <% unless @error_csv_mtime.nil? %> <p><a href="/tools/importer_error_report">Download</a> the error report from <%= @error_csv_mtime.strftime('%H:%M:%S (%B %d, %Y)') %></p> <% end %>
+  <% unless @error_csv_mtime.nil? %> <p><a href="/tools/importer_error_report">Download</a> the <span class="error">error report</span> from <%= @error_csv_mtime.strftime('%H:%M:%S (%B %d, %Y)') %></p> <% end %>
+  
+  <% if @success_time %> <p>The last import run <span class="success">completed successfully</span> at <%= @success_time.strftime('%H:%M:%S (%B %d, %Y)') %><% end %>
   
   <% if @importer_running_since.nil? %>
+  <p><a href="/tools/importer?operation=import">Run</a> import with these changes</p>
+  
   <% @changes_by_group.sort.each do |group, changes| %>
   <h2><%= group %> Changes</h2>
   
@@ -47,7 +51,7 @@
   
   function update_log_handler(log) {
     $('#log').text(log);
-    log.match('{importer finished}$') ? window.location.reload() : setTimeout(update_log, 1000);
+    log.match('{importer finished}$') ? window.location = '/tools/importer' : setTimeout(update_log, 1000);
   }
 </script>
 <% end %>

@@ -8,6 +8,14 @@
   <% if @importer_running_since.nil? %>
   <% @changes_by_group.sort.each do |group, changes| %>
   <h2><%= group %> Changes</h2>
+  
+  <% info = @upload_info_by_group[group] %>
+  <form action="/tools/importer?operation=upload_<%= group %>" method="post" enctype="multipart/form-data">
+    <%= submit "Upload #{info.first}" %>
+    to the <select name="bucket"><% info.last.each { |b| %><option value="<%= b.attribute_escape %>"><%= b %></option><% } %></select> bucket
+    <input type="file" name="file" />
+  </form>
+  
   <% available = @available_by_group[group] %>
   <% unless available.empty? %>
   <form action="/tools/importer?operation=remove_<%= group %>" method="post">

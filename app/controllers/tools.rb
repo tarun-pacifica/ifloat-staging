@@ -21,6 +21,7 @@ class Tools < Application
   IMPORTER_DATA_DIRS = Hash[%w(Asset CSV).map { |group| [group, Merb.root / ".." / "ifloat_#{group.downcase}s"] }]
   IMPORTER_ERROR_PATH = "/tmp/ifloat_importer_errors.csv"
   IMPORTER_LOG_PATH = "/tmp/ifloat_importer.log"
+  IMPORTER_UNZIP_DIR = "/tmp/ifloat_importer_unzips"
   def importer
     @importer_running_since = (File.mtime(IMPORTER_CHECKPOINT_PATH) rescue nil)
     unless @importer_running_since.nil? or @importer_running_since > 1.hour.ago
@@ -39,21 +40,37 @@ class Tools < Application
       # mark import as being in progress (touch checkpoint file)
       # start import with checkpoint file params - redirect STDERR / STDOUT to log file
       # may also need to supply an error CSV output path?
+      
     when /^remove_(Asset|CSV)$/
       path = params[:path]
       FileUtils.rmtree(IMPORTER_DATA_DIRS[$1] / path) unless path.blank?
+      
     when /^revert_(Asset|CSV)$/
       dir = IMPORTER_DATA_DIRS[$1]
       @error = git_revert(dir)
-    when "upload"
-      # validate file
-      # move file into relevant DIR
+      
+    when /^upload_(Asset|CSV)$/
+      file = params[:file]
+      if file.blank?
+        @error = "please choose a file"
+      elsif params[:bucket].blank?
+        @error = "please choose a bucket"
+      else
+        group = $1
+        expected_ext = {"Asset" => ".zip", "CSV" => ".csv"}[group]
+        @error =
+          if File.extname(file[:filename]) == expected_ext then unzip_move(file, IMPORTER_DATA_DIRS[group] / params[:bucket])
+          else "#{group} upload names should end in #{expected_ext}"
+          end
+      end
+      
     end
     
     if @importer_running_since.nil?
       @available_by_group = Hash[IMPORTER_DATA_DIRS.map { |group, path| [group, git_available(group, path)] }]
       @changes_by_group = Hash[IMPORTER_DATA_DIRS.map { |group, path| [group, git_changes(path)] }]
       @error_csv_mtime = (File.mtime(IMPORTER_ERROR_PATH) rescue nil)
+      @upload_info_by_group = {"Asset" => ["an asset ZIP", Asset::BUCKETS], "CSV" => ["a CSV", %w(/ products)]}
     end
     
     render
@@ -204,6 +221,35 @@ class Tools < Application
     report = `git --git-dir=#{dir}/.git --work-tree=#{dir} reset --hard`
     return "unable to reset #{dir.inspect}: #{report}" unless $?.success?
     
+    nil
+  end
+  
+  def unzip_move(file, target_dir)
+    name = file[:filename]
+    ext = File.extname(name)
+    
+    from_path = file[:tempfile].path
+    
+    if ext == ".zip"
+      FileUtils.rmtree(IMPORTER_UNZIP_DIR)
+      FileUtils.mkpath(IMPORTER_UNZIP_DIR)
+      
+      name = File.basename(name, ext)
+      unzip_path = IMPORTER_UNZIP_DIR / name
+      return "failed to unzip the supplied file" unless system("unzip", from_path, "-d", IMPORTER_UNZIP_DIR)
+      return "unzipping the supplied file did not produce a folder called #{name.inspect}" unless File.directory?(unzip_path)
+      
+      FileUtils.rmtree(IMPORTER_UNZIP_DIR / "__MACOSX")
+      return "failed to clean up #{unzip_path.inspect}" unless
+        system("find", unzip_path, "-type", "d", "-exec", "chmod", "755", "{}", ";") and
+        system("find", unzip_path, "-type", "f", "-exec", "chmod", "644", "{}", ";") and
+        system("find", unzip_path, "-name", "Thumbs.db", "-exec", "rm", "{}", ";")
+      from_path = unzip_path
+    end
+    
+    to_path = target_dir / name
+    FileUtils.rmtree(to_path)
+    FileUtils.mv(from_path, to_path)
     nil
   end
 end

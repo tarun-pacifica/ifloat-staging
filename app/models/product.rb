@@ -21,7 +21,6 @@ class Product
   has n, :product_relationships # needs to be named this way as 'relationships' collides with DM
   has n, :values, :model => "PropertyValue"
   
-  # TODO: spec
   def self.marshal_values(product_ids, language_code, range_sep, forced_diff_names = [])
     attributes = {:product_id => product_ids}
     db_values = NumericPropertyValue.all(attributes).map
@@ -127,7 +126,6 @@ class Product
     Attachment.product_role_assets([id])[id] || {}
   end
   
-  # TODO: spec
   def marshal_values(language_code, range_sep)
     Product.marshal_values([id], language_code, range_sep)
   end

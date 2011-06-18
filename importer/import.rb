@@ -15,7 +15,7 @@ OBJECT_INDEX_DIR     = INDEXES_DIR / "objects"
 [ASSET_VARIANT_DIR, CSV_INDEX_DIR, OBJECT_INDEX_DIR].each { |dir| FileUtils.mkpath(dir) }
 
 require THIS_DIR / "lib" / "error_writer"
-%w(lib parsers).each { |dir| Dir[THIS_DIR / dir / "*.rb"].each { |path| load path } }
+%w(lib parsers).each { |dir| Dir[THIS_DIR / dir / "*.rb"].sort.each { |path| load path } }
 
 
 def mail_fail(whilst)

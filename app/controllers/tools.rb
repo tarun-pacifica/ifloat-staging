@@ -51,7 +51,7 @@ class Tools < Application
         begin
           require Merb.root / "importer" / "import"
         rescue Exception => e
-          File.open(IMPORTER_ERROR_PATH, "a") { |f| f.puts "\n\n{error: #{e.inspect}}"}
+          File.open(IMPORTER_LOG_PATH, "a") { |f| f.puts "\n\n{error: #{e.inspect}}"}
         ensure
           File.delete(IMPORTER_CHECKPOINT_PATH)
           FileUtils.touch(IMPORTER_SUCCESS_PATH) unless File.exist?(IMPORTER_ERROR_PATH)

@@ -50,9 +50,11 @@ class Tools < Application
         $stdout.sync = $stderr.sync = true
         begin
           require Merb.root / "importer" / "import"
+        rescue Exception => e
+          File.open(IMPORTER_ERROR_PATH, "a") { |f| f.puts "\n\n{error: #{e.inspect}}"}
         ensure
           File.delete(IMPORTER_CHECKPOINT_PATH)
-          File.touch(IMPORTER_SUCCESS_PATH) unless File.exist?(IMPORTER_ERROR_PATH)
+          FileUtils.touch(IMPORTER_SUCCESS_PATH) unless File.exist?(IMPORTER_ERROR_PATH)
         end
       end
       

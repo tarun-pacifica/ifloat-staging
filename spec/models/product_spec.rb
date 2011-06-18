@@ -33,7 +33,7 @@ describe Product do
     end
   end
   
-  describe "marshal_values" do
+  describe "marshalling values" do
     before(:all) do
       @products = 3.times.map { |i| Product.create(:company_id => 1, :reference => "ABC#{i}") }
       
@@ -70,28 +70,48 @@ describe Product do
       (@products + @property_types_by_name.values + @properties_by_name.values + @values).each(&:destroy)
     end
     
-    def flat_marshal(*args)
-      Product.marshal_values(*args).map do |set|
-        set.map { |info| info[:values] }.flatten
+    describe "with marshal_values" do
+      def flat_marshal(*args)
+        Product.marshal_values(*args).map do |set|
+          set.map { |info| info[:values] }.flatten
+        end
+      end
+      
+      it "should return common and differentiated values" do
+        common, diff = flat_marshal(@products.map(&:id), "ENG", ":::")
+        common.should == %w(a)
+        diff.sort.should == %w(0 0:::1 0:::2 2001-01-01:::2003)
+      end
+      
+      it "should allow for forcing an otherwise common value to be treated as differentiated" do
+        common, diff = flat_marshal(@products.map(&:id), "ENG", ":::", "text:text")
+        common.should == []
+        diff.sort.should == %w(0 0:::1 0:::2 2001-01-01:::2003 a a a)
+      end
+      
+      it "should provide an instance decorator" do
+        common, diff = @products.first.marshal_values("ENG", ":::")
+        common.map { |info| info[:values] }.flatten.sort.should == %w(0 2001-01-01:::2003 a)
+        diff.should == []
       end
     end
     
-    it "should return common and differentiated values" do
-      common, diff = flat_marshal(@products.map(&:id), "ENG", ":::")
-      common.should == %w(a)
-      diff.sort.should == %w(0 0:::1 0:::2 2001-01-01:::2003)
-    end
-    
-    it "should allow for forcing an otherwise common value to be treated as differentiated" do
-      common, diff = flat_marshal(@products.map(&:id), "ENG", ":::", "text:text")
-      common.should == []
-      diff.sort.should == %w(0 0:::1 0:::2 2001-01-01:::2003 a a a)
-    end
-    
-    it "should provide an instance decorator" do
-      common, diff = @products.first.marshal_values("ENG", ":::")
-      common.map { |info| info[:values] }.flatten.sort.should == %w(0 2001-01-01:::2003 a)
-      diff.should == []
+    describe "with values_by_property_name_by_product_id" do
+      it "should return the values for a given set of property names" do
+        values = Product.values_by_property_name_by_product_id(@products.map(&:id), "ENG", %w(text:text date:date))
+        values.size.should == @products.size
+        values[@products.first.id]["date:date"].should == [@values.last]
+      end
+      
+      it "should return the values for a given set of property IDs" do
+        values = Product.values_by_property_name_by_product_id(@products.map(&:id), "ENG", [  @properties_by_name["date"].id])
+        values.size.should == 1
+        values[@products.first.id]["date:date"].should == [@values.last]
+      end
+      
+      it "should provide an instance decorator" do
+        @products.first.values_by_property_name("ENG", %w(date:date))["date:date"].should == [@values.last]
+      end
     end
   end
   
@@ -99,8 +119,6 @@ describe Product do
   it "should have specs for prices_by_url_by_product_id"
   it "should have specs for prices_by_url"
   it "should have specs for primary_images_by_product_id"
-  it "should have specs for values_by_property_name_by_product_id"
-  it "should have specs for values_by_property_name"
   it "should have specs for assets_by_role"
   
 end

@@ -100,7 +100,6 @@ class Product
     assets_by_prod_id
   end
   
-  # TODO: spec
   def self.values_by_property_name_by_product_id(product_ids, language_code, names_or_ids)
     names_or_ids = names_or_ids.to_set
     names_by_property_id = {}
@@ -165,7 +164,6 @@ class Product
     end.compact
   end
   
-  # TODO: spec
   def values_by_property_name(language_code, names_or_ids)
     Product.values_by_property_name_by_product_id([id], language_code, names_or_ids)[id] || {}
   end

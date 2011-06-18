@@ -8,7 +8,7 @@
   <% if @success_time %> <p>The last import run <span class="success">completed successfully</span> at <%= @success_time.strftime('%H:%M:%S (%B %d, %Y)') %><% end %>
   
   <% if @importer_running_since.nil? %>
-  <p><a href="/tools/importer?operation=import">Run</a> import with these changes</p>
+  <p><a href="/tools/importer?operation=import">Run</a> import now</p>
   
   <% @changes_by_group.sort.each do |group, changes| %>
   <h2><%= group %> Changes</h2>

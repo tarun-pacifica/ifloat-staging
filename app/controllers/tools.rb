@@ -215,7 +215,7 @@ class Tools < Application
   def git_available(group, dir)
     glob = (group == "Asset" ? (dir / "*" / "*") : (dir / "**" / "**.csv"))
     matcher = /^#{dir}\/(.+?)$/
-    Dir[glob].map { |path| path =~ matcher; $1 }.reject { |path| path == "assets.csv" }
+    Dir[glob].map { |path| path =~ matcher; $1 }.reject { |path| path == "assets.csv" }.sort
   end
   
   def git_changes(dir)

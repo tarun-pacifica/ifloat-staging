@@ -120,8 +120,7 @@ class Product
     values_by_prop_name_by_prod_id
   end
   
-  # TODO: spec
-  def assets_by_role 
+  def assets_by_role
     Attachment.product_role_assets([id])[id] || {}
   end
   

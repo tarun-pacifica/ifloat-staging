@@ -70,6 +70,10 @@ describe Product do
       (@products + @property_types_by_name.values + @properties_by_name.values + @values).each(&:destroy)
     end
     
+    describe "with assets_by_role" do
+      @products.first.assets_by_role.should == {}
+    end
+    
     describe "with marshal_values" do
       def flat_marshal(*args)
         Product.marshal_values(*args).map do |set|

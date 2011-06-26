@@ -67,7 +67,14 @@ class ObjectRef < String
     ObjectCatalogue.default.data_for(self)
   end
   
+  def inspect_friendly(top_level = true)
+    a = attributes
+    klass = a[:klass]
+    values = a.values_at(*PRIMARY_KEYS[klass]).map { |v| v.is_a?(ObjectRef) ? v.inspect_friendly(false) : v }
+    top_level ? "#{klass}[#{values.flatten.join(' / ')}]" : values
+  end
+  
   def row_md5s
     ObjectCatalogue.default.row_md5s_by_ref[self]
-  end
+  end  
 end

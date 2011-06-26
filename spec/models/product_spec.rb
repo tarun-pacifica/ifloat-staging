@@ -71,7 +71,9 @@ describe Product do
     end
     
     describe "with assets_by_role" do
-      @products.first.assets_by_role.should == {}
+      it "should return an empty hash by default" do
+        @products.first.assets_by_role.should == {}
+      end
     end
     
     describe "with marshal_values" do
@@ -123,6 +125,5 @@ describe Product do
   it "should have specs for prices_by_url_by_product_id"
   it "should have specs for prices_by_url"
   it "should have specs for primary_images_by_product_id"
-  it "should have specs for assets_by_role"
   
 end

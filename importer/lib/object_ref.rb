@@ -76,5 +76,5 @@ class ObjectRef < String
   
   def row_md5s
     ObjectCatalogue.default.row_md5s_by_ref[self]
-  end  
+  end
 end

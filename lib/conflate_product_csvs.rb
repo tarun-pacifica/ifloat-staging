@@ -31,7 +31,7 @@ end
 sorted_column_names = universal_columns.keys.sort_by do |col_name|
   case col_name
   when "company.reference" then [0]
-  when "product.reference" then [2]
+  when "product.reference", "product.reference_group" then [2, col_name]
   when /^mapping\.(.+?)$/ then [3, $1]
   when /^raw:.*?(\d+)$/ then [7, $1.to_i]
   when /^(.+?:.+?):(.*?):(\d+)$/ then [4, (properties_by_name[$1].sequence_number rescue 0).to_i, $3.to_i, $2]

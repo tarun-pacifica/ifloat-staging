@@ -29,6 +29,7 @@ def mail_fail(whilst)
   exit 1
 end
 
+
 puts "Scanning asset repository for updates..."
 assets = ImportableAssets.new(REPO_DIRS["assets"], ASSET_CSV_PATH, ASSET_VARIANT_DIR, ASSET_WATERMARK_PATH)
 unless assets.update
@@ -44,11 +45,13 @@ Dir[REPO_DIRS["csvs"] / "**" / "*.csv"].each { |path| csvs.add(path) }
 mail_fail("compiling CSVs") if csvs.write_errors(ERROR_CSV_PATH)
 csvs.delete_obsolete
 csvs.summarize
+GC.start
 
 puts "Recovering object state..."
 objects = ObjectCatalogue.new(csvs, OBJECT_INDEX_DIR)
 objects.delete_obsolete
 objects.summarize
+GC.start
 
 puts "Generating any missing row objects..."
 generator = RowObjectGenerator.new(csvs, objects)
@@ -56,12 +59,14 @@ extra_dependency_rules = {Asset => [Product], PropertyDefinition => [AssociatedW
 DataMapper::Model.sorted_descendants(extra_dependency_rules).each { |model| generator.generate_for(model) }
 mail_fail("generating row objects") if generator.write_errors(ERROR_CSV_PATH)
 objects.summarize
+GC.start
 
 puts "Generating any missing auto objects..."
 generator = AutoObjectGenerator.new(csvs, objects)
 generator.generate
 mail_fail("generating auto objects") if generator.write_errors(ERROR_CSV_PATH)
 objects.summarize
+GC.start
 
 puts "Running global integrity checks..."
 verifier = ObjectVerifier.new(csvs, objects)

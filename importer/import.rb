@@ -35,6 +35,8 @@ unless assets.update
   assets.write_errors(ERROR_CSV_PATH)
   mail_fail("compiling assets")
 end
+assets = nil
+GC.start
 
 puts "Scanning CSV repository for updates..."
 csvs = CSVCatalogue.new(CSV_INDEX_DIR)

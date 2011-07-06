@@ -2,7 +2,7 @@ require "tsort"
 
 module DataMapper::Model
   def self.sorted_descendants(extra_rules = {})
-    models = (descendants.to_a | descendants.map { |d| d.descendants.to_a }).extend(TSort)
+    models = (descendants.to_a + descendants.map { |d| d.descendants.to_a }).flatten.uniq.extend(TSort)
     models.instance_variable_set("@extra_rules", extra_rules)
     
     def models.tsort_each_node(&block); each(&block); end

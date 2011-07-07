@@ -9,6 +9,7 @@ class AutoObjectGenerator
     @objects = object_catalogue
     
     @errors = []
+    @strategies_by_class_args = {}
     
     @agd_property, @at_property = %w(auto:group_diff auto:title).map do |name|
       ref = ObjectRef.for(PropertyDefinition, [name])
@@ -25,53 +26,42 @@ class AutoObjectGenerator
   def generate
     return unless @errors.empty?
     
-    product_data_by_ref = {}
-    product_refs_by_class = {Product => [], PropertyHierarchy => [], TitleStrategy => []}
-    value_refs_by_product_ref = {}
-    @objects.each do |ref, data|
-      klass = data[:class]
-      if klass == Product
-        product_data_by_ref[ref] = data
-        product_refs_by_class[Product] << ref
-      elsif VALUE_CLASSES.include?(klass)
-        product_ref = data[:product]
-        auto_class =
-          if data[:property_hierarchy] then PropertyHierarchy
-          elsif data[:title_strategy]  then TitleStrategy
-          else nil
-          end
-        product_refs_by_class[auto_class] << product_ref unless auto_class.nil?
-        (value_refs_by_product_ref[product_ref] ||= []) << ref
-      end
-    end
+    products_done = 0
+    products_todo = @objects.queue_size("products", true)
     
-    all_product_refs = product_refs_by_class.delete(Product).to_set
-    product_refs_by_class.each do |klass, refs|
-      error_count, product_count = 0, 0
-      refs_to_generate = all_product_refs - refs
-      refs_to_generate.delete_if { |ref| product_data_by_ref[ref][:reference_group].nil? } if klass == PropertyHierarchy
-      m = method("generate_#{klass.to_s.gsub(/[^A-Z]/, '').downcase}_values")
+    @objects.queue_each("products") do |product_ref, refs|
+      product = @objects.data_for(product_ref)
+      products_done += 1
+      next if product.nil?
       
-      refs_to_generate.each_slice(500).each do |refs|
-        refs.each do |ref|
-          values_by_property_name = (value_refs_by_product_ref[ref] || []).group_by { |v| v[:definition][:name] }
-          product_class = values_by_property_name["reference:class"].first[:text_value]
-          row_md5 = ref.row_md5s.first
-          
-          auto_objects, errors = m.call(ref, product_data_by_ref[ref], product_class, values_by_property_name, row_md5)
-          errors += @objects.add(auto_objects, row_md5).map { |e| error_for_row(e, row_md5) }
-          @errors += errors
-          
-          product_count += 1 unless auto_objects.empty?
-          error_count += errors.size
+      values = refs.map(&@objects.method(:data_for))
+      values_by_property_name = values.group_by { |v| v[:definition][:name] }
+      
+      klass = values_by_property_name["reference:class"].first[:text_value]
+      row_md5 = @objects.row_md5s_for(product_ref).first
+      args = [product_ref, product, klass, values_by_property_name, row_md5]
+      
+      methods = [method(:generate_ts_values)]
+      methods << method(:generate_ph_values) unless product[:reference_group].nil?
+      
+      retain = false
+      methods.each do |m|
+        auto_objects, errors = m.call(*args)
+        errors += @objects.add(auto_objects, row_md5).map { |e| error_for_row(e, row_md5) }
+        @errors += errors
+        unless errors.empty?
+          retain = true
+          break
         end
-        
-        puts " - generated #{klass} objects for #{product_count}/#{refs_to_generate.size} products" if product_count > 0
       end
       
-      puts " ! #{error_count} errors reported while generating #{klass} objects" if error_count > 0
-      @objects.commit("auto_#{klass}")
+      puts " - processed #{products_done}/#{products_todo} new/updated products" if products_done % 500 == 0
+      retain
     end
+    puts " - processed #{products_done}/#{products_todo} new/updated products" if products_todo % 500 > 0
+    
+    puts " ! #{@errors.size} errors reported" unless @errors.empty?
+    @objects.flush
   end
   
   def generate_auto_part(values, capitalize, superscript_units)
@@ -98,8 +88,8 @@ class AutoObjectGenerator
     
     seq_num = 0
     while seq_num += 1 do
-      hierarchy = ObjectRef.for(PropertyHierarchy, [klass, seq_num])
-      unless @objects.has_ref?(hierarchy)
+      hierarchy = strategy_for(PropertyHierarchy, [klass, seq_num])
+      if hierarchy.nil?
         return [[], [error_no_strategy(:ph, klass, row_md5)]] if seq_num == 1
         break
       end
@@ -128,8 +118,8 @@ class AutoObjectGenerator
   def generate_ts_values(product_ref, product, klass, values_by_property_name, row_md5)
     title_objects, errors = [], []
     
-    strategy = ObjectRef.for(TitleStrategy, [klass])
-    return [[], [error_no_strategy(:ts, klass, row_md5)]] unless @objects.has_ref?(strategy)
+    strategy = strategy_for(TitleStrategy, [klass])
+    return [[], [error_no_strategy(:ts, klass, row_md5)]] if strategy.nil?
     
     TitleStrategy::TITLE_PROPERTIES.each_with_index.map do |title, i|
       rendered_parts = []
@@ -161,5 +151,13 @@ class AutoObjectGenerator
     end
     
     errors.empty? ? [title_objects, []] : [[], errors]
+  end
+  
+  def strategy_for(klass, args)
+    key = [klass, args]
+    return @strategies_by_class_args[key] if @strategies_by_class_args.has_key?(key)
+    strategy = ObjectRef.for(klass, args)
+    strategy = strategy.attributes unless strategy.nil?
+    @strategies_by_class_args[key] = strategy
   end
 end

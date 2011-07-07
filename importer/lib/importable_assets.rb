@@ -106,13 +106,15 @@ class ImportableAssets
     empty_paths, mtimes_by_path = scan_source_dir
     unchanged = read_from_csv.select { |a| a[:mtime] == mtimes_by_path[a[:path]] }
     paths_to_scan = (mtimes_by_path.keys - unchanged.map { |a| a[:path] })
-    scan_size = paths_to_scan.size
     
-    scanned = paths_to_scan.each_with_index.map do |path, i|
-      a = {:path => path, :relative_path => relative_path(path), :mtime => mtimes_by_path[path]}
-      empty_paths.include?(path) ? error(a, "empty file") : scan_asset(a)
-      puts " - #{i + 1}/#{scan_size} #{a[:relative_path]}"
-      a
+    scanned = []
+    paths_to_scan.each_slice(500) do |paths|
+      scanned += paths.map do |path|
+        a = {:path => path, :relative_path => relative_path(path), :mtime => mtimes_by_path[path]}
+        empty_paths.include?(path) ? error(a, "empty file") : scan_asset(a)
+        a
+      end
+      puts " - scanned #{scanned.size}/#{paths_to_scan.size} assets"
     end
     
     @all = unchanged + scanned
@@ -128,15 +130,19 @@ class ImportableAssets
     scanned_product_images = scanned.select { |a| a[:bucket] == "products" and a.has_key?(:pixel_size) }
     scanned_product_images.each { |image| image.update(variants_by_name(image)) }
     variants = variants_missing(scanned_product_images)
-    variants.each_with_index do |spec, i|
-      image, name, path = spec.values_at(:image, :name, :path)
-      variant_create(image, name, path)
-      puts " - #{i + 1}/#{variants.size} #{image[:relative_path]} -> [#{name}] #{path}"
+    created = 0
+    variants.each_slice(500) do |specs|
+      specs.each_with_index do |spec, i|
+        image, name, path = spec.values_at(:image, :name, :path)
+        variant_create(image, name, path)
+        created += 1
+      end
+      puts " - created #{created}/#{variants.size} image variants"
     end
     return false unless @errors.empty?
     
     write_to_csv unless scanned.empty?
-    puts " > managing #{@all.size} assets in total"
+    puts " > managing #{@all.size} assets"
     
     all_variant_paths = @all.map { |a| a.values_at(:path_wm, :path_small, :path_tiny) }.flatten.compact
     (Dir[@variant_dir / "*"] - all_variant_paths).delete_and_log("obsolete variants")

@@ -47,10 +47,12 @@ csvs.delete_obsolete
 csvs.summarize
 GC.start
 
-puts "Recovering object state..."
+puts "Recovering / updating object state..."
 objects = ObjectCatalogue.new(csvs, OBJECT_INDEX_DIR)
-objects.delete_obsolete
 objects.summarize
+objects.add_queue("products") do |ref, object|
+  [object[:product], ref] if AutoObjectGenerator::VALUE_CLASSES.include?(object[:class])
+end
 GC.start
 
 puts "Generating any missing row objects..."

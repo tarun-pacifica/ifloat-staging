@@ -1,78 +1,109 @@
 class CSVCatalogue
   include ErrorWriter
   
-  DATA_FILE_NAME = "rows_by_md5"
   ERROR_HEADERS = %w(csv error)
   IMPROPER_NIL_VALUES = %w(n/a N/a n/A nil niL nIl nIL Nil NiL NIl).to_set
-  INFO_FILE_NAME = "info"
   NIL_VALUES = %w(N/A NIL)
   SKIP_HEADER_MATCHER = /^(raw:)|(IMPORT)/
   
   def initialize(dir)
-    @dir = dir
     @errors = []
-    @indexes_by_row_md5 = {}
-    @info_by_csv_md5 = {}
-    @names_by_row_md5 = {}
+    
+    @added_csv_md5s = Set.new
+    @csv_info_by_csv_md5 = OklahomaMixer.open(dir / "catalogue.tch")
+    @row_data_by_row_md5 = OklahomaMixer.open(dir / "data.tch")
+    @row_locations_by_row_md5 = OklahomaMixer.open(dir / "locations.tch")
+    
+    delete_inconsistent
   end
   
-  def add(path)
-    @row_md5s = nil
+  def add(csv_path)
+    csv_md5 = Digest::MD5.file(csv_path).hexdigest
+    @added_csv_md5s << csv_md5
+    return if @csv_info_by_csv_md5.has_key?(csv_md5)
     
-    md5 = Digest::MD5.file(path).hexdigest
-    name = (File.dirname(path) =~ /products$/ ? "products/" : "") + File.basename(path)
-    index_dir = @dir / md5
-    info_path = index_dir / INFO_FILE_NAME
+    name = (File.dirname(csv_path) =~ /products$/ ? "products/" : "") + File.basename(csv_path)
+    errors, info, locations_by_row_md5, rows_by_row_md5 = parse_rows(csv_path, name)
     
-    # TODO: remove once marshal stops blowing up in ruby 1.8
-    if File.exist?(info_path)
-      GC.disable
-      add_info(md5, Marshal.load(File.open(info_path)))
-      GC.enable
-      return
-    end
-    # add_info(md5, Marshal.load(File.open(info_path))) and return if File.exist?(info_path)
-    
-    if File.directory?(index_dir)
-      puts " ! #{name} partial update detected (erasing and starting again)"
-      FileUtils.rmtree(index_dir)
-    end
-    FileUtils.mkpath(index_dir)
-    
-    info = add_rows(path, index_dir).update(:name => name)
-    
-    errors = info.delete(:errors)
-    if(errors.any?)
+    unless errors.empty?
       @errors += errors.map { |e| [name, e] }
-      FileUtils.rmtree(index_dir)
       puts " ! #{name} #{errors.size} errors"
       return
     end
     
-    add_info(md5, info)
-    info_file_path = index_dir / INFO_FILE_NAME
-    File.open("#{info_file_path}.tmp", "w") { |f| Marshal.dump(info, f) }
-    FileUtils.move("#{info_file_path}.tmp", info_file_path)
+    rows_by_row_md5.each do |row_md5, row|
+      @row_locations_by_row_md5[row_md5] = Marshal.dump(locations_by_row_md5[row_md5])
+      @row_data_by_row_md5[row_md5] = Marshal.dump(row)
+    end
+    @csv_info_by_csv_md5[csv_md5] = Marshal.dump(info)
+    flush
     puts " - #{name}"
   end
   
-  def add_info(csv_md5, info)
-    @info_by_csv_md5[csv_md5] = info.merge(:md5 => csv_md5)
-    name = info[:name]
-    info[:row_md5s].each_with_index do |row_md5, i|
-      @indexes_by_row_md5[row_md5] = i + 2
-      @names_by_row_md5[row_md5] = name
+  def delete_inconsistent
+    csv_md5s_by_row_md5s = {}
+    @csv_info_by_csv_md5.each do |csv_md5, info|
+      Marshal.load(info)[:row_md5s].each { |row_md5| csv_md5s_by_row_md5s[row_md5] = csv_md5 }
     end
+    
+    row_md5_sets = [csv_md5s_by_row_md5s, @row_data_by_row_md5, @row_locations_by_row_md5].map(&:keys)
+    bad_row_md5s = row_md5_sets.inject(:|) - row_md5_sets.inject(:&)
+    return if bad_row_md5s.empty?
+    
+    bad_row_md5s.each do |row_md5|
+      csv_md5 = csv_md5s_by_row_md5s[row_md5]
+      @csv_info_by_csv_md5.delete(csv_md5) unless csv_md5.nil?
+      @row_data_by_row_md5.delete(row_md5)
+      @row_locations_by_row_md5.delete(row_md5)
+    end
+    flush
+    
+    puts " ! #{bad_row_md5s.size} inconsistent rows deleted"
+    delete_inconsistent
   end
   
-  def add_rows(from_path, into_dir)
+  def delete_obsolete
+    csv_deleter = @csv_info_by_csv_md5.method(:delete)
+    row_deleter = @row_data_by_row_md5.method(:delete)
+    loc_deleter = @row_locations_by_row_md5.method(:delete)
+    
+    @csv_info_by_csv_md5.map do |md5, info|
+      next if @added_csv_md5s.include?(md5)
+      Marshal.load(info)[:row_md5s].each(&row_deleter).each(&loc_deleter)
+      md5
+    end.compact.each(&csv_deleter)
+    flush
+    
+    stores.each(&:defrag)
+  end
+  
+  def flush
+    stores.each(&:flush)
+  end
+  
+  def infos_for_name(matcher)
+    @csv_info_by_csv_md5.map do |md5, info|
+      info = Marshal.load(info)
+      info[:name] =~ matcher ? info.merge(:md5 => md5) : nil
+    end.compact
+  end
+  
+  def location(row_md5, join_with = ":")
+    location = @row_locations_by_row_md5[row_md5]
+    return nil if location.nil?
+    fields = Marshal.load(location)
+    join_with.nil? ? fields : fields.join(join_with)
+  end
+  
+  def parse_rows(csv_path, name)
     errors = []
     headers = nil
+    locations_by_md5 = {}
     rows_by_md5 = {}
     row_md5s = []
     
     row_index = 0
-    FasterCSV.foreach(from_path, :headers => :first_row, :return_headers => true, :encoding => "UTF-8") do |row|
+    FasterCSV.foreach(csv_path, :headers => :first_row, :return_headers => true, :encoding => "UTF-8") do |row|
       row_index += 1
       
       row_errors = []
@@ -90,41 +121,29 @@ class CSVCatalogue
       
       values.map! { |v| NIL_VALUES.include?(v) ? nil : v }
       md5 = Digest::MD5.hexdigest(Marshal.dump(values))
+      locations_by_md5[md5] = [name, row_index]
       rows_by_md5[md5] = values
       row_md5s << md5
     end
     
-    if rows_by_md5.empty? then errors << "no header row"
-    else File.open(into_dir / DATA_FILE_NAME, "w") { |f| Marshal.dump(rows_by_md5, f) }
-    end
-    
-    {:errors => errors, :headers => headers, :row_md5s => row_md5s}
+    errors << "no header row" if rows_by_md5.empty?
+    info = {:headers => headers, :name => name, :row_md5s => row_md5s}
+    [errors, info, locations_by_md5, rows_by_md5]
   end
   
-  def delete_obsolete
-    Dir[@dir / "*"].reject do |path|
-      @info_by_csv_md5.has_key?(File.basename(path))
-    end.delete_and_log("obsolete CSV indexes")
-  end
-  
-  def infos_for_name(matcher)
-    @info_by_csv_md5.map { |md5, info| info[:name] =~ matcher ? info.merge(:md5 => md5) : nil }.compact
-  end
-  
-  def location(row_md5, join_with = ":")
-    fields = [@names_by_row_md5[row_md5], @indexes_by_row_md5[row_md5]]
-    join_with.nil? ? fields : fields.join(join_with)
+  def row(row_md5)
+    Marshal.load(@row_data_by_row_md5[row_md5])
   end
   
   def row_md5s
-    @indexes_by_row_md5.keys
+    @row_data_by_row_md5.keys
   end
   
-  def rows_by_md5(csv_md5)
-    File.open(@dir / csv_md5 / DATA_FILE_NAME) { |f| Marshal.load(f) }
+  def stores
+    [@csv_info_by_csv_md5, @row_data_by_row_md5, @row_locations_by_row_md5]
   end
   
   def summarize
-    puts " > managing #{row_md5s.size} rows from #{@info_by_csv_md5.size} CSVs"
+    puts " > managing #{@row_data_by_row_md5.size} rows from #{@csv_info_by_csv_md5.size} CSVs"
   end
 end

@@ -3,169 +3,185 @@ class ObjectCatalogue
     @@default
   end
   
-  attr_reader :row_md5s_by_ref
-  
   def initialize(csv_catalogue, dir)
     @@default = self
     
     @csvs = csv_catalogue
+    @dir = dir
     
-    @data_dir, @refs_dir, @rows_dir = %w(data refs rows).map { |d| dir / d }
-    dirs_with_groups = [@data_dir, @refs_dir, @rows_dir].map do |d|
-      FileUtils.mkpath(d)
-      [d, Dir[d / "*"].map { |path| File.basename(path) }]
-    end
-    groups_by_dir = Hash[dirs_with_groups]
+    @data_by_ref = OklahomaMixer.open(dir / "data.tch")
+    @refs_by_row_md5 = OklahomaMixer.open(dir / "refs_by_row.tcb")
+    @row_md5s_by_ref = OklahomaMixer.open(dir / "rows_by_ref.tcb")
+    @value_md5s_by_ref = OklahomaMixer.open(dir / "value_md5s.tch")
+    @queues_by_name = {}
     
-    common_groups = groups_by_dir.values.inject(:&)
-    groups_by_dir.each do |d, names|
-      (names - common_groups).map { |name| d / name }.delete_and_log("orphaned #{File.basename(d)}")
-    end
-    
-    @groups_by_ref = {}
-    @vals_by_ref = {}
-    common_groups.each do |name|
-      # TODO: remove once marshal stops blowing up in ruby 1.8
-      GC.disable
-      value_md5s_by_ref = File.open(@refs_dir / name) { |f| Marshal.load(f) }
-      GC.enable
-      
-      value_md5s_by_ref.each do |ref, value_md5|
-        @groups_by_ref[ref] = name
-        @vals_by_ref[ref] = value_md5
-      end
-    end
-    
-    most_recent_commit = nil
-    @row_md5s_by_ref = {}
-    common_groups.each do |name|
-      path = @rows_dir / name
-      most_recent_commit = [most_recent_commit, File.mtime(path)].compact.max
-      @row_md5s_by_ref.update(File.open(path) { |f| Marshal.load(f) })
-    end
-    
-    @data_by_ref = {}
-    @refs_to_write = []
+    delete_inconsistent
+    delete_obsolete
   end
   
   def add(objects, *row_md5s)
+    flush_pending(true)
+    
     objects.each do |object|
       ref, value_md5 = ObjectRef.from_object(object)
       
       if has_ref?(ref)
-        existing_row_md5s = @row_md5s_by_ref[ref].map(&@csvs.method(:location)).join(", ")
-        existing_row_md5s = "unknown csvs / rows" if existing_row_md5s.blank?
-        return ["duplicate of #{object[:class]} from #{existing_row_md5s}"]
+        existing_rows = row_md5s_for(ref).map(&@csvs.method(:location)).join(", ")
+        existing_rows = "unknown csvs / rows" if existing_rows.blank?
+        return ["duplicate of #{object[:class]} from #{existing_rows}"]
       end
       
-      @data_by_ref[ref] = object
-      @row_md5s_by_ref[ref] = (row_md5s + row_md5_chain(object)).flatten.uniq
-      @vals_by_ref[ref] = value_md5
+      @data_by_ref[ref] = Marshal.dump(object)
+      @value_md5s_by_ref[ref] = value_md5
       
-      @refs_to_write << ref
+      (row_md5s + row_md5_chain(object)).flatten.uniq.each do |row_md5|
+        @refs_by_row_md5.store(row_md5, ref, :dup)
+        @row_md5s_by_ref.store(ref, row_md5, :dup)
+      end
+      
+      @queues_by_name.each_value do |db, block|
+        key, value = block.call(ref, object)
+        db.store(key, value, :dup) unless key.nil?
+      end
     end
     
     []
   end
   
-  def commit(group)
-    return if @refs_to_write.empty?
-    
-    data_by_ref = {}
-    row_md5s_by_ref = {}
-    vals_by_ref = {}
-    @refs_to_write.each do |ref|
-      data_by_ref[ref] = @data_by_ref.delete(ref)
-      row_md5s_by_ref[ref] = @row_md5s_by_ref[ref]
-      vals_by_ref[ref] = @vals_by_ref[ref]
-      @groups_by_ref[ref] = group
-    end
-    @refs_to_write.clear
-    
-    {@data_dir => data_by_ref, @refs_dir => vals_by_ref, @rows_dir => row_md5s_by_ref}.each do |dir, set|
-      path = dir / group
-      data = (File.open(path) { |f| Marshal.load(f) } rescue {})
-      data.update(set)
-      File.open(path, "w") { |f| Marshal.dump(data, f) }
-    end
+  def add_queue(name, &block)
+    @queues_by_name[name] = [OklahomaMixer.open(@dir / "queue_#{name}.tcb"), block]
+  end
+  
+  def all_row_md5s
+    @refs_by_row_md5.keys
   end
   
   def data_for(ref)
     data = @data_by_ref[ref]
-    return data unless data.nil?
+    data.nil? ? nil : Marshal.load(data)
+  end
+  
+  def delete_inconsistent
+    return unless flush_pending?
+    puts " ! possible inconsistent state detected - running consistency scan"
     
-    path = @data_dir / @groups_by_ref[ref]
-    return nil unless File.exist?(path)
+    # this is slower than keyset operations in memory but far more memory efficient for large object sets
+    bad_refs = []
+    by_ref_stores = [@data_by_ref, @row_md5s_by_ref, @value_md5s_by_ref]
+    refs_checked = []
     
-    # TODO: remove once marshal stops blowing up in ruby 1.8
-    GC.disable
-    data_by_ref = File.open(path) { |f| Marshal.load(f) }
-    GC.enable
-    @data_by_ref.update(data_by_ref)[ref]
+    by_ref_stores.each_with_index do |master, i|
+      slaves = by_ref_stores[0...i] + by_ref_stores[(i + 1)..-1]
+      master.each_key do |ref|
+        next if i > 0 and refs_checked.include?(ref)
+        bad_refs << ref unless slaves.all? { |db| db.has_key?(ref) }
+        refs_checked << ref
+      end
+      refs_checked = refs_checked.to_set if i == 0
+    end
+    
+    by_ref_stores.each do |db|
+      bad_refs.each { |ref| db.delete(ref, :dup) }
+    end
+    flush
+    
+    puts(bad_refs.empty? ? " - all objects consistent" : " ! #{bad_refs.size} inconsistent objects deleted")
   end
   
   def delete_obsolete
-    all_row_md5s = @csvs.row_md5s.to_set
-    
-    obsolete_groups = []
-    refs_by_row_md5 = {}
-    @row_md5s_by_ref.each do |ref, row_md5s|
-      row_md5s.each { |row_md5| (refs_by_row_md5[row_md5] ||= []) << ref }
-    end
-    obsolete_refs = refs_by_row_md5.values_at(*(refs_by_row_md5.keys.to_set - all_row_md5s)).flatten.uniq
+    bad_row_md5s = all_row_md5s - @csvs.row_md5s
+    puts " - #{bad_row_md5s.size} obsolete rows" unless bad_row_md5s.empty?
+    bad_refs = refs_for(bad_row_md5s)
+    puts " - #{bad_refs.size} obsolete objects" unless bad_refs.empty?
     
     # any object with parents (A and B) in two different rows might be deleted because A is removed
     # unfortunately, because other items produced from B might still exist, the importer wouldn't know that
     # it needed to completely refresh B - thus we allow row obsolescence to propagate up to a child object's
     # primary parent row (which will be the row already marked obsolete in all other cases)
-    implictly_obsolete_row_md5s = @row_md5s_by_ref.values_at(*obsolete_refs).map(&:first)
-    obsolete_refs = (obsolete_refs + refs_by_row_md5.values_at(*implictly_obsolete_row_md5s).flatten).uniq
+    implicit_bad_row_md5s = (@row_md5s_by_ref.values_at(*bad_refs) - bad_row_md5s)
+    puts " - #{implicit_bad_row_md5s.size} implicitly obsolete rows" unless implicit_bad_row_md5s.empty?
+    implicit_bad_refs = (refs_for(implicit_bad_row_md5s) - bad_refs)
+    puts " - #{implicit_bad_refs} implicitly obsolete objects" unless implicit_bad_refs.empty?
     
-    obsolete_refs.group_by { |ref| @groups_by_ref.delete(ref) }.each do |name, refs|
-      obsolete_groups << name
-      
-      [@data_dir, @refs_dir, @rows_dir].each do |dir|
-        path = dir / name
-        data = File.open(path) { |f| Marshal.load(f) } rescue {}
-        refs.each { |ref| data.delete(ref) }
-        if data.empty? then File.delete(path)
-        else File.open(path, "w") { |f| Marshal.dump(data, f) }
-        end
-      end
-    end
-    
-    obsolete_refs.each do |ref|
+    flush_pending(true)
+    (bad_refs + implicit_bad_refs).each do |ref|
       @data_by_ref.delete(ref)
-      @row_md5s_by_ref.delete(ref)
-      @vals_by_ref.delete(ref)
+      @row_md5s_by_ref.delete(ref, :dup)
+      @value_md5s_by_ref.delete(ref)
     end
+    (bad_row_md5s + implicit_bad_row_md5s).each { |md5| @refs_by_row_md5.delete(md5, :dup) }
+    flush
     
-    puts " - deleted #{obsolete_refs.size} objects in #{obsolete_groups.size} groups" unless obsolete_refs.empty?
+    stores.each(&:defrag)
   end
   
-  def each(&block)
-    Dir[@data_dir / "*"].each do |path|
-      # TODO: remove once marshal stops blowing up in ruby 1.8
-      GC.disable
-      File.open(path) { |f| Marshal.load(f) }.each(&block)
+  def each
+    @data_by_ref.each do |ref, data|
+      GC.disable # TODO: remove once Ruby stops segfaulting on marshal
+      yield ObjectRef.new(ref), Marshal.load(data)
       GC.enable
     end
   end
+    
+  def flush
+    stores.each(&:flush)
+    flush_pending(false)
+  end
+  
+  def flush_pending(pending)
+    if pending then FileUtils.touch(@dir / "_flush_pending")
+    elsif flush_pending? then File.delete(@dir / "_flush_pending")
+    end
+  end
+  
+  def flush_pending?
+    File.exist?(@dir / "_flush_pending")
+  end
   
   def has_ref?(ref)
-    @vals_by_ref.has_key?(ref)
+    @data_by_ref.has_key?(ref)
+  end
+  
+  def queue_each(name)
+    db = (@queues_by_name[name].first rescue nil)
+    return if db.nil?
+    
+    keys_to_retain = db.keys.select { |key| yield(key, db.values(key)) }.to_set
+    
+    if keys_to_retain.empty? then db.clear
+    else db.delete_if { |key, value| not keys_to_retain.include?(key) }
+    end
+    db.flush
+    db.defrag
+  end
+  
+  def queue_size(name, keys_only = false)
+    db = (@queues_by_name[name].first rescue nil)
+    (keys_only ? db.keys.size : db.size) unless db.nil?
+  end
+  
+  def refs_for(row_md5s)
+    row_md5s.map { |md5| @refs_by_row_md5.values(md5) }.flatten.uniq.select { |ref| has_ref?(ref) }
+  end
+  
+  def row_md5s_for(ref)
+    @row_md5s_by_ref.values(ref)
   end
   
   def row_md5_chain(object)
     case object
     when Array     then object.map { |v| row_md5_chain(v) }
     when Hash      then object.values.map { |v| row_md5_chain(v) }
-    when ObjectRef then @row_md5s_by_ref[object]
+    when ObjectRef then row_md5s_for(object)
     else []
     end
   end
   
+  def stores
+    [@data_by_ref, @refs_by_row_md5, @row_md5s_by_ref, @value_md5s_by_ref] + @queues_by_name.values.map(&:first)
+  end
+  
   def summarize
-    puts " > managing #{@groups_by_ref.size} objects in #{@groups_by_ref.values.uniq.size} groups"
+    puts " > managing #{@data_by_ref.size} objects"
   end
 end

@@ -36,7 +36,7 @@ class AbstractParser
         begin
           parsed_by_header[header] = parse_field(header, value, parsed_by_header)
         rescue Exception => e
-          errors << [@info[:headers][@headers.index(header)], e.message]
+          errors << [@info[:headers][@headers.index(header)], e.message + " " + e.backtrace.inspect]
         end
       end
     end if errors.empty?
@@ -56,8 +56,12 @@ class AbstractParser
   
   def lookup!(klass, *pk_values)
     ref = ObjectRef.for(klass, pk_values)
-    raise "invalid/unknown #{ref.inspect_friendly}" unless @objects.has_ref?(ref)
+    raise "invalid/unknown #{klass}[#{lookup_error_values(klass, pk_values)}]" unless @objects.has_ref?(ref)
     ref
+  end
+  
+  def lookup_error_values(klass, pk_values)
+    pk_values.map { |pkv| pkv.is_a?(ObjectRef) ? pkv.inspect_friendly : pkv }.join(" / ")
   end
   
   def parse_field(header, value, fields)

@@ -73,8 +73,4 @@ class ObjectRef < String
     values = a.values_at(*PRIMARY_KEYS[klass]).map { |v| v.is_a?(ObjectRef) ? v.inspect_friendly : v }
     "#{klass}[#{values.join(' / ')}]"
   end
-  
-  def row_md5s
-    ObjectCatalogue.default.row_md5s_for(self)
-  end
 end

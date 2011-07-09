@@ -11,8 +11,9 @@ THIS_DIR             = Merb.root / "importer"
 INDEXES_DIR          = THIS_DIR / "indexes"
 CSV_INDEX_DIR        = INDEXES_DIR / "csvs"
 OBJECT_INDEX_DIR     = INDEXES_DIR / "objects"
+VERIFIER_INDEX_DIR   = INDEXES_DIR / "verifier"
 
-[ASSET_VARIANT_DIR, CSV_INDEX_DIR, OBJECT_INDEX_DIR].each { |dir| FileUtils.mkpath(dir) }
+[ASSET_VARIANT_DIR, CSV_INDEX_DIR, OBJECT_INDEX_DIR, VERIFIER_INDEX_DIR].each { |dir| FileUtils.mkpath(dir) }
 
 require THIS_DIR / "lib" / "error_writer"
 %w(lib parsers).each { |dir| Dir[THIS_DIR / dir / "*.rb"].sort.each { |path| load path } }
@@ -36,8 +37,6 @@ unless assets.update
   assets.write_errors(ERROR_CSV_PATH)
   mail_fail("compiling assets")
 end
-assets = nil
-GC.start
 
 puts "Scanning CSV repository for updates..."
 csvs = CSVCatalogue.new(CSV_INDEX_DIR)
@@ -45,15 +44,13 @@ Dir[REPO_DIRS["csvs"] / "**" / "*.csv"].each { |path| csvs.add(path) }
 mail_fail("compiling CSVs") if csvs.write_errors(ERROR_CSV_PATH)
 csvs.delete_obsolete
 csvs.summarize
-GC.start
 
 puts "Recovering / updating object state..."
-objects = ObjectCatalogue.new(csvs, OBJECT_INDEX_DIR)
+objects = ObjectCatalogue.new(csvs, OBJECT_INDEX_DIR, VERIFIER_INDEX_DIR)
 objects.summarize
 objects.add_queue("products") do |ref, object|
   [object[:product], ref] if AutoObjectGenerator::VALUE_CLASSES.include?(object[:class])
 end
-GC.start
 
 puts "Generating any missing row objects..."
 generator = RowObjectGenerator.new(csvs, objects)
@@ -61,16 +58,13 @@ extra_dependency_rules = {Asset => [Product], PropertyDefinition => [AssociatedW
 DataMapper::Model.sorted_descendants(extra_dependency_rules).each { |model| generator.generate_for(model) }
 mail_fail("generating row objects") if generator.write_errors(ERROR_CSV_PATH)
 objects.summarize
-GC.start
 
 puts "Generating any missing auto objects..."
 generator = AutoObjectGenerator.new(csvs, objects)
 generator.generate
 mail_fail("generating auto objects") if generator.write_errors(ERROR_CSV_PATH)
 objects.summarize
-GC.start
 
 puts "Running global integrity checks..."
-verifier = ObjectVerifier.new(csvs, objects)
-verifier.verify
-mail_fail("verifying global integrity") if verifier.write_errors(ERROR_CSV_PATH)
+objects.verifier.verify
+mail_fail("verifying global integrity") if objects.verifier.write_errors(ERROR_CSV_PATH)

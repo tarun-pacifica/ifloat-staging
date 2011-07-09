@@ -107,8 +107,7 @@ class AutoObjectGenerator
         :auto_generated => true,
         :sequence_number => seq_num,
         :language_code => "ENG",
-        :text_value => rendered_parts.join(" - "),
-        :property_hierarchy => hierarchy
+        :text_value => rendered_parts.join(" - ")
       }
     end
     
@@ -144,8 +143,7 @@ class AutoObjectGenerator
           :auto_generated => true,
           :sequence_number => i + 1,
           :language_code => "ENG",
-          :text_value => rendered_parts.join(" "),
-          :title_strategy => strategy
+          :text_value => rendered_parts.join(" ")
         }
       end
     end

@@ -3,7 +3,9 @@ class ObjectCatalogue
     @@default
   end
   
-  def initialize(csv_catalogue, dir)
+  attr_reader :verifier
+  
+  def initialize(csv_catalogue, dir, verifier_dir)
     @@default = self
     
     @csvs = csv_catalogue
@@ -14,6 +16,8 @@ class ObjectCatalogue
     @row_md5s_by_ref = OklahomaMixer.open(dir / "rows_by_ref.tcb")
     @value_md5s_by_ref = OklahomaMixer.open(dir / "value_md5s.tch")
     @queues_by_name = {}
+    
+    @verifier = ObjectVerifier.new(csv_catalogue, self, verifier_dir)
     
     delete_inconsistent
     delete_obsolete
@@ -43,6 +47,8 @@ class ObjectCatalogue
         key, value = block.call(ref, object)
         db.store(key, value, :dup) unless key.nil?
       end
+      
+      @verifier.added(ref, object)
     end
     
     []
@@ -115,14 +121,6 @@ class ObjectCatalogue
     stores.each(&:defrag)
   end
   
-  def each
-    @data_by_ref.each do |ref, data|
-      GC.disable # TODO: remove once Ruby stops segfaulting on marshal
-      yield ObjectRef.new(ref), Marshal.load(data)
-      GC.enable
-    end
-  end
-    
   def flush
     stores.each(&:flush)
     flush_pending(false)

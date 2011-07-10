@@ -39,24 +39,24 @@ class ObjectRef < String
   
   def self.from_object(object)
     klass = object[:class]
+    pks, vks = keys_for(klass)
+    raise "no primary keys for #{klass}"
     
-    pk_md5 = self.for(klass, object.values_at(*PRIMARY_KEYS[klass]))
-    
-    rel_names_by_child_key = Hash[klass.relationships.map { |name, rel| [rel.child_key.first.name, name.to_sym] }]
-    property_names = klass.properties.map do |property|
-      name = property.name
-      rel_names_by_child_key[name] || name
-    end
-    keys = (property_names - PRIMARY_KEYS[klass] - [:id, :type]).sort_by { |sym| sym.to_s }
-    value_md5 = coerce_to_md5(object.values_at(*keys))
-    
-    [new(pk_md5), value_md5]
+    [new(self.for(klass, object.values_at(*pks))), coerce_to_md5(object.values_at(*vks))]
   end
   
   @@md5_cache = {}
   def self.for(klass, pk_values)
     pk_values = ([klass] + pk_values)
     @@md5_cache[pk_values] ||= new(coerce_to_md5(pk_values))
+  end
+  
+  def self.keys_for(klass)
+    pks = PRIMARY_KEYS[klass]
+    return [nil, nil] if pks.nil?
+    
+    vks = (klass.properties.map(&:name) - pks - [:id, :type]).sort_by { |sym| sym.to_s }
+    [pks, vks]
   end
   
   def[](key)

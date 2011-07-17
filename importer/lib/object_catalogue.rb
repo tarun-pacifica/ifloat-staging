@@ -121,6 +121,10 @@ class ObjectCatalogue
     stores.each(&:defrag)
   end
   
+  def each_ref(&block)
+    @data_by_ref.each_key(&block)
+  end
+  
   def flush
     stores.each(&:flush)
     flush_pending(false)
@@ -181,5 +185,9 @@ class ObjectCatalogue
   
   def summarize
     puts " > managing #{@data_by_ref.size} objects"
+  end
+  
+  def value_md5_for(ref)
+    @value_md5s_by_ref[ref]
   end
 end

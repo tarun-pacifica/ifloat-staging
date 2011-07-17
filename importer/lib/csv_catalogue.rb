@@ -33,7 +33,7 @@ class CSVCatalogue
     
     rows_by_row_md5.each do |row_md5, row|
       @row_locations_by_row_md5[row_md5] = Marshal.dump(locations_by_row_md5[row_md5])
-      @row_data_by_row_md5[row_md5] = Marshal.dump(row)
+      @row_data_by_row_md5[row_md5] = Marshal.dump(row) unless @row_data_by_row_md5.has_key?(row_md5)
     end
     @csv_info_by_csv_md5[csv_md5] = Marshal.dump(info)
     flush
@@ -63,15 +63,16 @@ class CSVCatalogue
   end
   
   def delete_obsolete
+    row_md5s_by_csv_md5 = Hash[@csv_info_by_csv_md5.map { |md5, info| [md5, Marshal.load(info)[:row_md5s]] }]
+    good_row_md5s = row_md5s_by_csv_md5.values_at(*@added_csv_md5s).flatten.to_set
+    
     csv_deleter = @csv_info_by_csv_md5.method(:delete)
     row_deleter = @row_data_by_row_md5.method(:delete)
     loc_deleter = @row_locations_by_row_md5.method(:delete)
     
-    @csv_info_by_csv_md5.map do |md5, info|
-      next if @added_csv_md5s.include?(md5)
-      Marshal.load(info)[:row_md5s].each(&row_deleter).each(&loc_deleter)
-      md5
-    end.compact.each(&csv_deleter)
+    @csv_info_by_csv_md5.keys.delete_if { |md5| @added_csv_md5s.include?(md5) }.each do |md5|
+      (row_md5s_by_csv_md5[md5].to_set - good_row_md5s).each(&row_deleter).each(&loc_deleter)
+    end.each(&csv_deleter)
     flush
     
     stores.each(&:defrag)

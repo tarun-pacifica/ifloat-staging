@@ -24,10 +24,11 @@ class ObjectRef < String
   def self.coerce_to_md5(values)
     coerced = values.map do |value|
       case value
-      when Array, Hash         then Base64.encode64(Marshal.dump(value))
+      when Array               then Base64.encode64(Marshal.dump(value))
       when BigDecimal          then "%.#{NumericPropertyValue::MAX_DP}f" % value
       when Class, Integer, nil then value.to_s
       when false               then "0"
+      when Hash                then Base64.encode64(Marshal.dump(Marshal.load(Marshal.dump(value)))) # stabilizes order
       when ObjectRef, String   then value
       when true                then "1"
       else raise "unable to coerce #{value.class} #{value.inspect}"
@@ -40,7 +41,7 @@ class ObjectRef < String
   def self.from_object(object)
     klass = object[:class]
     pks, vks = keys_for(klass)
-    raise "no primary keys for #{klass}"
+    raise "no primary keys for #{klass}" if pks.nil?
     
     [new(self.for(klass, object.values_at(*pks))), coerce_to_md5(object.values_at(*vks))]
   end
@@ -55,7 +56,13 @@ class ObjectRef < String
     pks = PRIMARY_KEYS[klass]
     return [nil, nil] if pks.nil?
     
-    vks = (klass.properties.map(&:name) - pks - [:id, :type]).sort_by { |sym| sym.to_s }
+    property_names_by_child_key = Hash[klass.relationships.map { |name, rel| [rel.child_key.first.name, name.to_sym] }]
+    properties = klass.properties.map do |property|
+      n = property.name
+      property_names_by_child_key[n] || n
+    end
+    
+    vks = (properties - pks - [:id, :type]).sort_by { |sym| sym.to_s }
     [pks, vks]
   end
   

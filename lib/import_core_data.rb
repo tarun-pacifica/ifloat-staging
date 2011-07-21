@@ -394,14 +394,6 @@ class ImportSet
   end
   
   def import_class(klass, objects)
-    # TODO: change on-disk storage model for assets to include bucket dir so that we can simply sync the entire set
-    # if klass == Asset
-      # bytes_by_name_by_bucket = AssetStore.bytes_by_name_by_bucket
-      # for every DB asset that does not appear in the asset store
-      # set the asset's DB checksum to "", forcing an update
-      # DEBUG NOTES HERE AS SUCH
-    # end
-    
     relationships = {}
     klass.relationships.each do |attribute, relationship|
       relationships[attribute.to_sym] = relationship.child_key.first.name
@@ -415,7 +407,8 @@ class ImportSet
     to_update = []
     
     objects.each do |object|
-      next if klass == TextPropertyValue and object.attributes[:text_value].blank?
+      next if klass == TextPropertyValue and
+        (object.attributes[:text_value].blank? or object.attributes[:definition].attributes[:name] =~ /^raw/)
       
       attributes = {}
       object.attributes.each do |key, value|

@@ -123,7 +123,7 @@ class ProductParser < AbstractParser
       next if search_unit == unit
       
       object = fields[[:values, klass, property, seq_num, search_unit]]
-      next if object.nil?
+      next if object.nil? or object[:auto_generated]
       
       attributes = {:class => klass, :definition => property, :auto_generated => true, :sequence_number => seq_num}
       return attributes.update(klass.convert(object, unit))

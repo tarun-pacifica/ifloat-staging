@@ -261,8 +261,8 @@ class ProductParser < AbstractParser
       next if search_unit == unit
       
       object = fields[[:values, klass, property, seq_num, search_unit, component]]
-      next if object.nil?
-
+      next if object.nil? or object.attributes[:auto_generated]
+      
       tolerance_key = [:values, klass, property, seq_num, search_unit, :tolerance]
       return :deferred if @header_values.include?(tolerance_key) and not fields.has_key?(tolerance_key)
       

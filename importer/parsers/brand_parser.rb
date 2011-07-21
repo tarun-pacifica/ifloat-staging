@@ -3,7 +3,7 @@ class BrandParser < AbstractParser
   REQUIRED_VALUE_HEADERS = %w(company.reference marketing:brand logo)
     
   def generate_objects(parsed_fields)
-    attributes = [:company, :name, :logo, :description].zip(parsed_fields.values_at(*HEADERS))
+    attributes = [:company, :name, :asset, :description].zip(parsed_fields.values_at(*HEADERS))
     [Hash[attributes].update(:class => Brand)]
   end
   

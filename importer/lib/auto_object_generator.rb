@@ -27,36 +27,39 @@ class AutoObjectGenerator
     return unless @errors.empty?
     
     products_done = 0
-    products_todo = @objects.queue_size("products", true)
+    products_todo = @objects.queue_size("refs_by_product", true)
     
-    @objects.queue_each("products") do |product_ref, refs|
+    @objects.queue_each("refs_by_product") do |product_ref, refs|
       product = @objects.data_for(product_ref)
       products_done += 1
-      next if product.nil?
       
-      values = refs.map(&@objects.method(:data_for))
-      values_by_property_name = values.group_by { |v| v[:definition][:name] }
-      
-      klass = values_by_property_name["reference:class"].first[:text_value]
-      row_md5 = @objects.row_md5s_for(product_ref).first
-      args = [product_ref, product, klass, values_by_property_name, row_md5]
-      
-      methods = [method(:generate_ts_values)]
-      methods << method(:generate_ph_values) unless product[:reference_group].nil?
-      
-      retain = false
-      methods.each do |m|
-        auto_objects, errors = m.call(*args)
-        errors += @objects.add(auto_objects, row_md5).map { |e| error_for_row(e, row_md5) }
-        @errors += errors
-        unless errors.empty?
-          retain = true
-          break
+      if product.nil?
+        refs
+      else
+        values = refs.map(&@objects.method(:data_for))
+        values_by_property_name = values.group_by { |v| v[:definition][:name] }
+        
+        klass = values_by_property_name["reference:class"].first[:text_value]
+        row_md5 = @objects.row_md5s_for(product_ref).first
+        args = [product_ref, product, klass, values_by_property_name, row_md5]
+        
+        methods = [method(:generate_ts_values)]
+        methods << method(:generate_ph_values) unless product[:reference_group].nil?
+        
+        retain = false
+        methods.each do |m|
+          auto_objects, errors = m.call(*args)
+          errors += @objects.add(auto_objects, row_md5).map { |e| error_for_row(e, row_md5) }
+          @errors += errors
+          unless errors.empty?
+            retain = true
+            break
+          end
         end
+        
+        puts " - processed #{products_done}/#{products_todo} new/updated products" if products_done % 500 == 0
+        retain ? [] : refs
       end
-      
-      puts " - processed #{products_done}/#{products_todo} new/updated products" if products_done % 500 == 0
-      retain
     end
     puts " - processed #{products_done}/#{products_todo} new/updated products" if products_todo % 500 > 0
     

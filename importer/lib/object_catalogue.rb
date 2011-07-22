@@ -87,7 +87,9 @@ class ObjectCatalogue
     end
     
     by_ref_stores.each do |db|
-      bad_refs.each { |ref| db.delete(ref, :dup) }
+      if db.is_a?(BTreeDatabase) then bad_refs.each { |ref| db.delete(ref, :dup) }
+      else bad_refs.each(&db.method(:delete))
+      end
     end
     flush
     
@@ -144,17 +146,31 @@ class ObjectCatalogue
     @data_by_ref.has_key?(ref)
   end
   
-  def queue_each(name)
+  def queue_each(name, keys = nil)
     db = (@queues_by_name[name].first rescue nil)
     return if db.nil?
     
-    keys_to_retain = db.keys.select { |key| yield(key, db.values(key)) }.to_set
-    
-    if keys_to_retain.empty? then db.clear
-    else db.delete_if { |key, value| not keys_to_retain.include?(key) }
+    keys_to_delete = []
+    key_vals_to_delete = []
+    (keys || db.keys).each do |key|
+      values = db.values(key)
+      vals_to_delete = yield(key, values)
+      if vals_to_delete == values then keys_to_delete << key
+      else key_vals_to_delete += vals_to_delete.map { |val| [key, val] }
+      end
     end
+    
+    keys_to_delete.each { |key| db.delete(key, :dup) }
+    
+    key_vals_to_delete = key_vals_to_delete.to_set
+    db.delete_if { |key, value| key_vals_to_delete.include?([key, value]) } unless key_vals_to_delete.empty?
+    
     db.flush
     db.defrag
+  end
+  
+  def queue_get(name, key, &block)
+    queue_each(name, [key], &block)
   end
   
   def queue_size(name, keys_only = false)

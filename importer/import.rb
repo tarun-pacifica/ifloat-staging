@@ -30,7 +30,6 @@ def mail_fail(whilst)
   exit 1
 end
 
-
 puts "Scanning asset repository for updates..."
 assets = ImportableAssets.new(REPO_DIRS["assets"], ASSET_CSV_PATH, ASSET_VARIANT_DIR, ASSET_WATERMARK_PATH)
 unless assets.update
@@ -48,14 +47,18 @@ csvs.summarize
 puts "Recovering / updating object state..."
 objects = ObjectCatalogue.new(csvs, OBJECT_INDEX_DIR, VERIFIER_INDEX_DIR)
 objects.summarize
-objects.add_queue("products") do |ref, object|
+objects.add_queue("refs_by_product") do |ref, object|
   [object[:product], ref] if AutoObjectGenerator::VALUE_CLASSES.include?(object[:class])
+end
+objects.add_queue("refs_by_class") do |ref, object|
+  [object[:class], ref]
 end
 
 puts "Generating any missing row objects..."
 generator = RowObjectGenerator.new(csvs, objects)
 extra_dependency_rules = {Asset => [Product], PropertyDefinition => [AssociatedWord, PropertyHierarchy, TitleStrategy]}
-DataMapper::Model.sorted_descendants(extra_dependency_rules).each { |model| generator.generate_for(model) }
+classes = DataMapper::Model.sorted_descendants(extra_dependency_rules)
+classes.each { |klass| generator.generate_for(klass) }
 mail_fail("generating row objects") if generator.write_errors(ERROR_CSV_PATH)
 objects.summarize
 
@@ -68,3 +71,9 @@ objects.summarize
 puts "Running global integrity checks..."
 objects.verifier.verify
 mail_fail("verifying global integrity") if objects.verifier.write_errors(ERROR_CSV_PATH)
+
+exit
+puts "Updating database..."
+updater = DatabaseUpdater.new(classes, csvs, objects)
+updater.update
+mail_fail("updating database") if updater.write_errors(ERROR_CSV_PATH)

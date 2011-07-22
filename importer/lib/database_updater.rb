@@ -1,69 +1,15 @@
 class DatabaseUpdater
   include ErrorWriter
   
-  ERROR_HEADERS = %w(csv row operation error)
+  ERROR_HEADERS = %w(csv row error)
   
-  def initialize(classes, object_catalogue)
+  def initialize(classes, csv_catalogue, object_catalogue)
     @classes = classes
+    @csvs = csv_catalogue
     @objects = object_catalogue
     
     @adapter = DataMapper.repository(:default).adapter
     @errors = []
-  end
-  
-  def scan_db(klass)
-    query = <<-SQL
-      CREATE TEMPORARY TABLE IF NOT EXISTS #{klass.storage_name}_md5s (
-        id INT(10) unsigned PRIMARY KEY,
-        pk_md5 VARCHAR(32) NOT NULL,
-        value_md5 VARCHAR(32)
-      ) ENGINE=MEMORY DEFAULT CHARSET=utf8
-    SQL
-    @adapter.execute(query)
-    
-    pks_vks = ObjectRef.keys_for(klass)
-    return if pks_vks.first.nil?
-    
-    relationships = klass.relationships
-    pk_fields, value_fields = pks_vks.each_with_index.map do |keys, i|
-      components = keys.map do |key|
-        rel = relationships[key]
-        field =
-          if rel.nil? then "t1.#{key}"
-          else "(SELECT pk_md5 FROM #{rel.parent_model.storage_name}_md5s WHERE id = t1.#{rel.child_key.first.name})"
-          end
-        "IFNULL(#{field}, '')"
-      end
-      
-      components.unshift("'#{klass}'") if i == 0
-      components.empty? ? "MD5('')" : "MD5(CONCAT(#{components.join(",'::',")}))"
-    end
-    
-    query = <<-SQL
-      INSERT INTO #{klass.storage_name}_md5s
-      SELECT id, #{pk_fields} AS pk_md5, #{value_fields} AS value_md5
-      FROM #{klass.storage_name} t1
-    SQL
-    query += "WHERE type = '#{klass}'" if klass.properties.named?(:type)
-    @adapter.execute(query) # TODO: cope explicitly with table full errors
-    
-    valid_pk_md5s_seen = []
-    query = "SELECT * FROM #{klass.storage_name}_md5s"
-    query += " WHERE id IN (SELECT id FROM #{klass.storage_name} WHERE type = '#{klass}')" if klass.properties.named?(:type)
-    @adapter.select(query).each do |record|
-      id, pk_md5, db_value_md5 = record.id, record.pk_md5, record.value_md5
-      
-      value_md5 = @objects.value_md5_for(pk_md5)
-      if value_md5.nil?
-        puts "delete #{pk_md5} (#{id})"
-        break
-      elsif value_md5 != db_value_md5
-        puts "update #{pk_md5} (#{id}): #{db_value_md5} -> #{value_md5}"
-        valid_pk_md5s_seen << pk_md5
-        break
-      end
-    end
-    valid_pk_md5s_seen
   end
   
   def update
@@ -73,20 +19,173 @@ class DatabaseUpdater
       @adapter.push_transaction(transaction)
       
       @adapter.execute("SET max_heap_table_size = 256*1024*1024")
-      valid_pk_md5s_seen = @classes.map(&method(:scan_db)).flatten.to_set
-      # do inserts
-      
-      # keys = @objects.keys
-      # begin tran
-      # obsolete = db_keys - keys => delete
-      # inserts  = keys - db_keys => insert as chain of dependency - so will need to maintain a pkmd5=>ID lookup table in mem
-      # updates  = (walk remainder and note diff val md5s?) - use lookup table here as well
-      # end tran
+      @classes.each(&method(:update_class))
       
       @adapter.pop_transaction
       if @errors.empty? then transaction.commit
       else transaction.rollback
       end
     end
+  end
+  
+  
+  private
+  
+  def build_md5_report(klass, min_id = 0)
+    create_md5_table(klass)
+    pk_fields, value_fields = build_md5_report_fields(klass)
+    return if pk_fields.nil?
+    
+    query = <<-SQL
+      INSERT INTO #{md5_table(klass)}
+      SELECT id, #{pk_fields} AS ref, #{value_fields} AS value_md5
+      FROM #{klass.storage_name} t1
+      WHERE id > ?
+    SQL
+    query += "AND type = '#{klass}'" if klass.properties.named?(:type)
+    @adapter.execute(query, min_id) # TODO: cope explicitly with table full errors
+  end
+  
+  def build_md5_report_fields(klass)
+    pks_vks = ObjectRef.keys_for(klass)
+    return [nil, nil] if pks_vks.first.nil?
+    
+    relationships = klass.relationships
+    pks_vks.each_with_index.map do |keys, i|
+      components = keys.map do |key|
+        rel = relationships[key]
+        field =
+          if rel.nil? then "t1.#{key}"
+          else "(SELECT ref FROM #{md5_table(rel.parent_model)} WHERE id = t1.#{rel.child_key.first.name})"
+          end
+        "IFNULL(#{field}, '')"
+      end
+      
+      components.unshift("'#{klass}'") if i == 0
+      components.empty? ? "MD5('')" : "MD5(CONCAT(#{components.join(",'::',")}))"
+    end
+  end
+  
+  def create_md5_table(klass)
+    @adapter.execute <<-SQL
+      CREATE TEMPORARY TABLE IF NOT EXISTS #{md5_table(klass)} (
+        id INT(10) unsigned PRIMARY KEY,
+        ref VARCHAR(32) NOT NULL,
+        value_md5 VARCHAR(32),
+        INDEX(ref)
+      ) ENGINE=MEMORY DEFAULT CHARSET=utf8
+    SQL
+  end
+  
+  def delete_and_update_from_db_md5_report(klass)
+    to_destroy_ids = []
+    error_count, updated_count = 0, 0
+    ids_seen = []
+    valid_refs_seen = []
+    
+    query = "SELECT * FROM #{md5_table(klass)}"
+    query += " WHERE id IN (SELECT id FROM #{klass.storage_name} WHERE type = '#{klass}')" if klass.properties.named?(:type)
+    @adapter.select(query).each do |record|
+      id, ref, db_value_md5 = record.id, record.ref, record.value_md5
+      ids_seen << id
+      
+      value_md5 = @objects.value_md5_for(ref)
+      if value_md5.nil?
+        to_destroy_ids << id
+      else
+        if value_md5 != db_value_md5
+          attributes = @objects.data_for(ref)
+          attributes.delete(:class)
+          errors = nil
+          begin
+            resource = klass.get(id)
+            errors = resource.errors.full_messages unless resource.update(attributes)
+          rescue Exception => e
+            errors = [e.message]
+          end
+          @errors << errors.map { |e| error_for_row(e, @objects.row_md5s_for(ref).first) }
+          error_count += errors.size
+          updated_count += 1 if errors.empty?
+        end
+        valid_refs_seen << ref
+      end
+    end
+    
+    puts " ! #{error_count} errors encountered while attempting to update #{klass} records" if error_count > 0
+    puts " - updated #{updated_count} #{klass} records" if updated_count > 0
+    
+    to_destroy_ids.each_slice(1000) { |ids| klass.all(:id => ids).destroy! }
+    puts " - destroyed #{to_destroy_ids.size} #{klass} records" unless to_destroy_ids.empty?
+    
+    [ids_seen.max || 0, valid_refs_seen]
+  end
+  
+  def insert_missing_refs(klass, max_id_seen, valid_refs_seen)
+    to_insert_refs = []
+    
+    @objects.queue_get("refs_by_class", klass) do |_, refs|
+      obsolete_refs = []
+      refs.each do |ref|
+        next if valid_refs_seen.include?(ref)
+        object = @objects.data_for(ref)
+        (object.nil? ? obsolete_refs : to_insert_refs) << ref
+      end
+      obsolete_refs
+    end
+    
+    property_names_by_child_key = Hash[klass.relationships.map { |name, rel| [rel.child_key.first.name, name.to_sym] }]
+    db_properties_with_local_properties = klass.properties.map do |property|
+      next if property == klass.serial
+      n = property.name
+      [n.to_s, property_names_by_child_key[n] || n]
+    end.compact
+    column_names, local_symbols = db_properties_with_local_properties.transpose
+    
+    column_names_list = column_names.map(&@adapter.method(:quote_name)).join(", ")
+    bind_parts = column_names.map { |n| n =~ /_id$/ ? "(SELECT id FROM #{md5_table(klass)} WHERE ref = ?)" : "?" }
+    bind_set = "(#{bind_parts.join(', ')})"
+    
+    error_count = 0
+    inserted_count = 0
+    
+    to_insert_refs.each_slice(1000) do |refs|
+      bind_values = []
+      insert_count = 0
+      
+      refs.each do |ref|
+        object = @objects.data_for(ref)
+        next if klass == TextPropertyValue and object[:text_value].blank?
+        object[:type] = object.delete(:class)
+        bind_values += object.values_at(*local_symbols).map do |v|
+          v = Base64.encode64(Marshal.dump(Marshal.load(Marshal.dump(v)))) if v.is_a?(Array) or v.is_a?(Hash)
+          v
+        end
+        insert_count += 1
+      end
+      
+      bind_sets = Array.new(insert_count) { bind_set }.join(", ")
+      
+      begin
+        @adapter.execute("INSERT INTO #{klass.storage_name} (#{column_names_list}) VALUES #{bind_sets}", *bind_values)
+        build_md5_report(klass, max_id_seen)
+        inserted_count += insert_count
+      rescue Exception => e
+        @errors << [nil, nil, e.message]
+        error_count += 1
+      end
+    end
+    
+    puts " ! #{error_count} errors encountered while attempting to insert #{klass} records" if error_count > 0
+    puts " - inserted #{inserted_count.size} #{klass} records" if inserted_count > 0
+  end
+  
+  def md5_table(klass)
+    "#{klass.storage_name}_md5s"
+  end
+  
+  def update_class(klass)
+    build_md5_report(klass)
+    max_id_seen, valid_refs_seen = delete_and_update_from_db_md5_report(klass)
+    insert_missing_refs(klass, max_id_seen, valid_refs_seen.to_set)
   end
 end

@@ -109,7 +109,7 @@ class ObjectCatalogue
     implicit_bad_row_md5s = (@row_md5s_by_ref.values_at(*bad_refs) - bad_row_md5s)
     puts " - #{implicit_bad_row_md5s.size} implicitly obsolete rows" unless implicit_bad_row_md5s.empty?
     implicit_bad_refs = (refs_for(implicit_bad_row_md5s) - bad_refs)
-    puts " - #{implicit_bad_refs} implicitly obsolete objects" unless implicit_bad_refs.empty?
+    puts " - #{implicit_bad_refs.size} implicitly obsolete objects" unless implicit_bad_refs.empty?
     
     flush_pending(true)
     (bad_refs + implicit_bad_refs).each do |ref|

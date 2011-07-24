@@ -59,7 +59,7 @@ module Merb
       image_url = Indexer.category_image_url_for_node(path_names)
       name ||= path_names.last
       image = (image_url.nil? ? "" : "<img src=\"#{image_url}\" alt=\"#{name.attribute_escape}\" />")
-      "<a href=#{url.inspect} #{klass}> #{image} <span>#{Merb::Parse.escape_xml(name)}</span> </a>"
+      "<a href=#{url.inspect} #{klass}> #{image} <span>#{Merb::Parse.escape_xml(name)}</span> <span class=\"see_all\">(see all)</span></a>"
     end
     
     def category_url(path_names)

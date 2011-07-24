@@ -123,3 +123,7 @@
   border: 1px solid gray;
   color: black;
 }
+
+#categories .items a .see_all{
+  display: none;
+}

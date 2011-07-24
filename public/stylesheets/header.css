@@ -50,10 +50,7 @@
 #header .strapline .addthis_toolbox {
   display: inline;
   float: right;
-}
-
-#header .strapline .addthis_button_print {
-  display: none;
+  width: 133px;
 }
 
 #header .find_bar {

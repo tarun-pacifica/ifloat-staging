@@ -56,6 +56,10 @@
   display: none;
 }
 
+#breadcrumbs a .see_all {
+  font-size: 10px;
+}
+
 #breadcrumbs span.chevron {
   border: solid transparent;
   border-left-color: #6D87A1;

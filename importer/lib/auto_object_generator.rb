@@ -56,7 +56,7 @@ class AutoObjectGenerator
         @errors += errors
         
         puts " - processed #{products_done}/#{products_todo} new/updated products" if products_done % 500 == 0
-        errors.empty? ? [] : refs
+        errors.empty? ? refs : []
       end
     end
     puts " - processed #{products_done}/#{products_todo} new/updated products" if products_todo % 500 > 0

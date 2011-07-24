@@ -32,7 +32,7 @@ class ObjectCatalogue
       if has_ref?(ref)
         existing_rows = row_md5s_for(ref).map(&@csvs.method(:location)).join(", ")
         existing_rows = "unknown csvs / rows" if existing_rows.blank?
-        return ["duplicate of #{object[:class]} from #{existing_rows}"]
+        return ["duplicate of #{object[:class]} from #{existing_rows}: #{object.inspect}"]
       end
       
       @data_by_ref[ref] = Marshal.dump(object)

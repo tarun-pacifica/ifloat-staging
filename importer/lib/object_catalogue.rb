@@ -26,15 +26,17 @@ class ObjectCatalogue
   def add(objects, *row_md5s)
     flush_pending(true)
     
-    objects.each do |object|
+    orvs = objects.map do |object|
       ref, value_md5 = ObjectRef.from_object(object)
-      
       if has_ref?(ref)
         existing_rows = row_md5s_for(ref).map(&@csvs.method(:location)).join(", ")
         existing_rows = "unknown csvs / rows" if existing_rows.blank?
         return ["duplicate of #{object[:class]} from #{existing_rows}: #{object.inspect}"]
       end
-      
+      [object, ref, value_md5]
+    end
+    
+    orvs.each do |object, ref, value_md5|
       @data_by_ref[ref] = Marshal.dump(object)
       @value_md5s_by_ref[ref] = value_md5
       
@@ -154,8 +156,14 @@ class ObjectCatalogue
     key_vals_to_delete = []
     (keys || db.keys).each do |key|
       values = db.values(key)
-      vals_to_delete = yield(key, values)
-      if vals_to_delete == values then keys_to_delete << key
+      val_set = values.to_set
+      if val_set.size < values.size
+        db.delete(key, :dup)
+        val_set.each { |val| db.store(key, val, :dup) }
+      end
+      
+      vals_to_delete = yield(key, val_set)
+      if vals_to_delete.to_set == val_set then keys_to_delete << key
       else key_vals_to_delete += vals_to_delete.map { |val| [key, val] }
       end
     end

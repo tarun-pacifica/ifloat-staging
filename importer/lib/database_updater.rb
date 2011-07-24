@@ -19,7 +19,22 @@ class DatabaseUpdater
       @adapter.push_transaction(transaction)
       
       @adapter.execute("SET max_heap_table_size = 256*1024*1024")
+      md5_tables = @classes.map(&method(:md5_table)).uniq
+      md5_tables.each do |table|
+        @adapter.execute("DROP TABLE IF EXISTS #{table}")
+        @adapter.execute <<-SQL
+          CREATE TABLE #{table} (
+            id INT(10) unsigned PRIMARY KEY,
+            ref VARCHAR(32) NOT NULL,
+            value_md5 VARCHAR(32),
+            INDEX(ref)
+          ) ENGINE=MEMORY DEFAULT CHARSET=utf8
+        SQL
+      end
+      
       @classes.each(&method(:update_class))
+      
+      md5_tables.each { |table| @adapter.execute("DROP TABLE IF EXISTS #{table}") }
       
       @adapter.pop_transaction
       if @errors.empty? then transaction.commit
@@ -32,7 +47,6 @@ class DatabaseUpdater
   private
   
   def build_md5_report(klass, min_id = 0)
-    create_md5_table(klass)
     pk_fields, value_fields = build_md5_report_fields(klass)
     return if pk_fields.nil?
     
@@ -66,21 +80,10 @@ class DatabaseUpdater
     end
   end
   
-  def create_md5_table(klass)
-    @adapter.execute <<-SQL
-      CREATE TEMPORARY TABLE IF NOT EXISTS #{md5_table(klass)} (
-        id INT(10) unsigned PRIMARY KEY,
-        ref VARCHAR(32) NOT NULL,
-        value_md5 VARCHAR(32),
-        INDEX(ref)
-      ) ENGINE=MEMORY DEFAULT CHARSET=utf8
-    SQL
-  end
-  
   def delete_and_update_from_db_md5_report(klass)
-    to_destroy_ids = []
-    error_count, updated_count = 0, 0
     ids_seen = []
+    to_destroy_ids = []
+    to_update_ids_by_ref = {}
     valid_refs_seen = []
     
     query = "SELECT * FROM #{md5_table(klass)}"
@@ -92,35 +95,23 @@ class DatabaseUpdater
       value_md5 = @objects.value_md5_for(ref)
       if value_md5.nil?
         to_destroy_ids << id
+      elsif value_md5 != db_value_md5
+        to_update_ids_by_ref[ref] = id
       else
-        if value_md5 != db_value_md5
-          attributes = @objects.data_for(ref)
-          attributes.delete(:class)
-          errors = nil
-          begin
-            resource = klass.get(id)
-            errors = resource.errors.full_messages unless resource.update(attributes)
-          rescue Exception => e
-            errors = [e.message]
-          end
-          @errors << errors.map { |e| error_for_row(e, @objects.row_md5s_for(ref).first) }
-          error_count += errors.size
-          updated_count += 1 if errors.empty?
-        end
         valid_refs_seen << ref
       end
     end
     
-    puts " ! #{error_count} errors encountered while attempting to update #{klass} records" if error_count > 0
-    puts " - updated #{updated_count} #{klass} records" if updated_count > 0
-    
     to_destroy_ids.each_slice(1000) { |ids| klass.all(:id => ids).destroy! }
     puts " - destroyed #{to_destroy_ids.size} #{klass} records" unless to_destroy_ids.empty?
     
-    [ids_seen.max || 0, valid_refs_seen]
+    to_update_ids_by_ref.values.each_slice(1000) { |ids| klass.all(:id => ids).destroy! }
+    puts " - destroyed #{to_destroy_ids.size} #{klass} records for re-insertion" unless to_update_ids_by_ref.empty?
+    
+    [ids_seen.max || 0, to_update_ids_by_ref, valid_refs_seen]
   end
   
-  def insert_missing_refs(klass, max_id_seen, valid_refs_seen)
+  def insert_missing_refs(klass, max_id_seen, to_update_ids_by_ref, valid_refs_seen)
     to_insert_refs = []
     
     @objects.queue_get("refs_by_class", klass) do |_, refs|
@@ -133,42 +124,46 @@ class DatabaseUpdater
       obsolete_refs
     end
     
-    property_names_by_child_key = Hash[klass.relationships.map { |name, rel| [rel.child_key.first.name, name.to_sym] }]
+    relationships = klass.relationships
+    property_names_by_child_key = Hash[relationships.map { |name, rel| [rel.child_key.first.name, name.to_sym] }]
+    
     db_properties_with_local_properties = klass.properties.map do |property|
-      next if property == klass.serial
       n = property.name
       [n.to_s, property_names_by_child_key[n] || n]
     end.compact
     column_names, local_symbols = db_properties_with_local_properties.transpose
     
     column_names_list = column_names.map(&@adapter.method(:quote_name)).join(", ")
-    bind_parts = column_names.map { |n| n =~ /_id$/ ? "(SELECT id FROM #{md5_table(klass)} WHERE ref = ?)" : "?" }
+    bind_parts = local_symbols.map do |sym|
+      rel = relationships[sym]
+      rel.nil? ? "?" : "(SELECT id FROM #{md5_table(rel.parent_model)} WHERE ref = ?)"
+    end
     bind_set = "(#{bind_parts.join(', ')})"
     
     error_count = 0
     inserted_count = 0
     
     to_insert_refs.each_slice(1000) do |refs|
+      bind_sets = []
       bind_values = []
-      insert_count = 0
       
       refs.each do |ref|
         object = @objects.data_for(ref)
         next if klass == TextPropertyValue and object[:text_value].blank?
+        
+        object[:id] = to_update_ids_by_ref[ref]
         object[:type] = object.delete(:class)
+        bind_sets << bind_set
         bind_values += object.values_at(*local_symbols).map do |v|
           v = Base64.encode64(Marshal.dump(Marshal.load(Marshal.dump(v)))) if v.is_a?(Array) or v.is_a?(Hash)
           v
         end
-        insert_count += 1
+        inserted_count += 1
       end
       
-      bind_sets = Array.new(insert_count) { bind_set }.join(", ")
-      
       begin
-        @adapter.execute("INSERT INTO #{klass.storage_name} (#{column_names_list}) VALUES #{bind_sets}", *bind_values)
+        @adapter.execute("INSERT INTO #{klass.storage_name} (#{column_names_list}) VALUES #{bind_sets.join(', ')}", *bind_values) unless bind_sets.empty?
         build_md5_report(klass, max_id_seen)
-        inserted_count += insert_count
       rescue Exception => e
         @errors << [nil, nil, e.message]
         error_count += 1
@@ -176,7 +171,7 @@ class DatabaseUpdater
     end
     
     puts " ! #{error_count} errors encountered while attempting to insert #{klass} records" if error_count > 0
-    puts " - inserted #{inserted_count.size} #{klass} records" if inserted_count > 0
+    puts " - inserted #{inserted_count} #{klass} records" if inserted_count > 0
   end
   
   def md5_table(klass)
@@ -185,7 +180,7 @@ class DatabaseUpdater
   
   def update_class(klass)
     build_md5_report(klass)
-    max_id_seen, valid_refs_seen = delete_and_update_from_db_md5_report(klass)
-    insert_missing_refs(klass, max_id_seen, valid_refs_seen.to_set)
+    max_id_seen, to_update_ids_by_ref, valid_refs_seen = delete_and_update_from_db_md5_report(klass)
+    insert_missing_refs(klass, max_id_seen, to_update_ids_by_ref, valid_refs_seen.to_set)
   end
 end

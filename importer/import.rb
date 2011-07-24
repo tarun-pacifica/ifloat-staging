@@ -72,7 +72,6 @@ puts "Running global integrity checks..."
 objects.verifier.verify
 mail_fail("verifying global integrity") if objects.verifier.write_errors(ERROR_CSV_PATH)
 
-exit
 puts "Updating database..."
 updater = DatabaseUpdater.new(classes, csvs, objects)
 updater.update

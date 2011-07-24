@@ -36,7 +36,7 @@ class AbstractParser
         begin
           parsed_by_header[header] = parse_field(header, value, parsed_by_header)
         rescue Exception => e
-          errors << [@info[:headers][@headers.index(header)], e.message + " " + e.backtrace.inspect]
+          errors << [@info[:headers][@headers.index(header)], e.message]
         end
       end
     end if errors.empty?

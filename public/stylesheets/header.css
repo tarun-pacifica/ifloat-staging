@@ -44,7 +44,16 @@
   position: absolute;
   left: 200px;
   top: 102px;
-  width: 650px;
+  width: 760px;
+}
+
+#header .strapline .addthis_toolbox {
+  display: inline;
+  float: right;
+}
+
+#header .strapline .addthis_button_print {
+  display: none;
 }
 
 #header .find_bar {

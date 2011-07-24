@@ -46,19 +46,17 @@ class AutoObjectGenerator
         methods = [method(:generate_ts_values)]
         methods << method(:generate_ph_values) unless product[:reference_group].nil?
         
-        retain = false
+        auto_objects, errors = [], []
         methods.each do |m|
-          auto_objects, errors = m.call(*args)
-          errors += @objects.add(auto_objects, row_md5).map { |e| error_for_row(e, row_md5) }
-          @errors += errors
-          unless errors.empty?
-            retain = true
-            break
-          end
+          aos, es = m.call(*args)
+          auto_objects += aos
+          errors += es
         end
+        errors += @objects.add(auto_objects, row_md5).map { |e| error_for_row(e, row_md5) }
+        @errors += errors
         
         puts " - processed #{products_done}/#{products_todo} new/updated products" if products_done % 500 == 0
-        retain ? [] : refs
+        errors.empty? ? [] : refs
       end
     end
     puts " - processed #{products_done}/#{products_todo} new/updated products" if products_todo % 500 > 0

@@ -5,7 +5,7 @@
   
   <% unless @error_csv_mtime.nil? %> <p><a href="/tools/importer_error_report">Download</a> the <span class="error">error report</span> from <%= @error_csv_mtime.strftime('%H:%M:%S (%B %d, %Y)') %></p> <% end %>
   
-  <% if @success_time %> <p>The last import run <span class="success">completed successfully</span> at <%= @success_time.strftime('%H:%M:%S (%B %d, %Y)') %><% end %>
+  <% unless @success_time.nil? %> <p>The last import run <span class="success">completed successfully</span> at <%= @success_time.strftime('%H:%M:%S (%B %d, %Y)') %><% end %>
   
   <% if @importer_running_since.nil? %>
   <p><a href="/tools/importer?operation=import">Run</a> import now</p>
@@ -32,7 +32,16 @@
   </form>
   <% end %>
   
-  <% unless changes == "{none}" %><p><a href="/tools/importer?operation=revert_<%= group %>">Undo</a> all <%= group.downcase %> changes</p><% end %>
+  <% unless changes == "{none}" %>
+  <p><a href="/tools/importer?operation=revert_<%= group %>">Undo</a> all <%= group.downcase %> changes</p>
+  <% if @success_time.nil? %>
+  <p class="warn">These changes cannot be committed until there has been a successful run of the importer</p>
+  <% elsif @success_time > @most_recent_by_group[group] %>
+  <p><a href="/tools/importer?operation=commit_<%= group %>">Commit</a> all <%= group.downcase %> changes</p>
+  <% else %>
+  <p class="warn">These changes cannot be committed until there has been a more recent, successful run of the importer</p>
+  <% end %>
+  <% end %>
   <pre><%= changes %></pre>
   <% end %>
   

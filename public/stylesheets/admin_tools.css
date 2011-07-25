@@ -25,6 +25,11 @@
   padding: 10px;
 }
 
+#importer p.warn {
+  color: #404040;
+  font-style: italic;
+}
+
 #importer span.error {
   color: red;
   font-weight: bold;

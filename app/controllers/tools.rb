@@ -36,8 +36,11 @@ class Tools < Application
       return render
     end
     
-    # TODO: what to do when a success - i.e. need to emphasize no error report somehow - do we have enough state to do this?
     case operation
+    when /^commit_(Asset|CSV)$/
+      dir = IMPORTER_DATA_DIRS[$1]
+      @error = git_commit(dir)
+      
     when "import"
       @importer_running_since = Time.now
       FileUtils.touch(IMPORTER_CHECKPOINT_PATH)
@@ -87,6 +90,7 @@ class Tools < Application
       @available_by_group = Hash[IMPORTER_DATA_DIRS.map { |group, path| [group, git_available(group, path)] }]
       @changes_by_group = Hash[IMPORTER_DATA_DIRS.map { |group, path| [group, git_changes(path)] }]
       @error_csv_mtime = (File.mtime(IMPORTER_ERROR_PATH) rescue nil)
+      @most_recent_by_group = Hash[IMPORTER_DATA_DIRS.map { |group, path| [group, git_most_recent(group, path)] }]
       @success_time = (File.mtime(IMPORTER_SUCCESS_PATH) rescue nil)
       @upload_info_by_group = {"Asset" => ["an asset ZIP", Asset::BUCKETS], "CSV" => ["a CSV", %w(/ products)]}
     end
@@ -213,9 +217,8 @@ class Tools < Application
   end
   
   def git_available(group, dir)
-    glob = (group == "Asset" ? (dir / "*" / "*") : (dir / "**" / "**.csv"))
     matcher = /^#{dir}\/(.+?)$/
-    Dir[glob].map { |path| path =~ matcher; $1 }.reject { |path| path == "assets.csv" }.sort
+    Dir[git_file_glob(group, dir)].map { |path| path =~ matcher; $1 }.reject { |path| path == "assets.csv" }.sort
   end
   
   def git_changes(dir)
@@ -230,6 +233,25 @@ class Tools < Application
     end.join("\n")
     
     report.blank? ? "{none}" : report
+  end
+  
+  def git_commit(dir)
+    report = `git --git-dir=#{dir}/.git --work-tree=#{dir} add . 2>&1`
+    return "unable to git-add the contents of #{dir.inspect}: #{report}" unless $?.success?
+    
+    report = `git --git-dir=#{dir}/.git --work-tree=#{dir} commit -am . 2>&1`
+    return "unable to git-commit the contents of #{dir.inspect}: #{report}" unless $?.success?
+    
+    report = `git --git-dir=#{dir}/.git --work-tree=#{dir} push 2>&1`
+    return "unable to git-push the contents of #{dir.inspect}: #{report}" unless $?.success?
+  end
+  
+  def git_file_glob(group, dir)
+    group == "Asset" ? (dir / "*" / "*") : (dir / "**" / "**.csv")
+  end
+  
+  def git_most_recent(group, dir)
+    Dir[git_file_glob(group, dir)].map(&File.method(:mtime)).max
   end
   
   def git_revert(dir)

@@ -48,7 +48,7 @@ class DatabaseUpdater
   
   def build_md5_report(klass)
     pk_fields, value_fields = build_md5_report_fields(klass)
-    return if pk_fields.nil?
+    return false if pk_fields.nil?
     
     query = <<-SQL
       INSERT INTO #{md5_table(klass)}
@@ -58,6 +58,7 @@ class DatabaseUpdater
     SQL
     query += "AND type = '#{klass}'" if klass.properties.named?(:type)
     @adapter.execute(query) # TODO: cope explicitly with table full errors
+    true
   end
   
   def build_md5_report_fields(klass)
@@ -177,8 +178,8 @@ class DatabaseUpdater
   end
   
   def update_class(klass)
+    return unless build_md5_report(klass)
     puts " - #{klass} records"
-    build_md5_report(klass)
     to_update_ids_by_ref, valid_refs_seen = delete_and_update_from_db_md5_report(klass)
     insert_missing_refs(klass, to_update_ids_by_ref, valid_refs_seen)
   end

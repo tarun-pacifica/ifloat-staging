@@ -76,3 +76,11 @@ puts "Updating database..."
 updater = DatabaseUpdater.new(classes, csvs, objects)
 updater.update
 mail_fail("updating database") if updater.write_errors(ERROR_CSV_PATH)
+
+puts "Recompiling indexes / expiring caches..."
+begin
+  Indexer.compile
+  PickedProduct.all.update!(:invalidated => true)
+rescue Exception => e
+  p e
+end

@@ -18,14 +18,15 @@ VERIFIER_INDEX_DIR   = INDEXES_DIR / "verifier"
 require THIS_DIR / "lib" / "error_writer"
 %w(lib parsers).each { |dir| Dir[THIS_DIR / dir / "*.rb"].sort.each { |path| load path } }
 
-
+# TODO: all mail failure behaviour should move into the web tool
+# - this likely means raising an exception with an attachment?
 def mail_fail(whilst)
   puts " ! errors occured whilst #{whilst}"
   if Merb.environment == "development"
     system "mate", ERROR_CSV_PATH
-  else
-    mail_info = {:whilst => whilst, :repo_summary => GitRepo.summarize(REPO_DIRS), :attach => ERROR_CSV_PATH}
-    Mailer.deliver(:import_failure, mail_info)
+  # else
+  #   mail_info = {:whilst => whilst, :repo_summary => GitRepo.summarize(REPO_DIRS), :attach => ERROR_CSV_PATH}
+  #   Mailer.deliver(:import_failure, mail_info)
   end
   exit 1
 end
@@ -78,9 +79,5 @@ updater.update
 mail_fail("updating database") if updater.write_errors(ERROR_CSV_PATH)
 
 puts "Recompiling indexes / expiring caches..."
-begin
-  Indexer.compile
-  PickedProduct.all.update!(:invalidated => true)
-rescue Exception => e
-  p e
-end
+Indexer.compile
+PickedProduct.all.update!(:invalidated => true)

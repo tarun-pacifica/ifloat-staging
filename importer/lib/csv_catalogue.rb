@@ -4,6 +4,7 @@ class CSVCatalogue
   ERROR_HEADERS = %w(csv error)
   IMPROPER_NIL_VALUES = %w(n/a N/a n/A nil niL nIl nIL Nil NiL NIl).to_set
   NIL_VALUES = %w(N/A NIL)
+  NON_PRODUCT_CSV_PATHS = %w(assets.csv associated_words.csv brands.csv companies.csv facilities.csv property_definitions.csv property_hierarchies.csv property_types.csv property_value_definitions.csv title_strategies.csv unit_of_measures.csv).to_set
   SKIP_HEADER_MATCHER = /^(raw:)|(IMPORT)/
   
   def initialize(dir)
@@ -18,6 +19,11 @@ class CSVCatalogue
   end
   
   def add(csv_path)
+    unless csv_path =~ /^products\// or NON_PRODUCT_CSV_PATHS.include(csv_path)
+      @errors << [csv_path, "does not belong in the / directory"]
+      return
+    end
+    
     csv_md5 = Digest::MD5.file(csv_path).hexdigest
     @added_csv_md5s << csv_md5
     return if @csv_info_by_csv_md5.has_key?(csv_md5)

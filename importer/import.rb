@@ -81,3 +81,4 @@ mail_fail("updating database") if updater.write_errors(ERROR_CSV_PATH)
 puts "Recompiling indexes / expiring caches..."
 Indexer.compile
 PickedProduct.all.update!(:invalidated => true)
+puts " > done"

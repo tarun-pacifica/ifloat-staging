@@ -110,6 +110,7 @@ class DatabaseUpdater
     [to_update_ids_by_ref, valid_refs_seen]
   end
   
+  # TODO: need actual asset records in order to upload images?
   def insert_missing_refs(klass, to_update_ids_by_ref, valid_refs_seen)
     to_insert_refs = []
     

@@ -66,6 +66,7 @@ class Tools < Application
     when /^remove_(Asset|CSV)$/
       path = params[:path]
       FileUtils.rmtree(IMPORTER_DATA_DIRS[$1] / path) unless path.blank?
+      File.delete(IMPORTER_SUCCESS_PATH) if File.exist?(IMPORTER_SUCCESS_PATH)
       
     when /^revert_(Asset|CSV)$/
       dir = IMPORTER_DATA_DIRS[$1]
@@ -85,6 +86,7 @@ class Tools < Application
           else "#{group} upload names should end in #{expected_ext}"
           end
       end
+      FFile.delete(IMPORTER_SUCCESS_PATH) if @error.nil? and File.exist?(IMPORTER_SUCCESS_PATH)
       
     end
     

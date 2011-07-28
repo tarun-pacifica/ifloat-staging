@@ -148,7 +148,9 @@ class DatabaseUpdater
       
       refs.each do |ref|
         object = @objects.data_for(ref)
+        
         next if klass == TextPropertyValue and object[:text_value].blank?
+        Asset.new(object).store! if klass == Asset
         
         object[:id] = to_update_ids_by_ref[ref]
         object[:type] = object.delete(:class)

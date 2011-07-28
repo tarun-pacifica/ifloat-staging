@@ -18,16 +18,9 @@ VERIFIER_INDEX_DIR   = INDEXES_DIR / "verifier"
 require THIS_DIR / "lib" / "error_writer"
 %w(lib parsers).each { |dir| Dir[THIS_DIR / dir / "*.rb"].sort.each { |path| load path } }
 
-# TODO: all mail failure behaviour should move into the web tool
-# - this likely means raising an exception with an attachment?
-def mail_fail(whilst)
+def bomb(whilst)
   puts " ! errors occured whilst #{whilst}"
-  if Merb.environment == "development"
-    system "mate", ERROR_CSV_PATH
-  # else
-  #   mail_info = {:whilst => whilst, :repo_summary => GitRepo.summarize(REPO_DIRS), :attach => ERROR_CSV_PATH}
-  #   Mailer.deliver(:import_failure, mail_info)
-  end
+  system "mate", ERROR_CSV_PATH if Merb.environment == "development"
   exit 1
 end
 
@@ -35,13 +28,13 @@ puts "Scanning asset repository for updates..."
 assets = ImportableAssets.new(REPO_DIRS["assets"], ASSET_CSV_PATH, ASSET_VARIANT_DIR, ASSET_WATERMARK_PATH)
 unless assets.update
   assets.write_errors(ERROR_CSV_PATH)
-  mail_fail("compiling assets")
+  bomb("compiling assets")
 end
 
 puts "Scanning CSV repository for updates..."
 csvs = CSVCatalogue.new(CSV_INDEX_DIR)
 Dir[REPO_DIRS["csvs"] / "**" / "*.csv"].each { |path| csvs.add(path) }
-mail_fail("compiling CSVs") if csvs.write_errors(ERROR_CSV_PATH)
+bomb("compiling CSVs") if csvs.write_errors(ERROR_CSV_PATH)
 csvs.delete_obsolete
 csvs.summarize
 
@@ -60,23 +53,23 @@ generator = RowObjectGenerator.new(csvs, objects)
 extra_dependency_rules = {Asset => [Product], PropertyDefinition => [AssociatedWord, PropertyHierarchy, TitleStrategy]}
 classes = DataMapper::Model.sorted_descendants(extra_dependency_rules)
 classes.each { |klass| generator.generate_for(klass) }
-mail_fail("generating row objects") if generator.write_errors(ERROR_CSV_PATH)
+bomb("generating row objects") if generator.write_errors(ERROR_CSV_PATH)
 objects.summarize
 
 puts "Generating any missing auto objects..."
 generator = AutoObjectGenerator.new(csvs, objects)
 generator.generate
-mail_fail("generating auto objects") if generator.write_errors(ERROR_CSV_PATH)
+bomb("generating auto objects") if generator.write_errors(ERROR_CSV_PATH)
 objects.summarize
 
 puts "Running global integrity checks..."
 objects.verifier.verify
-mail_fail("verifying global integrity") if objects.verifier.write_errors(ERROR_CSV_PATH)
+bomb("verifying global integrity") if objects.verifier.write_errors(ERROR_CSV_PATH)
 
 puts "Updating database..."
 updater = DatabaseUpdater.new(classes, csvs, objects)
 updater.update
-mail_fail("updating database") if updater.write_errors(ERROR_CSV_PATH)
+bomb("updating database") if updater.write_errors(ERROR_CSV_PATH)
 
 puts "Recompiling indexes / expiring caches..."
 Indexer.compile

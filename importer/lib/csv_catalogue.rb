@@ -19,8 +19,10 @@ class CSVCatalogue
   end
   
   def add(csv_path)
-    unless csv_path =~ /^products\// or NON_PRODUCT_CSV_PATHS.include(csv_path)
-      @errors << [csv_path, "does not belong in the / directory"]
+    name = (File.dirname(csv_path) =~ /products$/ ? "products/" : "") + File.basename(csv_path)
+    
+    unless name =~ /^products\// or NON_PRODUCT_CSV_PATHS.include?(name)
+      @errors << [name, "is not a system/global CSV"]
       return
     end
     
@@ -28,7 +30,6 @@ class CSVCatalogue
     @added_csv_md5s << csv_md5
     return if @csv_info_by_csv_md5.has_key?(csv_md5)
     
-    name = (File.dirname(csv_path) =~ /products$/ ? "products/" : "") + File.basename(csv_path)
     errors, info, locations_by_row_md5, rows_by_row_md5 = parse_rows(csv_path, name)
     
     unless errors.empty?

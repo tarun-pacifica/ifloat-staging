@@ -30,6 +30,7 @@ module Mailer
         add_file attachment_path unless attachment_path.nil?
       end
     
+    # TODO: remove once on new importer
     when :import_failure
       ars, crs, whilst, attachment_path = params.values_at(:ars, :crs, :whilst, :attach)
       return if ars.nil? or crs.nil? or whilst.nil?
@@ -42,6 +43,7 @@ module Mailer
         add_file attachment_path unless attachment_path.nil?
       end
     
+    # TODO: remove once on new importer
     when :import_success
       ars, crs, stats_by_class = params.values_at(:ars, :crs, :stats)
       return if ars.nil? or crs.nil? or stats_by_class.nil?

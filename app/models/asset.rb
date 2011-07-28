@@ -34,9 +34,7 @@ class Asset
   end
   
   before :save do
-    AssetStore.write(self) unless @file_path.nil?
-    AssetStore.write(self, "small") unless @file_path_small.nil?
-    AssetStore.write(self, "tiny") unless @file_path_tiny.nil?
+    store!
   end
   
   attr_writer :file_path
@@ -46,6 +44,13 @@ class Asset
   def file_path(variant = nil)
     variant = "_#{variant}" unless variant.nil?
     instance_variable_get("@file_path#{variant}")
+  end
+  
+  # TODO: spec
+  def store!
+    AssetStore.write(self) unless @file_path.nil?
+    AssetStore.write(self, "small") unless @file_path_small.nil?
+    AssetStore.write(self, "tiny") unless @file_path_tiny.nil?
   end
   
   def store_name(variant = nil)

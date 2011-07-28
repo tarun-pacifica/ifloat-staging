@@ -53,10 +53,8 @@ class Tools < Application
         $stdout.sync = $stderr.sync = true
         begin
           require Merb.root / "importer" / "import"
-          # TODO: mail success
         rescue Exception => e
-          File.open(IMPORTER_LOG_PATH, "a") { |f| f.puts "\n\n{error: #{e.inspect} @ #{e.backtrace.first}}"}
-          # TODO: mail failure
+          File.open(IMPORTER_LOG_PATH, "w") { |f| f.puts e.inspect; f.puts e.backtrace }
         ensure
           File.delete(IMPORTER_CHECKPOINT_PATH)
           FileUtils.touch(IMPORTER_SUCCESS_PATH) unless File.exist?(IMPORTER_ERROR_PATH)

@@ -61,7 +61,11 @@
   function update_log_handler(log) {
     $('#log').text(log);
     $('html, body').animate({scrollTop: $(document).height() - $(window).height()});
-    log.match('{importer finished}$') ? window.location = '/tools/importer' : setTimeout(update_log, 1000);
+    try {
+      log.match('{importer finished}$') ? window.location = '/tools/importer' : setTimeout(update_log, 1000);
+    } catch {
+      window.location = '/tools/importer'
+    }
   }
 </script>
 <% end %>

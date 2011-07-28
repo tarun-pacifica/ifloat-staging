@@ -56,7 +56,7 @@ class ObjectRef < String
     pks = PRIMARY_KEYS[klass]
     return [nil, nil] if pks.nil?
     
-    property_names_by_child_key = Hash[klass.relationships.map { |name, rel| [rel.child_key.first.name, name.to_sym] }]
+    property_names_by_child_key = klass.property_names_by_child_key
     properties = klass.properties.map do |property|
       n = property.name
       property_names_by_child_key[n] || n

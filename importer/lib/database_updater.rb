@@ -123,9 +123,7 @@ class DatabaseUpdater
       obsolete_refs
     end
     
-    relationships = klass.relationships
-    property_names_by_child_key = Hash[relationships.map { |name, rel| [rel.child_key.first.name, name.to_sym] }]
-    
+    property_names_by_child_key = klass.property_names_by_child_key
     db_properties_with_local_properties = klass.properties.map do |property|
       n = property.name
       [n.to_s, property_names_by_child_key[n] || n]
@@ -134,7 +132,7 @@ class DatabaseUpdater
     
     column_names_list = column_names.map(&@adapter.method(:quote_name)).join(", ")
     bind_parts = local_symbols.map do |sym|
-      rel = relationships[sym]
+      rel = klass.relationships[sym]
       rel.nil? ? "?" : "(SELECT id FROM #{md5_table(rel.parent_model)} WHERE ref = ?)"
     end
     bind_set = "(#{bind_parts.join(', ')})"

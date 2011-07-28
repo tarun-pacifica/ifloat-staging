@@ -5,14 +5,13 @@ def gems(names, version)
 end
 
 # DataMapper and Merb
-gems %w(dm-core dm-aggregates dm-migrations dm-mysql-adapter dm-transactions dm-types dm-validations), "1.0.2"
-gems %w(merb-core merb-action-args merb-helpers), "1.1.3"
-gems %w(merb_datamapper), "1.1.2"
+gems %w(dm-core dm-aggregates dm-migrations dm-mysql-adapter dm-transactions dm-types dm-validations), "1.1.0"
+gems %w(merb-core merb-action-args merb-helpers merb_datamapper), "1.1.3"
 
 # Others
 gem "bluecloth",      "2.0.9"
 gem "cloudfiles",     "1.4.10"
-gem "fastercsv",      "1.5.3" unless RUBY_VERSION =~ /^1\.9\./
+gem "fastercsv",      "1.5.4" unless RUBY_VERSION =~ /^1\.9\./
 gem "i18n",           "0.5.0"
 gem "json",           "1.4.6"
 gem "mail",           "2.2.12"

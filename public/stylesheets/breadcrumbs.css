@@ -60,6 +60,10 @@
   font-size: 10px;
 }
 
+#breadcrumbs a.unfind .see_all {
+  display: none;
+}
+
 #breadcrumbs span.chevron {
   border: solid transparent;
   border-left-color: #6D87A1;

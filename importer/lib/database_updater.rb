@@ -150,7 +150,7 @@ class DatabaseUpdater
         
         object[:id] = to_update_ids_by_ref[ref]
         object[:type] = object.delete(:class)
-        Asset.new(object.keep(Asset::STORE_KEYS)).store! if klass == Asset
+        Asset.new(object.keep(*Asset::STORE_KEYS)).store! if klass == Asset
         
         bind_sets << bind_set
         bind_values += object.values_at(*local_symbols).map do |v|

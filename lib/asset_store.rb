@@ -150,8 +150,10 @@ module AssetStore
     
     def write(asset, variant = nil)
       source_path = asset.file_path(variant)
+      p source_path
       container do |c|
         object = c.create_object("#{asset.bucket}/#{asset.store_name(variant)}")
+        p object
         object.load_from_filename(source_path) if object.bytes.to_i != File.size(source_path)
       end unless source_path.nil?
     end

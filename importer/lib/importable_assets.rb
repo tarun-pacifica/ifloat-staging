@@ -127,9 +127,9 @@ class ImportableAssets
     scan_image_sizes(scanned)
     return false unless @errors.empty?
     
-    scanned_product_images = scanned.select { |a| a[:bucket] == "products" and a.has_key?(:pixel_size) }
-    scanned_product_images.each { |image| image.update(variants_by_name(image)) }
-    variants = variants_missing(scanned_product_images)
+    all_product_images = @all.select { |a| a[:bucket] == "products" and a.has_key?(:pixel_size) }
+    all_product_images.each { |image| image.update(variants_by_name(image)) }
+    variants = variants_missing(all_product_images)
     created = 0
     variants.each_slice(500) do |specs|
       specs.each_with_index do |spec, i|

@@ -15,6 +15,7 @@ class Asset
   BUCKETS = %w(brand_logos category_images products property_icons)
   IMAGE_FORMAT = /\.(gif|jpeg|jpg|png|tif|tiff)$/
   NAME_FORMAT = /^([\w\-\.]+?)\.([a-z]{3,})$/
+  STORE_KEYS = [:bucket, :name, :checksum, :file_path, :file_path_small, :file_path_tiny]
   
   property :id, Serial
   property :bucket, String, :required => true, :unique_index => :name_per_company_per_bucket

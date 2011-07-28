@@ -148,12 +148,12 @@ class DatabaseUpdater
       
       refs.each do |ref|
         object = @objects.data_for(ref)
-        
         next if klass == TextPropertyValue and object[:text_value].blank?
-        Asset.new(object).store! if klass == Asset
         
         object[:id] = to_update_ids_by_ref[ref]
         object[:type] = object.delete(:class)
+        Asset.new(object.keep(Asset::STORE_KEYS)).store! if klass == Asset
+        
         bind_sets << bind_set
         bind_values += object.values_at(*local_symbols).map do |v|
           v = Base64.encode64(Marshal.dump(Marshal.load(Marshal.dump(v)))) if v.is_a?(Array) or v.is_a?(Hash)

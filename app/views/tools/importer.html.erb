@@ -26,7 +26,7 @@
     <%= submit "Remove" %>
     <select name="path">
       <% available.each do |path| %>
-      <option value="<%= path.attribute_escape %>"><option1><%= path %></option>
+      <option value="<%= path.attribute_escape %>"><%= path %></option>
       <% end %>
     </select>
   </form>
@@ -55,17 +55,18 @@
 
 <% unless @importer_running_since.nil? %>
 <script type="text/javascript" charset="utf-8">
-  function update_log() { $.get('/tools/importer_log', update_log_handler); }
+  function update_log() { $.get('/tools/importer_log', update_log_handler).error(update_log_handler_err); }
   update_log();
   
   function update_log_handler(log) {
     $('#log').text(log);
     $('html, body').animate({scrollTop: $(document).height() - $(window).height()});
-    try {
-      log.match('{importer finished}$') ? window.location = '/tools/importer' : setTimeout(update_log, 1000);
-    } catch {
-      window.location = '/tools/importer'
-    }
+    log.match('{importer finished}$') ? window.location = '/tools/importer' : setTimeout(update_log, 1000);
+  }
+  
+  function update_log_handler_err() {
+    alert('Unexpected response from server while retrieving log. Hit OK to reload the page.');
+    window.location = '/tools/importer';
   }
 </script>
 <% end %>

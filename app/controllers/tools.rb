@@ -49,16 +49,10 @@ class Tools < Application
       end
       
       fork do
-        $stdout = $stderr = File.open(IMPORTER_LOG_PATH, "w")
-        $stdout.sync = $stderr.sync = true
-        begin
-          require Merb.root / "importer" / "import"
-        rescue Exception => e
-          File.open(IMPORTER_ERROR_PATH, "w") { |f| f.puts "#{e.inspect}"; f.puts e.backtrace }
-        ensure
-          File.delete(IMPORTER_CHECKPOINT_PATH)
-          FileUtils.touch(IMPORTER_SUCCESS_PATH) unless File.exist?(IMPORTER_ERROR_PATH)
-        end
+        ENV["IMPORTER_CHECKPOINT_PATH"] = IMPORTER_CHECKPOINT_PATH
+        ENV["IMPORTER_LOG_PATH"]        = IMPORTER_LOG_PATH
+        ENV["IMPORTER_SUCCESS_PATH"]    = IMPORTER_SUCCESS_PATH
+        exec "bundle", "exec", "merb", "-r", "importer/import.rb"
       end
       
     when /^remove_(Asset|CSV)$/

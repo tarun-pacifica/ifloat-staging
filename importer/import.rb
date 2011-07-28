@@ -18,11 +18,19 @@ VERIFIER_INDEX_DIR   = INDEXES_DIR / "verifier"
 require THIS_DIR / "lib" / "error_writer"
 %w(lib parsers).each { |dir| Dir[THIS_DIR / dir / "*.rb"].sort.each { |path| load path } }
 
+IMPORTER_LOG_PATH = ENV["IMPORTER_LOG_PATH"]
+unless IMPORTER_LOG_PATH.nil?
+  $stdout = $stderr = File.open(IMPORTER_LOG_PATH, "w")
+  $stdout.sync = $stderr.sync = true
+end
+
 def bomb(whilst)
   puts " ! errors occured whilst #{whilst}"
   system "mate", ERROR_CSV_PATH if Merb.environment == "development"
   exit 1
 end
+
+begin
 
 puts "Scanning asset repository for updates..."
 assets = ImportableAssets.new(REPO_DIRS["assets"], ASSET_CSV_PATH, ASSET_VARIANT_DIR, ASSET_WATERMARK_PATH)
@@ -75,3 +83,12 @@ puts "Recompiling indexes / expiring caches..."
 Indexer.compile
 PickedProduct.all.update!(:invalidated => true)
 puts " > done"
+
+rescue Exception => e
+  File.open(ERROR_CSV_PATH, "w") { |f| f.puts "#{e.inspect}"; f.puts e.backtrace }
+  
+ensure
+  File.delete(ENV["IMPORTER_CHECKPOINT_PATH"]) if ENV.has_key?("IMPORTER_CHECKPOINT_PATH")
+  FileUtils.touch(ENV["IMPORTER_SUCCESS_PATH"]) if ENV.has_key?("IMPORTER_SUCCESS_PATH") and not File.exist?(ERROR_CSV_PATH)
+  
+end

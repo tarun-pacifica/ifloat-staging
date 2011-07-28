@@ -127,12 +127,12 @@ class ImportableAssets
     scan_image_sizes(scanned)
     return false unless @errors.empty?
     
-    all_product_images = @all.select { |a| a[:bucket] == "products" and a.has_key?(:pixel_size) }
+    all_product_images = @all.select { |a| a[:bucket] == "products" and a[:pixel_size] =~ /^\d/ }
     all_product_images.each { |image| image.update(variants_by_name(image)) }
     variants = variants_missing(all_product_images)
     created = 0
     variants.each_slice(500) do |specs|
-      specs.each_with_index do |spec, i|
+      specs.each do |spec|
         image, name, path = spec.values_at(:image, :name, :path)
         variant_create(image, name, path)
         created += 1
@@ -178,7 +178,7 @@ class ImportableAssets
     product_images.map do |image|
       [:wm, :small, :tiny].map do |name|
         path = image["path_#{name}".to_sym]
-        {:image => image, :name => name, :path => path} unless path.nil? or File.exist?(path)
+        {:image => image, :name => name, :path => path} unless path.nil? or path == "N/A" or File.exist?(path)
       end
     end.flatten.compact
   end

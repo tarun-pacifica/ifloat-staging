@@ -86,7 +86,7 @@ class Tools < Application
           else "#{group} upload names should end in #{expected_ext}"
           end
       end
-      FFile.delete(IMPORTER_SUCCESS_PATH) if @error.nil? and File.exist?(IMPORTER_SUCCESS_PATH)
+      File.delete(IMPORTER_SUCCESS_PATH) if @error.nil? and File.exist?(IMPORTER_SUCCESS_PATH)
       
     end
     

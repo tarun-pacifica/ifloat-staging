@@ -3,7 +3,7 @@ $KCODE = "UTF-8" unless RUBY_VERSION =~ /^1\.9\./
 REPO_DIRS = Hash[["assets", "csvs"].map { |d| [d, Merb.root / ".." / "ifloat_#{d}"] }]
 
 ASSET_CSV_PATH       = REPO_DIRS["csvs"] / "assets.csv"
-ASSET_VARIANT_DIR    = "/tmp" / "ifloat_asset_variants_new"
+ASSET_VARIANT_DIR    = Merb.root / "caches" / "asset_variants"
 ASSET_WATERMARK_PATH = Merb.root / "public" / "images" / "common" / "watermark.png"
 ERROR_CSV_PATH       = "/tmp" / "ifloat_importer_errors.csv"
 

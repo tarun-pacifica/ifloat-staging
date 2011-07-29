@@ -33,16 +33,22 @@
   </form>
   <% end %>
   
-  <% unless changes == "{none}" %>
+  <% if changes == "{none}" %>
+  <p><a href="/tools/importer?operation=pull_<%= group %>">Pull</a> all <%= group.downcase %> updates from the repository server</p>
+  
+  <% else %>
   <p><a href="/tools/importer?operation=revert_<%= group %>">Undo</a> all <%= group.downcase %> changes</p>
+  
   <% if @success_time.nil? %>
   <p class="warn">These changes cannot be committed until there has been a successful run of the importer</p>
   <% elsif @success_time > @most_recent_by_group[group] %>
-  <p><a href="/tools/importer?operation=commit_<%= group %>">Commit</a> all <%= group.downcase %> changes</p>
+  <p><a href="/tools/importer?operation=push_<%= group %>">Push</a> all <%= group.downcase %> changes to the repository server</p>
   <% else %>
   <p class="warn">These changes cannot be committed until there has been a more recent, successful run of the importer</p>
   <% end %>
+  
   <% end %>
+  
   <pre><%= changes %></pre>
   <% end %>
   

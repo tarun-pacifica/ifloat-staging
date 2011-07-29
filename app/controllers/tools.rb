@@ -37,9 +37,6 @@ class Tools < Application
     end
     
     case operation
-    when /^commit_(Asset|CSV)$/
-      dir = IMPORTER_DATA_DIRS[$1]
-      @error = git_commit(dir)
       
     when "import"
       @importer_running_since = Time.now
@@ -54,6 +51,14 @@ class Tools < Application
         ENV["IMPORTER_SUCCESS_PATH"]    = IMPORTER_SUCCESS_PATH
         exec "bundle", "exec", "merb", "-r", "importer/import.rb"
       end
+      
+    when /^pull_(Asset|CSV)$/
+      dir = IMPORTER_DATA_DIRS[$1]
+      @error = git_pull(dir)
+      
+    when /^push_(Asset|CSV)$/
+      dir = IMPORTER_DATA_DIRS[$1]
+      @error = git_push(dir)
       
     when /^remove_(Asset|CSV)$/
       path = params[:path]
@@ -232,23 +237,31 @@ class Tools < Application
     report.blank? ? "{none}" : report
   end
   
-  def git_commit(dir)
-    report = `git --git-dir=#{dir}/.git --work-tree=#{dir} add . 2>&1`
-    return "unable to git-add the contents of #{dir.inspect}: #{report}" unless $?.success?
-    
-    report = `git --git-dir=#{dir}/.git --work-tree=#{dir} commit -am . 2>&1`
-    return "unable to git-commit the contents of #{dir.inspect}: #{report}" unless $?.success?
-    
-    report = `git --git-dir=#{dir}/.git --work-tree=#{dir} push 2>&1`
-    return "unable to git-push the contents of #{dir.inspect}: #{report}" unless $?.success?
-  end
-  
   def git_file_glob(group, dir)
     group == "Asset" ? (dir / "*" / "*") : (dir / "**" / "**.csv")
   end
   
   def git_most_recent(group, dir)
     Dir[git_file_glob(group, dir)].map(&File.method(:mtime)).max
+  end
+  
+  def git_pull(dir)
+    # TODO: remove DIR change once git-push respects --work-tree like it's supposed to
+    pwd = Dir.pwd; Dir.chdir(dir)
+    report = `git --git-dir=#{dir}/.git --work-tree=#{dir} pull --rebase 2>&1`
+    Dir.chdir(pwd)
+    return "unable to pull the latest revision of #{dir.inspect}: #{report}" unless $?.success?
+  end
+  
+  def git_push(dir)
+    report = `git --git-dir=#{dir}/.git --work-tree=#{dir} add . 2>&1`
+    return "unable to git-add the contents of #{dir.inspect}: #{report}" unless $?.success?
+    
+    report = `git --git-dir=#{dir}/.git --work-tree=#{dir} commit -am . --author=#{session.user.login} 2>&1`
+    return "unable to git-commit the contents of #{dir.inspect}: #{report}" unless $?.success?
+    
+    report = `git --git-dir=#{dir}/.git --work-tree=#{dir} push 2>&1`
+    return "unable to git-push the contents of #{dir.inspect}: #{report}" unless $?.success?
   end
   
   def git_revert(dir)

@@ -88,6 +88,7 @@ class Tools < Application
       @error_csv_mtime = (File.mtime(IMPORTER_ERROR_PATH) rescue nil)
       @most_recent_by_group = Hash[IMPORTER_DATA_DIRS.map { |group, path| [group, git_most_recent(group, path)] }]
       @success_time = (File.mtime(IMPORTER_SUCCESS_PATH) rescue nil)
+      @summaries_by_group = Hash[IMPORTER_DATA_DIRS.map { |group, path| [group, git_summarize(path)] }]
       @upload_info_by_group = {"Asset" => ["an asset ZIP", Asset::BUCKETS], "CSV" => ["a CSV", %w(/ products)]}
     end
     
@@ -258,6 +259,10 @@ class Tools < Application
     return "unable to reset #{dir.inspect}: #{report}" unless $?.success?
     
     nil
+  end
+  
+  def git_summarize(path)
+    `git --git-dir='#{path}/.git' log -n1 --pretty='format:%H from %ai by %cn' 2>&1`.chomp
   end
   
   def unzip_move(file, target_dir)

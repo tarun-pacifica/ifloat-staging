@@ -12,6 +12,7 @@
   
   <% @changes_by_group.sort.each do |group, changes| %>
   <h2><%= group %> Changes</h2>
+  <p>Revision: <%= @summaries_by_group[group] %></p>
   
   <% info = @upload_info_by_group[group] %>
   <form action="/tools/importer?operation=upload_<%= group %>" method="post" enctype="multipart/form-data">

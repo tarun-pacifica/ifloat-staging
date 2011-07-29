@@ -86,6 +86,7 @@ puts " > done"
 
 rescue Exception => e
   File.open(ERROR_CSV_PATH, "w") { |f| f.puts "#{e.inspect}"; f.puts e.backtrace }
+  puts e.inspect, e.backtrace
   
 ensure
   File.delete(ENV["IMPORTER_CHECKPOINT_PATH"]) if ENV.has_key?("IMPORTER_CHECKPOINT_PATH")

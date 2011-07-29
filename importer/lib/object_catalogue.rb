@@ -89,7 +89,7 @@ class ObjectCatalogue
     end
     
     by_ref_stores.each do |db|
-      if db.is_a?(BTreeDatabase) then bad_refs.each { |ref| db.delete(ref, :dup) }
+      if db.is_a?(OklahomaMixer::BTreeDatabase) then bad_refs.each { |ref| db.delete(ref, :dup) }
       else bad_refs.each(&db.method(:delete))
       end
     end

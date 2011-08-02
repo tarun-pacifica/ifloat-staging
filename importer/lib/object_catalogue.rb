@@ -108,7 +108,7 @@ class ObjectCatalogue
     # unfortunately, because other items produced from B might still exist, the importer wouldn't know that
     # it needed to completely refresh B - thus we allow row obsolescence to propagate up to a child object's
     # primary parent row (which will be the row already marked obsolete in all other cases)
-    implicit_bad_row_md5s = (@row_md5s_by_ref.values_at(*bad_refs) - bad_row_md5s)
+    implicit_bad_row_md5s = (@row_md5s_by_ref.values_at(*bad_refs) - bad_row_md5s).uniq.compact
     puts " - #{implicit_bad_row_md5s.size} implicitly obsolete rows" unless implicit_bad_row_md5s.empty?
     implicit_bad_refs = (refs_for(implicit_bad_row_md5s) - bad_refs)
     puts " - #{implicit_bad_refs.size} implicitly obsolete objects" unless implicit_bad_refs.empty?
@@ -187,7 +187,7 @@ class ObjectCatalogue
   end
   
   def refs_for(row_md5s)
-    row_md5s.map { |md5| @refs_by_row_md5.values(md5) }.flatten.uniq.select { |ref| has_ref?(ref) }
+    row_md5s.map { |md5| @refs_by_row_md5.values(md5) }.flatten.uniq
   end
   
   def row_md5s_for(ref)

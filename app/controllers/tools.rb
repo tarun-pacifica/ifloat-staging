@@ -281,7 +281,7 @@ class Tools < Application
   end
   
   def git_summarize(path)
-    `git --git-dir='#{path}/.git' log -n1 --pretty='format:%H from %ai by %cn' 2>&1`.chomp
+    `git --git-dir='#{path}/.git' log -n1 --pretty='format:%H from %ai by %an' 2>&1`.chomp
   end
   
   def unzip_move(file, target_dir)

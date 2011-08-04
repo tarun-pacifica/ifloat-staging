@@ -108,3 +108,29 @@
   margin: 0;
   padding: 0 0 0 20px;
 }
+
+#users table {
+  border-collapse: collapse;
+}
+
+#users table th {
+  border: 1px solid silver;
+  padding: 5px;
+}
+
+#users table td {
+  border: 1px solid silver;
+  padding: 5px;
+}
+
+#users table td.id {
+  text-align: right;
+}
+
+#users table td.true {
+  color: green;
+}
+
+#users table td.false {
+  color: red;
+}

@@ -212,6 +212,11 @@ class Tools < Application
     send_data(File.read(to_csv_path), :filename => file_name, :type => "text/csv")
   end
   
+  def users
+    @users = User.all
+    render
+  end
+  
   private
   
   def ensure_authenticated

@@ -1,0 +1,23 @@
+<div id="users" class="admin_tools">
+  <h1>Users</h1>
+  
+  <table summary="users">
+    <tr> <th>ID</th> <th>Name</th> <th>Nickname</th> <th>Login</th> <th>Admin</th> <th>Marketing</th> <th>Registered</th> <th>Confirmed</th> </tr>
+    
+    <% @users.each do |user| %>
+    <tr>
+      <td class="id"><%= user.id %></td>
+      <td><%= h user.name %></td>
+      <td><%= h user.nickname %></td>
+      <td><%= h user.login %></td>
+      <td class="<%= user.admin %>"><%= user.admin %></td>
+      <td class="<%= user.send_marketing %>"><%= user.send_marketing %></td>
+      <td><%= user.created_at.strftime("%Y-%m-%d %H:%M:%S") %></td>
+      <td><%= user.confirmed_at.strftime("%Y-%m-%d %H:%M:%S") %></td>
+    </tr>
+    <% end %>
+    
+  </table>
+  
+  <hr class="terminator" />
+</div>

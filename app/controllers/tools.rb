@@ -262,8 +262,8 @@ class Tools < Application
     report = `git --git-dir=#{dir}/.git --work-tree=#{dir} add . 2>&1`
     return "unable to git-add the contents of #{dir.inspect}: #{report}" unless $?.success?
     
-    author = "'#{session.user.name}<#{session.user.login}>'"
-    report = `git --git-dir=#{dir}/.git --work-tree=#{dir} commit -am . --author=#{author} 2>&1`
+    author = "#{session.user.name} <#{session.user.login}>"
+    report = `git --git-dir=#{dir}/.git --work-tree=#{dir} commit -am . --author=#{author.inspect} 2>&1`
     return "unable to git-commit the contents of #{dir.inspect}: #{report}" unless $?.success?
     
     report = `git --git-dir=#{dir}/.git --work-tree=#{dir} push 2>&1`

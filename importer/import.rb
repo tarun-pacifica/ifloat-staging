@@ -84,6 +84,7 @@ Indexer.compile
 PickedProduct.all.update!(:invalidated => true)
 puts " > done"
 
+rescue SystemExit
 rescue Exception => e
   File.open(ERROR_CSV_PATH, "w") { |f| f.puts "#{e.inspect}"; f.puts e.backtrace }
   puts e.inspect, e.backtrace

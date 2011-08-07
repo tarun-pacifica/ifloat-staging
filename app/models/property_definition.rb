@@ -55,22 +55,6 @@ class PropertyDefinition
     friendly_names
   end
   
-  # TODO: spec - deprecate in favour of Indexer approach?
-  def self.icon_urls_by_property_id(properties)
-    properties_by_asset_name = {}
-    properties.each do |property|
-      properties_by_asset_name[property.name.tr(":", "_") + ".png"] = property
-    end
-    
-    urls = {}
-    Asset.all(:bucket => "property_icons", :name => (properties_by_asset_name.keys + ["blank.png"])).each do |asset|
-      if asset.name == "blank.png" then urls.default = asset.url
-      else urls[properties_by_asset_name[asset.name].id] = asset.url
-      end
-    end
-    urls
-  end
-  
   def friendly_name_sections(language_code)
     PropertyDefinition.friendly_name_sections([self], language_code)[self.id]
   end

@@ -481,7 +481,14 @@ module Indexer
   # TODO: extend to support other languages
   def self.compile_property_display_cache(properties)
     friendly_names = PropertyDefinition.friendly_name_sections(properties, "ENG")
-    icon_urls = PropertyDefinition.icon_urls_by_property_id(properties)
+    
+    icon_urls = {}
+    properties_by_asset_name = Hash[ properties.map { |property| [property.name.tr(":", "_") + ".png", property] } ]
+    Asset.all(:bucket => "property_icons").each do |asset|
+      if asset.name == "blank.png" then icon_urls.default = asset.url
+      else icon_urls[properties_by_asset_name[asset.name].id] = asset.url
+      end
+    end
     
     cache = {}
     properties.each do |property|

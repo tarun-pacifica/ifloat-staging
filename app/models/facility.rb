@@ -43,7 +43,7 @@ class Facility
   
   def product_mappings(product_ids)
     mappings = ProductMapping.all(:company_id => company_id, :product_id => product_ids)
-    return [] if mappings.empty? # TODO: spec - was returning a hash previously
+    return [] if mappings.empty?
     
     query = "SELECT reference FROM facility_products WHERE facility_id = ? AND reference IN ?"
     all_refs = mappings.map { |m| m.reference_parts.first }

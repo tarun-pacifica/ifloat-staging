@@ -63,7 +63,7 @@ describe Facility do
       Facility.new(:id => 1, :company_id => 1).product_mappings([1, 2, 3]).should == @mappings[0, 2]
     end
     
-    it "should return an empty hash if no product IDs are specified" do
+    it "should return an empty array if no product IDs are specified" do
       Facility.new(:id => 1, :company_id => 1).product_mappings([]).should == []
     end
   end

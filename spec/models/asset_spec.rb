@@ -92,5 +92,15 @@ describe Asset do
       names[2].should =~ /abc-tiny.jpg$/
     end
   end
-
+  
+  describe "urls_by_variant" do
+    it "should return the URLs for each variant" do
+      asset = Asset.new(:bucket => "products", :name => "car.jpg", :checksum => "abc")
+      asset.stub(:url).and_return("foo")
+      asset.should_receive(:url).once.with(:small)
+      asset.should_receive(:url).once.with(:tiny)
+      asset.urls_by_variant.should == {:small => "foo", :tiny => "foo"}
+    end
+  end
+  
 end

@@ -47,7 +47,6 @@ class Asset
     instance_variable_get("@file_path#{variant}")
   end
   
-  # TODO: spec
   def store!
     AssetStore.write(self) unless @file_path.nil?
     AssetStore.write(self, "small") unless @file_path_small.nil?
@@ -70,7 +69,6 @@ class Asset
     AssetStore.url(self, variant)
   end
   
-  # TODO: spec
   def urls_by_variant
     Hash[[:small, :tiny].map { |k| [k, url(k)] }]
   end

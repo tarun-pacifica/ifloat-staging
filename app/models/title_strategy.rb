@@ -27,7 +27,6 @@ class TitleStrategy
     end
   end
   
-  # TODO: spec
   def validate_title(title)
     title.is_a?(Array) and
     title.all? { |part| part =~ PropertyDefinition::NAME_FORMAT or part == "-" or part == "product.reference" } ||

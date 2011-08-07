@@ -17,10 +17,10 @@ class ObjectCatalogue
     @value_md5s_by_ref = OklahomaMixer.open(dir / "value_md5s.tch")
     @queues_by_name = {}
     
-    @verifier = ObjectVerifier.new(csv_catalogue, self, verifier_dir)
-    
     delete_inconsistent
     delete_obsolete
+    
+    @verifier = ObjectVerifier.new(csv_catalogue, self, verifier_dir)
   end
   
   def add(objects, *row_md5s)

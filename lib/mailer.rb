@@ -105,7 +105,7 @@ module Mailer
       report += picks.map do |pick|
         product = products_by_id[pick.product_id]
         company = companies_by_id[product.company_id]
-        "(#{pick.group}) #{company.reference} / #{product.reference}"
+        "(#{pick.group}) #{company.reference} / #{product.reference} [#{pick.cached_class}]"
       end.sort
       
       Mail.deliver do |mail|

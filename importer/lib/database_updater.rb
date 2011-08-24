@@ -1,7 +1,7 @@
 class DatabaseUpdater
   include ErrorWriter
   
-  ERROR_HEADERS = %w(csv row error)
+  ERROR_HEADERS = %w(error query)
   
   def initialize(classes, csv_catalogue, object_catalogue)
     @classes = classes
@@ -164,7 +164,7 @@ class DatabaseUpdater
         @adapter.execute("INSERT INTO #{klass.storage_name} (#{column_names_list}) VALUES #{bind_sets.join(', ')}", *bind_values) unless bind_sets.empty?
         build_md5_report(klass)
       rescue Exception => e
-        @errors << [nil, nil, e.message]
+        @errors << [e.message, e.query]
         error_count += 1
       end
     end

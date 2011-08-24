@@ -196,8 +196,14 @@ class Tools < Application
         fields << purchase.facility.primary_url
         fields << purchase.response[:reference]
         fields << purchase.completed_at.strftime("%Y-%m-%d %H:%M:%S")
-        fields << purchase.session.created_at.strftime("%Y-%m-%d %H:%M:%S")
-        fields << (purchase.completed_at - purchase.session.created_at).to_i
+        
+        cookie_date = purchase.cookie_date
+        if cookie_date.nil?
+          fields += %w(? ?)
+        else
+          fields << cookie_date.strftime("%Y-%m-%d %H:%M:%S")
+          fields << (purchase.completed_at - cookie_date).to_i
+        end
         
         purchase.response[:items].each do |i|
           quantity = i['quantity'].to_i

@@ -52,4 +52,10 @@ class Purchase
     
     parsed_data
   end
+  
+  # TODO: spec
+  def cookie_date
+    entity = SessionEvent.last(:session_id => session_id, :created_at.lt => completed_at) || session
+    entity.nil? ? nil : entity.created_at
+  end
 end

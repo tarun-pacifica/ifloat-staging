@@ -44,19 +44,18 @@
   position: absolute;
   left: 200px;
   top: 102px;
-  width: 760px;
 }
 
 #header .translate {
   position: absolute;
-  left: 791px;
+  right: 15px;
   top: 70px;
 }
 
-#header .strapline .addthis_toolbox {
-  display: inline;
-  float: right;
-  width: 133px;
+#header .addthis_toolbox {
+  position: absolute;
+  right: 10px;
+  top: 45px;
 }
 
 #header .find_bar {

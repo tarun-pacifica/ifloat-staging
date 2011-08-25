@@ -89,7 +89,7 @@ class AutoObjectGenerator
     
     seq_num = 0
     while seq_num += 1 do
-      hierarchy = strategy_for(PropertyHierarchy, [klass, seq_num])
+      hierarchy, hierarchy_ref = strategy_for(PropertyHierarchy, [klass, seq_num])
       if hierarchy.nil?
         return [[], [error_no_strategy(:ph, klass, row_md5)]] if seq_num == 1
         break
@@ -108,7 +108,8 @@ class AutoObjectGenerator
         :auto_generated => true,
         :sequence_number => seq_num,
         :language_code => "ENG",
-        :text_value => rendered_parts.join(" - ")
+        :text_value => rendered_parts.join(" - "),
+        :property_hierarchy => hierarchy_ref # ensures dependency chain for deletions / updates
       }
     end
     
@@ -118,7 +119,7 @@ class AutoObjectGenerator
   def generate_ts_values(product_ref, product, klass, values_by_property_name, row_md5)
     title_objects, errors = [], []
     
-    strategy = strategy_for(TitleStrategy, [klass])
+    strategy, strategy_ref = strategy_for(TitleStrategy, [klass])
     return [[], [error_no_strategy(:ts, klass, row_md5)]] if strategy.nil?
     
     TitleStrategy::TITLE_PROPERTIES.each_with_index.map do |title, i|
@@ -144,7 +145,8 @@ class AutoObjectGenerator
           :auto_generated => true,
           :sequence_number => i + 1,
           :language_code => "ENG",
-          :text_value => rendered_parts.join(" ")
+          :text_value => rendered_parts.join(" "),
+          :title_strategy => strategy_ref # ensures dependency chain for deletions / updates
         }
       end
     end
@@ -155,8 +157,8 @@ class AutoObjectGenerator
   def strategy_for(klass, args)
     key = [klass, args]
     return @strategies_by_class_args[key] if @strategies_by_class_args.has_key?(key)
-    strategy = ObjectRef.for(klass, args)
-    strategy = strategy.attributes unless strategy.nil?
-    @strategies_by_class_args[key] = strategy
+    strategy_ref = ObjectRef.for(klass, args)
+    strategy = strategy_ref.attributes unless strategy_ref.nil?
+    @strategies_by_class_args[key] = [strategy, strategy_ref]
   end
 end

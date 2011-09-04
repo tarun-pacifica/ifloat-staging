@@ -182,7 +182,8 @@ class ObjectVerifier
       ordered_values_by_product_ref.values.transpose.each_with_index do |diff_column, i|
         blank_count = diff_column.count(&:blank?)
         next if blank_count == 0 or blank_count == diff_column.size
-        @errors << error_for_row("differentiating values from property set #{i + 1} are a mixture of values and blanks: #{diff_column.inspect} (group: #{friendly_group})", @objects.row_md5s_for(values_by_ref.keys.first).first)
+        error_row_md5 = @objects.row_md5s_for(ordered_values_by_product_ref.keys.first).first
+        @errors << error_for_row("differentiating values from property set #{i + 1} are a mixture of values and blanks: #{diff_column.inspect} (group: #{friendly_group})", error_row_md5)
       end
       
       ordered_values_by_product_ref.to_a.combination(2) do |a, b|

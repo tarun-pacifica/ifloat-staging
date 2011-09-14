@@ -36,7 +36,7 @@ class AutoObjectGenerator
       if product.nil?
         refs
       else
-        values = refs.map(&@objects.method(:data_for))
+        values = refs.map(&@objects.method(:data_for)).compact
         values_by_property_name = values.group_by { |v| v[:definition][:name] }
         
         klass = values_by_property_name["reference:class"].first[:text_value]

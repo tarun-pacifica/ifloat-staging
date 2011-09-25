@@ -179,7 +179,16 @@ class ObjectVerifier
         tpv_refs_by_product_ref.map { |product_ref, tpv_refs| [product_ref, tpv_refs.sort_by(&sorter).map(&valuer)] }
       ]
       
-      ordered_values_by_product_ref.values.transpose.each_with_index do |diff_column, i|
+      diff_columns = nil
+      begin
+        diff_columns = ordered_values_by_product_ref.values.transpose
+      rescue
+        error_row_md5 = @objects.row_md5s_for(ordered_values_by_product_ref.keys.first).first
+        @errors << error_for_row("mixed number of property hierarchy values per product in the product group #{group.inspect} - probably a mix of classes with differently shaped property hierarchy configurations", error_row_md5)
+        next
+      end
+      
+      diff_columns.each_with_index do |diff_column, i|
         blank_count = diff_column.count(&:blank?)
         next if blank_count == 0 or blank_count == diff_column.size
         error_row_md5 = @objects.row_md5s_for(ordered_values_by_product_ref.keys.first).first

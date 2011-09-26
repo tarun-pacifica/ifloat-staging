@@ -3,4 +3,5 @@ Disallow: /picked_products
 Disallow: /products/autocomplete
 Disallow: /purchases
 Disallow: /users
+Disallow: /terms.pdf
 Sitemap: http://www.ifloat.biz/sitemap.xml

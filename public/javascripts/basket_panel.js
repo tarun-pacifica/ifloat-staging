@@ -5,13 +5,13 @@ function basket_panel_add(group) {
     return;
   }
   
-  var adder =  $('#basket_panel_adder');
+  var adder = $('#basket_panel_adder');
   adder.fadeOut('fast');
   
   var data = {
     group: group,
     product_id: basket_panel_product_info.product_id,
-    quantity: adder.find('input').val()
+    quantity: (adder.find('input').val() || 1)
   };
   
   $.post('/picked_products', data, basket_panel_load_handle, 'json');
@@ -54,8 +54,9 @@ function basket_panel_load_handle(picks_by_group) {
     }
     
     if(!picks_contain_product_id) {
+      html.push('<div id="basket_panel_adder">');
+      
       if(info.price) {
-        html.push('<div id="basket_panel_adder">');
         html.push('<p class="price">' + info.price + '</p>');
         if(info.pack > 1) html.push('<p class="price_note">for ' + info.pack + ' at ' + info.price_each + ' each</p>');
         html.push('<p class="price_note">(Best partner price)</p>');
@@ -63,10 +64,12 @@ function basket_panel_load_handle(picks_by_group) {
         html.push('<div class="add_basket" onclick="basket_panel_add(\'buy_now\')">ADD TO BASKET</div>');
         html.push('<p class="add_other" onclick="basket_panel_add(\'buy_later\')">Add to Future Buys</p>');
         html.push('<p class="add_other" onclick="basket_panel_add(\'compare\')">Add to Compare List</p>');
-        html.push('</div>');
       } else {
-        html.push('<div id="basket_panel_adder"> <p class="no_price">None of our partners have this item in stock at the moment</p> </div>');
+        html.push('<p class="no_price">None of our partners have this item in stock at the moment</p>');
+        html.push('<p class="add_other" onclick="basket_panel_add(\'compare\')">Add to Compare List</p>');
       }
+      
+      html.push('</div>');
     }
   }
   

@@ -2,9 +2,9 @@
 development: &defaults
     adapter: mysql
     database: ifloat_dev
+    host: localhost
     username: ifloat_app
     password: j4hd7ag234
-    host: localhost
 
 rake:
     <<: *defaults

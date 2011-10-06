@@ -136,7 +136,7 @@ class Facility
       reports << fields.unshift(ref, "unmapped reference")
     end
     (mapped_refs - new_refs).each do |ref|
-      classes = mappings_by_fp_ref[ref].map { |mapping| classes_by_product_id[mapping.product_id] }.uniq.sort.join(", ")
+      classes = mappings_by_fp_ref[ref].map { |mapping| classes_by_product_id[mapping.product_id] }.uniq.compact.sort.join(", ")
       reports << [ref, "obsolete mapped reference", "classes: #{classes}"]
     end
     

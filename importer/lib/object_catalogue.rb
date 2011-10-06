@@ -57,7 +57,7 @@ class ObjectCatalogue
   end
   
   def add_queue(name, &block)
-    @queues_by_name[name] = [OklahomaMixer.open(@dir / "queue_#{name}.tcb"), block]
+    @queues_by_name[name] = [OklahomaMixer.open(@dir / "queue_#{name}.tcb", "wcs"), block]
   end
   
   def all_row_md5s

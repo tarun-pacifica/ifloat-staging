@@ -26,6 +26,12 @@ class CSVCatalogue
       return
     end
     
+    file_info = `file #{csv_path.inspect}`
+    unless file_info =~ /UTF-8 Unicode/ or file_info =~ /ASCII/
+      @errors << [name, "does not appear to be UTF-8 / ASCII encoded: #{file_info.squeeze(' ')}"]
+      return
+    end
+    
     csv_md5 = Digest::MD5.file(csv_path).hexdigest
     @added_csv_md5s << csv_md5
     return if @csv_info_by_csv_md5.has_key?(csv_md5)

@@ -38,6 +38,9 @@ class Tools < Application
     
     case operation
       
+    when "flush"
+      Dir["importer" / "indexes" / "*"].each { |path| p FileUtils.rmtree(path) }
+      
     when "import"
       @importer_running_since = Time.now
       FileUtils.touch(IMPORTER_CHECKPOINT_PATH)

@@ -9,6 +9,7 @@
   
   <% if @importer_running_since.nil? %>
   <p><a href="/tools/importer?operation=import">Run</a> import now</p>
+  <p><a href="/tools/importer?operation=flush">Flush</a> the import cache (and rebuild on next run)</p>
   
   <% @changes_by_group.sort.each do |group, changes| %>
   <h2><%= group %> Changes</h2>

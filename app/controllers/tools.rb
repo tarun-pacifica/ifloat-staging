@@ -317,6 +317,7 @@ class Tools < Application
       from_path = unzip_path
     end
     
+    FileUtils.mkpath(target_dir)
     to_path = target_dir / name
     FileUtils.rmtree(to_path)
     FileUtils.mv(from_path, to_path)

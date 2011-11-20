@@ -12,7 +12,7 @@
 class Asset
   include DataMapper::Resource
   
-  BUCKETS = %w(brand_logos category_images products property_icons)
+  BUCKETS = %w(banners brand_logos category_images products property_icons)
   IMAGE_FORMAT = /\.(gif|jpeg|jpg|png|tif|tiff)$/
   NAME_FORMAT = /^([\w\-\.]+?)\.([a-z]{3,})$/
   STORE_KEYS = [:bucket, :name, :checksum, :file_path, :file_path_small, :file_path_tiny]
@@ -26,6 +26,7 @@ class Asset
   belongs_to :company
     property :company_id, Integer, :required => true, :unique_index => :name_per_company_per_bucket
   has n, :attachments
+  has n, :banners
   has n, :brands
   
   validates_within :bucket, :set => BUCKETS

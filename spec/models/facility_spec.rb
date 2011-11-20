@@ -171,7 +171,7 @@ describe Facility do
     after(:all) do
       [@text_type, @ref_class, @sale_price, @company, @facility, @product, @prod_class, @unused_mapping].each { |object| object.destroy }
     end
-        
+    
     it "should create new products, warning on umapped / obsolete mappings (and do nothing if there are no diffs)" do
       @facility.update_products("P1" => {:price => "42.42", :title => "T1", :description => "D1", :image_url => ""}).should == [
         ["P1", "updated: title", "from nil", "to \"T1\""],

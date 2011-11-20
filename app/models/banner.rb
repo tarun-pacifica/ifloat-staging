@@ -27,6 +27,7 @@ class Banner
   property :width,       Integer, :default => 0
   
   belongs_to :asset
+    property :asset_id,  Integer, :required => false
   
   validates_within :location, :set => LOCATIONS
   

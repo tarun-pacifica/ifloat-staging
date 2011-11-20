@@ -11,6 +11,7 @@ class ObjectRef < String
     Company                 => [:reference],
     Facility                => [:company, :name],
     Asset                   => [:bucket, :company, :name],
+    Banner                  => [:description],
     Brand                   => [:company, :name],
     Product                 => [:company, :reference],
     Attachment              => [:product, :role, :sequence_number],

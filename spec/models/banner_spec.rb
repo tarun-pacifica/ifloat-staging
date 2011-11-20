@@ -19,9 +19,9 @@ describe Banner do
       @banner.should be_valid
     end
     
-    it "should fail without an asset" do
+    it "should succeed without an asset" do
       @banner.asset = nil
-      @banner.should_not be_valid
+      @banner.should be_valid
     end
     
     it "should fail without a description" do

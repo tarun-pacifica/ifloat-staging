@@ -4,7 +4,7 @@ class CSVCatalogue
   ERROR_HEADERS = %w(csv error)
   IMPROPER_NIL_VALUES = %w(n/a N/a n/A nil niL nIl nIL Nil NiL NIl).to_set
   NIL_VALUES = %w(N/A NIL)
-  NON_PRODUCT_CSV_PATHS = %w(assets.csv associated_words.csv brands.csv companies.csv facilities.csv property_definitions.csv property_hierarchies.csv property_types.csv property_value_definitions.csv title_strategies.csv unit_of_measures.csv).to_set
+  NON_PRODUCT_CSV_PATHS = %w(assets.csv associated_words.csv banners.csv brands.csv companies.csv facilities.csv property_definitions.csv property_hierarchies.csv property_types.csv property_value_definitions.csv title_strategies.csv unit_of_measures.csv).to_set
   SKIP_HEADER_MATCHER = /^(raw:)|(IMPORT)/
   
   def initialize(dir)
@@ -135,9 +135,14 @@ class CSVCatalogue
       
       values.map! { |v| NIL_VALUES.include?(v) ? nil : v }
       md5 = Digest::MD5.hexdigest(Marshal.dump(values))
-      locations_by_md5[md5] = [name, row_index]
-      rows_by_md5[md5] = values
-      row_md5s << md5
+      
+      if rows_by_md5.has_key?(md5)
+        errors << "row #{row_index} duplicates a previous row"
+      else
+        locations_by_md5[md5] = [name, row_index]
+        rows_by_md5[md5] = values
+        row_md5s << md5
+      end
     end
     
     errors << "no header row" if rows_by_md5.empty?

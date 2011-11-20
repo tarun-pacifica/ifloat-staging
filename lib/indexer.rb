@@ -3,6 +3,7 @@ module Indexer
   SITEMAP_PATH = "public/sitemap.xml"
   
   @@auto_diff_property_id = nil
+  @@banner_html_by_location = nil
   @@brand_property_id = nil
   @@category_definitions = {}
   @@category_image_urls = {}
@@ -43,6 +44,10 @@ module Indexer
     
     weighted_matches = matches.sort_by { |word, product_ids| -product_ids.size }
     weighted_matches.map { |match, product_ids| (words + [match]).join(" ") }
+  end
+  
+  def self.banner_html_for_location(location)
+    (@@banner_html_by_location[location] || []).choice if ensure_loaded
   end
   
   def self.brand_property_id
@@ -101,6 +106,7 @@ module Indexer
       records = text_records
       
       indexes = {
+        :banner_html_by_location    => compile_banner_html_by_location,
         :category_definitions       => compile_category_definitions(properties, records),
         :category_image_urls        => compile_category_image_urls,
         :category_tree              => compile_category_tree(properties, records),
@@ -193,6 +199,7 @@ module Indexer
     
     File.open(COMPILED_PATH) do |f|
       indexes = Marshal.load(f)
+      @@banner_html_by_location    = indexes[:banner_html_by_location]
       @@category_definitions       = indexes[:category_definitions]
       @@category_image_urls        = indexes[:category_image_urls]
       @@category_tree              = indexes[:category_tree]
@@ -326,6 +333,10 @@ module Indexer
   
   
   private
+  
+  def self.compile_banner_html_by_location
+    Hash[ Banner.all.group_by(&:location).map { |location, banners| [location, banners.map(&:html)] } ]
+  end
   
   # TODO: extend to support multiple languages
   def self.compile_category_definitions(properties, records)

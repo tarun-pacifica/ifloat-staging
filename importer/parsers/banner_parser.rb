@@ -9,6 +9,6 @@ class BannerParser < AbstractParser
   
   def parse_field(head, value, fields)
     raise "invalid location: #{value.inspect}" if head == "location" and not Banner::LOCATIONS.include?(value)
-    (head == "image" and not value.nil?) ? lookup!(Asset, "banners", "GBR-OC357582", value) : value
+    (head == "image" and not value.nil?) ? lookup!(Asset, "banners", lookup!(Company, "GBR-OC357582"), value) : value
   end
 end

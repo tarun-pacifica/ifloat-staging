@@ -27,6 +27,20 @@ p.copyright {
   text-align: center;
 }
 
+p.copyright .notice {
+  padding: 0 10px;
+}
+
+p.copyright a {
+  color: #30A0FB;
+  padding: 0 10px;
+  text-decoration: none;
+}
+
+p.copyright a:hover {
+  text-decoration: underline;
+}
+
 p.global {
   background: #FFFFE0;
   border-bottom: 1px solid gray;

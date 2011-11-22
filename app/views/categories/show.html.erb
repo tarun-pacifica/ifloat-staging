@@ -24,7 +24,11 @@
   <% end %>
 </div>
 
-<div id="basket_panel"> </div>
+<div id="basket_panel">
+  <div class="advert">
+    <%= Indexer.banner_html_for_location("under-basket") %>
+  </div>
+</div>
 
 <script type="text/javascript" charset="utf-8">
   $(document).ready(function() {

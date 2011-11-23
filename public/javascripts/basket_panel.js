@@ -43,7 +43,7 @@ function basket_panel_load(product_id, price, unit_of_measure, pack_quantity, pr
 }
 
 function basket_panel_load_handle(picks_by_group) {
-  var html = [];
+  var html = ['<div class="header">BASKET</div>'];
   
   var info = basket_panel_product_info;
   if(info) {

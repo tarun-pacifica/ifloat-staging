@@ -37,7 +37,6 @@
 
 <script type="text/javascript" charset="utf-8">
   $(document).ready(function() {
-    $('#basket_tab').hide();
     var config = {display: 7, duration: 1000};
     $('#brand_products .product_set').each(function() { $(this).tinycarousel(config) });
     product_links_wire_up(<%= @product_ids.to_json %>);

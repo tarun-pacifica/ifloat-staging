@@ -48,14 +48,14 @@
 
 #header .translate {
   position: absolute;
-  right: 15px;
-  top: 70px;
+  right: 110px;
+  top: 143px;
 }
 
 #header .addthis_toolbox {
   position: absolute;
   right: 10px;
-  top: 45px;
+  top: 147px;
 }
 
 #header .find_bar {

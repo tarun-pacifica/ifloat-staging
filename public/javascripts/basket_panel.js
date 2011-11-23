@@ -43,7 +43,7 @@ function basket_panel_load(product_id, price, unit_of_measure, pack_quantity, pr
 }
 
 function basket_panel_load_handle(picks_by_group) {
-  var html = ['<div class="header">BASKET</div>'];
+  var html = [];
   
   var info = basket_panel_product_info;
   if(info) {
@@ -83,7 +83,7 @@ function basket_panel_load_handle(picks_by_group) {
     basket_panel_load_handle_compare(picks_by_group.compare)
   );
   
-  $('#basket_panel').prepend(html.join(' '));
+  $('#basket_panel').prepend('<div class="header">BASKET</div>' + html.join(' '));
 }
 
 function basket_panel_load_handle_buy_now(picks_and_subtotal) {

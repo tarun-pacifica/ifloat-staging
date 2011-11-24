@@ -1,3 +1,9 @@
+<script type="text/javascript" charset="utf-8">
+  function flush() {
+    if (confirm("Are you SURE you'd like to flush the cache?")) window.location = '/tools/importer?operation=flush';
+  }
+</script>
+
 <div id="importer" class="admin_tools">
   <h1>Importer</h1>
   
@@ -9,7 +15,7 @@
   
   <% if @importer_running_since.nil? %>
   <p><a href="/tools/importer?operation=import">Run</a> import now</p>
-  <p><a href="/tools/importer?operation=flush">Flush</a> the import cache (and rebuild on next run)</p>
+  <p><a href="javascript:flush()">Flush</a> the import cache (and rebuild on next run)</p>
   
   <% @changes_by_group.sort.each do |group, changes| %>
   <h2><%= group %> Changes</h2>

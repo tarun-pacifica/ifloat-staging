@@ -80,14 +80,16 @@ module Indexer
     definition = @@category_definitions[path_names.last]
     return definition if children.empty?
     
-    category_statement =
-      case path_names.size
+    # category_statement =
+      # case path_names.size
       # when 0 then "Categories include: #{children.friendly_join('and')}."
-      when 1 then "Product types include: #{children.friendly_join('and')}."
-      else return definition
-      end
+      # when 1 then "Product types include: #{children.friendly_join('and')}."
+      # else return definition
+      # end
     
-    [definition, category_statement].compact.join(" ")
+    # [definition, category_statement].compact.join(" ")
+    
+    definition
   end
   
   def self.category_image_url_for_node(path_names)

@@ -2,6 +2,14 @@
 
 module Merb
   module GlobalHelpers
+    def basket_panel
+      adverts = ["under-basket", "under-basket-2"].map(&Indexer.method(:banner_html_for_location)).compact.map do |html|
+        "<div class=\"advert\"> #{html} </div>"
+      end
+      
+      "<div id=\"basket_panel\"> #{adverts} </div>"
+    end
+    
     def brand_image(brand)
       brand.nil? ? nil : "<img src=\"#{brand.asset.url}\" alt=\"brand logo\" />"
     end

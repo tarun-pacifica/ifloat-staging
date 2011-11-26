@@ -4,6 +4,10 @@
   padding: 5px 15px;
 }
 
+#categories .advert {
+  margin-top: 10px;
+}
+
 #categories .find_bad {
   background: #FFDDDD;
   border: 1px solid red;

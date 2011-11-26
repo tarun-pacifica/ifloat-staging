@@ -2,6 +2,12 @@
 <%= partial "common/header" %>
 
 <div id="categories">
+  <% if @path_names.empty? and @find_phrase.blank? %>
+  <div class="advert">
+    <%= Indexer.banner_html_for_location("home-under-find") %>
+  </div>
+  <% end %>
+  
   <% if @find_bad %>
   
   <div class="find_bad">

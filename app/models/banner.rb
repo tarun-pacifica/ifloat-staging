@@ -14,7 +14,7 @@
 class Banner
   include DataMapper::Resource
   
-  LOCATIONS = %w(header under-basket under-basket-2)
+  LOCATIONS = %w(header home-under-find under-basket under-basket-2)
   
   property :id, Serial
   

@@ -52,7 +52,11 @@ class AutoObjectGenerator
           auto_objects += aos
           errors += es
         end
-        errors += @objects.add(auto_objects, row_md5).map { |e| error_for_row(e, row_md5) }
+        
+        # TODO: items can sometimes be stuck in the queue (or perhaps added more than once)
+        #       hence we pass ignore_duplicates=true to @objects.add
+        #       need to work out why / how this is happening
+        ignored_errors = @objects.add(auto_objects, row_md5, true).map { |e| error_for_row(e, row_md5) }
         @errors += errors
         
         puts " - processed #{products_done}/#{products_todo} new/updated products" if products_done % 500 == 0

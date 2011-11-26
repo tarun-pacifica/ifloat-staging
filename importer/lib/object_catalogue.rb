@@ -23,7 +23,7 @@ class ObjectCatalogue
     @verifier = ObjectVerifier.new(csv_catalogue, self, verifier_dir)
   end
   
-  def add(objects, *row_md5s)
+  def add(objects, parent_row_md5, ignore_duplicates = false)
     flush_pending(true)
     
     orvs = objects.map do |object|
@@ -31,16 +31,21 @@ class ObjectCatalogue
       if has_ref?(ref)
         existing_rows = row_md5s_for(ref).map(&@csvs.method(:location)).join(", ")
         existing_rows = "unknown csvs / rows" if existing_rows.blank?
-        return ["duplicate of #{object[:class]} from #{existing_rows}: #{object.inspect}"]
+        if ignore_duplicates
+          nil
+        else
+          return ["duplicate of #{object[:class]} from #{existing_rows}: #{object.inspect}"]
+        end
+      else
+        [object, ref, value_md5]
       end
-      [object, ref, value_md5]
-    end
+    end.compact
     
     orvs.each do |object, ref, value_md5|
       @data_by_ref[ref] = Marshal.dump(object)
       @value_md5s_by_ref[ref] = value_md5
       
-      (row_md5s + row_md5_chain(object)).flatten.uniq.each do |row_md5|
+      ([parent_row_md5] + row_md5_chain(object)).flatten.uniq.each do |row_md5|
         @refs_by_row_md5.store(row_md5, ref, :dup)
         @row_md5s_by_ref.store(ref, row_md5, :dup)
       end

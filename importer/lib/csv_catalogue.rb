@@ -5,7 +5,7 @@ class CSVCatalogue
   IMPROPER_NIL_VALUES = %w(n/a N/a n/A nil niL nIl nIL Nil NiL NIl).to_set
   NIL_VALUES = %w(N/A NIL)
   NON_PRODUCT_CSV_PATHS = %w(assets.csv associated_words.csv banners.csv brands.csv companies.csv facilities.csv property_definitions.csv property_hierarchies.csv property_types.csv property_value_definitions.csv title_strategies.csv unit_of_measures.csv).to_set
-  SKIP_HEADER_MATCHER = /^(raw:)|(IMPORT)/
+  SKIP_HEADER_MATCHER = /^(raw:|IMPORT)/
   
   def initialize(dir)
     @errors = []

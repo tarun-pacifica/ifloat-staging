@@ -16,10 +16,13 @@ module Conversion
     ["fl_oz", "fl_oz_us"]     => [0.96076, 0],
     ["fl_oz", "ml"]           => [28.413, 0],
     ["fl_oz_us", "gal_us"]    => [128, 0],
+    ["fl_oz_us", "li"]        => [0.029574, 0],
     ["fl_oz_us", "ml"]        => [29.574, 0],
     ["fl_oz_us", "pt_us"]     => [16, 0],
     ["fl_oz_us", "qt_us"]     => [32, 0],
     ["ft", "m"]               => [0.3048, 0],
+    ["ft/sec", "m/sec"]       => [0.3048, 0],
+    ["ft/min", "m/min"]       => [0.3048, 0],
     ["ft2", "m2"]             => [0.092903, 0],
     ["ft2/gal", "ft2/gal_us"] => [0.83267, 0],
     ["ft2/gal", "m2/li"]      => [0.020436, 0],
@@ -57,7 +60,7 @@ module Conversion
   
   def self.convert(value, from_unit, to_unit, sig_figs = determine_sig_figs(value))
     a, b = MAPPINGS[[from_unit, to_unit].sort]
-    raise "no conversion available for #{from_unit.inspect} -> #{to_unit.inspect}" if a.nil?    
+    raise "no conversion available for #{from_unit.inspect} -> #{to_unit.inspect}" if a.nil?
     converted_value = (from_unit < to_unit) ? (value * a + b) : ((value - b) / a)
     return 0 if converted_value == 0
     

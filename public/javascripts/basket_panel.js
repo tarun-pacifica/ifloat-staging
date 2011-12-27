@@ -83,7 +83,10 @@ function basket_panel_load_handle(picks_by_group) {
     basket_panel_load_handle_compare(picks_by_group.compare)
   );
   
-  $('#basket_panel').prepend('<div class="header">BASKET</div>' + html.join(' '));
+  var panel = $('#basket_panel');
+  var adverts = panel.find('.advert');
+  panel.html('<div class="header">BASKET</div>' + html.join(' '));
+  panel.append(adverts);
 }
 
 function basket_panel_load_handle_buy_now(picks_and_subtotal) {
@@ -103,7 +106,7 @@ function basket_panel_load_handle_buy_now(picks_and_subtotal) {
 function basket_panel_load_handle_buy_later(picks) {
   if (!picks) return [];
   
-  var html = [basket_panel_markup_header('Future Buys', '/images/basket_panel/buy_later_blue.png')];
+  var html = ['<h2>Future Buys</h2>'];
   for(var i in picks) html.push(basket_panel_markup_item(picks[i], false));
   return html;
 }
@@ -111,7 +114,7 @@ function basket_panel_load_handle_buy_later(picks) {
 function basket_panel_load_handle_compare(picks) {
   if (!picks) return [];
   
-  var html = [basket_panel_markup_header('Compare List', '/images/basket_panel/compare_blue.png')];
+  var html = ['<h2>Compare List</h2>'];
   
   var section = undefined, section_count = 0;
   for(var i in picks) {
@@ -154,10 +157,4 @@ function basket_panel_markup_item(pick, buy_now) {
   
   html.push('</div>');
   return html.join(' ');
-}
-
-// TODO: simplify if images no longer needed
-function basket_panel_markup_header(text, img_src) {
-  return '<h2>' + text + ' </h2>';
-  // return '<h2> <img src="' + img_src + '" /> ' + text + ' </h2>';
 }

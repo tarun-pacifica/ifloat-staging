@@ -20,7 +20,6 @@ Merb::Router.prepare do
   match('/picked_products/products_for/:klass').to(:controller => 'picked_products', :action => 'compare_by_class')
   resources :picked_products
   
-  match('/products/:prod_id/buy_now/:fac_id').defer_to { [404, {}, ""] } # TODO: remove on / after July 3rd, 2011
   match('/products/autocomplete').to(:controller => 'products', :action => 'autocomplete')
   match('/products/batch/:ids').to(:controller => 'products', :action => 'batch')
   match('/products/:junk-:id', :junk => /[\w\-.]+/).to(:controller => 'products', :action => 'show')

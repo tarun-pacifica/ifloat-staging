@@ -4,7 +4,7 @@
 <% features, description = @body_values_by_name.values_at("marketing:feature_list", "marketing:description").map { |values| (values || []).first.to_s.superscript } %>
 
 <div id="product">
-  <%= breadcrumbs(@body_values_by_name.values_at("reference:category", "reference:class").map(&:first), false) %>
+  <%= breadcrumbs(@body_values_by_name.values_at("reference:category", "reference:class").map(&:first)) %>
   
   <h1> <%= brand_title(@brand, @title) %> </h1>
   <hr class="terminator" />

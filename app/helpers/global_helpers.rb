@@ -19,8 +19,7 @@ module Merb
       image.nil? ? title.superscript : "#{image} <span>#{title.superscript}</span>"
     end
     
-    # TODO: remove support entirely for filter_prompt if we decide always to show filters
-    def breadcrumbs(category_path_names, filter_prompt = false)
+    def breadcrumbs(category_path_names)
       crumbs = []
       
       filters = (JSON.parse(params["filters"]) rescue [])
@@ -48,8 +47,6 @@ module Merb
         
         crumbs << category_link(category_path_names, label, filters[0, i + 1])
       end
-      
-      crumbs << '<a class="filter" href="#" onclick="category_filters_show(); return false">Filter your results</a>' if filter_prompt and category_path_names.size == 2
       
       '<div id="breadcrumbs">' + crumbs.join(' <span class="chevron"></span> ') + '</div> <hr class="terminator" />'
     end

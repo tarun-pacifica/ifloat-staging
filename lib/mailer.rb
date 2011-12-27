@@ -30,38 +30,6 @@ module Mailer
         add_file attachment_path unless attachment_path.nil?
       end
     
-    # TODO: remove once on new importer
-    when :import_failure
-      ars, crs, whilst, attachment_path = params.values_at(:ars, :crs, :whilst, :attach)
-      return if ars.nil? or crs.nil? or whilst.nil?
-      
-      report = ["Context: #{Mailer.context(whilst)}", "", "Asset repository @ #{ars}", "CSV repository @ #{crs}", ""]
-      
-      Mail.deliver do |mail|
-        Mailer.envelope(mail, action, :admin, :sysadmin)
-        body report.join("\n")
-        add_file attachment_path unless attachment_path.nil?
-      end
-    
-    # TODO: remove once on new importer
-    when :import_success
-      ars, crs, stats_by_class = params.values_at(:ars, :crs, :stats)
-      return if ars.nil? or crs.nil? or stats_by_class.nil?
-      
-      whilst = "importing"
-      report = ["Context: #{Mailer.context(whilst)}", "", "Asset repository @ #{ars}", "CSV repository @ #{crs}", ""]
-      report += stats_by_class.map do |klass, stats|
-        "#{klass}: " + [:created, :updated, :destroyed, :skipped].map do |stat|
-          count = stats[stat]
-          count == 0 ? nil : "#{stat} #{count}"
-        end.compact.join(", ")
-      end
-      
-      Mail.deliver do |mail|
-        Mailer.envelope(mail, action, :admin, :sysadmin)
-        body report.join("\n")
-      end
-      
     when :password_reset
       user = params[:user]
       return if user.nil?

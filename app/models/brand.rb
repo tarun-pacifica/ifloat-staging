@@ -29,7 +29,10 @@ class Brand
     Asset.all("brands.name" => names)
   end
   
-  # TODO: spec
+  def indexer
+    Indexer
+  end
+  
   def product_ids_by_category_node(node_matcher)
     query =<<-SQL
       SELECT DISTINCT(product_id)
@@ -38,7 +41,7 @@ class Brand
         AND text_value = ?
     SQL
     
-    product_ids = repository.adapter.select(query, Indexer.brand_property_id, name).to_set
+    product_ids = repository.adapter.select(query, indexer.brand_property_id, name).to_set
     product_ids_by_node = {}
     walk_category_tree_for_product_ids(product_ids) do |node, node_product_ids|
       product_ids_by_node[node] = node_product_ids.to_a if node_matcher.zip(node).all? { |m, n| m == n }
@@ -50,7 +53,7 @@ class Brand
   private
   
   def walk_category_tree_for_product_ids(product_ids, node = [], &block)
-    children = Indexer.category_children_for_node(node)
+    children = indexer.category_children_for_node(node)
     if children.first.is_a?(Integer)
       node_product_ids = (product_ids & children)
       block.call(node, node_product_ids) unless node_product_ids.empty?

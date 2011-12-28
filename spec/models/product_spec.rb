@@ -58,6 +58,8 @@ describe Product do
       @values << DatePropertyValue.create(d.merge(:product => @products.first))
       
       # TODO: factor out a complete data set for testing across the various specs
+      # TODO: mock indexer object on product (self.indexer and indexer)
+      #       thence simplify Indexer.compile as should never be called in test env
       #       note that these properties are required to silence warnings from the indexer
       %w(auto:group_diff marketing:brand reference:class sale:price_min).each do |name|
         pt = @property_types_by_name["text"]

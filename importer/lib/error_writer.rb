@@ -1,5 +1,4 @@
 module ErrorWriter
-  # TODO: use in all includers if possible
   def error_for_row(message, row_md5)
     @csvs.location(row_md5, nil) << message
   end

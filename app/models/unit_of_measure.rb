@@ -16,7 +16,7 @@ class UnitOfMeasure
   
   belongs_to :property_definition
   
-  # TODO: spec
+  # TODO: spec and factor out Indexer to a class method for greater speccability
   def self.unit_and_divisor_by_product_id(product_ids)
     # TODO: cache this in the Indexer
     uoms = UnitOfMeasure.all

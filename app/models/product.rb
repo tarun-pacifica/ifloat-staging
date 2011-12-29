@@ -21,6 +21,10 @@ class Product
   has n, :product_relationships # needs to be named this way as 'relationships' collides with DM
   has n, :values, :model => "PropertyValue"
   
+  def self.indexer
+    Indexer
+  end
+  
   def self.marshal_values(product_ids, language_code, range_sep, forced_diff_names = [])
     attributes = {:product_id => product_ids}
     db_values = NumericPropertyValue.all(attributes).map
@@ -36,7 +40,7 @@ class Product
     
     db_values_by_property_id.each do |property_id, values|
       definitions = definitions_by_property_id[property_id]
-      prop_info = Indexer.property_display_cache[property_id]
+      prop_info = indexer.property_display_cache[property_id]
       values_by_product_id = values.group_by(&:product_id)
       
       common = false
@@ -85,7 +89,7 @@ class Product
   # TODO: spec
   def self.primary_images_by_product_id(product_ids)
     checksums_by_product_id = {}
-    Indexer.image_checksums_for_product_ids(product_ids).each do |checksum, prod_ids|
+    indexer.image_checksums_for_product_ids(product_ids).each do |checksum, prod_ids|
       prod_ids.each do |prod_id|
         checksums_by_product_id[prod_id] = checksum
       end
@@ -103,7 +107,7 @@ class Product
   def self.values_by_property_name_by_product_id(product_ids, language_code, names_or_ids)
     names_or_ids = names_or_ids.to_set
     names_by_property_id = {}
-    Indexer.property_display_cache.each do |property_id, info|
+    indexer.property_display_cache.each do |property_id, info|
       name = info[:raw_name]
       names_by_property_id[property_id] = name if names_or_ids.include?(property_id) or names_or_ids.include?(name)
     end
@@ -124,6 +128,10 @@ class Product
     Attachment.product_role_assets([id])[id] || {}
   end
   
+  def indexer
+    Indexer
+  end
+  
   def marshal_values(language_code, range_sep)
     Product.marshal_values([id], language_code, range_sep)
   end
@@ -137,8 +145,8 @@ class Product
   def sibling_properties_with_prod_ids_and_values(language_code, klass = nil)
     return [] if reference_group.nil?
     
-    klass ||= TextPropertyValue.first(:product_id => id, :property_definition_id => Indexer.class_property_id).to_s
-    properties_by_name = Indexer.property_display_cache.values.hash_by { |info| info[:raw_name] }
+    klass ||= TextPropertyValue.first(:product_id => id, :property_definition_id => indexer.class_property_id).to_s
+    properties_by_name = indexer.property_display_cache.values.hash_by { |info| info[:raw_name] }
     
     lead_property_by_seq_num = {}
     PropertyHierarchy.all(:class_name => klass).each do |ph|
@@ -149,7 +157,7 @@ class Product
     TextPropertyValue.all(
       "product.company_id"      => company_id,
       "product.reference_group" => reference_group,
-      :property_definition_id   => Indexer.auto_diff_property_id,
+      :property_definition_id   => indexer.auto_diff_property_id,
       :language_code            => language_code
     ).each do |tpv|
       (prod_ids_and_values_by_seq_num[tpv.sequence_number] ||= []) << [tpv.product_id, tpv.to_s]

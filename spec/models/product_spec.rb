@@ -57,15 +57,15 @@ describe Product do
       d = snag.merge(:definition => @properties_by_name["date"], :min_value => 20010101, :max_value => 20030000)
       @values << DatePropertyValue.create(d.merge(:product => @products.first))
       
-      # TODO: factor out a complete data set for testing across the various specs
-      # TODO: mock indexer object on product (self.indexer and indexer)
-      #       thence simplify Indexer.compile as should never be called in test env
-      #       note that these properties are required to silence warnings from the indexer
-      %w(auto:group_diff marketing:brand reference:class sale:price_min).each do |name|
-        pt = @property_types_by_name["text"]
-        @properties_by_name[name] = PropertyDefinition.create(:property_type_id => pt.id, :name => name, :sequence_number => 1)
-      end
-      Indexer.compile
+      @property_display_cache = Indexer.compile_property_display_cache(@properties_by_name.values)
+    end
+    
+    before(:each) do
+      indexer = mock(:indexer)
+      indexer.stub!(:property_display_cache).and_return(@property_display_cache)
+      
+      Product.stub!(:indexer).and_return(indexer)
+      @products.each { |product| product.stub!(:indexer).and_return(indexer) }
     end
     
     after(:all) do

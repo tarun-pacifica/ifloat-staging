@@ -1,7 +1,6 @@
 require File.join( File.dirname(__FILE__), '..', "spec_helper" )
 
 describe Product do
-
   describe "creation" do
     before(:each) do
       @product = Product.new(:company_id => 1, :reference => "AF11235", :reference_group => "AF12")
@@ -123,8 +122,37 @@ describe Product do
     end
   end
   
+  describe "prices_by_url_by_product_id" do
+    before(:all) do
+      @companies = %w(Musto Misto).map { |n| Company.create(:name => n, :reference => "ABC-#{n}", :primary_url => n) }
+      @facilities = @companies.map do |c|
+        c.facilities.create(:name => c.reference, :purchase_ttl => 0, :primary_url => c.primary_url)
+      end
+      @fac_prods = @facilities.map do |f|
+        [1, 2, 3].map { |i| f.products.create(:reference => i, :price => 5.20, :currency => "GBP") }
+        [4, 5, 6].map { |i| f.products.create(:reference => i, :price => 4.80, :currency => "USD") }
+      end.flatten
+      
+      musto = @companies.first
+      @mappings = [1, 3, 5].map { |i| ProductMapping.create(:company => musto, :product_id => i, :reference => i)}
+    end
+    
+    after(:all) do
+      (@companies + @facilities + @fac_prods + @mappings).each(&:destroy)
+      @fac_prods.each { |c| c.should be_valid }
+    end
+    
+    it "should return the prices for the given product ID in the given currency" do
+      Product.prices_by_url_by_product_id([1, 3], "GBP").should == {1 => {"Musto" => 5.2}, 3 => {"Musto" => 5.2}}
+    end
+    
+    it "should work the same way for a specific object instance" do
+      Product.new(:id => 1).prices_by_url("GBP").should == {"Musto" => 5.2}
+      Product.new(:id => 2).prices_by_url("GBP").should == {}
+    end
+  end
+  
   # TODO: verify all these methods are used
-  it "should have specs for prices_by_url_by_product_id"
   it "should have specs for prices_by_url"
   it "should have specs for primary_images_by_product_id"
   

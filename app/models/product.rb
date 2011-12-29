@@ -63,7 +63,8 @@ class Product
     [common_values, diff_values]
   end
   
-  # TODO: spec, implement supply country filtering support when required (retail:country)
+  # TODO: implement and spec country filtering support when required (retail:country)
+  # TODO: implement and spec currency support
   # TODO: may be able to factor out the mapping bit to ProductMapping
   def self.prices_by_url_by_product_id(product_ids, currency)
     return {} if product_ids.empty?
@@ -136,7 +137,6 @@ class Product
     Product.marshal_values([id], language_code, range_sep)
   end
   
-  # TODO: spec
   def prices_by_url(currency)
     Product.prices_by_url_by_product_id([id], currency)[id] || {}
   end

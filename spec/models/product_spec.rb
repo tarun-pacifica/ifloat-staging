@@ -139,7 +139,6 @@ describe Product do
     
     after(:all) do
       (@companies + @facilities + @fac_prods + @mappings).each(&:destroy)
-      @fac_prods.each { |c| c.should be_valid }
     end
     
     it "should return the prices for the given product ID in the given currency" do
@@ -152,8 +151,29 @@ describe Product do
     end
   end
   
-  # TODO: verify all these methods are used
-  it "should have specs for prices_by_url"
-  it "should have specs for primary_images_by_product_id"
+  describe "primary_images_by_product_id" do
+    before(:all) do
+      @assets = %w(abc def).map do |checksum|
+        Asset.create(:company_id => 1, :bucket => "products", :name => "#{checksum}.jpg", :checksum => checksum)
+      end
+      @image_checksums_for_product_ids = {"abc" => [1], "def" => [2]}
+    end
+    
+    before(:each) do
+      indexer = mock(:indexer)
+      indexer.stub!(:image_checksums_for_product_ids).and_return(@image_checksums_for_product_ids)
+      indexer.should_receive(:image_checksums_for_product_ids).with([1, 2])
+      Product.stub!(:indexer).and_return(indexer)
+    end
+    
+    after(:all) do
+      @assets.each(&:destroy)
+    end
+    
+    it "should return the primary images for the given product IDs" do
+      Product.primary_images_by_product_id([1, 2]).should == {1 => @assets.first, 2 => @assets.last}
+    end
+  end
   
+  it "should have specs for sibling_properties_with_prod_ids_and_values"
 end

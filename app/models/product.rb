@@ -87,7 +87,6 @@ class Product
     prices_by_url_by_prod_id
   end
   
-  # TODO: spec
   def self.primary_images_by_product_id(product_ids)
     checksums_by_product_id = {}
     indexer.image_checksums_for_product_ids(product_ids).each do |checksum, prod_ids|

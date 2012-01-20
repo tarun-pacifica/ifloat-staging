@@ -224,11 +224,25 @@ module Indexer
     
     # TODO: this needs to be done by one thread only - at init (if not in console mode) and then as a background thread
     #       or possibly from the Importer housekeeping actions
+    assets_by_checksum = Asset.all(:bucket => "products").hash_by(:checksum)
     File.open(SITEMAP_PATH, "w") do |f|
       f.puts '<?xml version="1.0" encoding="UTF-8"?>'
       f.puts '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
-      titles = (@@product_title_cache[:url] || {}).values
-      f.puts titles.map { |stem| "<url> <loc>http://www.ifloat.biz#{stem}</loc> <changefreq>daily</changefreq> </url>" }
+      urls = (@@product_title_cache[:url] || {}).map do |product_id, stem|
+        parts = ["<url>"]
+        parts << "<loc>http://www.ifloat.biz#{stem}</loc>"
+        parts << "<changefreq>daily</changefreq>"
+        
+        image = assets_by_checksum[@@image_checksum_index[product_id]]
+        parts << "<image:image>"
+        parts << "<image:loc>#{image.url}</image:loc>"
+        parts << "<image:title>#{image.name}</image:title>"
+        parts << "</image:image>"
+        
+        parts << "</url>"
+        parts.join(" ")
+      end
+      f.puts urls
       f.puts '</urlset>'
     end
     

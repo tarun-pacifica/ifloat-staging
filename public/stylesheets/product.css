@@ -21,15 +21,25 @@
 }
 
 #product p.summary {
-  color: #2030A0;
+  background-color: #7090C0;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  color: white;
   font-size: 14px;
+  padding: 3px 5px;
 }
 
 #product h2 {
-  color: #20A5FF;
+  background-color: #6D87A1;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  color: white;
   font-size: 16px;
   font-weight: normal;
   margin: 0;
+  padding: 3px 5px;
 }
 
 #product .info_snippet {

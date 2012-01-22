@@ -227,7 +227,7 @@ module Indexer
     assets_by_checksum = Asset.all(:bucket => "products").hash_by(:checksum)
     File.open(SITEMAP_PATH, "w") do |f|
       f.puts '<?xml version="1.0" encoding="UTF-8"?>'
-      f.puts '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+      f.puts '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">'
       urls = (@@product_title_cache[:url] || {}).map do |product_id, stem|
         parts = ["<url>"]
         parts << "<loc>http://www.ifloat.biz#{stem}</loc>"

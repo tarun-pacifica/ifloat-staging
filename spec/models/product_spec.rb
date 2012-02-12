@@ -175,5 +175,72 @@ describe Product do
     end
   end
   
-  it "should have specs for sibling_properties_with_prod_ids_and_values"
+  describe "ref_class" do
+    before(:all) do
+      @product = Product.create(:company_id => 1, :reference => "ABC-123")
+      @class = TextPropertyValue.create(:product_id => @product.id, :property_definition_id => 1, :text_value => "a", :language_code => "ENG", :sequence_number => 1, :auto_generated => false)
+    end
+    
+    before(:each) do
+      indexer = mock(:indexer)
+      indexer.stub!(:class_property_id).and_return(1)
+      @product.stub!(:indexer).and_return(indexer)
+    end
+    
+    after(:all) do
+      [@product, @class].each(&:destroy)
+    end
+    
+    it "should look up the product's reference:class" do
+      @product.ref_class.should == "a"
+    end
+  end
+  
+  describe "sibling_properties_with_prod_ids_and_values" do
+    before(:all) do
+      # TODO: need matching conditions for whole logic of method - note join via first query in that method
+      @products = 3.times.map { Product.create(:company_id => 1, :reference => "ABC-123")}
+      @property = PropertyDefinition.create(:property_type_id => 1, :sequence_number => 1, :name => "auto:diff")
+      @values = 4.times.map do |i|
+        TextPropertyValue.create(:definition => @property, :sequence_number => i % 2, :auto_generated => false, :product_id => i / 2, :text_value => i.to_s, :language_code => "ENG")
+      end
+    end
+    
+    before(:each) do
+      indexer = mock(:indexer)
+      indexer.stub!(:auto_diff_property_id).and_return(1)
+      @product.stub!(:indexer).and_return(indexer)
+      
+      PropertyHierarchy.stub!(:lead_property_by_seq_num).and_return do |class_name|
+        case class_name
+        when "boat" then {}
+        when "fish" then {1 => {:raw_name => "auto:same"}}
+        when "goat" then {2 => {:raw_name => "auto:diff"}}
+        end
+      end
+      
+      @product.reference_group = "ABC-123"
+    end
+    
+    after(:all) do
+      (@products + [@property] + @values).each(&:destroy)
+    end
+    
+    it "should return an empty list for products not in a reference group" do
+      @product.reference_group = nil
+      @product.sibling_properties_with_prod_ids_and_values("ENG", "goat").should == []
+    end
+    
+    it "should return an empty list when no property hierarcies match the product's class" do
+      @product.sibling_properties_with_prod_ids_and_values("ENG", "boat").should == []
+    end
+    
+    it "should return an empty list when there are no sibling property values" do
+      @product.sibling_properties_with_prod_ids_and_values("ENG", "fish").should == []
+    end
+    
+    it "should return a list of sibling property values otherwise" do
+      @product.sibling_properties_with_prod_ids_and_values("ENG", "goat").should == [5, 6]
+    end
+  end
 end

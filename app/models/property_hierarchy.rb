@@ -1,3 +1,5 @@
+# TODO: write these docs
+#
 # = Summary
 #
 # Title auto-construction in the system is handled by means of TitleStrategy objects. These strategies take the forms of very simple build instructions per auto-constructed title (of which there are four per product). The strategy employed for a given product is entirely dependent on it's class. One TitleStrategy may apply to many classes but each class has either no or one TitleStrategy.
@@ -21,5 +23,19 @@ class PropertyHierarchy
   validates_with_block :property_names do
     property_names.is_a?(Array) and property_names.all? { |name| name =~ PropertyDefinition::NAME_FORMAT } ||
       [false, "Value should be an array containing property names"]
+  end
+  
+  def self.indexer
+    Indexer
+  end
+  
+  def self.lead_property_by_seq_num(class_name)
+    properties_by_name = indexer.property_display_cache.values.hash_by { |info| info[:raw_name] }
+    
+    Hash[
+      all(:class_name => class_name).map do |ph|
+        [ph.sequence_number, properties_by_name[ph.property_names.first]]
+      end
+    ]
   end
 end

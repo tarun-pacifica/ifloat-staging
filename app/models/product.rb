@@ -140,17 +140,13 @@ class Product
     Product.prices_by_url_by_product_id([id], currency)[id] || {}
   end
   
+  def ref_class
+    TextPropertyValue.first(:product_id => id, :property_definition_id => indexer.class_property_id).to_s
+  end
+  
   # TODO: spec
-  def sibling_properties_with_prod_ids_and_values(language_code, klass = nil)
+  def sibling_properties_with_prod_ids_and_values(language_code, klass = ref_class)
     return [] if reference_group.nil?
-    
-    klass ||= TextPropertyValue.first(:product_id => id, :property_definition_id => indexer.class_property_id).to_s
-    properties_by_name = indexer.property_display_cache.values.hash_by { |info| info[:raw_name] }
-    
-    lead_property_by_seq_num = {}
-    PropertyHierarchy.all(:class_name => klass).each do |ph|
-      lead_property_by_seq_num[ph.sequence_number] = properties_by_name[ph.property_names.first]
-    end
     
     prod_ids_and_values_by_seq_num = {}
     TextPropertyValue.all(
@@ -162,7 +158,7 @@ class Product
       (prod_ids_and_values_by_seq_num[tpv.sequence_number] ||= []) << [tpv.product_id, tpv.to_s]
     end
     
-    lead_property_by_seq_num.sort.map do |seq_num, property|
+    PropertyHierarchy.lead_property_by_seq_num(klass).sort.map do |seq_num, property|
       prod_ids_and_values = prod_ids_and_values_by_seq_num[seq_num]
       next if prod_ids_and_values.nil?
       next if prod_ids_and_values.map { |pid, val| val }.uniq.size == 1

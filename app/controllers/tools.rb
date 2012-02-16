@@ -260,7 +260,7 @@ class Tools < Application
   end
   
   def git_pull(dir)
-    # TODO: remove DIR change once git-push respects --work-tree like it's supposed to
+    # TODO: remove DIR change once git-pull respects --work-tree like it's supposed to
     pwd = Dir.pwd; Dir.chdir(dir)
     report = `git --git-dir=#{dir}/.git --work-tree=#{dir} pull --rebase 2>&1`
     Dir.chdir(pwd)

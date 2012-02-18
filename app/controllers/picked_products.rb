@@ -10,8 +10,8 @@ class PickedProducts < Application
     picks_by_product_id = picks.hash_by(:product_id)
     mappings = facility.product_mappings(picks_by_product_id.keys)
     mappings_with_quantities = mappings.map { |m| [m, picks_by_product_id[m.product_id].quantity] }
-    @purchase_urls = facility.purchase_urls(mappings_with_quantities)
-    return redirect("/") if @purchase_urls.empty?
+    purchase_url = facility.purchase_url(mappings_with_quantities)
+    return redirect("/") if purchase_url.nil?
     
     Mailer.deliver(:purchase_started,
       :url     => facility.primary_url,
@@ -19,10 +19,8 @@ class PickedProducts < Application
       :from_ip => request.remote_ip,
       :userish => session.userish(request)) if Merb.environment == "production"
     
-    @skip_copyright = true
-    @transitional = true
     session.log!("GET", "picked_products_buy:#{facility.primary_url}", request.remote_ip)
-    render
+    redirect(purchase_url.to_s)
   end
   
   def create(product_id, group, quantity)

@@ -62,23 +62,36 @@ class Facility
     Hash[mappings.map { |m| [m.product_id, product_url(m)] }]
   end
   
-  # TODO: respec now this takes mappings_with_quantites rather than just mappings
-  def purchase_urls(mappings_with_quantites)
-    return [] if mappings_with_quantites.empty?
+  def purchase_url(mappings_with_quantites)
+    return nil if mappings_with_quantites.empty?
     
     case primary_url
+      
     when "marinestore.co.uk"
-      endpoint = "http://marinestore.co.uk/Merchant2/merchant.mvc"
-      mappings_with_quantites.map do |mapping, quantity|
-        query = {"Action" => "ADPR", "Screen" => "BASK", "Store_Code" => "mrst", "Quantity" => quantity.to_s}
-        query["Product_Code"], variations = mapping.reference_parts
-        variations.each_with_index do |kv, i|
-          query["Product_Attributes[#{i}]:code"] = kv[0]
-          query["Product_Attributes[#{i}]:value"] = kv[1]
+      params = {
+        "Action"     => "ADPRM",
+        "Affiliate"  => "YachtWorld", # TODO: need actual code
+        "Screen"     => "BASK",
+        "Store_Code" => "mrst"
+      }
+      
+      mappings_with_quantites.each_with_index do |mq, i|
+        mapping, quantity = mq
+        sub_params = {"quantity" => quantity.to_s}
+        sub_params["code"], variations = mapping.reference_parts
+        
+        variations.each_with_index do |kv, j|
+          sub_params["Product_Attributes[#{j + 1}]:code"] = kv[0]
+          sub_params["Product_Attributes[#{j + 1}]:value"] = kv[1]
         end
-        query_url(query)
-      end << query_url("Screen" => "BASK", "Store_Code" => "mrst")
-    else []
+        
+        sub_params.each { |key, value| params["EMS_Product[#{i + 1}]:#{key}"] = value }
+      end
+      
+      query_url(params)
+      
+    else nil
+      
     end
   end
   
@@ -86,7 +99,7 @@ class Facility
     uri_params =
       case primary_url
       when "marinestore.co.uk"
-        {:scheme => "http", :host => "marinestore.co.uk", :path => "/Merchant2/merchant.mvc"}
+        {:scheme => "https", :host => "marinestore.co.uk", :path => "/Merchant2/merchant.mvc"}
       end
     uri = Addressable::URI.new(uri_params || {})
     uri.query_values = params unless uri_params.nil?

@@ -65,21 +65,5 @@
       <a href="/terms.pdf">Terms</a>
     </p>
     <% end %>
-    
-    <script type="text/javascript" charset="utf-8">
-      $(document).ready(function() {
-        if(! $.browser.safari) return;
-        
-        $('body').prepend('<p class="global"> <img src="/images/common/safari.png" alt="safari" /> We\'re working hard to fix a few problems with Safari and our checkout process at the moment. To workaround the issue in the mean time, please change your settings to accept cookies \'Always\' rather than \'Only from sites I visit\' while you\'re visiting us. Alternatively, use a different browser like Firefox / Chrome.</p>');
-        var para = $('p.global')
-        var para_height = para.outerHeight(true);
-        var elements = [$('#header .addthis_toolbox'), $('#header .advert'), $('#header .strapline'), $('#header .translate')];
-        for(var i in elements) {
-          var e = elements[i];
-          e.css('top', parseInt(e.css('top')) + para_height + 'px');
-        }
-        para.animate({backgroundColor: 'yellow'}).animate({backgroundColor: '#FFFFE0'})
-      });
-    </script>
   </body>
 </html>

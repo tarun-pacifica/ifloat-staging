@@ -134,7 +134,7 @@ describe Facility do
     end
     
     it "should return the MarineStore purchase URL" do
-      Facility.new(:primary_url => "marinestore.co.uk").purchase_url(@mappings_with_quantities).to_s.should ==  "https://marinestore.co.uk/Merchant2/merchant.mvc?Action=ADPRM&Affiliate=YachtWorld&EMS_Product%5B1%5D%3AProduct_Attributes%5B1%5D%3Acode=k1&EMS_Product%5B1%5D%3AProduct_Attributes%5B1%5D%3Avalue=v1&EMS_Product%5B1%5D%3AProduct_Attributes%5B2%5D%3Acode=k2&EMS_Product%5B1%5D%3AProduct_Attributes%5B2%5D%3Avalue=v2&EMS_Product%5B1%5D%3Acode=ABCDE&EMS_Product%5B1%5D%3Aquantity=1&EMS_Product%5B2%5D%3Acode=EBCDA&EMS_Product%5B2%5D%3Aquantity=2&Screen=BASK&Store_Code=mrst"
+      Facility.new(:primary_url => "marinestore.co.uk").purchase_url(@mappings_with_quantities).to_s.should ==  "https://marinestore.co.uk/Merchant2/merchant.mvc?Action=ADPRM&Affiliate=ifloat&EMS_Product%5B1%5D%3AProduct_Attributes%5B1%5D%3Acode=k1&EMS_Product%5B1%5D%3AProduct_Attributes%5B1%5D%3Avalue=v1&EMS_Product%5B1%5D%3AProduct_Attributes%5B2%5D%3Acode=k2&EMS_Product%5B1%5D%3AProduct_Attributes%5B2%5D%3Avalue=v2&EMS_Product%5B1%5D%3Acode=ABCDE&EMS_Product%5B1%5D%3Aquantity=1&EMS_Product%5B2%5D%3Acode=EBCDA&EMS_Product%5B2%5D%3Aquantity=2&Screen=BASK&Store_Code=mrst"
     end
     
     it "should return nil for an unrecognised facility" do

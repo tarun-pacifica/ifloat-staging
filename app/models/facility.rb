@@ -70,7 +70,7 @@ class Facility
     when "marinestore.co.uk"
       params = {
         "Action"     => "ADPRM",
-        "Affiliate"  => "YachtWorld", # TODO: need actual code
+        "Affiliate"  => "ifloat",
         "Screen"     => "BASK",
         "Store_Code" => "mrst"
       }

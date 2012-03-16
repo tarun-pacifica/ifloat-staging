@@ -170,7 +170,6 @@ class Tools < Application
     end
     
     to_csv_path = "/tmp/ms_variant_report.csv"
-    GC.disable
     begin
       Zip::ZipFile.foreach(file[:tempfile].path) do |entry|
         Partners::MarineStore.dump_report(entry.get_input_stream, to_csv_path, includer, guesser)
@@ -179,7 +178,6 @@ class Tools < Application
     rescue Exception => e
       @error = "unexpected error while attempting to decompress / parse the supplied file: #{e}"
     end
-    GC.enable
     return render unless @error.nil?
     
     file_name = "ms_variant_report_#{DateTime.now.strftime('%Y%m%d_%H%M')}.csv"

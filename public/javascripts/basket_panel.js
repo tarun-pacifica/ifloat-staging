@@ -97,8 +97,11 @@ function basket_panel_load_handle_buy_now(picks_and_subtotal) {
   var html = [];
   for(var i in picks_and_subtotal) html.push(basket_panel_markup_item(picks_and_subtotal[i], true));
   
-  html.push('<div class="subtotal"> <p><span class="label">Sub-total</span> <span class="money">' + subtotal + ' </span></p> <div class="checkout" onclick="basket_panel_checkout()">GO TO CHECKOUT</div> </div>');
-  // onmouseover="tooltip_show(event, ' + util_escape_attr_js($ifloat_header.facility.description) + ', \'left\')" onmouseout="tooltip_hide()"
+  var description = $ifloat_header.facility.description
+  var popup = ""
+  if (description && description.length > 0) popup = 'onmouseover="tooltip_show(event, ' + util_escape_attr_js(description) + ', \'left\')" onmouseout="tooltip_hide()"';
+  
+  html.push('<div class="subtotal"> <p><span class="label">Sub-total</span> <span class="money">' + subtotal + ' </span></p> <div class="checkout" onclick="basket_panel_checkout()" ' + popup + '>GO TO CHECKOUT</div> </div>');
   
   return html;
 }

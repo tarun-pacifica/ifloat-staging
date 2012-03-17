@@ -46,6 +46,21 @@
   top: 102px;
 }
 
+#header .strapline a {
+  background: #30A0FB;
+  border-radius: 5px 5px 5px 5px;
+  -moz-border-radius: 5px 5px 5px 5px;
+  -webkit-border-radius: 5px 5px 5px 5px;
+  color: white;
+  margin-left: 5px;
+  padding: 3px 5px;
+  text-decoration: none;
+}
+
+#header .strapline a:hover {
+  text-decoration: underline;
+}
+
 #header .translate {
   position: absolute;
   right: 110px;

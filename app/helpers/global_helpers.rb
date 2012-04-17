@@ -131,6 +131,7 @@ module Merb
     end
     
     def money_uom(amount, currency, unit, divisor)
+      return nil if amount.nil?
       return money(amount, currency, unit) if divisor.nil?
       
       parts = [money(amount, currency)]

@@ -79,6 +79,7 @@ class Facility
         mapping, quantity = mq
         sub_params = {"quantity" => quantity.to_s}
         sub_params["code"], variations = mapping.reference_parts
+        sub_params["code"].downcase! # TODO: remove once all DB product codes are lowercase
         
         variations.each_with_index do |kv, j|
           sub_params["Product_Attributes[#{j + 1}]:code"] = kv[0]

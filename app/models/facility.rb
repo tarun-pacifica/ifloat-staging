@@ -99,7 +99,7 @@ class Facility
     uri_params =
       case primary_url
       when "marinestore.co.uk"
-        {:scheme => "https", :host => "marinestore.co.uk", :path => "/Merchant2/merchant.mvc"}
+        {:scheme => "http", :host => "marinestore.co.uk", :path => "/Merchant2/merchant.mvc"}
       end
     uri = Addressable::URI.new(uri_params || {})
     uri.query_values = params unless uri_params.nil?

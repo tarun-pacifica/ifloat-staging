@@ -16,7 +16,6 @@ describe NumericPropertyValue do
     it "should succeed with valid data" do
       @value.should be_valid
       @value.to_s.should == "22.5 GBP"
-      @value.comparison_key.should == [22.5, "GBP"]
     end
     
     it "should succeed with valid data, acting as a range" do
@@ -61,7 +60,7 @@ describe NumericPropertyValue do
       @value.unit = nil
       @value.should be_valid
       @value.to_s.should == "22.5"
-      @value.comparison_key.should == [22.5]
+      @value.comparison_key.should == [22.5, 22.5]
     end
   end
   

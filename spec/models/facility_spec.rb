@@ -97,7 +97,7 @@ describe Facility do
     before(:all) { @mapping = ProductMapping.new(:reference => "ABCDE;k1=v1;k2=v2") }
     
     it "should return a well-formed MarineStore product URL" do
-      Facility.new(:primary_url => "marinestore.co.uk").product_url(@mapping).to_s.should == "https://marinestore.co.uk/Merchant2/merchant.mvc?Product_Code=ABCDE&Screen=PROD&Store_Code=mrst"
+      Facility.new(:primary_url => "marinestore.co.uk").product_url(@mapping).to_s.should == "http://marinestore.co.uk/Merchant2/merchant.mvc?Product_Code=ABCDE&Screen=PROD&Store_Code=mrst"
     end
     
     it "should return an empty URL otherwise" do
@@ -107,8 +107,8 @@ describe Facility do
   
   describe "product_urls_by_id" do
     before(:all) do
-      @mappings = %w(ABCDE;k1=v1;k2=v2 EBCDA).map do |ref|
-        ProductMapping.new(:product_id => rand(100), :reference => ref)
+      @mappings = %w(ABCDE;k1=v1;k2=v2 EBCDA).each_with_index.map do |ref, i|
+        ProductMapping.new(:product_id => i, :reference => ref)
       end
     end
     
@@ -134,7 +134,7 @@ describe Facility do
     end
     
     it "should return the MarineStore purchase URL" do
-      Facility.new(:primary_url => "marinestore.co.uk").purchase_url(@mappings_with_quantities).to_s.should ==  "https://marinestore.co.uk/Merchant2/merchant.mvc?Action=ADPRM&Affiliate=ifloat&EMS_Product%5B1%5D%3AProduct_Attributes%5B1%5D%3Acode=k1&EMS_Product%5B1%5D%3AProduct_Attributes%5B1%5D%3Avalue=v1&EMS_Product%5B1%5D%3AProduct_Attributes%5B2%5D%3Acode=k2&EMS_Product%5B1%5D%3AProduct_Attributes%5B2%5D%3Avalue=v2&EMS_Product%5B1%5D%3Acode=ABCDE&EMS_Product%5B1%5D%3Aquantity=1&EMS_Product%5B2%5D%3Acode=EBCDA&EMS_Product%5B2%5D%3Aquantity=2&Screen=BASK&Store_Code=mrst"
+      Facility.new(:primary_url => "marinestore.co.uk").purchase_url(@mappings_with_quantities).to_s.should ==  "http://marinestore.co.uk/Merchant2/merchant.mvc?Action=ADPRM&Affiliate=ifloat&EMS_Product%5B1%5D%3AProduct_Attributes%5B1%5D%3Acode=k1&EMS_Product%5B1%5D%3AProduct_Attributes%5B1%5D%3Avalue=v1&EMS_Product%5B1%5D%3AProduct_Attributes%5B2%5D%3Acode=k2&EMS_Product%5B1%5D%3AProduct_Attributes%5B2%5D%3Avalue=v2&EMS_Product%5B1%5D%3Acode=ABCDE&EMS_Product%5B1%5D%3Aquantity=1&EMS_Product%5B2%5D%3Acode=EBCDA&EMS_Product%5B2%5D%3Aquantity=2&Screen=BASK&Store_Code=mrst"
     end
     
     it "should return nil for an unrecognised facility" do
@@ -148,7 +148,7 @@ describe Facility do
   
   describe "query_url" do
     it "should return a well-formed MarineStore URL" do
-      Facility.new(:primary_url => "marinestore.co.uk").query_url("me&you" => "foo=bar").to_s.should == "https://marinestore.co.uk/Merchant2/merchant.mvc?me%26you=foo%3Dbar"
+      Facility.new(:primary_url => "marinestore.co.uk").query_url("me&you" => "foo=bar").to_s.should == "http://marinestore.co.uk/Merchant2/merchant.mvc?me%26you=foo%3Dbar"
     end
     
     it "should return an empty URL otherwise" do

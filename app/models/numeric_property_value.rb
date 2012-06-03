@@ -49,8 +49,7 @@ class NumericPropertyValue < PropertyValue
   end
   
   def comparison_key
-    key = [min_value]
-    key << max_value unless min_value == max_value
+    key = [min_value, max_value]
     key << unit unless unit.nil?
     key
   end

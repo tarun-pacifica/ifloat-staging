@@ -196,19 +196,23 @@ describe Product do
     end
   end
   
+  # TODO: need matching conditions that test the entire logic of this method (note esp. the join in the first query)
   describe "sibling_properties_with_prod_ids_and_values" do
     before(:all) do
-      # TODO: need matching conditions for whole logic of method - note join via first query in that method
-      @products = 3.times.map { Product.create(:company_id => 1, :reference => "ABC-123")}
+      @products = 3.times.map { |i| Product.create(:company_id => 1, :reference => "ABC-#{i}", :reference_group => "ABC-123") }
       @property = PropertyDefinition.create(:property_type_id => 1, :sequence_number => 1, :name => "auto:diff")
       @values = 4.times.map do |i|
-        TextPropertyValue.create(:definition => @property, :sequence_number => i % 2, :auto_generated => false, :product_id => i / 2, :text_value => i.to_s, :language_code => "ENG")
+        prod_id = @products[i % 3].id
+        TextPropertyValue.create(:definition => @property, :sequence_number => 2, :auto_generated => false, :product_id => prod_id, :text_value => i.to_s, :language_code => "ENG")
       end
     end
     
     before(:each) do
       indexer = mock(:indexer)
-      indexer.stub!(:auto_diff_property_id).and_return(1)
+      indexer.stub!(:auto_diff_property_id).and_return(@property.id)
+      
+      @product = @products.first
+      @product.reference_group = "ABC-123"
       @product.stub!(:indexer).and_return(indexer)
       
       PropertyHierarchy.stub!(:lead_property_by_seq_num).and_return do |class_name|
@@ -218,8 +222,6 @@ describe Product do
         when "goat" then {2 => {:raw_name => "auto:diff"}}
         end
       end
-      
-      @product.reference_group = "ABC-123"
     end
     
     after(:all) do
@@ -239,8 +241,11 @@ describe Product do
       @product.sibling_properties_with_prod_ids_and_values("ENG", "fish").should == []
     end
     
-    it "should return a list of sibling property values otherwise" do
-      @product.sibling_properties_with_prod_ids_and_values("ENG", "goat").should == [5, 6]
+    it "should return a list of sibling properties with product IDs and values otherwise" do
+      p1, p2, p3 = @products.map(&:id)
+      @product.sibling_properties_with_prod_ids_and_values("ENG", "goat").should == [
+        [{:raw_name=>"auto:diff"}, [[p1, "0"], [p2, "1"], [p3, "2"], [p1, "3"]]]
+      ]
     end
   end
 end

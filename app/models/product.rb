@@ -144,7 +144,6 @@ class Product
     TextPropertyValue.first(:product_id => id, :property_definition_id => indexer.class_property_id).to_s
   end
   
-  # TODO: spec
   def sibling_properties_with_prod_ids_and_values(language_code, klass = ref_class)
     return [] if reference_group.nil?
     

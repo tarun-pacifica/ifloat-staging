@@ -6,6 +6,7 @@ caches/*
 doc/*
 !doc/README
 !doc/rdoc/
+!doc/server_setup.txt
 importer/indexes
 log/
 public/assets

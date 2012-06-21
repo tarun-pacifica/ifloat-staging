@@ -1,0 +1,213 @@
+=== APP SERVER ===
+
+ssh root@ip.address
+apt-get update
+apt-get upgrade
+
+apt-get install rubygems ruby-dev libsqlite3-dev build-essential libmysqlclient-dev mysql-server git-core nginx graphicsmagick libopenssl-ruby libxslt1-dev unzip libtokyocabinet-dev
+[when prompted set the root password for mysql to that for the machine]
+
+[download an updated libtokyocabinet8/dev to /root]
+curl http://ie.archive.ubuntu.com/ubuntu/pool/main/t/tokyocabinet/libtokyocabinet8_1.4.37-6.1_amd64.deb > libtokyocabinet8_1.4.37-6.1_amd64.deb
+curl http://ie.archive.ubuntu.com/ubuntu/pool/main/t/tokyocabinet/libtokyocabinet-dev_1.4.37-6.1_amd64.deb > libtokyocabinet-dev_1.4.37-6.1_amd64.deb
+dpkg -i libtokyocabinet8_1.4.37-6.1_amd64.deb
+dpkg -i libtokyocabinet-dev_1.4.37-6.1_amd64.deb
+
+gem install rubygems-update
+/var/lib/gems/1.8/bin/update_rubygems
+gem install bundler
+
+[swap in ifloat_stag as appropriate for staging]
+mysql_secure_installation (production)
+mysql -u root -p
+ - root should be localhost only (mysql defaults to localhost connections)
+ - CREATE DATABASE ifloat_prod;
+ - GRANT ALL ON ifloat_prod.* TO 'ifloat_app'@'localhost' IDENTIFIED BY 'j4hd7ag234';
+ - FLUSH PRIVILEGES;
+
+CREATE TABLE `sessions` (
+  `session_id` varchar(32) NOT NULL,
+  `data` text,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`session_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+
+rm -rf /var/www/nginx-default
+chown www-data.www-data /var/www
+sudo -u www-data ssh-keygen
+[add public key to git_ro account on repo server]
+[add public key to git account on repo server as well for the staging server so that it can commit back on assets / csvs]
+
+sudo -u www-data nano -w /var/www/.ssh/authorized_keys
+[add ssh public keys for users to this user]
+
+mkdir ~root/.ssh
+chmod 700 ~root/.ssh
+nano -w ~root/.ssh/authorized_keys
+[add ssh public keys for users to this user]
+
+nano -w /etc/passwd
+[www-data:x:33:33:www-data:/var/www:/bin/bash]
+
+(as www-data : checking the private IP with ifconfig on the repo server if this doesn't work and swapping MERB_ENV=staging as appropriate)
+nano -w ~/.profile
+-----
+export MERB_ENV=profuction
+export PATH=$PATH:/var/lib/gems/1.8/bin
+alias mi='cd ~/ifloat; bundle exec merb -i'
+#alias pull='cd ~/ifloat_assets; git clean -df && git reset --hard && git pull; cd ~/ifloat_csvs; git clean -df && git reset --hard && git pull; cd ~/ifloat; git pull'
+alias pull='cd ~/ifloat; git pull'
+alias import='cd ~/ifloat; bundle exec merb --script-runner lib/import_core_data.rb'
+alias restart='cd ~/ifloat; kill `ps -eo pid,command | grep "merb : ifloat" | grep -v grep | cut -f 1 -d m`; bundle exec merb -a thin -c 3 --name ifloat'
+-----
+
+git clone ssh://git_ro@10.176.197.41/~git/ifloat.git
+git clone ssh://git[_ro]@10.176.197.41/~git/ifloat_assets.git
+git clone ssh://git[_ro]@10.176.197.41/~git/ifloat_csvs.git
+git clone ssh://git_ro@10.176.197.41/~git/ifloat_prices.git
+cd ~/ifloat
+bundle install --deployment
+
+mi
+---
+DataMapper::Model.descendants.each do |model|
+  begin
+    model.auto_migrate!
+  rescue
+    warn "auto_migration failed on #{model}"
+  end
+end
+---
+
+import
+# take a close look at the following script and make sure it's up-to-date before running it
+bundle exec merb --script-runner lib/ensure_users.rb
+restart
+
+nano -w ~www-data/crontab
+====
+MERB_ENV=production
+
+@hourly cd ~/ifloat_prices; git pull
+@hourly cd ~/ifloat; bundle exec merb --script-runner lib/housekeeping.rb
+30 0 * * * cd ~/ifloat; bundle exec merb --script-runner lib/backup_database.rb
+* * * * * cd ~/ifloat; lib/restarter.rb
+====
+crontab crontab
+
+cp -R ~/ifloat/config/ssl_certificates ~/
+
+nano -w /etc/nginx/nginx.conf
+=====
+user www-data;
+worker_processes 1;
+
+error_log  /var/log/nginx/error.log;
+pid        /var/run/nginx.pid;
+
+events {
+  worker_connections  1024;
+}
+
+http {
+  access_log   /var/log/nginx/access.log;
+  default_type application/octet-stream;
+  include      /etc/nginx/mime.types;
+  
+  keepalive_timeout    10;
+  sendfile             on;
+  tcp_nodelay          off;
+  tcp_nopush           on;
+  client_max_body_size 10M;
+
+  gzip            on;
+  gzip_buffers    16 8k;
+  gzip_comp_level 6;
+  gzip_disable    "MSIE [1-6].(?!.*SV1)";
+  gzip_proxied    any;
+  gzip_types      text/plain text/html text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript text/csv;
+  gzip_vary       on;
+
+  include /etc/nginx/conf.d/*.conf;
+  include /etc/nginx/sites-enabled/*;
+}
+=====
+nano -w /etc/nginx/sites-available/ifloat
+=====
+upstream ifloat {
+  server 127.0.0.1:4000;
+  server 127.0.0.1:4001;
+  server 127.0.0.1:4002;
+}
+
+server {
+  listen 80;
+  listen 443 default ssl;
+
+  server_name _;
+  root /var/www/ifloat/public;
+
+  ssl_certificate /var/www/ssl_certificates/www.ifloat.biz.crt;
+  ssl_certificate_key /var/www/ssl_certificates/www.ifloat.biz.key;
+
+  location / {
+    proxy_read_timeout 5m;
+    proxy_redirect off;
+    proxy_max_temp_file_size 0;
+    proxy_next_upstream error;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    
+    if (-f $request_filename) {
+      break;
+    }
+
+    if (-f $document_root/maintenance.html) {
+      rewrite ^(.*)$ /maintenance.html last;
+      break;
+    }
+
+    if (!-f $request_filename) {
+      proxy_pass http://ifloat;
+      break;
+    }
+  }
+}
+=====
+
+ln -s /etc/nginx/sites-available/ifloat /etc/nginx/sites-enabled/ifloat
+rm /etc/nginx/sites-enabled/default
+
+/etc/init.d/nginx start
+
+
+=== REPOSITORY SERVER # TODO: not yet updated to 10.4 ===
+
+# TODO: note repo now has Ruby and public keys for root, git, git_ro
+
+adduser git
+adduser git_ro
+[when prompted set the password to something random]
+[hit enter for the rest of the prompts]
+
+cd ~git
+sudo -u git mkdir .ssh
+sudo -u git chmod 700 .ssh
+sudo -u git nano -w .ssh/authorized_keys
+[add ssh public keys for users to this user]
+
+[ditto for git_ro but add the public keys of the www-data user on the app servers]
+
+apt-get install git-core
+[git repositories live in ~git]
+
+git's crontab...
+---
+@daily cd ~/working_copies/ifloat_prices; ./update_all.rb
+@daily cd ~/ifloat.git; git gc
+@daily cd ~/ifloat_assets.git; git gc
+@daily cd ~/ifloat_csvs.git; git gc
+@daily cd ~/ifloat_prices.git; git gc
+---

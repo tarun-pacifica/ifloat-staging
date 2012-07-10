@@ -18,7 +18,7 @@
   </div>
   
   <% else %>
-  
+  <h1><%= @path_names.empty? ? "Categories" : @path_names.join(" - ") %></h1>
   <%= breadcrumbs(@path_names) %>
   
   <div class="filters"> <h2>Filter your <%= "result".pluralize_count(@child_links.size) %> by...</h2> </div>

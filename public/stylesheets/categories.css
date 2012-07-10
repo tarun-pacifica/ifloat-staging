@@ -4,6 +4,10 @@
   padding: 5px 15px;
 }
 
+#categories h1 {
+  display: none;
+}
+
 #categories .find_bad {
   background: #FFDDDD;
   border: 1px solid red;

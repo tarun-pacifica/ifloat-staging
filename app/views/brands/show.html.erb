@@ -2,6 +2,7 @@
 <%= partial "common/header" %>
 
 <div id="brand_info">
+  <h1><%= @brand.name %></h1>
   <div class="logo">
     <a href="<%= @canonical_path %>"> <%= brand_image(@brand) || @brand.name.superscript %> </a>
   </div>

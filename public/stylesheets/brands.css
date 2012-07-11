@@ -3,6 +3,10 @@
   padding: 10px;
 }
 
+#brand_info h1 {
+  display: none;
+}
+
 #brand_info div {
   float: left;
 }

@@ -60,6 +60,7 @@ alias mi='cd ~/ifloat; bundle exec merb -i'
 alias pull='cd ~/ifloat; git pull'
 alias import='cd ~/ifloat; bundle exec merb --script-runner lib/import_core_data.rb'
 alias restart='cd ~/ifloat; kill `ps -eo pid,command | grep "merb : ifloat" | grep -v grep | cut -f 1 -d m`; bundle exec merb -a thin -c 3 --name ifloat'
+alias fluff='curl -I localhost:4000; curl -I localhost:4001; curl -I localhost:4002' # use after a production restart
 -----
 
 git clone ssh://git_ro@10.176.197.41/~git/ifloat.git

@@ -20,7 +20,7 @@ class Brands < Application
     end
     
     @page_description = @brand.description
-    @page_title = name
+    @page_title = "#{name} brand boat equipment products for sale at ifloat®"
     render
   end
 end

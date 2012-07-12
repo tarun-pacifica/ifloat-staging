@@ -219,6 +219,20 @@ class Tools < Application
     send_data(File.read(to_csv_path), :filename => file_name, :type => "text/csv")
   end
   
+  def title_report
+    to_csv_path = "/tmp/titles_report.csv"
+    FasterCSV.open(to_csv_path, "w") do |csv|
+      csv << %w(product_id product_ref canonical description image)
+      
+      repository.adapter.select("SELECT id, reference FROM products").each do |id_ref|
+        csv << [id_ref.id, id_ref.reference] + [:canonical, :description, :image].map { |domain| Indexer.product_title(domain, id_ref.id) }
+      end
+    end
+    
+    file_name = "title_report_#{DateTime.now.strftime('%Y%m%d_%H%M')}.csv"
+    send_data(File.read(to_csv_path), :filename => file_name, :type => "text/csv")
+  end
+  
   def users
     @users = User.all
     render

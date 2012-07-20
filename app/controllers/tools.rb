@@ -220,12 +220,20 @@ class Tools < Application
   end
   
   def title_report
+    company_refs_by_id = Hash[
+      repository.adapter.select("SELECT id, reference FROM companies").map { |id_ref| [id_ref.id, id_ref.reference] }
+    ]
+    
     to_csv_path = "/tmp/titles_report.csv"
     FasterCSV.open(to_csv_path, "w") do |csv|
-      csv << %w(product_id product_ref canonical description image)
+      csv << %w(company_ref product_ref canonical canonical_size description description_size image image_size url url_size)
       
-      repository.adapter.select("SELECT id, reference FROM products").each do |id_ref|
-        csv << [id_ref.id, id_ref.reference] + [:canonical, :description, :image].map { |domain| Indexer.product_title(domain, id_ref.id) }
+      repository.adapter.select("SELECT company_id, id, reference FROM products").each do |rec|
+        csv << [company_refs_by_id[rec.company_id], rec.reference] +
+          [:canonical, :description, :image, :url].map do |domain|
+            title = Indexer.product_title(domain, rec.id)
+            [title, title.size]
+          end.flatten
       end
     end
     

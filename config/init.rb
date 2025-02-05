@@ -122,4 +122,9 @@ end
 
 Merb::BootLoader.after_app_loads do
   require "lib" / "data_mapper_session_store"
+  begin
+    Indexer.compile unless Indexer.facilities
+  rescue => e
+    Merb.logger.error("Failed to compile Indexer: #{e.message}")
+  end
 end

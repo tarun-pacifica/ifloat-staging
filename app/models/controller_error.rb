@@ -15,8 +15,7 @@ class ControllerError
 
   property :id, Serial
   property :created_at, DateTime, :default => proc { DateTime.now }
-  property :updated_at, DateTime # This will auto-update on save
-  property :timestamp, DateTime, :default => proc { DateTime.now } # Actual error timestamp
+  property :error_timestamp, DateTime, :default => proc { DateTime.now } # Using error_timestamp instead of timestamp
 
   property :controller, String
   property :action, String
@@ -30,22 +29,27 @@ class ControllerError
   property :session, Object
 
   def self.log!(request)
-    exception = (request.exceptions.first rescue Exception.new("request.exceptions.first"))
-    request_params = (request.params.to_hash rescue {})
+    begin
+      exception = (request.exceptions.first rescue Exception.new("request.exceptions.first"))
+      request_params = (request.params.to_hash rescue {})
 
-    create(
-      :controller => request_params["controller"],
-      :action     => request_params["action"],
-      :params     => request_params,
+      create(
+        :controller => request_params["controller"],
+        :action     => request_params["action"],
+        :params     => request_params,
 
-      :exception_class   => exception.class,
-      :exception_message => exception.message,
-      :exception_context => (exception.backtrace || []).first,
+        :exception_class   => exception.class,
+        :exception_message => exception.message,
+        :exception_context => (exception.backtrace || []).first,
 
-      :ip_address => (request.remote_ip rescue nil),
-      :session    => (request.session.to_hash rescue nil),
-      :timestamp  => DateTime.now
-    )
+        :ip_address => (request.remote_ip rescue nil),
+        :session    => (request.session.to_hash rescue nil),
+        :error_timestamp  => DateTime.now
+      )
+    rescue => e
+      Merb.logger.error("Failed to log controller error: #{e.message}")
+      nil
+    end
   end
 
   def self.obsolete

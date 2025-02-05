@@ -26,11 +26,16 @@ DataMapper.setup(:default, {
                    :database => 'ifloat_prod',
                    :encoding => 'utf8',
                    :reconnect => true,
+                   :pool_timeout => 5,
+                   :pool_size => 5,
                    :variables => {
                      :charset => 'utf8',
                      :collation => 'utf8_unicode_ci'
                    }
 })
+
+DataMapper::Model.descendants.each { |model| model.finalize }
+DataMapper::Model.descendants.each { |model| model.relationships.each_value(&:child_key) }
 
 Merb.logger.info("Loaded PRODUCTION Environment...")
 

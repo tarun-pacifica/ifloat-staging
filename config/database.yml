@@ -1,22 +1,26 @@
----
-development: &defaults
-    adapter: mysql
-    database: ifloat_dev
-    host: localhost
-    username: ifloat_app
-    password: j4hd7ag234
+defaults: &defaults
+  adapter: mysql
+  host: localhost
+  username: ifloat_app
+  password: j4hd7ag234
+  encoding: utf8
 
-rake:
-    <<: *defaults
- 
+development:
+  <<: *defaults
+  database: ifloat_dev
+
 test:
-    <<: *defaults
-    database: ifloat_test
+  <<: *defaults
+  database: ifloat_test
 
 staging:
-    <<: *defaults
-    database: ifloat_stag
+  <<: *defaults
+  database: ifloat_stag
 
 production:
-    <<: *defaults
-    database: ifloat_prod
+  <<: *defaults
+  database: ifloat_prod
+
+rake:
+  <<: *defaults
+  database: ifloat_dev

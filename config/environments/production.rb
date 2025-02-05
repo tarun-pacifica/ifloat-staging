@@ -1,3 +1,5 @@
+require 'do_mysql'
+
 DataObjects::MySQL.logger = DataObjects::Logger.new(STDOUT, :off)
 DataObjects::Connection.quote_identifier = false
 

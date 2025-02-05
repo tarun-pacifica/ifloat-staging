@@ -15,7 +15,7 @@ class ControllerError
 
   property :id, Serial
   property :created_at, DateTime, :default => proc { DateTime.now }
-  property :error_timestamp, DateTime, :default => proc { DateTime.now } # Using error_timestamp instead of timestamp
+  property :error_timestamp, DateTime # Added to match our new column
 
   property :controller, String
   property :action, String
@@ -29,6 +29,7 @@ class ControllerError
   property :session, Object
 
   def self.log!(request)
+    # Use begin/rescue to handle potential errors gracefully
     begin
       exception = (request.exceptions.first rescue Exception.new("request.exceptions.first"))
       request_params = (request.params.to_hash rescue {})
@@ -39,8 +40,8 @@ class ControllerError
         :params     => request_params,
 
         :exception_class   => exception.class,
-        :exception_message => exception.message,
-        :exception_context => (exception.backtrace || []).first,
+        :exception_message => exception.message.to_s[0..254],
+        :exception_context => (exception.backtrace || []).first.to_s[0..254],
 
         :ip_address => (request.remote_ip rescue nil),
         :session    => (request.session.to_hash rescue nil),

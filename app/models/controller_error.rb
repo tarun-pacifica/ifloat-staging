@@ -13,35 +13,38 @@ class ControllerError
 
   OBSOLESCENCE_TIME = 1.month
 
+  # Be explicit about all properties and types
   property :id, Serial
-  property :created_at, DateTime
-  property :controller, String, :length => 50
-  property :action, String, :length => 50
-  property :params, Text
-  property :exception_class, String, :length => 50
-  property :exception_message, String, :length => 255
-  property :exception_context, String, :length => 255
-  property :ip_address, String, :length => 39  # Changed from IPAddress to match schema
-  property :session, Text
-  property :error_timestamp, DateTime
+  property :created_at, DateTime, :required => false, :default => nil
+  property :controller, String, :required => false, :length => 50, :default => nil
+  property :action, String, :required => false, :length => 50, :default => nil
+  property :params, Text, :required => false, :default => nil
+  property :exception_class, String, :required => false, :length => 50, :default => nil
+  property :exception_message, String, :required => false, :length => 255, :default => nil
+  property :exception_context, String, :required => false, :length => 255, :default => nil
+  property :ip_address, String, :required => false, :length => 39, :default => nil
+  property :session, Text, :required => false, :default => nil
+  property :error_timestamp, DateTime, :required => false, :default => nil
 
   def self.log!(request)
     begin
       exception = (request.exceptions.first rescue Exception.new("request.exceptions.first"))
       request_params = (request.params.to_hash rescue {})
 
-      create(
-        :controller => request_params["controller"],
-        :action     => request_params["action"],
-        :params     => request_params,
-        :exception_class   => exception.class.to_s,
-        :exception_message => exception.message.to_s[0..254],
-        :exception_context => (exception.backtrace || []).first.to_s[0..254],
-        :ip_address => request.remote_ip.to_s,
-        :session    => request.session.to_hash,
-        :error_timestamp  => DateTime.now,
-        :created_at => DateTime.now
-      )
+      # Create the object first, then set attributes
+      error = new
+      error.controller = request_params["controller"].to_s
+      error.action = request_params["action"].to_s
+      error.params = request_params
+      error.exception_class = exception.class.to_s
+      error.exception_message = exception.message.to_s[0..254]
+      error.exception_context = (exception.backtrace || []).first.to_s[0..254]
+      error.ip_address = request.remote_ip.to_s
+      error.session = request.session.to_hash
+      error.error_timestamp = DateTime.now
+      error.created_at = DateTime.now
+      error.save
+      error
     rescue => e
       Merb.logger.error("Failed to log controller error: #{e.message}")
       nil

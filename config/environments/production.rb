@@ -1,9 +1,28 @@
-require 'do_mysql'
+require 'rubygems'
+require 'dm-core'
+require 'dm-migrations'
+require 'dm-mysql-adapter'
 
+# Setup the DataMapper connection before configuring MySQL logger
+DataMapper.setup(:default, {
+                   :adapter  => 'mysql',
+                   :host     => 'localhost',
+                   :username => 'ifloat_app',
+                   :password => 'j4hd7ag234',
+                   :database => 'ifloat_prod',
+                   :encoding => 'utf8mb4',
+                   :reconnect => true
+})
+
+# Now configure the MySQL logger
+require 'data_objects'
+require 'do_mysql'
 DataObjects::MySQL.logger = DataObjects::Logger.new(STDOUT, :off)
 DataObjects::Connection.quote_identifier = false
 
+# Rest of your production.rb configuration
 Merb.logger.info("Loaded PRODUCTION Environment...")
+
 Merb::Config.use { |c|
   c[:exception_details] = false
   c[:reload_templates] = false

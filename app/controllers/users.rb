@@ -13,22 +13,26 @@ class Users < Application
 
   def create(name, nickname, login, password, confirmation)
     nickname = nil if nickname.blank?
+
+    # Basic validation before attempting save
+    raise Unauthenticated, "Email address is required" if login.blank?
+    raise Unauthenticated, "Password is required" if password.blank?
+    raise Unauthenticated, "Name is required" if name.blank?
+
     user = User.new(
       :name => name,
       :nickname => nickname,
-      :login => login,
+      :login => login.downcase, # Force lowercase before save
       :password => password,
       :confirmation => confirmation,
       :created_from => request.remote_ip
     )
 
-    # Remove separate validation call since save will validate anyway
     if user.save
       Mailer.deliver(:registration, :user => user)
       session.login!(login, password)
       "<p>Successfully registered and logged in as <strong>#{user.name}</strong>. Confirmation e-mail sent to <strong>#{login}</strong>.</p>"
     else
-      # Use the error messages directly from failed save
       raise Unauthenticated, user.errors.full_messages.join("\n")
     end
   end

@@ -22,13 +22,21 @@
 #
 class User
   include DataMapper::Resource
-  
+
   UNCONFIRMED_EXPIRY_HOURS = 24
-  
+
   property :id,             Serial
   property :name,           String,    :required => true
   property :nickname,       String
-  property :login,          String,    :required => true, :length => 255, :format => :email_address, :unique => true, :unique_index => true
+  property :login, String,
+    :required => true,
+    :length => 255,
+    :format => :email_address,
+    :unique => true,
+    :unique_index => true,
+  :messages => {
+    :is_unique => "Email address is already registered"
+  }
   property :password,       String,    :required => true, :length => 255
   property :admin,          Boolean,   :required => true, :default => false
   property :disabled_at,    DateTime
@@ -37,49 +45,49 @@ class User
   property :created_from,   IPAddress, :required => true
   property :confirm_key,    String,    :required => true, :default => proc { Password.gen_string(16) }
   property :confirmed_at,   DateTime
-  
+
   has n, :contacts
   has n, :picked_products, :order => [:created_at]
   has n, :locations
   has n, :messages
   has n, :purchases
-  
+
   before :valid? do
     self.login = login.downcase unless login.nil?
   end
-  
+
   validates_with_block :password, :if => proc { |u| u.attribute_dirty?(:password) and not u.password.blank? } do
     (password == @confirmation) || [false, "Password doesn't match confirmation"]
   end
-  
+
   before :save do
     unless Password.hashed?(password)
       @plain_password = password
       self.password = Password.hash(@plain_password)
     end
   end
-  
+
   def self.authenticate(login, pass)
     user = User.first(:login => login)
     return nil if user.nil?
     Password.match?(user.password, pass) ? user : nil
   end
-  
+
   def self.expired
     all(:confirmed_at => nil, :created_at.lt => UNCONFIRMED_EXPIRY_HOURS.hours.ago)
   end
-  
+
   attr_reader :plain_password
   attr_writer :confirmation
-  
+
   def display_name
     nickname || name
   end
-  
+
   def enabled?
     disabled_at.nil? or disabled_at > DateTime.now
   end
-  
+
   def reset_password
     @plain_password = Password.gen_string(8)
     self.password = Password.hash(@plain_password)

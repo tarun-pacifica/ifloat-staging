@@ -20,4 +20,3 @@ gem "oklahoma_mixer", "0.4.0"
 gem "rspec",          "2.3.0"
 gem "thin",           "1.2.7"
 gem "zip",            "2.0.2"
-gem 'encoding-mysql', '~> 0.1.1'

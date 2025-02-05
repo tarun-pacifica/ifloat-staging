@@ -4,7 +4,11 @@ defaults: &defaults
   username: ifloat_app
   password: j4hd7ag234
   encoding: utf8mb4
-  charset: utf8mb4 
+  reconnect: true
+  mysql_encoding: utf8mb4
+  variables:
+    charset: utf8mb4
+    collation: utf8mb4_unicode_ci
 
 development:
   <<: *defaults

@@ -14,22 +14,18 @@ class ControllerError
   OBSOLESCENCE_TIME = 1.month
 
   property :id, Serial
-  property :created_at, DateTime, :default => proc { DateTime.now }
-  property :error_timestamp, DateTime # Added to match our new column
-
-  property :controller, String
-  property :action, String
-  property :params, Object
-
-  property :exception_class, String
+  property :created_at, DateTime
+  property :controller, String, :length => 50
+  property :action, String, :length => 50
+  property :params, Text
+  property :exception_class, String, :length => 50
   property :exception_message, String, :length => 255
   property :exception_context, String, :length => 255
-
-  property :ip_address, IPAddress
-  property :session, Object
+  property :ip_address, String, :length => 39  # Changed from IPAddress to match schema
+  property :session, Text
+  property :error_timestamp, DateTime
 
   def self.log!(request)
-    # Use begin/rescue to handle potential errors gracefully
     begin
       exception = (request.exceptions.first rescue Exception.new("request.exceptions.first"))
       request_params = (request.params.to_hash rescue {})
@@ -38,14 +34,13 @@ class ControllerError
         :controller => request_params["controller"],
         :action     => request_params["action"],
         :params     => request_params,
-
-        :exception_class   => exception.class,
+        :exception_class   => exception.class.to_s,
         :exception_message => exception.message.to_s[0..254],
         :exception_context => (exception.backtrace || []).first.to_s[0..254],
-
-        :ip_address => (request.remote_ip rescue nil),
-        :session    => (request.session.to_hash rescue nil),
-        :error_timestamp  => DateTime.now
+        :ip_address => request.remote_ip.to_s,
+        :session    => request.session.to_hash,
+        :error_timestamp  => DateTime.now,
+        :created_at => DateTime.now
       )
     rescue => e
       Merb.logger.error("Failed to log controller error: #{e.message}")

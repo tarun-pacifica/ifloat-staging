@@ -27,9 +27,6 @@ DataMapper.setup(:default, {
                    :encoding => 'utf8mb4'
 })
 
-# Set quote identifier after connection is established
-DataObjects::Connection.quote_identifier = false
-
 # Rest of your production.rb configuration...
 Merb.logger.info("Loaded PRODUCTION Environment...")
 

@@ -3,12 +3,7 @@ defaults: &defaults
   host: localhost
   username: ifloat_app
   password: j4hd7ag234
-  encoding: utf8
   reconnect: true
-  mysql_encoding: utf8
-  variables:
-    charset: utf8
-    collation: utf8_unicode_ci
 
 development:
   <<: *defaults

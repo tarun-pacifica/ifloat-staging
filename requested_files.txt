@@ -1,0 +1,272 @@
+=== _header.html.erb ===
+<div id="header">
+  <div class="global_links">
+    <a class="login" href="#">Log In</a>
+  </div>
+  
+  <a class="logo" href="/"><img src="/images/common/logo.png" alt="ifloat logo" width="158" height="106" /></a>
+  
+  <div class="advert">
+    <%= Indexer.banner_html_for_location("header") %>
+  </div>
+  
+<!--   <div class="translate">
+    <div id="google_translate_element"></div><script>
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        gaTrack: true,
+        gaId: 'UA-18470174-1',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+      }, 'google_translate_element');
+    }
+    </script><script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  </div> -->
+  
+  <!-- AddThis Button BEGIN -->
+<!--  <div class="addthis_toolbox addthis_default_style">
+  <a class="addthis_button_facebook"></a>
+  <a class="addthis_button_twitter"></a>
+  <a class="addthis_button_google_plusone" g:plusone:count="false"></a>
+  <a class="addthis_button_compact"></a>
+  </div>
+  <script type="text/javascript">var addthis_config = {"data_track_clickback":true};</script>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=ra-4e1eed720c640cce"></script> -->
+  <!-- AddThis Button END -->
+  
+  <div class="strapline">
+    find boat equipment, sailing wear and sea books then buy them from our partners safely and easily
+    <a href="http://blog.ifloat.biz">read our blog</a>
+  </div>
+  
+  <div class="find_bar">
+    <div class="categories">
+      <a href="/categories" class="show_all">All Categories</a>
+      <ul>
+        <% Indexer.category_children_for_node([]).sort.each do |name| %>
+        <li><%= category_link([name], nil, [], nil) %></li>
+        <% end %>
+      </ul>
+    </div>
+    
+    <%= partial "common/finder" %>
+  </div>
+</div>
+
+<script type="text/javascript" charset="utf-8">
+  var $ifloat_header = {facility: <%= Indexer.facilities.values.first.keep(:id, :description).to_json %>}
+  
+  $(document).ready(function() {
+    login_update();
+    <% if @async_tracking %> $.get("/users/track", {url: window.location.pathname, r: Math.random()});<% end %>
+  });
+</script>
+
+=== controller_error.rb ===
+# = Summary
+#
+# This is a centralized logger for errors in controllers. It has no data integrity rules as the emphasis is on getting something / anything recorded in the event of a problem.
+#
+# = Processes
+#
+# === 1. Destroy Obsolete Data
+#
+# Run ControllerError.obsolete.destroy! periodically. This will destroy all ControllerErrors older than OBSOLESCENCE_TIME.
+#
+class ControllerError
+  include DataMapper::Resource
+  
+  OBSOLESCENCE_TIME = 1.month
+  
+  property :id, Serial
+  property :created_at, DateTime, :default => proc { DateTime.now }
+  
+  property :controller, String
+  property :action, String
+  property :params, Object
+  
+  property :exception_class, String
+  property :exception_message, String, :length => 255
+  property :exception_context, String, :length => 255
+  
+  property :ip_address, IPAddress
+  property :session, Object
+  
+  def self.log!(request)
+    exception = (request.exceptions.first rescue Exception.new("request.exceptions.first"))
+    request_params = (request.params.to_hash rescue {})
+    
+    create( :controller => request_params["controller"],
+            :action     => request_params["action"],
+            :params     => request_params,
+            
+            :exception_class   => exception.class,
+            :exception_message => exception.message,
+            :exception_context => (exception.backtrace || []).first,
+            
+            :ip_address => (request.remote_ip rescue nil),
+            :session    => (request.session.to_hash rescue nil) )
+  end
+  
+  def self.obsolete
+    all(:created_at.lt => OBSOLESCENCE_TIME.ago)
+  end
+end
+
+=== exceptions.rb ===
+class Exceptions < Merb::Controller
+  def action_not_found
+    redirect "/"
+  end
+  
+  def common_error
+    ControllerError.log!(request)
+    exception = request.exceptions.first
+    "#{exception.status}: #{exception.class.to_s.split('::').last}"
+  end
+  
+  alias :unauthorized   :common_error # 401
+  alias :not_found      :common_error # 404
+  alias :not_acceptable :common_error # 406
+  
+  def unauthenticated    
+    return redirect("/prelaunch/login") if Merb.environment == "staging" and params[:action] != "login"
+    
+    @errors = request.exceptions.first.message.split("\n")
+    @errors = [] if @errors.first =~ /Unauthenticated/
+    @errors.each { |error| error.gsub!(/Login/, "E-mail") }
+    render :layout => false
+  end
+  
+  # any other exceptions
+  def standard_error
+    ControllerError.log!(request)
+    raise request.exceptions.first
+  end
+end
+=== categories.rb ===
+class Categories < Application
+  def filter(root, sub, id)
+    provides :js
+    headers["Cache-Control"] = "max-age=0"
+    
+    path_names, product_ids = path_names_and_children(root, sub, found_product_ids)
+    filter_detail(id.to_i, filtered_product_ids(product_ids)).to_json
+  end
+  
+  def filters(root, sub)
+    provides :js
+    headers["Cache-Control"] = "max-age=0"
+    
+    path_names, product_ids = path_names_and_children(root, sub, found_product_ids)
+    return [].to_json if product_ids.empty?
+    
+    property_ids = Indexer.property_ids_for_product_ids(filtered_product_ids(product_ids), session.language)
+    
+    filters = (JSON.parse(params["filters"]) rescue [])
+    filter_ids = filters.map { |f| f.first }.to_set
+    property_ids = property_ids.reject { |id| filter_ids.include?(id) }
+    
+    Indexer.property_display_cache.values_at(*property_ids).compact.sort_by { |info| info[:seq_num] }.to_json
+  end
+  
+  def show(root = nil, sub = nil)
+    @find_phrase = params["find"]
+    fpids = found_product_ids
+    @path_names, children = path_names_and_children(root, sub, fpids)
+    
+    children = filtered_product_ids(children) if children.first.is_a?(Integer)
+    
+    if children.empty?
+      if @find_phrase.blank? or path_names_and_children(root, sub, nil).last.empty?
+        redirection = redirection_for(@path_names)
+        return redirection.nil? ? categories_404 : redirect(redirection, :status => 301)
+      end
+      
+      @find_alternatives = find_phrase_alternatives(@find_phrase)
+      @find_bad = true
+    end
+    
+    @child_links =
+      if children.first.is_a?(Integer)
+        product_links_by_node, @product_ids = marshal_product_links(:products => children)
+        product_links_by_node[:products]
+      else
+        children.map { |child| category_link(@path_names + [child]) }
+      end
+    
+    @canonical_path = ["/categories", root, sub].compact.join("/")
+    @page_title = @path_names.join(" - ") unless @path_names.empty?
+    @page_description = Indexer.category_definition_for_node(@path_names)
+    @page_description ||= "Find and buy boat equipment, accessories, sailing clothing and sea books and charts." if @path_names.empty?
+    render
+  end
+  
+  
+  private
+  
+  def filter_detail(property_id, product_ids)
+    prop_info = Indexer.property_display_cache[property_id]
+    return [] if prop_info.nil? or product_ids.empty?
+    
+    values = Indexer.filterable_values_for_property_id(property_id, product_ids, session.language)
+    
+    if prop_info[:type] == "text"
+      defs_by_value = (PropertyValueDefinition.by_property_id([property_id], session.language)[property_id] || {})
+      prop_info.merge(:values => values.zip(defs_by_value.values_at(*values)))
+      
+    else
+      klass = PropertyType.value_class(prop_info[:type])
+      formatted = values.map do |units_with_values|
+        units_with_values.map { |u, v| klass.format(v, v, nil, u, :verbose => true) }.join(" / ")
+      end
+      prop_info.merge(:values => values.zip(formatted))
+      
+    end
+  end
+  
+  def filtered_product_ids(product_ids)
+    filters = (JSON.parse(params["filters"]) rescue [])
+    (filters.empty? ? product_ids : Indexer.product_ids_for_filters(product_ids, filters, session.language))
+  end
+  
+  def find_phrase_alternatives(phrase)
+    words = phrase.downcase.split.map { |word| Indexer.correct_spelling(word, session.language) }.compact
+    return words if words.size <= 1
+    
+    words.size.downto(1) do |i|
+      hits = words.combination(i).map do |combo|
+        spec = combo.join(" ")
+        (Indexer.product_ids_for_phrase(spec, session.language).size > 0) ? spec : nil
+      end.compact
+      return hits unless hits.empty?
+    end
+    
+    []
+  end
+  
+  def found_product_ids
+    phrase = params["find"]
+    phrase.nil? ? nil : Indexer.product_ids_for_phrase(phrase, session.language)
+  end
+  
+  def path_names_and_children(root, sub, only_product_ids)
+    path_names = [root, sub].compact.map { |name| name.tr("+", " ") }
+    [path_names, Indexer.category_children_for_node(path_names, only_product_ids).sort]
+  end
+  
+  # TODO: remove once redirects no longer required
+  def build_redirects
+    redirects = {}
+    FasterCSV.foreach(Merb.root / "config" / "category_redirects.csv", :encoding => "UTF-8") do |row|
+      old_path_names, new_path_names = row[0, 2].map { |f| f.split("/") }
+      redirects[old_path_names] = category_url(new_path_names)
+    end
+    redirects
+  end
+  
+  # TODO: remove once redirects no longer required
+  def redirection_for(path_names)
+    (@@redirects ||= build_redirects)[path_names]
+  end
+end

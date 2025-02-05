@@ -128,3 +128,6 @@ Merb::BootLoader.after_app_loads do
     Merb.logger.error("Failed to compile Indexer: #{e.message}")
   end
 end
+
+Encoding.default_internal = 'UTF-8'
+Encoding.default_external = 'UTF-8'

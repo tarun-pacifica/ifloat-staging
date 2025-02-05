@@ -3,7 +3,8 @@ defaults: &defaults
   host: localhost
   username: ifloat_app
   password: j4hd7ag234
-  encoding: utf8
+  encoding: utf8mb4
+  charset: utf8mb4 
 
 development:
   <<: *defaults

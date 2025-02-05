@@ -23,4 +23,4 @@ production:
 
 rake:
   <<: *defaults
-  database: ifloat_dev
+  database: ifloat_prod

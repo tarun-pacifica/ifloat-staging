@@ -53,4 +53,31 @@ class ControllerError
   def self.obsolete
     all(:created_at.lt => OBSOLESCENCE_TIME.ago)
   end
+
+  # Add this method to ControllerError class to test the SQL generation
+  def self.test_create(attributes)
+    valid_attrs = {}
+    attributes.each do |key, value|
+      if properties.map(&:name).include?(key)
+        valid_attrs[key] = value
+      end
+    end
+
+    column_names = valid_attrs.keys.map(&:to_s)
+    values = valid_attrs.values.map do |value|
+      case value
+      when DateTime, Time
+        "'#{value.strftime('%Y-%m-%d %H:%M:%S')}'"
+      when String
+        "'#{repository(:default).adapter.send(:quote_string, value)}'"
+      when NilClass
+        'NULL'
+      else
+        "'#{value}'"
+      end
+    end
+
+    sql = "INSERT INTO controller_errors (#{column_names.join(', ')}) VALUES (#{values.join(', ')})"
+    puts "Test SQL: #{sql}"
+  end
 end

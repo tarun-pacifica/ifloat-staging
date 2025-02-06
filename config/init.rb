@@ -146,69 +146,64 @@ module DataMapperOverride
       end
     end
 
-    private
-
-    def format_attribute(value)
-      case value
-      when DateTime, Time
-        "'#{value.strftime('%Y-%m-%d %H:%M:%S')}'"
-      when String
-        "'#{repository(:default).adapter.send(:quote_string, value)}'"
-      when NilClass
-        'NULL'
-      when TrueClass
-        '1'
-      when FalseClass
-        '0'
-      else
-        value.to_s
-      end
-    end
-
-    public
-
     def safe_create(attributes = {})
       begin
-        Merb.logger.info("#{self.name}#safe_create started with attributes: #{attributes.inspect}")
+        Merb.logger.info("Starting safe_create with attributes: #{attributes.inspect}")
 
         repository(:default).adapter.transaction do |txn|
           begin
-            # Filter attributes to only include those that match property names
-            valid_attrs = attributes.select { |key, _| properties.map(&:name).include?(key) }
+            # Filter valid attributes
+            valid_attrs = {}
+            attributes.each do |key, value|
+              if properties.map(&:name).include?(key)
+                valid_attrs[key] = value
+                Merb.logger.debug("Added valid attribute: #{key} = #{value}")
+              end
+            end
 
-            # Build columns and values arrays ensuring they match
-            columns = valid_attrs.keys
-            values = columns.map { |col| format_attribute(valid_attrs[col]) }
+            # Build columns and values lists
+            column_names = valid_attrs.keys.map(&:to_s)
+            values = valid_attrs.values.map do |value|
+              case value
+              when DateTime, Time
+                "'#{value.strftime('%Y-%m-%d %H:%M:%S')}'"
+              when String
+                "'#{repository(:default).adapter.send(:quote_string, value)}'"
+              when NilClass
+                'NULL'
+              else
+                "'#{value}'"
+              end
+            end
 
-            # Construct SQL with matching columns and values
-            sql = "INSERT INTO #{storage_names[:default]} (#{columns.join(', ')}) " +
-              "VALUES (#{values.join(', ')})"
+            Merb.logger.debug("Columns: #{column_names.inspect}")
+            Merb.logger.debug("Values: #{values.inspect}")
 
-            Merb.logger.debug("#{self.name}#safe_create SQL: #{sql}")
+            # Build and execute SQL
+            sql = "INSERT INTO controller_errors (#{column_names.join(', ')}) VALUES (#{values.join(', ')})"
+            Merb.logger.debug("Generated SQL: #{sql}")
 
-            # Execute the SQL
             repository(:default).adapter.execute(sql)
-
-            # Get the last inserted ID
             insert_id = repository(:default).adapter.select("SELECT LAST_INSERT_ID()").first
 
             # Return the created record
             get(insert_id)
           rescue => e
-            Merb.logger.error("#{self.name}#safe_create failed: #{e.message}\n#{e.backtrace.join("\n")}")
+            Merb.logger.error("Error in safe_create: #{e.message}")
+            Merb.logger.error("SQL was: #{sql}") if defined?(sql)
             txn.rollback
             raise e
           end
         end
       rescue => e
-        Merb.logger.error("#{self.name}#safe_create transaction failed: #{e.message}")
+        Merb.logger.error("Transaction failed in safe_create: #{e.message}")
         raise e
       end
     end
   end
 end
 
-# Hook it into DataMapper::Model which all DM models include
+# Hook it into DataMapper::Model
 module DataMapper
   module Model
     include DataMapperOverride

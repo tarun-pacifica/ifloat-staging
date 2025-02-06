@@ -129,6 +129,19 @@ Merb::BootLoader.after_app_loads do
   end
 end
 
+module DataMapper
+  module Ext
+    module Hash
+      def self.symbolize_keys(hash)
+        hash.inject({}) { |result, (key, value)|
+          result[(key.to_sym rescue key) || key] = value
+          result
+        }
+      end
+    end
+  end
+end
+
 module DataMapperOverride
   extend self
 

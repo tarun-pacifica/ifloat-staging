@@ -136,7 +136,6 @@ module DataMapperOverride
 
   module ClassMethods
     def self.extended(base)
-      # Only alias if the create method exists
       if base.respond_to?(:create)
         base.class_eval do
           class << self
@@ -149,21 +148,12 @@ module DataMapperOverride
 
     private
 
-    def escape_value(value)
-      case value
-      when String
-        repository(:default).adapter.send(:quote_string, value)
-      else
-        value
-      end
-    end
-
-    def format_value(value)
+    def format_attribute(value)
       case value
       when DateTime, Time
         "'#{value.strftime('%Y-%m-%d %H:%M:%S')}'"
       when String
-        "'#{escape_value(value)}'"
+        "'#{repository(:default).adapter.send(:quote_string, value)}'"
       when NilClass
         'NULL'
       when TrueClass
@@ -183,23 +173,26 @@ module DataMapperOverride
 
         repository(:default).adapter.transaction do |txn|
           begin
-            table_name = self.storage_names[:default]
-            columns = []
-            values = []
+            # Filter attributes to only include those that match property names
+            valid_attrs = attributes.select { |key, _| properties.map(&:name).include?(key) }
 
-            valid_attributes = attributes.select { |key, _| properties.map(&:name).include?(key) }
+            # Build columns and values arrays ensuring they match
+            columns = valid_attrs.keys
+            values = columns.map { |col| format_attribute(valid_attrs[col]) }
 
-            valid_attributes.each do |key, value|
-              columns << key.to_s
-              values << format_value(value)
-            end
+            # Construct SQL with matching columns and values
+            sql = "INSERT INTO #{storage_names[:default]} (#{columns.join(', ')}) " +
+              "VALUES (#{values.join(', ')})"
 
-            sql = "INSERT INTO #{table_name} (#{columns.join(', ')}) VALUES (#{values.join(', ')})"
             Merb.logger.debug("#{self.name}#safe_create SQL: #{sql}")
 
-            result = repository(:default).adapter.execute(sql)
+            # Execute the SQL
+            repository(:default).adapter.execute(sql)
+
+            # Get the last inserted ID
             insert_id = repository(:default).adapter.select("SELECT LAST_INSERT_ID()").first
 
+            # Return the created record
             get(insert_id)
           rescue => e
             Merb.logger.error("#{self.name}#safe_create failed: #{e.message}\n#{e.backtrace.join("\n")}")

@@ -208,19 +208,78 @@ module DataMapperOverride
 
   public :test_all_models
 
+  def generate_test_data(model_class, props, unique_suffix)
+    test_data = {}
+    props.each do |prop|
+      # Test required fields explicitly
+      value = if prop.required?
+        generate_required_value(prop, model_class, unique_suffix)
+      else
+        generate_optional_value(prop, model_class, unique_suffix)
+      end
+
+      # Test length validations
+      if prop.length && value.respond_to?(:length)
+        value = value[0...prop.length]
+      end
+
+      test_data[prop.name] = value if value
+    end
+    test_data
+  end
+
+  def test_relationships(model_class)
+    model_class.relationships.each do |rel|
+      # Test belongs_to
+      if rel.is_a?(DataMapper::Associations::ManyToOne::Relationship)
+        test_belongs_to(model_class, rel)
+      end
+
+      # Test has_many
+      if rel.is_a?(DataMapper::Associations::OneToMany::Relationship)
+        test_has_many(model_class, rel)
+      end
+    end
+  end
+
+  def test_validations(model_class)
+    # Test presence validations
+    test_presence_validations(model_class)
+
+    # Test uniqueness constraints
+    test_uniqueness_constraints(model_class)
+
+    # Test format validations
+    test_format_validations(model_class)
+  end
+
   def test_safe_create_for_model(model_class)
     begin
       puts "\nTesting #{model_class.name}..."
-      # ... other code ...
+      model_class.send(:include, DataMapperOverride) unless model_class.respond_to?(:safe_create)
+
+      props = model_class.properties.reject { |p| p.serial? }
+      count = model_class.count rescue 0
+      unique_suffix = count + rand(1000)
+
+      test_data = generate_test_data(model_class, props, unique_suffix)
+      test_data = create_contact_record(model_class, test_data) if model_class.name =~ /^(Email|Phone|Im)Contact$/
+
       test1 = model_class.safe_create(test_data)
       puts "Test 1 - Basic creation: #{test1 ? 'PASS' : 'FAIL'}"
+      return false unless test1
 
-      return false unless test1  # Add this line
+      test2 = test_special_characters(model_class, props, test_data, unique_suffix)
+      puts "Test 2 - Special characters: #{test2 ? 'PASS' : 'FAIL'}" if test2
+      return false unless test2
 
-      if test1
-        test2 = test_special_characters(model_class, props, test_data, unique_suffix)
-        puts "Test 2 - Special characters: #{test2 ? 'PASS' : 'FAIL'}" if test2
-      end
+      test3 = test_relationships(model_class)
+      puts "Test 3 - Relationships: #{test3 ? 'PASS' : 'FAIL'}"
+      return false unless test3
+
+      test4 = test_validations(model_class)
+      puts "Test 4 - Validations: #{test4 ? 'PASS' : 'FAIL'}"
+      return false unless test4
 
       true
     rescue => e

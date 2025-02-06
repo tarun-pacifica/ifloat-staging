@@ -135,49 +135,25 @@ module DataMapperOverride
   end
 
   module ClassMethods
-    def self.extended(base)
-      if base.respond_to?(:create)
-        base.class_eval do
-          class << self
-            alias_method :old_create, :create
-            alias_method :create, :safe_create
-          end
-        end
-      end
-    end
-
     def safe_create(attributes = {})
-      begin
-        Merb.logger.info("Starting safe_create with attributes: #{attributes.inspect}")
+      table_name = storage_names[:default] || self.name.underscore.pluralize
+      columns = []
+      values = []
 
-        repository(:default).adapter.transaction do |txn|
-          begin
-            # Format timestamps exactly like custom_create
-            created = attributes[:created_at].strftime('%Y-%m-%d %H:%M:%S')
-            error_time = attributes[:error_timestamp].strftime('%Y-%m-%d %H:%M:%S')
-
-            # Build SQL exactly like custom_create
-            sql = "INSERT INTO controller_errors (created_at, controller, action, error_timestamp) " +
-              "VALUES ('#{created}', '#{attributes[:controller]}', '#{attributes[:action]}', '#{error_time}')"
-
-            Merb.logger.debug("Generated SQL: #{sql}")
-
-            repository(:default).adapter.execute(sql)
-            insert_id = repository(:default).adapter.select("SELECT LAST_INSERT_ID()").first
-
-            # Return the created record
-            get(insert_id)
-          rescue => e
-            Merb.logger.error("Error in safe_create: #{e.message}")
-            Merb.logger.error("SQL was: #{sql}") if defined?(sql)
-            txn.rollback
-            raise e
-          end
+      attributes.each do |key, value|
+        if self.properties.map(&:name).include?(key)
+          columns << key.to_s
+          values << (value.is_a?(DateTime) || value.is_a?(Time) ?
+                     "'#{value.strftime('%Y-%m-%d %H:%M:%S')}'" :
+                     "'#{value}'")
         end
-      rescue => e
-        Merb.logger.error("Transaction failed in safe_create: #{e.message}")
-        raise e
       end
+
+      sql = "INSERT INTO `#{table_name}` (#{columns.join(', ')}) VALUES (#{values.join(', ')})"
+
+      repository(:default).adapter.execute(sql)
+      insert_id = repository(:default).adapter.select("SELECT LAST_INSERT_ID()").first
+      get(insert_id)
     end
   end
 end

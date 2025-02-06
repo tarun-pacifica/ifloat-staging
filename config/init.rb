@@ -129,14 +129,6 @@ Merb::BootLoader.after_app_loads do
   end
 end
 
-
-# Hook it into DataMapper::Model
-module DataMapper
-  module Model
-    include DataMapperOverride
-  end
-end
-
 module DataMapperOverride
   extend self
 
@@ -471,5 +463,12 @@ module DataMapperOverride
 
     success_rate = ((results.values.count(true).to_f / results.length) * 100).to_i
     puts "\nOverall Success Rate: #{success_rate}%"
+  end
+end
+
+# Hook it into DataMapper::Model
+module DataMapper
+  module Model
+    include DataMapperOverride
   end
 end

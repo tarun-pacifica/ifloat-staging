@@ -206,6 +206,8 @@ module DataMapperOverride
     results.values.all?
   end
 
+  public :test_all_models
+
   def test_safe_create_for_model(model_class)
     begin
       puts "\nTesting #{model_class.name}..."

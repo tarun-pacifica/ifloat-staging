@@ -211,17 +211,11 @@ module DataMapperOverride
   def test_safe_create_for_model(model_class)
     begin
       puts "\nTesting #{model_class.name}..."
-      model_class.send(:include, DataMapperOverride) unless model_class.respond_to?(:safe_create)
-
-      props = model_class.properties.reject { |p| p.serial? }
-      count = model_class.count rescue 0
-      unique_suffix = count + rand(1000)
-
-      test_data = generate_test_data(model_class, props, unique_suffix)
-      test_data = create_contact_record(model_class, test_data) if model_class.name =~ /^(Email|Phone|Im)Contact$/
-
+      # ... other code ...
       test1 = model_class.safe_create(test_data)
       puts "Test 1 - Basic creation: #{test1 ? 'PASS' : 'FAIL'}"
+
+      return false unless test1  # Add this line
 
       if test1
         test2 = test_special_characters(model_class, props, test_data, unique_suffix)

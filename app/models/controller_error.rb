@@ -10,19 +10,20 @@
 #
 class ControllerError
   include DataMapper::Resource
+
   OBSOLESCENCE_TIME = 1.month
 
   property :id, Serial
   property :created_at, DateTime, :required => false
-  property :controller, String, :required => false, :length => 50
-  property :action, String, :required => false, :length => 50
-  property :params, Text, :required => false
-  property :exception_class, String, :required => false, :length => 50
-  property :exception_message, String, :required => false, :length => 255
-  property :exception_context, String, :required => false, :length => 255
-  property :ip_address, String, :required => false, :length => 39
-  property :session, Text, :required => false
+  property :controller, String, :length => 50, :required => false
+  property :action, String, :length => 50, :required => false
   property :error_timestamp, DateTime, :required => false
+  property :params, Text, :required => false
+  property :exception_class, String, :length => 50, :required => false
+  property :exception_message, String, :length => 255, :required => false
+  property :exception_context, String, :length => 255, :required => false
+  property :ip_address, String, :length => 39, :required => false
+  property :session, Text, :required => false
 
   def self.log!(request)
     begin

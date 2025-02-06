@@ -128,3 +128,91 @@ Merb::BootLoader.after_app_loads do
     Merb.logger.error("Failed to compile Indexer: #{e.message}")
   end
 end
+
+# First define the module as before
+module DataMapperOverride
+  def self.included(base)
+    base.extend(ClassMethods)
+    base.class_eval do
+      class << self
+        alias_method :old_create, :create
+        alias_method :create, :safe_create
+      end
+    end
+  end
+
+  module ClassMethods
+    private
+
+    def escape_value(value)
+      case value
+      when String
+        repository(:default).adapter.send(:quote_string, value)
+      else
+        value
+      end
+    end
+
+    def format_value(value)
+      case value
+      when DateTime, Time
+        "'#{value.strftime('%Y-%m-%d %H:%M:%S')}'"
+      when String
+        "'#{escape_value(value)}'"
+      when NilClass
+        'NULL'
+      when TrueClass
+        '1'
+      when FalseClass
+        '0'
+      else
+        value.to_s
+      end
+    end
+
+    public
+
+    def safe_create(attributes = {})
+      begin
+        Merb.logger.info("#{self.name}#safe_create started with attributes: #{attributes.inspect}")
+
+        repository(:default).adapter.transaction do |txn|
+          begin
+            table_name = self.storage_names[:default]
+            columns = []
+            values = []
+
+            valid_attributes = attributes.select { |key, _| properties.map(&:name).include?(key) }
+
+            valid_attributes.each do |key, value|
+              columns << key.to_s
+              values << format_value(value)
+            end
+
+            sql = "INSERT INTO #{table_name} (#{columns.join(', ')}) VALUES (#{values.join(', ')})"
+            Merb.logger.debug("#{self.name}#safe_create SQL: #{sql}")
+
+            result = repository(:default).adapter.execute(sql)
+            insert_id = repository(:default).adapter.select("SELECT LAST_INSERT_ID()").first
+
+            get(insert_id)
+          rescue => e
+            Merb.logger.error("#{self.name}#safe_create failed: #{e.message}\n#{e.backtrace.join("\n")}")
+            txn.rollback
+            raise e
+          end
+        end
+      rescue => e
+        Merb.logger.error("#{self.name}#safe_create transaction failed: #{e.message}")
+        raise e
+      end
+    end
+  end
+end
+
+# Then hook it into DataMapper::Model which all DM models include
+module DataMapper
+  module Model
+    include DataMapperOverride
+  end
+end

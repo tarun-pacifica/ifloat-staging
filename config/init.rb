@@ -301,7 +301,7 @@ module DataMapperOverride
       when 'name'
         "Valid#{model_class.name}#{unique_suffix}"
       when 'reference', 'reference_group'
-        "REF#{model_class.name}#{unique_suffix}"
+        "REF-#{model_class.name}-#{unique_suffix}"
       when 'canonical'
         true
       when 'bidirectional'
@@ -310,6 +310,8 @@ module DataMapperOverride
         false
       when 'core_type'
         'text'
+      when 'units'
+        nil
       when 'variant'
         case model_class.name
         when 'ImContact' then 'Skype'
@@ -319,11 +321,14 @@ module DataMapperOverride
       when 'group'
         'compare'
       when 'role'
-        'image'
+        case model_class.name
+        when 'Attachment' then 'image'
+        when 'ProductRelationship' then 'works_with'
+        end
       when 'location'
         'header'
       when 'language_code'
-        'en_US'
+        'en-US'
       when 'country_code'
         'US'
       when 'gps_coordinates'
@@ -342,11 +347,30 @@ module DataMapperOverride
         100.0
       when 'currency'
         'USD'
+      when 'value'
+        case model_class.name
+        when 'EmailContact' then "email-#{unique_suffix}@example.com"
+        when 'PhoneContact' then "+1-555-#{unique_suffix}"
+        when 'ImContact' then "im-user-#{unique_suffix}"
+        else
+          "test_value_#{unique_suffix}"
+        end
       else
         "test_#{prop.name}_#{unique_suffix}"
       end
 
       test_data[prop.name] = value if value
+    end
+
+    # Additional model-specific handling
+    case model_class.name
+    when 'ProductRelationship'
+      test_data['name'] ||= 'works_with'
+      test_data['bidirectional'] = false
+    when 'PickedProduct'
+      test_data['invalidated'] = false
+    when 'Location'
+      test_data['gln_13'] = '1234567890123'
     end
 
     test_data

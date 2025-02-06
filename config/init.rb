@@ -297,32 +297,56 @@ module DataMapperOverride
       puts "\nTesting #{model_class.name}..."
       model_class.send(:include, DataMapperOverride) unless model_class.respond_to?(:safe_create)
 
-      props = model_class.properties.reject { |p| p.serial? }
-      count = model_class.count rescue 0
+      # 1.8.7 compatible property filtering
+      props = model_class.properties.select { |p| !p.serial? && p.name.to_s != 'id' }
+      count = begin
+        model_class.count
+      rescue
+        0
+      end
       unique_suffix = count + rand(1000)
 
-      test_data = generate_test_data(model_class, props, unique_suffix)
-      test_data = create_contact_record(model_class, test_data) if model_class.name =~ /^(Email|Phone|Im)Contact$/
+      # Generate test data with 1.8.7 compatible method
+      begin
+        test_data = generate_test_data(model_class, props, unique_suffix)
+        test_data = create_contact_record(model_class, test_data) if model_class.name =~ /^(Email|Phone|Im)Contact$/
+      rescue => data_gen_error
+        puts "Failed to generate test data: #{data_gen_error.message}"
+        return false
+      end
 
+      # Basic creation test
       test1 = model_class.safe_create(test_data)
-      puts "Test 1 - Basic creation: #{test1 ? 'PASS' : 'FAIL'}"
-      return false unless test1
+      unless test1
+        puts "Test 1 - Basic creation: FAIL"
+        puts "Error details: #{test_data.inspect}"
+        return false
+      end
+      puts "Test 1 - Basic creation: PASS"
 
-      test2 = test_special_characters(model_class, props, test_data, unique_suffix)
-      puts "Test 2 - Special characters: #{test2 ? 'PASS' : 'FAIL'}" if test2
-      return false unless test2
+      # Merb-compatible test sequence with error handling
+      tests = [
+        [:special_characters, method(:test_special_characters), [model_class, props, test_data, unique_suffix]],
+        [:relationships, method(:test_relationships), [model_class]],
+        [:validations, method(:test_validations), [model_class]]
+      ]
 
-      test3 = test_relationships(model_class)
-      puts "Test 3 - Relationships: #{test3 ? 'PASS' : 'FAIL'}"
-      return false unless test3
-
-      test4 = test_validations(model_class)
-      puts "Test 4 - Validations: #{test4 ? 'PASS' : 'FAIL'}"
-      return false unless test4
+      tests.each_with_index do |(test_name, test_method, args), index|
+        begin
+          result = test_method.call(*args)
+          puts "Test #{index + 2} - #{test_name.to_s.capitalize}: #{result ? 'PASS' : 'FAIL'}"
+          return false unless result
+        rescue => e
+          puts "#{test_name.to_s.capitalize} test failed: #{e.message}"
+          return false
+        end
+      end
 
       true
     rescue => e
-      puts "Test failed with error: #{e.message}"
+      # 1.8.7 compatible error handling
+      puts "Unexpected error testing #{model_class.name}: #{e.message}"
+      puts e.backtrace[0,5].join("\n")
       false
     end
   end

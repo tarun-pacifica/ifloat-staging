@@ -221,66 +221,6 @@ module DataMapperOverride
 
   public :test_all_models
 
-  # Add this to the generate_test_data method in DataMapperOverride
-  def generate_test_data(model_class, props, unique_suffix)
-    test_data = {
-      'canonical' => true,
-      'bidirectional' => false,
-      'invalidated' => false,
-      'variant' => case model_class.name
-      when 'ImContact' then 'Skype'
-      when 'PhoneContact' then 'Mobile'
-      else nil
-      end,
-      'type' => model_class.name,
-      'core_type' => 'text',
-      'bucket' => 'products',
-      'group' => 'compare',
-      'role' => 'image',
-      'location' => 'header',
-      'name' => "valid_name_#{unique_suffix}",
-      'reference' => "REF#{unique_suffix}",
-      'reference_group' => "GROUP#{unique_suffix}",
-      'language_code' => 'en_US',
-      'country_code' => 'US',
-      'gps_coordinates' => '40.7128,-74.0060',
-      'currency' => 'USD',
-      'price' => 100.00,
-      'value' => case model_class.name
-      when 'PhoneContact' then '+1-555-0000'
-      when 'EmailContact' then "test#{unique_suffix}@example.com"
-      else "test_value_#{unique_suffix}"
-      end
-    }
-
-    props.each do |prop|
-      next if test_data.has_key?(prop.name.to_s)
-      test_data[prop.name] = case prop.primitive.to_s
-      when /DateTime|Time/ then Time.now
-      when /String|Text/ then "test_#{prop.name}_#{unique_suffix}"
-      when /Integer|Fixnum/ then 1
-      when /Float/ then 1.0
-      when /Boolean/ then false
-      end
-    end
-
-    test_data
-  end
-
-  def test_relationships(model_class)
-    model_class.relationships.each do |rel|
-      # Test belongs_to
-      if rel.is_a?(DataMapper::Associations::ManyToOne::Relationship)
-        test_belongs_to(model_class, rel)
-      end
-
-      # Test has_many
-      if rel.is_a?(DataMapper::Associations::OneToMany::Relationship)
-        test_has_many(model_class, rel)
-      end
-    end
-  end
-
   def test_validations(model_class)
     # Test presence validations
     test_presence_validations(model_class)
@@ -353,32 +293,50 @@ module DataMapperOverride
 
   def generate_test_data(model_class, props, unique_suffix)
     test_data = {}
+
     props.each do |prop|
       value = case prop.name.to_s
       when 'type'
         model_class.name
-      when 'admin', 'bidirectional', 'invalidated', 'canonical', 'filterable'
+      when 'name'
+        "Valid#{model_class.name}#{unique_suffix}"
+      when 'reference', 'reference_group'
+        "REF#{model_class.name}#{unique_suffix}"
+      when 'canonical'
+        true
+      when 'bidirectional'
         false
+      when 'invalidated'
+        false
+      when 'core_type'
+        'text'
+      when 'variant'
+        case model_class.name
+        when 'ImContact' then 'Skype'
+        when 'PhoneContact' then 'Mobile'
+        when 'EmailContact' then nil
+        end
+      when 'group'
+        'compare'
+      when 'role'
+        'image'
+      when 'location'
+        'header'
+      when 'language_code'
+        'en_US'
+      when 'country_code'
+        'US'
+      when 'gps_coordinates'
+        '40.7128,-74.0060'
       when /.*_id$/
         1
-      when 'rules', 'description', 'property_names'
-        'test'
-      when 'contact_type'
-        model_class.name.sub(/Contact$/, '').downcase
-      when 'language_code'
-        "en_#{unique_suffix}"
-      when /.*_address$/, 'ip_address'
-        handle_address_field(prop)
-      when 'value'
-        generate_value_field(model_class, unique_suffix)
       else
-        generate_primitive_value(prop, unique_suffix)
+        "test_#{prop.name}_#{unique_suffix}"
       end
 
       test_data[prop.name] = value if value
     end
 
-    handle_special_cases(model_class, test_data, unique_suffix)
     test_data
   end
 

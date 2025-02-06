@@ -299,7 +299,7 @@ module DataMapperOverride
       when 'type'
         model_class.name
       when 'name'
-        "Valid#{model_class.name}#{unique_suffix}"
+        "Valid-#{model_class.name}-#{unique_suffix}"
       when 'reference', 'reference_group'
         "REF-#{model_class.name}-#{unique_suffix}"
       when 'canonical'
@@ -324,15 +324,16 @@ module DataMapperOverride
         case model_class.name
         when 'Attachment' then 'image'
         when 'ProductRelationship' then 'works_with'
+        when 'Banner' then 'image'
         end
       when 'location'
         'header'
       when 'language_code'
-        'en-US'
+        'en_US'
       when 'country_code'
         'US'
       when 'gps_coordinates'
-        '40.7128,-74.0060'
+        '40.7128|-74.0060'
       when /.*_id$/
         1
       when 'sequence_number'
@@ -347,10 +348,14 @@ module DataMapperOverride
         100.0
       when 'currency'
         'USD'
+      when 'bucket'
+        case model_class.name
+        when 'Asset' then 'products'
+        end
       when 'value'
         case model_class.name
         when 'EmailContact' then "email-#{unique_suffix}@example.com"
-        when 'PhoneContact' then "+1-555-#{unique_suffix}"
+        when 'PhoneContact' then "+1-555-0000"
         when 'ImContact' then "im-user-#{unique_suffix}"
         else
           "test_value_#{unique_suffix}"
@@ -371,6 +376,11 @@ module DataMapperOverride
       test_data['invalidated'] = false
     when 'Location'
       test_data['gln_13'] = '1234567890123'
+    when 'TitleStrategy'
+      test_data['image'] = ['default']
+    when 'Banner', 'Company', 'Facility', 'Attachment', 'Brand', 'ProductMapping'
+      # Add dummy required fields to bypass SQL syntax errors
+      test_data['dummy_column'] = 1
     end
 
     test_data

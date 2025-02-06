@@ -152,35 +152,14 @@ module DataMapperOverride
 
         repository(:default).adapter.transaction do |txn|
           begin
-            # Filter valid attributes
-            valid_attrs = {}
-            attributes.each do |key, value|
-              if properties.map(&:name).include?(key)
-                valid_attrs[key] = value
-                Merb.logger.debug("Added valid attribute: #{key} = #{value}")
-              end
-            end
+            # Format timestamps exactly like custom_create
+            created = attributes[:created_at].strftime('%Y-%m-%d %H:%M:%S')
+            error_time = attributes[:error_timestamp].strftime('%Y-%m-%d %H:%M:%S')
 
-            # Build columns and values lists
-            column_names = valid_attrs.keys.map(&:to_s)
-            values = valid_attrs.values.map do |value|
-              case value
-              when DateTime, Time
-                "'#{value.strftime('%Y-%m-%d %H:%M:%S')}'"
-              when String
-                "'#{repository(:default).adapter.send(:quote_string, value)}'"
-              when NilClass
-                'NULL'
-              else
-                "'#{value}'"
-              end
-            end
+            # Build SQL exactly like custom_create
+            sql = "INSERT INTO controller_errors (created_at, controller, action, error_timestamp) " +
+              "VALUES ('#{created}', '#{attributes[:controller]}', '#{attributes[:action]}', '#{error_time}')"
 
-            Merb.logger.debug("Columns: #{column_names.inspect}")
-            Merb.logger.debug("Values: #{values.inspect}")
-
-            # Build and execute SQL
-            sql = "INSERT INTO controller_errors (#{column_names.join(', ')}) VALUES (#{values.join(', ')})"
             Merb.logger.debug("Generated SQL: #{sql}")
 
             repository(:default).adapter.execute(sql)

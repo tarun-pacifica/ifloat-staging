@@ -330,6 +330,18 @@ module DataMapperOverride
         '40.7128,-74.0060'
       when /.*_id$/
         1
+      when 'sequence_number'
+        1
+      when 'findable', 'filterable', 'display_as_data', 'admin', 'send_marketing'
+        true
+      when 'created_at', 'confirmed_at', 'completed_at', 'disabled_at', 'error_timestamp'
+        DateTime.now
+      when 'height', 'width', 'purchase_ttl', 'quantity', 'gln_13'
+        1
+      when 'price'
+        100.0
+      when 'currency'
+        'USD'
       else
         "test_#{prop.name}_#{unique_suffix}"
       end

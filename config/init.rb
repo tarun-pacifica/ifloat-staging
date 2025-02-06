@@ -221,23 +221,49 @@ module DataMapperOverride
 
   public :test_all_models
 
+  # Add this to the generate_test_data method in DataMapperOverride
   def generate_test_data(model_class, props, unique_suffix)
-    test_data = {}
+    test_data = {
+      'canonical' => true,
+      'bidirectional' => false,
+      'invalidated' => false,
+      'variant' => case model_class.name
+      when 'ImContact' then 'Skype'
+      when 'PhoneContact' then 'Mobile'
+      else nil
+      end,
+      'type' => model_class.name,
+      'core_type' => 'text',
+      'bucket' => 'products',
+      'group' => 'compare',
+      'role' => 'image',
+      'location' => 'header',
+      'name' => "valid_name_#{unique_suffix}",
+      'reference' => "REF#{unique_suffix}",
+      'reference_group' => "GROUP#{unique_suffix}",
+      'language_code' => 'en_US',
+      'country_code' => 'US',
+      'gps_coordinates' => '40.7128,-74.0060',
+      'currency' => 'USD',
+      'price' => 100.00,
+      'value' => case model_class.name
+      when 'PhoneContact' then '+1-555-0000'
+      when 'EmailContact' then "test#{unique_suffix}@example.com"
+      else "test_value_#{unique_suffix}"
+      end
+    }
+
     props.each do |prop|
-      # Test required fields explicitly
-      value = if prop.required?
-        generate_required_value(prop, model_class, unique_suffix)
-      else
-        generate_optional_value(prop, model_class, unique_suffix)
+      next if test_data.has_key?(prop.name.to_s)
+      test_data[prop.name] = case prop.primitive.to_s
+      when /DateTime|Time/ then Time.now
+      when /String|Text/ then "test_#{prop.name}_#{unique_suffix}"
+      when /Integer|Fixnum/ then 1
+      when /Float/ then 1.0
+      when /Boolean/ then false
       end
-
-      # Test length validations
-      if prop.length && value.respond_to?(:length)
-        value = value[0...prop.length]
-      end
-
-      test_data[prop.name] = value if value
     end
+
     test_data
   end
 

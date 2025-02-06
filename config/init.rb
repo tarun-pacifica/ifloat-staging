@@ -129,19 +129,24 @@ Merb::BootLoader.after_app_loads do
   end
 end
 
-# First define the module as before
 module DataMapperOverride
   def self.included(base)
     base.extend(ClassMethods)
-    base.class_eval do
-      class << self
-        alias_method :old_create, :create
-        alias_method :create, :safe_create
-      end
-    end
   end
 
   module ClassMethods
+    def self.extended(base)
+      # Only alias if the create method exists
+      if base.respond_to?(:create)
+        base.class_eval do
+          class << self
+            alias_method :old_create, :create
+            alias_method :create, :safe_create
+          end
+        end
+      end
+    end
+
     private
 
     def escape_value(value)
@@ -210,7 +215,7 @@ module DataMapperOverride
   end
 end
 
-# Then hook it into DataMapper::Model which all DM models include
+# Hook it into DataMapper::Model which all DM models include
 module DataMapper
   module Model
     include DataMapperOverride
